@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doraemon - Workspace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f9fafb;
+            --bg-container: #ffffff;
+            --bg-active: #efefef;
+            --bg-disabled: #dbdbdb;
+            --text-default: #131825;
+            --text-secondary: #73726e;
+            --text-disabled: #ababa9;
+            --border-divider: #e5e7eb;
+            --border-default: #d9d9d9;
+            --button-default: #131825;
+            --white: #ffffff;
+            --error-base: #f5222d;
+            --primary: #1C64F2;
+            --blue-7: #0958D9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-default);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app { display: flex; width: 100%; height: 100vh; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 240px; height: 100vh;
+            background: var(--bg-container);
+            border-right: 1px solid var(--border-divider);
+            display: flex; flex-direction: column; flex-shrink: 0;
+        }
+        .sidebar-logo {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 18px 20px 24px; height: 64px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .sidebar-logo-inner { display: flex; align-items: center; gap: 6px; }
+        .sidebar-logo-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+        .sidebar-logo-text { font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: 16px; line-height: 24px; }
+        .sidebar-collapse-btn {
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; cursor: pointer; transition: background 0.15s;
+        }
+        .sidebar-collapse-btn:hover { background: var(--bg-active); }
+
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 0 16px; }
+        .sidebar-content::-webkit-scrollbar { width: 4px; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+        .sidebar-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 8px; border-radius: 12px;
+            cursor: pointer; transition: background 0.15s; position: relative;
+        }
+        .sidebar-item:hover { background: var(--bg-active); }
+        .sidebar-item.active { background: var(--bg-active); }
+        .sidebar-item-icon {
+            width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .sidebar-item-icon.cs-icon { background: var(--primary); border-radius: 10px; }
+        .sidebar-item-text {
+            font-size: 14px; font-weight: 400; line-height: 22px; color: var(--text-default);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+        }
+        .sidebar-item-status {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            display: flex; align-items: center;
+        }
+        .sidebar-item-status .loading-icon { width: 12px; height: 12px; animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .notification-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
+        .sidebar-item-action {
+            width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; cursor: pointer; opacity: 0; transition: opacity 0.15s;
+        }
+        .sidebar-item:hover .sidebar-item-action { opacity: 1; }
+
+        .sidebar-section { display: flex; flex-direction: column; }
+        .sidebar-section-label { padding: 7px 8px; font-size: 12px; font-weight: 500; line-height: 18px; color: var(--text-disabled); }
+        .sidebar-section-header {
+            display: flex; align-items: center; justify-content: space-between; padding: 7px 8px;
+        }
+        .sidebar-section-header span { font-size: 12px; font-weight: 500; line-height: 18px; color: var(--text-disabled); }
+        .sidebar-section-header-actions { display: flex; gap: 4px; }
+        .sidebar-section-header-actions .action-icon {
+            width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; cursor: pointer; transition: background 0.15s;
+        }
+        .sidebar-section-header-actions .action-icon:hover { background: var(--bg-active); }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-divider);
+            padding: 16px; display: flex; align-items: center; gap: 8px;
+        }
+        .sidebar-footer-avatar { width: 40px; height: 40px; border-radius: 20px; overflow: hidden; flex-shrink: 0; }
+        .sidebar-footer-info { flex: 1; min-width: 0; }
+        .sidebar-footer-name { font-size: 14px; font-weight: 500; line-height: 22px; }
+        .sidebar-footer-role { font-size: 12px; font-weight: 400; line-height: 18px; color: var(--text-disabled); }
+        .sidebar-footer-bot {
+            width: 32px; height: 32px; border-radius: 16px;
+            background: var(--bg-base); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0;
+        }
+
+        /* ===== MAIN ===== */
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        .main-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; height: 64px; border-bottom: 1px solid var(--border-divider);
+            flex-shrink: 0; position: relative;
+        }
+        .main-header h1 { font-size: 16px; font-weight: 500; line-height: 24px; }
+        .notif-bell {
+            width: 32px; height: 32px; padding: 6px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; transition: background 0.15s;
+        }
+        .notif-bell:hover { background: #f0f0f0; }
+        .notif-badge {
+            position: absolute; top: 0; right: -3px;
+            min-width: 19px; height: 12px; background: var(--error-base);
+            border: 1px solid var(--bg-container); border-radius: 7px;
+            display: flex; align-items: center; justify-content: center; padding: 0 3px;
+        }
+        .notif-badge span { font-size: 10px; font-weight: 400; line-height: 10px; color: var(--white); }
+
+        /* Notification Panel */
+        .notif-panel {
+            position: absolute; top: 52px; right: 24px; z-index: 200;
+            width: 380px; background: var(--bg-container);
+            border: 1px solid var(--border-divider); border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+            display: none; flex-direction: column;
+        }
+        .notif-panel.show { display: flex; }
+        .notif-panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-bottom: 1px solid var(--border-divider);
+        }
+        .notif-panel-header h3 { font-size: 16px; font-weight: 600; }
+        .notif-panel-header .mark-read { font-size: 12px; color: var(--primary); cursor: pointer; }
+        .notif-panel-header .mark-read:hover { text-decoration: underline; }
+        .notif-panel-body { padding: 8px 12px; }
+        .notif-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 14px 16px; border-radius: 12px; cursor: pointer;
+            border-left: 3px solid var(--primary); background: #f0f5ff;
+            transition: background 0.15s; text-decoration: none; color: inherit;
+        }
+        .notif-item:hover { background: #e6edfa; }
+        .notif-item-icon {
+            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+            background: #f9f0ff; display: flex; align-items: center; justify-content: center;
+        }
+        .notif-item-body { flex: 1; min-width: 0; }
+        .notif-item-title { font-size: 13px; font-weight: 500; line-height: 20px; }
+        .notif-item-desc { font-size: 12px; line-height: 18px; color: var(--text-secondary); margin-top: 2px; }
+        .notif-item-time { font-size: 11px; color: var(--text-disabled); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+        .notif-item-btn {
+            display: inline-block; margin-top: 10px; padding: 5px 14px; border-radius: 8px;
+            font-size: 12px; font-weight: 500; background: var(--primary); color: var(--white);
+            border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s;
+            text-decoration: none;
+        }
+        .notif-item-btn:hover { background: #1a56d6; }
+        .notif-overlay { position: fixed; inset: 0; z-index: 150; display: none; }
+        .notif-overlay.show { display: block; }
+
+        .main-body { flex: 1; overflow-y: auto; padding: 24px; }
+        .main-body::-webkit-scrollbar { width: 6px; }
+        .main-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+        /* Toolbar */
+        .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .search-box {
+            display: flex; align-items: center; gap: 8px;
+            width: 240px; padding: 5px 12px; height: 32px;
+            border: 1px solid var(--border-divider); border-radius: 8px;
+            background: var(--bg-container);
+        }
+        .search-box input {
+            border: none; outline: none; font-family: 'Inter', sans-serif;
+            font-size: 14px; color: var(--text-default); width: 100%; background: transparent;
+        }
+        .search-box input::placeholder { color: var(--text-disabled); }
+        .btn-new {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 5px 16px; height: 32px; width: 114px;
+            background: var(--button-default); color: var(--white);
+            border: none; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif;
+            font-size: 14px; transition: background 0.15s;
+        }
+        .btn-new:hover { background: #2a2f3d; }
+        .btn-new-left { display: flex; align-items: center; gap: 4px; }
+
+        /* App Cards Row */
+        .app-cards { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+        .app-card {
+            display: flex; align-items: center; gap: 8px;
+            padding: 12px; width: 188px; background: var(--bg-container);
+            border-radius: 12px; cursor: pointer; transition: box-shadow 0.15s;
+            text-decoration: none; color: inherit;
+        }
+        .app-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .app-card-icon {
+            width: 44px; height: 44px; border-radius: 8.8px;
+            background: var(--bg-active); opacity: 0.8;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; overflow: hidden;
+        }
+        .app-card-icon.game { background: #f3e8e8; opacity: 1; }
+        .app-card-icon.a-sys { background: #fef3e2; opacity: 1; }
+        .app-card-icon.e-sys { background: #e8f0f3; opacity: 1; }
+        .app-card-icon.p-sys { background: #ece8f5; opacity: 1; }
+        .app-card-icon.w-sys { background: var(--bg-active); opacity: 0.8; }
+        .app-card-icon.mail-sys { background: #f3e8f5; opacity: 1; }
+        .app-card { position: relative; }
+        .app-card-name { font-size: 14px; font-weight: 500; line-height: 22px; flex: 1; min-width: 0; }
+        .app-card-badge {
+            position: absolute; top: -6px; right: -6px;
+            min-width: 20px; height: 20px; padding: 0 6px;
+            background: #f5222d; color: #fff; font-size: 11px; font-weight: 600;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 1px 4px rgba(245,34,45,0.3);
+        }
+
+        /* Section */
+        .ws-section { margin-bottom: 24px; }
+        .ws-section-title { font-size: 14px; font-weight: 500; line-height: 22px; margin-bottom: 12px; }
+
+        /* Table Cards Grid */
+        .table-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .table-card {
+            display: flex; align-items: center; gap: 8px;
+            padding: 12px; background: var(--bg-container);
+            border: 1px solid var(--border-divider); border-radius: 12px;
+            cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+            overflow: hidden;
+        }
+        .table-card:hover { border-color: #d0d0d0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .table-card-icon {
+            width: 40px; height: 40px; border-radius: 8px;
+            background: var(--bg-active); border: 1px solid var(--bg-container);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .table-card-name {
+            font-size: 14px; font-weight: 500; line-height: 22px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+        }
+
+        .icon-letter {
+            width: 24px; height: 24px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; color: var(--white);
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-inner">
+                <div class="sidebar-logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="#131825"/><circle cx="9" cy="10" r="2" fill="#fff"/><circle cx="15" cy="10" r="2" fill="#fff"/><path d="M8 15c0 0 2 3 4 3s4-3 4-3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <span class="sidebar-logo-text">Doraemon</span>
+            </div>
+            <div class="sidebar-collapse-btn">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3.125" y="3.125" width="13.75" height="13.75" rx="2" stroke="#73726e" stroke-width="1.5"/><line x1="8.5" y1="3.5" x2="8.5" y2="16.5" stroke="#73726e" stroke-width="1.5"/></svg>
+            </div>
+        </div>
+
+        <div class="sidebar-content">
+            <!-- New Chat -->
+            <div class="sidebar-item" style="margin-top:16px;">
+                <div class="sidebar-item-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.333 3.333h13.334A1.667 1.667 0 0118.333 5v7.5a1.667 1.667 0 01-1.666 1.667H5.833L3.333 16.667V3.333z" stroke="#131825" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <span class="sidebar-item-text">New Chat</span>
+            </div>
+            <!-- Workspace (active) -->
+            <div class="sidebar-item active">
+                <div class="sidebar-item-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 4h5v5H3V4zM12 4h5v5h-5V4zM3 12h5v5H3v-5zM12 12h5v5h-5v-5z" stroke="#131825" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 7v6M11.5 10h6" stroke="#131825" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </div>
+                <span class="sidebar-item-text">Workspace</span>
+            </div>
+
+            <!-- Expert Agent -->
+            <div class="sidebar-section" style="margin-top:16px;">
+                <div class="sidebar-section-label">Expert Agent</div>
+                <div class="sidebar-item">
+                    <div class="sidebar-item-icon cs-icon">
+                        <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M2.5 4C2.5 2.067 4.067.5 6 .5h2c1.933 0 3.5 1.567 3.5 3.5S9.933 7.5 8 7.5H6C4.067 7.5 2.5 5.933 2.5 4z" fill="#fff"/></svg>
+                    </div>
+                    <span class="sidebar-item-text">CS</span>
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-item-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="16" height="16" rx="4" fill="#E8563F"/><text x="10" y="14" text-anchor="middle" fill="white" font-size="9" font-weight="600" font-family="Inter">i18n</text></svg>
+                    </div>
+                    <span class="sidebar-item-text">i18n</span>
+                </div>
+            </div>
+
+            <!-- AI U -->
+            <div class="sidebar-section" style="margin-top:16px;">
+                <div class="sidebar-section-header">
+                    <span>AI U</span>
+                    <div class="sidebar-section-header-actions">
+                        <div class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#ababa9" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                        <div class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3h4v4H3V3zM9 3h4v4H9V3zM3 9h4v4H3V9zM9 9h4v4H9V9z" stroke="#ababa9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6v4M9 8h4" stroke="#ababa9" stroke-width="1" stroke-linecap="round"/></svg></div>
+                    </div>
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-item-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#f0f0f0"/><circle cx="8" cy="9" r="1.2" fill="#333"/><circle cx="12" cy="9" r="1.2" fill="#333"/><path d="M7.5 12.5c0 0 1.2 1.5 2.5 1.5s2.5-1.5 2.5-1.5" stroke="#333" stroke-width="1" stroke-linecap="round"/><path d="M4 5c1-2 3-3 6-3s5 1 6 3" stroke="#333" stroke-width="1.2" stroke-linecap="round"/><rect x="5" y="7" width="2" height="3" rx="1" fill="none" stroke="#333" stroke-width="0.8"/></svg>
+                    </div>
+                    <span class="sidebar-item-text">AI Research</span>
+                    <div class="sidebar-item-action">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="8" r="1" fill="#73726e"/><circle cx="8" cy="8" r="1" fill="#73726e"/><circle cx="12" cy="8" r="1" fill="#73726e"/></svg>
+                    </div>
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-item-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#ffe8d6"/><circle cx="8" cy="9" r="1" fill="#333"/><circle cx="12" cy="9" r="1" fill="#333"/><path d="M7.5 12c0 0 1 1.5 2.5 1.5s2.5-1.5 2.5-1.5" stroke="#333" stroke-width="1" stroke-linecap="round"/><path d="M5 4c1-1.5 3-2.5 5-2.5s4 1 5 2.5" stroke="#333" stroke-width="1.2" stroke-linecap="round"/><circle cx="14" cy="6" r="2" fill="none" stroke="#333" stroke-width="0.8"/></svg>
+                    </div>
+                    <span class="sidebar-item-text">Product Launch</span>
+                </div>
+            </div>
+
+            <!-- Today -->
+            <div class="sidebar-section" style="margin-top:16px;">
+                <div class="sidebar-section-label">Today</div>
+                <div class="sidebar-item"><span class="sidebar-item-text">AI Assistant Help</span></div>
+                <div class="sidebar-item">
+                    <span class="sidebar-item-text">Data Analysis Project</span>
+                    <div class="sidebar-item-status">
+                        <svg class="loading-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1a5 5 0 104.33 2.5" stroke="#73726e" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+                <div class="sidebar-item">
+                    <span class="sidebar-item-text">Project Planning</span>
+                    <div class="sidebar-item-status"><div class="notification-dot"></div></div>
+                </div>
+            </div>
+
+            <!-- Yesterday -->
+            <div class="sidebar-section" style="margin-top:16px;">
+                <div class="sidebar-section-label">Yesterday</div>
+                <div class="sidebar-item"><span class="sidebar-item-text">Marketing Campaign Id...</span></div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-avatar">
+                <div style="width:40px;height:40px;border-radius:20px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:16px;font-weight:600;">D</span></div>
+            </div>
+            <div class="sidebar-footer-info">
+                <div class="sidebar-footer-name">David chen</div>
+                <div class="sidebar-footer-role">Data Analyst</div>
+            </div>
+            <div class="sidebar-footer-bot">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#73726e" stroke-width="1.3"/><circle cx="7.5" cy="9" r="1" fill="#73726e"/><circle cx="12.5" cy="9" r="1" fill="#73726e"/><path d="M7 13c0 0 1.5 1.5 3 1.5s3-1.5 3-1.5" stroke="#73726e" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="main">
+        <div class="main-header">
+            <h1>Workspace</h1>
+            <div class="notif-bell" id="notifBell">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 18.333a1.667 1.667 0 001.667-1.666H8.333A1.667 1.667 0 0010 18.333zM15 13.333V9.167a5 5 0 00-4.167-4.925V3.333a.833.833 0 10-1.666 0v.909A5 5 0 005 9.167v4.166L3.333 15v.833h13.334V15L15 13.333z" fill="#131825"/></svg>
+                <div class="notif-badge" id="notifBadge"><span>5</span></div>
+            </div>
+
+            <!-- Notification Panel -->
+            <div class="notif-panel" id="notifPanel">
+                <div class="notif-panel-header">
+                    <h3>通知中心</h3>
+                    <span class="mark-read" id="markAllRead">标为已读</span>
+                </div>
+                <div class="notif-panel-body">
+                    <a class="notif-item" href="email_assistant.html">
+                        <div class="notif-item-icon">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4l6 4 6-4M2 3h12v10H2V3z" stroke="#722ed1" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div class="notif-item-body">
+                            <div class="notif-item-title">你有 5 封邮件待处理</div>
+                            <div class="notif-item-desc">包含 2 封紧急邮件，AI 已为所有邮件准备了回复草稿</div>
+                            <span class="notif-item-btn">去处理</span>
+                        </div>
+                        <div class="notif-item-time">刚刚</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="notif-overlay" id="notifOverlay"></div>
+
+        <div class="main-body">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="search-box">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 14l-3.5-3.5M11 6.5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round"/></svg>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <button class="btn-new">
+                    <div class="btn-new-left">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>New</span>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+
+            <!-- App Cards -->
+            <div class="app-cards">
+                <div class="app-card">
+                    <div class="app-card-icon game">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6 11h4M8 9v4" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round"/><circle cx="16" cy="10" r="1" fill="#c0392b"/><circle cx="18" cy="12" r="1" fill="#c0392b"/><rect x="2" y="6" width="20" height="12" rx="4" stroke="#c0392b" stroke-width="1.5"/></svg>
+                    </div>
+                    <span class="app-card-name">Game Launch Checklist</span>
+                </div>
+                <div class="app-card">
+                    <div class="app-card-icon a-sys">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><text x="12" y="17" text-anchor="middle" fill="#d4780a" font-size="16" font-weight="800" font-family="Inter">A</text></svg>
+                    </div>
+                    <span class="app-card-name">A System</span>
+                </div>
+                <div class="app-card">
+                    <div class="app-card-icon e-sys">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><text x="12" y="17" text-anchor="middle" fill="#2980b9" font-size="16" font-weight="800" font-family="Inter">E</text></svg>
+                    </div>
+                    <span class="app-card-name">E System</span>
+                </div>
+                <div class="app-card">
+                    <div class="app-card-icon p-sys">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><text x="12" y="17" text-anchor="middle" fill="#7b2d8e" font-size="16" font-weight="800" font-family="Inter">P</text></svg>
+                    </div>
+                    <span class="app-card-name">P System</span>
+                </div>
+                <div class="app-card">
+                    <div class="app-card-icon w-sys">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6l3 12h2l2-8 2 8h2l3-12" stroke="#555" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <span class="app-card-name">W System</span>
+                </div>
+                <!-- Mail Assistant Entry (next to W System) -->
+                <a class="app-card" href="email_assistant.html">
+                    <div class="app-card-icon mail-sys">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6l9 6 9-6" stroke="#8e44ad" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="5" width="18" height="14" rx="2" stroke="#8e44ad" stroke-width="1.5"/></svg>
+                    </div>
+                    <span class="app-card-name">邮件助手</span>
+                    <span class="app-card-badge">5</span>
+                </a>
+            </div>
+
+            <!-- i18n Section -->
+            <div class="ws-section">
+                <div class="ws-section-title">i18n</div>
+                <div class="table-grid">
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="#555" stroke-width="1.3"/><path d="M8 8h8M8 12h8M8 16h4" stroke="#555" stroke-width="1.3" stroke-linecap="round"/></svg>
+                        </div>
+                        <span class="table-card-name">Text Table</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><text x="5" y="18" fill="#555" font-size="14" font-weight="700" font-family="Inter">Aa</text></svg>
+                        </div>
+                        <span class="table-card-name">Text Fonts Table</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#555" stroke-width="1.3"/><circle cx="8.5" cy="10" r="1.5" fill="#555"/><path d="M3 16l5-4 3 3 4-5 6 6" stroke="#555" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <span class="table-card-name">Image Table</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#555" stroke-width="1.3"/><circle cx="8.5" cy="10" r="1.5" fill="#555"/><path d="M3 16l5-4 3 3 4-5 6 6" stroke="#555" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <span class="table-card-name">Image Fonts Table</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 8l9 5 9-5" stroke="#555" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 8v8a2 2 0 002 2h14a2 2 0 002-2V8" stroke="#555" stroke-width="1.3"/><circle cx="12" cy="6" r="3" stroke="#555" stroke-width="1.3"/></svg>
+                        </div>
+                        <span class="table-card-name">Announcement Table</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4V4z" stroke="#555" stroke-width="1.3"/><path d="M4 8h16M8 4v16" stroke="#555" stroke-width="1.3"/><path d="M15 6v2" stroke="#555" stroke-width="1.3" stroke-linecap="round"/></svg>
+                        </div>
+                        <span class="table-card-name">Dictionary Table</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M2 6h20M2 6v12a2 2 0 002 2h16a2 2 0 002-2V6" stroke="#555" stroke-width="1.3"/><path d="M12 6v14M7 10h10M7 14h10" stroke="#555" stroke-width="1.3" stroke-linecap="round"/></svg>
+                        </div>
+                        <span class="table-card-name">Pattern Table</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CS Section -->
+            <div class="ws-section">
+                <div class="ws-section-title">CS</div>
+                <div class="table-grid">
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <div class="icon-letter" style="background:#1C64F2;">CS</div>
+                        </div>
+                        <span class="table-card-name">CS Table</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tech Section -->
+            <div class="ws-section">
+                <div class="ws-section-title">Tech</div>
+                <div class="table-grid">
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <div class="icon-letter" style="background:#0958D9;">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="9" rx="1.5" stroke="white" stroke-width="1.2"/><path d="M5 14h6" stroke="white" stroke-width="1.2" stroke-linecap="round"/><path d="M8 12v2" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </div>
+                        </div>
+                        <span class="table-card-name">Tech Table</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Section -->
+            <div class="ws-section">
+                <div class="ws-section-title">Custom</div>
+                <div class="table-grid">
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="#555" stroke-width="1.3"/><path d="M8 8h2v8H8V8z" stroke="#555" stroke-width="1.3"/><path d="M14 12h2v4h-2v-4z" stroke="#555" stroke-width="1.3"/></svg>
+                        </div>
+                        <span class="table-card-name">reinna 轮回的花瓣 UI 风格投票</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="#555" stroke-width="1.3"/><path d="M8 8h2v8H8V8z" stroke="#555" stroke-width="1.3"/><path d="M14 12h2v4h-2v-4z" stroke="#555" stroke-width="1.3"/></svg>
+                        </div>
+                        <span class="table-card-name">tenken UI 风格投票</span>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v2H4V5z" stroke="#555" stroke-width="1.3"/><path d="M4 9h16v2H4V9z" stroke="#555" stroke-width="1.3"/><path d="M4 13h16v2H4v-2z" stroke="#555" stroke-width="1.3"/><path d="M4 17h10v2H4v-2z" stroke="#555" stroke-width="1.3"/></svg>
+                        </div>
+                        <span class="table-card-name">vividarm 个人设计进度管理</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script>
+    const notifBell = document.getElementById('notifBell');
+    const notifPanel = document.getElementById('notifPanel');
+    const notifOverlay = document.getElementById('notifOverlay');
+
+    notifBell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notifPanel.classList.toggle('show');
+        notifOverlay.classList.toggle('show', notifPanel.classList.contains('show'));
+    });
+
+    notifOverlay.addEventListener('click', () => {
+        notifPanel.classList.remove('show');
+        notifOverlay.classList.remove('show');
+    });
+
+    document.getElementById('markAllRead').addEventListener('click', () => {
+        document.querySelector('.notif-item').style.background = 'transparent';
+        document.querySelector('.notif-item').style.borderLeftColor = 'transparent';
+        document.getElementById('notifBadge').style.display = 'none';
+    });
+</script>
+<script>
+window.CTWBotConfig = {
+    title: 'CTW Bot',
+    welcome: '你好！👋 我是 CTW Bot，你的工作助手。\n\n你可以问我关于各系统的信息、查询工作进度，或者让我帮你处理日常事务~',
+    placeholder: '例如：帮我查一下本周待办…',
+    quickReplies: ['介绍一下 CTW', '本周有哪些待办？', '打开邮件助手'],
+    responses: {
+        '介绍': 'CTW 是一家全球领先的游戏公司~ 🎮\n\n主要业务包括游戏开发、发行和运营。公司拥有多个工作室和产品线，覆盖全球市场。',
+        '待办': '📋 本周你有以下待办事项：\n\n1. 审核 A 工作室项目进度报告\n2. 参加周三产品评审会\n3. 回复 B 工作室的资源申请邮件\n4. 完成季度 OKR 自评\n\n需要我帮你处理其中哪一项？',
+        '邮件': '好的，正在为你打开邮件助手~ 📧\n\n你也可以直接点击工作区中的「邮件助手」卡片进入。',
+        '日程': '📅 你今天的日程：\n\n10:00 — 项目站会 (30min)\n14:00 — 产品评审会 (1h)\n16:00 — 1on1 with 田中 (30min)\n\n需要我帮你调整或新增日程吗？'
+    }
+};
+</script>
+<script src="ctw-bot.js"></script>
+</body>
+</html>

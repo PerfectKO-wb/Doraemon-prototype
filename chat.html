@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doraemon - Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f9fafb;
+            --bg-container: #ffffff;
+            --bg-active: #efefef;
+            --bg-hover: #efefef;
+            --bg-hover2: #dbdbdb;
+            --bg-disabled: #dbdbdb;
+            --text-default: #131825;
+            --text-secondary: #73726e;
+            --text-disabled: #ababa9;
+            --border-divider: #e5e7eb;
+            --border-default: #d9d9d9;
+            --button-default: #131825;
+            --white: #ffffff;
+            --error-base: #f5222d;
+            --primary: #1C64F2;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-default);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app { display: flex; width: 100%; height: 100vh; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 240px; height: 100vh;
+            background: var(--bg-container);
+            border-right: 1px solid var(--border-divider);
+            display: flex; flex-direction: column; flex-shrink: 0;
+        }
+        .sidebar-logo {
+            display: flex; align-items: center; padding: 20px 24px; height: 64px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .sidebar-logo-inner { display: flex; align-items: center; gap: 6px; }
+        .sidebar-logo-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+        .sidebar-logo-text { font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: 16px; line-height: 24px; }
+
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 0 16px; }
+        .sidebar-content::-webkit-scrollbar { width: 4px; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+        .sidebar-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 8px; border-radius: 12px;
+            cursor: pointer; transition: background 0.15s; position: relative;
+        }
+        .sidebar-item:hover { background: var(--bg-active); }
+        .sidebar-item.active { background: var(--bg-active); }
+        .sidebar-item-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .sidebar-item-text {
+            font-size: 14px; font-weight: 400; line-height: 22px; color: var(--text-default);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+        }
+        .sidebar-item-status {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            display: flex; align-items: center;
+        }
+        .loading-icon { width: 12px; height: 12px; animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .notification-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
+
+        .sidebar-section { display: flex; flex-direction: column; }
+        .sidebar-section-label { padding: 7px 8px; font-size: 12px; font-weight: 500; line-height: 18px; color: var(--text-disabled); }
+        .sidebar-section-header {
+            display: flex; align-items: center; justify-content: space-between; padding: 7px 8px;
+        }
+        .sidebar-section-header span { font-size: 12px; font-weight: 500; line-height: 18px; color: var(--text-disabled); }
+        .section-add {
+            width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; cursor: pointer; transition: background 0.15s;
+        }
+        .section-add:hover { background: var(--bg-active); }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-divider);
+            padding: 16px; display: flex; align-items: center; gap: 8px;
+        }
+        .sidebar-footer-avatar { width: 40px; height: 40px; border-radius: 20px; overflow: hidden; flex-shrink: 0; }
+        .sidebar-footer-info { flex: 1; min-width: 0; }
+        .sidebar-footer-name { font-size: 14px; font-weight: 500; line-height: 22px; }
+        .sidebar-footer-role { font-size: 12px; font-weight: 400; line-height: 18px; color: var(--text-disabled); }
+
+        /* ===== MAIN CHAT ===== */
+        .main { flex: 1; display: flex; flex-direction: column; position: relative; }
+
+        .notif-bell {
+            position: absolute; top: 16px; right: 24px; z-index: 10;
+            width: 32px; height: 32px; padding: 6px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s;
+        }
+        .notif-bell:hover { background: #f0f0f0; }
+        .notif-badge {
+            position: absolute; top: 0; right: -3px;
+            min-width: 19px; height: 12px; background: var(--error-base);
+            border: 1px solid var(--bg-container); border-radius: 7px;
+            display: flex; align-items: center; justify-content: center; padding: 0 3px;
+        }
+        .notif-badge span { font-size: 10px; font-weight: 400; line-height: 10px; color: var(--white); }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1; overflow-y: auto;
+            display: flex; flex-direction: column;
+            padding: 24px 0; max-width: 800px; width: 100%;
+            margin: 0 auto;
+        }
+        .chat-area::-webkit-scrollbar { width: 6px; }
+        .chat-area::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+        /* Message Styles */
+        .msg { margin-bottom: 16px; }
+
+        .msg-user {
+            display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+        }
+        .msg-user-row { display: flex; align-items: center; gap: 8px; }
+        .msg-user-bubble {
+            display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0;
+            padding: 6px 12px; background: var(--bg-hover); border-radius: 12px;
+            font-size: 16px; line-height: 24px; max-width: 756px;
+        }
+        .msg-user-avatar {
+            width: 32px; height: 32px; border-radius: 16px; flex-shrink: 0;
+            overflow: hidden;
+        }
+        .msg-actions {
+            display: flex; align-items: center; gap: 4px;
+            opacity: 0; transition: opacity 0.15s;
+        }
+        .msg:hover .msg-actions { opacity: 1; }
+        .msg-action-btn {
+            width: 24px; height: 24px; padding: 4px; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s; border: none; background: transparent;
+        }
+        .msg-action-btn:hover { background: var(--bg-active); }
+
+        .msg-ai { display: flex; align-items: flex-start; gap: 12px; }
+        .msg-ai-avatar {
+            width: 32px; height: 32px; border-radius: 16px; flex-shrink: 0;
+            background: var(--bg-hover); border: 1px solid var(--border-divider);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .msg-ai-body { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; padding-top: 4px; }
+        .msg-ai-text { font-size: 16px; line-height: 24px; color: var(--text-default); max-width: 756px; }
+
+        /* @ mention tag */
+        .mention-tag {
+            display: inline-block; padding: 0 4px;
+            background: var(--bg-hover2); border-radius: 4px;
+            font-size: 16px; line-height: 24px;
+        }
+
+        /* Input Area */
+        .chat-input-wrapper {
+            padding: 0 calc((100% - 800px) / 2) 24px;
+            flex-shrink: 0;
+        }
+        .chat-input {
+            width: 100%; max-width: 800px; margin: 0 auto;
+            background: var(--bg-container);
+            border: 1px solid var(--border-divider);
+            border-radius: 24px; overflow: hidden;
+            box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+        }
+        .chat-input-text {
+            padding: 12px 16px; min-height: 48px;
+        }
+        .chat-input-text textarea {
+            width: 100%; border: none; outline: none; resize: none;
+            font-family: 'Inter', sans-serif; font-size: 16px; line-height: 24px;
+            color: var(--text-default); background: transparent;
+        }
+        .chat-input-text textarea::placeholder { color: var(--text-disabled); }
+        .chat-input-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px;
+        }
+        .chat-input-tools { display: flex; align-items: center; }
+        .input-tool {
+            width: 36px; height: 36px; border-radius: 18px; border: none;
+            background: transparent; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s;
+        }
+        .input-tool:hover { background: var(--bg-active); }
+        .send-btn {
+            width: 36px; height: 36px; border-radius: 18px; border: none;
+            background: var(--bg-disabled); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .send-btn.active { background: var(--button-default); }
+        .send-btn.active svg path { stroke: var(--white); }
+        .send-btn.stop { background: var(--button-default); }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-inner">
+                <div class="sidebar-logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="#131825"/><circle cx="9" cy="10" r="2" fill="#fff"/><circle cx="15" cy="10" r="2" fill="#fff"/><path d="M8 15c0 0 2 3 4 3s4-3 4-3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <span class="sidebar-logo-text">Doraemon</span>
+            </div>
+        </div>
+
+        <div class="sidebar-content">
+            <div class="sidebar-item" style="margin-top:16px;">
+                <div class="sidebar-item-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.333 3.333h13.334A1.667 1.667 0 0118.333 5v7.5a1.667 1.667 0 01-1.666 1.667H5.833L3.333 16.667V3.333z" stroke="#131825" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <span class="sidebar-item-text">New Chat</span>
+            </div>
+
+            <!-- Projects -->
+            <div class="sidebar-section" style="margin-top:16px;">
+                <div class="sidebar-section-header">
+                    <span>Projects</span>
+                    <div class="section-add">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#ababa9" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-item-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2.5 6.667V15a1.667 1.667 0 001.667 1.667h11.666A1.667 1.667 0 0017.5 15V8.333a1.667 1.667 0 00-1.667-1.666H10L8.333 5H4.167A1.667 1.667 0 002.5 6.667z" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <span class="sidebar-item-text">AI Research</span>
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-item-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2.5 6.667V15a1.667 1.667 0 001.667 1.667h11.666A1.667 1.667 0 0017.5 15V8.333a1.667 1.667 0 00-1.667-1.666H10L8.333 5H4.167A1.667 1.667 0 002.5 6.667z" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <span class="sidebar-item-text">Infra Upgrade</span>
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-item-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2.5 6.667V15a1.667 1.667 0 001.667 1.667h11.666A1.667 1.667 0 0017.5 15V8.333a1.667 1.667 0 00-1.667-1.666H10L8.333 5H4.167A1.667 1.667 0 002.5 6.667z" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <span class="sidebar-item-text">Product Launch</span>
+                </div>
+            </div>
+
+            <!-- Today -->
+            <div class="sidebar-section" style="margin-top:16px;">
+                <div class="sidebar-section-label">Today</div>
+                <div class="sidebar-item active">
+                    <span class="sidebar-item-text">AI Assistant Help</span>
+                </div>
+                <div class="sidebar-item">
+                    <span class="sidebar-item-text">Data Analysis Project</span>
+                    <div class="sidebar-item-status">
+                        <svg class="loading-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1a5 5 0 104.33 2.5" stroke="#73726e" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+                <div class="sidebar-item">
+                    <span class="sidebar-item-text">Project Planning</span>
+                    <div class="sidebar-item-status"><div class="notification-dot"></div></div>
+                </div>
+            </div>
+
+            <!-- Yesterday -->
+            <div class="sidebar-section" style="margin-top:16px;">
+                <div class="sidebar-section-label">Yesterday</div>
+                <div class="sidebar-item"><span class="sidebar-item-text">Marketing Campaign Id...</span></div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-avatar">
+                <div style="width:40px;height:40px;border-radius:20px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:16px;font-weight:600;">D</span></div>
+            </div>
+            <div class="sidebar-footer-info">
+                <div class="sidebar-footer-name">David chen</div>
+                <div class="sidebar-footer-role">Data Analyst</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="main">
+        <div class="notif-bell">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 18.333a1.667 1.667 0 001.667-1.666H8.333A1.667 1.667 0 0010 18.333zM15 13.333V9.167a5 5 0 00-4.167-4.925V3.333a.833.833 0 10-1.666 0v.909A5 5 0 005 9.167v4.166L3.333 15v.833h13.334V15L15 13.333z" fill="#131825"/></svg>
+            <div class="notif-badge"><span>5</span></div>
+        </div>
+
+        <div class="chat-area" id="chatArea"></div>
+
+        <!-- Input -->
+        <div class="chat-input-wrapper">
+            <div class="chat-input">
+                <div class="chat-input-text">
+                    <textarea id="chatTextarea" rows="1" placeholder="Create an expense claim for $120..."></textarea>
+                </div>
+                <div class="chat-input-bar">
+                    <div class="chat-input-tools">
+                        <button class="input-tool" title="Attach file">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.071 9.428l-7.071 7.071a5 5 0 01-7.071-7.071l7.07-7.071a3.333 3.333 0 014.715 4.714l-7.071 7.072a1.667 1.667 0 01-2.357-2.357l6.364-6.364" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <button class="input-tool" title="Mention">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13.333 10a3.333 3.333 0 11-6.666 0 3.333 3.333 0 016.666 0z" stroke="#73726e" stroke-width="1.5"/><path d="M13.333 10v1.667a2.5 2.5 0 005 0V10a8.333 8.333 0 10-3.333 6.667" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                    </div>
+                    <button class="send-btn" id="sendBtn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 15.833V4.167M5.833 8.333L10 4.167l4.167 4.166" stroke="#73726e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    /**
+     * ====== 预设场景配置 ======
+     * 通过 URL 参数 ?scene=xxx 选择不同的聊天内容。
+     * 每个 preset 包含：
+     *   title       — 左侧侧边栏高亮项的文字（可选）
+     *   placeholder — 输入框占位文字（可选）
+     *   messages    — 初始聊天消息数组
+     *     { role: 'user' | 'ai', text: '纯文本', html: true/false(可选) }
+     *   responses   — 关键词匹配的自定义回复（可选）
+     */
+    const CHAT_PRESETS = {
+
+        'default': {
+            title: 'AI Assistant Help',
+            messages: [
+                { role: 'user', text: 'I need to create a new project plan for the Q3 marketing campaign.' },
+                { role: 'ai',   text: "I'd be happy to help you create a project plan for the Q3 marketing campaign. Let's start with defining the key objectives, timeline, and resources needed. What are the main goals for this campaign?" },
+                { role: 'user', text: '<span class="mention-tag">@A</span>&nbsp;创建一个A票&nbsp;<span class="mention-tag">@W</span>&nbsp;同步w文档建一份', html: true },
+                { role: 'ai',   text: "I'd be happy to help you create a project plan for the Q3 marketing campaign." }
+            ]
+        },
+
+        'email-reply-1': {
+            title: '邮件回复 — 田中监修反馈',
+            placeholder: '编辑回复内容…',
+            messages: [
+                { role: 'ai', text: '以下是 AI 为你准备的邮件回复草稿：\n\n收件人：田中太郎 (A 出版社)\n主题：Re: 「天剑」角色监修第 3 轮反馈\n\n田中先生，\n\n感谢您提供的详细反馈。关于第 3 轮角色监修的修改建议，我们团队已经进行了评估：\n\n1. 主角服饰配色 — 已按建议调整为冷色系\n2. 背景细节精度 — 将在下一轮提交中优化\n3. 表情差分追加 — 预计本周五前完成\n\n修改后的素材预计下周一提交审核。如有其他问题，请随时联系。\n\n此致\nDavid Chen\n\n——\n你可以直接编辑上方内容，或在下方输入修改指令，例如"语气更正式一些"、"加上截止日期"等。' }
+            ],
+            responses: {
+                '正式': '好的，我已将语气调整为更正式的版本：\n\n田中先生，\n\n承蒙贵方提供第 3 轮角色监修反馈，特此致谢。针对反馈中各修改事项，敝团队已完成评估，具体回应如下：\n\n1. 主角服饰配色 — 已依据建议调整为冷色系\n2. 背景细节精度 — 将于下一轮提交中予以优化\n3. 表情差分追加 — 预计本周五前完成制作\n\n修改后素材预计于下周一提交贵方审核。如有任何疑问，敬请随时告知。\n\n此致敬上\nDavid Chen',
+                '截止': '已添加明确的截止日期信息。邮件末尾已补充：\n\n「请于本周四 (3/20) 前确认以上修改方向，以便我们按计划推进。」\n\n需要其他修改吗？',
+                '发送': '确认发送邮件给田中太郎 (tanaka@publisher-a.co.jp)？\n\n已抄送：山本部长 (yamamoto@publisher-a.co.jp)\n\n请确认或继续编辑。'
+            }
+        },
+
+        'email-reply-2': {
+            title: '邮件催促 — 佐藤花子任务逾期',
+            placeholder: '编辑催促邮件内容…',
+            messages: [
+                { role: 'ai', text: '以下是 AI 根据 A-System 任务逾期信息，为你准备的催促邮件草稿：\n\n收件人：佐藤花子 (B 工作室)\n主题：「C 游戏」角色设计任务逾期提醒\n\n佐藤さん，\n\n你在 A-System 中负责的任务「C 游戏 — 主角 3D 建模」（截止日：3/10）目前显示逾期未完成。\n\n当前状态：进行中（进度 75%）\n逾期天数：6 天\n\n请问是否遇到困难？如需资源支持或调整截止时间，请随时告知，我会协助协调。\n\n此致\nDavid Chen\n\n——\n你可以编辑以上内容，或告诉我调整方向，例如"语气委婉一些"、"加上新的截止日期建议"等。' }
+            ],
+            responses: {
+                '委婉': '好的，我已将语气调整得更委婉：\n\n佐藤さん，你好！\n\n关于「C 游戏 — 主角 3D 建模」任务，注意到目前进度为 75%，原定截止日已过。想了解一下目前的进展情况，是否遇到了什么需要协助的地方？\n\n如果需要调整时间计划或者额外的资源支持，我很乐意帮忙协调。不必有压力，我们一起把项目推进好就行~\n\n此致\nDavid Chen',
+                '截止': '已添加新截止日期建议：\n\n「考虑到当前进度(75%)，建议将截止日调整为 3/20，请确认这个时间是否可行。」\n\n需要其他修改吗？',
+                '发送': '确认发送催促邮件给佐藤花子 (sato@studio-b.co.jp)？\n\n请确认或继续编辑。'
+            }
+        },
+
+        'email-reply-3': {
+            title: '邮件回复 — 铃木预算审批',
+            placeholder: '编辑回复内容…',
+            messages: [
+                { role: 'ai', text: '以下是 AI 为你准备的邮件回复草稿：\n\n收件人：铃木一郎 (C 工作室)\n主题：Re: C 游戏海外发行预算审批\n\n铃木先生，\n\n感谢你提交的 C 游戏海外发行预算方案。经过初步审阅，有以下几点意见：\n\n1. 整体预算规模合理，市场推广费用分配得当\n2. 建议补充北美和欧洲市场的细分预算明细\n3. 本地化成本建议参考 B 游戏的实际支出数据\n\n请根据以上反馈修改后重新提交，我会尽快完成最终审批。\n\n此致\nDavid Chen\n\n——\n你可以编辑以上内容，或在下方输入修改指令。' }
+            ],
+            responses: {
+                '发送': '确认发送邮件给铃木一郎 (suzuki@studio-c.co.jp)？\n\n请确认或继续编辑。'
+            }
+        }
+    };
+
+    /* ====== 核心逻辑 ====== */
+    const chatTextarea = document.getElementById('chatTextarea');
+    const sendBtn = document.getElementById('sendBtn');
+    const chatArea = document.getElementById('chatArea');
+
+    const AI_AVATAR = `<svg width="20" height="24" viewBox="0 0 20 24" fill="none"><circle cx="10" cy="12" r="9" fill="#f0f0f0"/><circle cx="7.5" cy="11" r="1.2" fill="#2b2b2b"/><circle cx="12.5" cy="11" r="1.2" fill="#2b2b2b"/><path d="M8 14.5c0 0 1 1 2 1s2-1 2-1" stroke="#2b2b2b" stroke-width="0.8" stroke-linecap="round"/><path d="M4 7c1-2.5 3-4 6-4s5 1.5 6 4" stroke="#2b2b2b" stroke-width="1" stroke-linecap="round"/></svg>`;
+    const USER_AVATAR = `<div style="width:32px;height:32px;border-radius:16px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:13px;font-weight:600;">D</span></div>`;
+    const COPY_ICON = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="#ababa9" stroke-width="1.2"/><path d="M10.5 5.5V3.5a1.5 1.5 0 00-1.5-1.5H3.5A1.5 1.5 0 002 3.5V9a1.5 1.5 0 001.5 1.5h2" stroke="#ababa9" stroke-width="1.2"/></svg>`;
+    const EDIT_ICON = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 012.667 2.667l-8.667 8.666L2 14l.667-3.333 8.666-8.667z" stroke="#ababa9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+    function createUserMsg(text, useHTML) {
+        const div = document.createElement('div');
+        div.className = 'msg msg-user';
+        const bubbleContent = useHTML ? text : escapeHtml(text);
+        div.innerHTML = `<div class="msg-user-row"><div class="msg-user-bubble">${bubbleContent}</div><div class="msg-user-avatar">${USER_AVATAR}</div></div><div class="msg-actions"><button class="msg-action-btn" title="Copy">${COPY_ICON}</button><button class="msg-action-btn" title="Edit">${EDIT_ICON}</button></div>`;
+        return div;
+    }
+
+    function createAiMsg(text, useHTML) {
+        const div = document.createElement('div');
+        div.className = 'msg msg-ai';
+        const bodyContent = useHTML ? text : escapeHtml(text);
+        div.innerHTML = `<div class="msg-ai-avatar">${AI_AVATAR}</div><div class="msg-ai-body"><div class="msg-ai-text" style="white-space:pre-wrap;">${bodyContent}</div><div class="msg-actions" style="opacity:0;"><button class="msg-action-btn" title="Copy">${COPY_ICON}</button></div></div>`;
+        return div;
+    }
+
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    /* ====== 读取 URL 参数并渲染 ====== */
+    const params = new URLSearchParams(window.location.search);
+    const sceneName = params.get('scene') || 'default';
+    const preset = CHAT_PRESETS[sceneName] || CHAT_PRESETS['default'];
+
+    if (preset.title) {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        const activeItem = document.querySelector('.sidebar-item.active') || document.querySelector('.sidebar-section .sidebar-item');
+        if (activeItem) {
+            activeItem.classList.add('active');
+            const textEl = activeItem.querySelector('.sidebar-item-text');
+            if (textEl) textEl.textContent = preset.title;
+        }
+    }
+
+    if (preset.placeholder) {
+        chatTextarea.placeholder = preset.placeholder;
+    }
+
+    chatArea.innerHTML = '';
+    (preset.messages || []).forEach(m => {
+        if (m.role === 'user') chatArea.appendChild(createUserMsg(m.text, !!m.html));
+        else chatArea.appendChild(createAiMsg(m.text, !!m.html));
+    });
+
+    /* ====== 输入与发送 ====== */
+    const currentResponses = preset.responses || {};
+    const defaultResponses = [
+        "I'll get that done for you right away. Let me process the request and set things up.",
+        "Great question! Based on the project context, I'd recommend starting with a phased approach.",
+        "I've analyzed the data and here are my recommendations for moving forward with this task.",
+        "Sure thing! I'll coordinate with the relevant systems to complete this efficiently.",
+    ];
+
+    function getResponse(userText) {
+        const lower = userText.toLowerCase();
+        for (const key in currentResponses) {
+            if (lower.includes(key.toLowerCase())) return currentResponses[key];
+        }
+        return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    }
+
+    chatTextarea.addEventListener('input', () => {
+        sendBtn.classList.toggle('active', chatTextarea.value.trim().length > 0);
+        chatTextarea.style.height = 'auto';
+        chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 120) + 'px';
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    chatTextarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    function sendMessage() {
+        const text = chatTextarea.value.trim();
+        if (!text) return;
+        chatArea.appendChild(createUserMsg(text));
+        chatTextarea.value = '';
+        chatTextarea.style.height = 'auto';
+        sendBtn.classList.remove('active');
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        setTimeout(() => {
+            chatArea.appendChild(createAiMsg(getResponse(text)));
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }, 600);
+    }
+
+    chatArea.scrollTop = chatArea.scrollHeight;
+</script>
+<script>
+window.CTWBotConfig = {
+    title: 'CTW Bot · 对话',
+    welcome: '你好！💬 你正在对话模式中。\n\n这里你可以自由地和我对话，我会尽力帮你解答问题、完成任务~',
+    placeholder: '继续对话…',
+    quickReplies: ['帮我翻译这段文字', '生成会议纪要', '分析这份数据'],
+    responses: {
+        '翻译': '好的！请把需要翻译的文字发给我，并告诉我目标语言（中文 / 英文 / 日文等）。\n\n我会尽量保持原文的语气和风格~',
+        '会议': '📝 请提供以下信息，我来生成会议纪要：\n\n1. 会议主题\n2. 参与人员\n3. 讨论要点（关键词即可）\n4. 决议 / 待办事项\n\n或者你可以直接把会议录音 / 文字记录发给我~',
+        '分析': '📊 请把数据发给我，或告诉我数据的来源。\n\n我可以帮你做：\n• 趋势分析\n• 数据对比\n• 异常检测\n• 生成可视化图表描述\n\n你最关心哪个维度？'
+    }
+};
+</script>
+<script src="ctw-bot.js"></script>
+</body>
+</html>

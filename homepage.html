@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doraemon - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f9fafb;
+            --bg-container: #ffffff;
+            --bg-active: #efefef;
+            --bg-disabled: #dbdbdb;
+            --bg-hover: #f5f5f5;
+            --text-default: #131825;
+            --text-secondary: #73726e;
+            --text-disabled: #ababa9;
+            --border-divider: #e5e7eb;
+            --border-default: #d9d9d9;
+            --button-default: #131825;
+            --white: #ffffff;
+            --error-base: #f5222d;
+            --primary: #1C64F2;
+            --primary-light: #e8f0fe;
+            --primary-hover: #1a56d6;
+            --success: #52c41a;
+            --success-bg: #f6ffed;
+            --success-border: #b7eb8f;
+            --warning: #faad14;
+            --warning-bg: #fff7e6;
+            --warning-border: #ffd591;
+            --orange-bg: #fff7e6;
+            --orange-border: #ffd591;
+            --blue-bg: #e6f7ff;
+            --blue-border: #91d5ff;
+            --green-bg: #f6ffed;
+            --green-border: #b7eb8f;
+            --purple: #722ed1;
+            --purple-bg: #f9f0ff;
+            --purple-border: #d3adf7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-default);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: var(--bg-container);
+            border-right: 1px solid var(--border-divider);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 18px 20px 24px;
+            height: 64px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+
+        .sidebar-logo-inner {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sidebar-logo-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+
+        .sidebar-logo-text {
+            font-family: 'Urbanist', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 24px;
+            color: var(--text-default);
+        }
+
+        .sidebar-collapse-btn {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; cursor: pointer; transition: background 0.15s;
+        }
+        .sidebar-collapse-btn:hover { background: var(--bg-active); }
+
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 0 16px; }
+        .sidebar-content::-webkit-scrollbar { width: 4px; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+        .sidebar-new-chat {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 8px; margin-top: 16px;
+            background: var(--bg-active); border-radius: 12px;
+            cursor: pointer; transition: background 0.15s;
+        }
+        .sidebar-new-chat:hover { background: #e5e5e5; }
+        .sidebar-new-chat svg { flex-shrink: 0; }
+        .sidebar-new-chat span { font-size: 14px; font-weight: 400; line-height: 22px; color: var(--text-default); }
+
+        .sidebar-section-label { padding: 7px 8px; font-size: 12px; font-weight: 500; line-height: 18px; color: var(--text-disabled); }
+        .sidebar-section { display: flex; flex-direction: column; }
+
+        .sidebar-section-header {
+            display: flex; align-items: center; justify-content: space-between; padding: 7px 8px;
+        }
+        .sidebar-section-header span { font-size: 12px; font-weight: 500; line-height: 18px; color: var(--text-disabled); }
+        .sidebar-section-header .section-add {
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; cursor: pointer; transition: background 0.15s;
+        }
+        .sidebar-section-header .section-add:hover { background: var(--bg-active); }
+
+        .sidebar-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 8px; border-radius: 12px;
+            cursor: pointer; transition: background 0.15s; position: relative;
+        }
+        .sidebar-item:hover { background: var(--bg-active); }
+        .sidebar-item.active { background: var(--bg-active); }
+
+        .sidebar-item-icon {
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .sidebar-item-icon.cs-icon { background: var(--primary); border-radius: 10px; }
+        .sidebar-item-icon.mail-icon { background: #722ed1; border-radius: 10px; }
+
+        .sidebar-item-text {
+            font-size: 14px; font-weight: 400; line-height: 22px; color: var(--text-default);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 164px;
+        }
+
+        .sidebar-item-status {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            display: flex; align-items: center;
+        }
+        .sidebar-item-status .loading-icon { width: 12px; height: 12px; animation: spin 1s linear infinite; }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .notification-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
+
+        .sidebar-item-badge {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            min-width: 18px; height: 18px; padding: 0 5px;
+            background: var(--error-base); border-radius: 9px;
+            font-size: 11px; font-weight: 500; color: var(--white);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-divider);
+            padding: 16px; display: flex; align-items: center; gap: 8px;
+        }
+        .sidebar-footer-avatar { width: 40px; height: 40px; border-radius: 20px; overflow: hidden; flex-shrink: 0; }
+        .sidebar-footer-info { flex: 1; min-width: 0; }
+        .sidebar-footer-name { font-size: 14px; font-weight: 500; line-height: 22px; color: var(--text-default); }
+        .sidebar-footer-role { font-size: 12px; font-weight: 400; line-height: 18px; color: var(--text-disabled); }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1; position: relative;
+            display: flex; flex-direction: column; align-items: center;
+            overflow-y: auto;
+        }
+
+        /* ===== VIEW: HOME (default) ===== */
+        .view-home { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .view-home.hidden { display: none; }
+
+        .notification-bell {
+            position: fixed; top: 16px; right: 16px; z-index: 100;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 6px; border-radius: 16px; cursor: pointer; transition: background 0.15s;
+        }
+        .notification-bell:hover { background: #f0f0f0; }
+        .notification-badge {
+            position: absolute; top: 0; right: -3px;
+            min-width: 19px; height: 12px;
+            background: var(--error-base); border: 1px solid var(--bg-container); border-radius: 7px;
+            display: flex; align-items: center; justify-content: center; padding: 0 3px;
+        }
+        .notification-badge span { font-size: 10px; font-weight: 400; line-height: 10px; color: var(--white); }
+
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed; top: 52px; right: 16px; z-index: 200;
+            width: 420px; max-height: 560px;
+            background: var(--bg-container);
+            border: 1px solid var(--border-divider);
+            border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+            display: none; flex-direction: column;
+        }
+        .notification-panel.show { display: flex; }
+        .notification-panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-bottom: 1px solid var(--border-divider);
+        }
+        .notification-panel-header h3 { font-size: 16px; font-weight: 600; }
+        .notification-panel-header .mark-read { font-size: 12px; color: var(--primary); cursor: pointer; }
+        .notification-panel-header .mark-read:hover { text-decoration: underline; }
+
+        .notification-list { flex: 1; overflow-y: auto; padding: 8px 12px; }
+        .notification-list::-webkit-scrollbar { width: 4px; }
+        .notification-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+        .notif-card {
+            padding: 14px 16px; border-radius: 12px;
+            margin-bottom: 6px; cursor: pointer; transition: background 0.15s;
+            border-left: 3px solid transparent;
+        }
+        .notif-card:hover { background: var(--bg-hover); }
+        .notif-card.unread { background: #f0f5ff; border-left-color: var(--primary); }
+        .notif-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+        .notif-card-icon {
+            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .notif-card-icon.mail { background: var(--purple-bg); }
+        .notif-card-icon.warning { background: var(--warning-bg); }
+        .notif-card-icon.insight { background: var(--blue-bg); }
+        .notif-card-icon.success { background: var(--success-bg); }
+        .notif-card-body { flex: 1; min-width: 0; }
+        .notif-card-title { font-size: 13px; font-weight: 500; line-height: 20px; color: var(--text-default); }
+        .notif-card-desc { font-size: 12px; line-height: 18px; color: var(--text-secondary); margin-top: 2px; }
+        .notif-card-time { font-size: 11px; color: var(--text-disabled); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+        .notif-card-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .notif-btn {
+            padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 500;
+            cursor: pointer; border: none; transition: all 0.15s; font-family: 'Inter', sans-serif;
+        }
+        .notif-btn.primary { background: var(--primary); color: var(--white); }
+        .notif-btn.primary:hover { background: var(--primary-hover); }
+        .notif-btn.secondary { background: var(--bg-active); color: var(--text-default); }
+        .notif-btn.secondary:hover { background: #e0e0e0; }
+        .notif-btn.ghost { background: transparent; color: var(--text-secondary); }
+        .notif-btn.ghost:hover { background: var(--bg-active); }
+
+        /* Welcome */
+        .welcome-section {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; margin-top: 132px; width: 401px; text-align: center;
+        }
+        .welcome-title { font-weight: 700; font-size: 36px; line-height: 54px; color: var(--text-default); width: 100%; }
+        .welcome-subtitle { font-size: 16px; font-weight: 400; line-height: 24px; color: var(--text-secondary); width: 100%; }
+
+        .mode-toggle {
+            display: flex; align-items: center; padding: 4px; margin-top: 24px;
+            background: var(--bg-container); border: 1px solid var(--border-default); border-radius: 14px;
+        }
+        .mode-btn {
+            display: flex; align-items: center; justify-content: center;
+            padding: 9px 16px; border-radius: 12px;
+            font-size: 14px; font-weight: 500; line-height: 22px;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+            border: none; background: transparent; color: var(--text-secondary); font-family: 'Inter', sans-serif;
+        }
+        .mode-btn.active { background: var(--button-default); color: var(--white); box-shadow: 0px 4px 4px rgba(0,0,0,0.1); }
+        .mode-btn:not(.active):hover { background: var(--bg-active); }
+
+        .input-container {
+            width: 960px; max-width: calc(100% - 48px); margin-top: 52px;
+            background: var(--white); border: 1px solid var(--border-divider); border-radius: 24px;
+            overflow: hidden; box-shadow: 0px 8px 12px rgba(0,0,0,0.1);
+        }
+        .input-area { padding: 12px 16px; min-height: 72px; }
+        .input-area textarea {
+            width: 100%; border: none; outline: none; resize: none;
+            font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400; line-height: 24px;
+            color: var(--text-default); background: transparent;
+        }
+        .input-area textarea::placeholder { color: var(--text-disabled); }
+        .input-actions { display: flex; align-items: center; justify-content: space-between; padding: 16px; }
+        .input-tools { display: flex; align-items: center; }
+        .input-tool-btn {
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            padding: 8px; border-radius: 18px; cursor: pointer; transition: background 0.15s;
+            border: none; background: transparent;
+        }
+        .input-tool-btn:hover { background: var(--bg-active); }
+        .send-btn {
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            padding: 8px; border-radius: 18px; background: var(--bg-disabled);
+            border: none; cursor: pointer; transition: background 0.2s;
+        }
+        .send-btn.active { background: var(--button-default); }
+        .send-btn.active svg path { stroke: var(--white); }
+
+        .work-overview {
+            width: 960px; max-width: calc(100% - 48px);
+            margin-top: 85px; margin-bottom: 40px;
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .work-overview-label { font-size: 14px; font-weight: 400; line-height: 22px; color: var(--text-secondary); }
+        .work-overview-columns { display: flex; gap: 15px; }
+        .work-column { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        .work-column-header { display: flex; align-items: center; gap: 8px; }
+        .work-column-icon {
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            padding: 6px; border-radius: 12px; border: 1px solid;
+        }
+        .work-column-icon.tasks { background: var(--orange-bg); border-color: var(--orange-border); }
+        .work-column-icon.plans { background: var(--blue-bg); border-color: var(--blue-border); }
+        .work-column-icon.schedule { background: var(--green-bg); border-color: var(--green-border); }
+        .work-column-title { font-size: 16px; font-weight: 500; line-height: 24px; color: var(--text-default); }
+        .work-card {
+            background: var(--bg-container); border: 1px solid var(--border-divider); border-radius: 16px;
+            padding: 12px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .work-card:hover { border-color: #d0d0d0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .work-card-info { display: flex; flex-direction: column; gap: 4px; }
+        .work-card-title { font-size: 14px; font-weight: 500; line-height: 22px; color: var(--text-default); }
+        .work-card-time { font-size: 12px; font-weight: 400; line-height: 18px; color: var(--text-disabled); }
+        .work-card-action {
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            padding: 6px; border-radius: 8px; transition: background 0.15s;
+        }
+        .work-card-action:hover { background: var(--bg-active); }
+
+        /* ===== VIEW: MAIL TASK BOARD (邮件任务台) ===== */
+        .view-mail { display: none; width: 100%; height: 100%; flex-direction: column; }
+        .view-mail.active { display: flex; }
+
+        .mail-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 32px; border-bottom: 1px solid var(--border-divider);
+            background: var(--bg-container); flex-shrink: 0;
+        }
+        .mail-header-left { display: flex; align-items: center; gap: 16px; }
+        .mail-header-left h2 { font-size: 20px; font-weight: 700; }
+        .mail-header-tabs { display: flex; gap: 4px; background: var(--bg-base); padding: 3px; border-radius: 10px; }
+        .mail-tab {
+            padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+            cursor: pointer; border: none; background: transparent;
+            color: var(--text-secondary); font-family: 'Inter', sans-serif; transition: all 0.15s;
+        }
+        .mail-tab.active { background: var(--bg-container); color: var(--text-default); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .mail-tab:hover:not(.active) { color: var(--text-default); }
+
+        .mail-stats {
+            display: flex; align-items: center; gap: 16px;
+        }
+        .mail-stat {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; color: var(--text-secondary);
+        }
+        .mail-stat-num { font-weight: 600; color: var(--text-default); font-size: 18px; }
+        .mail-stat-num.highlight { color: var(--primary); }
+        .mail-stat-num.success { color: var(--success); }
+
+        .mail-body { flex: 1; overflow-y: auto; padding: 24px 32px; }
+        .mail-body::-webkit-scrollbar { width: 6px; }
+        .mail-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+        /* Area sections */
+        .mail-section { margin-bottom: 32px; }
+        .mail-section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .mail-section-title {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 15px; font-weight: 600; color: var(--text-default);
+        }
+        .mail-section-count {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 22px; height: 22px; padding: 0 6px;
+            background: var(--primary); color: var(--white);
+            border-radius: 11px; font-size: 12px; font-weight: 600;
+        }
+        .mail-section-action {
+            font-size: 13px; color: var(--primary); cursor: pointer; font-weight: 500;
+        }
+        .mail-section-action:hover { text-decoration: underline; }
+
+        /* Email cards - Area A */
+        .email-card {
+            background: var(--bg-container); border: 1px solid var(--border-divider);
+            border-radius: 14px; padding: 16px 20px; margin-bottom: 10px;
+            transition: border-color 0.15s, box-shadow 0.15s; cursor: pointer;
+        }
+        .email-card:hover { border-color: #c8c8c8; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .email-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .email-card-left { flex: 1; min-width: 0; }
+        .email-card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .email-priority {
+            padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+        }
+        .email-priority.urgent { background: #fff1f0; color: #cf1322; }
+        .email-priority.normal { background: var(--warning-bg); color: #d48806; }
+        .email-priority.low { background: var(--bg-base); color: var(--text-disabled); }
+        .email-sender { font-size: 13px; font-weight: 600; color: var(--text-default); }
+        .email-time { font-size: 12px; color: var(--text-disabled); }
+        .email-subject { font-size: 14px; font-weight: 500; color: var(--text-default); margin-bottom: 4px; }
+        .email-summary { font-size: 13px; color: var(--text-secondary); line-height: 20px; }
+
+        .email-draft-preview {
+            margin-top: 12px; padding: 12px 16px;
+            background: #fafbff; border: 1px solid #e8ecf4; border-radius: 10px;
+        }
+        .email-draft-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 600; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
+        }
+        .email-draft-text { font-size: 13px; color: var(--text-secondary); line-height: 20px; }
+
+        .email-card-actions { display: flex; gap: 8px; margin-top: 14px; }
+        .email-btn {
+            padding: 7px 16px; border-radius: 10px; font-size: 13px; font-weight: 500;
+            cursor: pointer; border: none; transition: all 0.15s; font-family: 'Inter', sans-serif;
+        }
+        .email-btn.primary { background: var(--primary); color: var(--white); }
+        .email-btn.primary:hover { background: var(--primary-hover); }
+        .email-btn.outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
+        .email-btn.outline:hover { background: var(--primary-light); }
+        .email-btn.ghost { background: var(--bg-active); color: var(--text-default); }
+        .email-btn.ghost:hover { background: #e0e0e0; }
+
+        /* Area B - Auto processed */
+        .auto-processed-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .auto-card {
+            background: var(--bg-container); border: 1px solid var(--border-divider);
+            border-radius: 14px; padding: 16px; text-align: center;
+            transition: border-color 0.15s;
+        }
+        .auto-card:hover { border-color: #c8c8c8; }
+        .auto-card-icon {
+            width: 40px; height: 40px; border-radius: 12px; margin: 0 auto 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auto-card-icon.archive { background: var(--bg-base); }
+        .auto-card-icon.tag { background: var(--blue-bg); }
+        .auto-card-icon.sent { background: var(--green-bg); }
+        .auto-card-icon.stats { background: var(--purple-bg); }
+        .auto-card-num { font-size: 24px; font-weight: 700; color: var(--text-default); }
+        .auto-card-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 18px; }
+
+        /* Area C - Rules */
+        .rules-list { display: flex; flex-direction: column; gap: 10px; }
+        .rule-card {
+            background: var(--bg-container); border: 1px solid var(--border-divider);
+            border-radius: 14px; padding: 16px 20px;
+            display: flex; align-items: center; gap: 16px;
+            transition: border-color 0.15s;
+        }
+        .rule-card:hover { border-color: #c8c8c8; }
+        .rule-icon {
+            width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .rule-icon.active-rule { background: var(--success-bg); }
+        .rule-icon.paused-rule { background: var(--bg-base); }
+        .rule-icon.template-rule { background: var(--purple-bg); }
+        .rule-info { flex: 1; min-width: 0; }
+        .rule-name { font-size: 14px; font-weight: 500; color: var(--text-default); }
+        .rule-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .rule-meta { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+        .rule-meta-item { font-size: 11px; color: var(--text-disabled); display: flex; align-items: center; gap: 4px; }
+
+        .rule-toggle {
+            width: 40px; height: 22px; border-radius: 11px; position: relative;
+            cursor: pointer; transition: background 0.2s; flex-shrink: 0; border: none;
+        }
+        .rule-toggle.on { background: var(--primary); }
+        .rule-toggle.off { background: var(--bg-disabled); }
+        .rule-toggle::after {
+            content: ''; position: absolute; top: 2px;
+            width: 18px; height: 18px; border-radius: 50%; background: var(--white);
+            transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .rule-toggle.on::after { left: 20px; }
+        .rule-toggle.off::after { left: 2px; }
+
+        /* Rule templates */
+        .rule-templates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+        .rule-template {
+            background: var(--bg-container); border: 1px dashed var(--border-default);
+            border-radius: 14px; padding: 16px; cursor: pointer;
+            transition: all 0.15s; text-align: center;
+        }
+        .rule-template:hover { border-color: var(--primary); border-style: solid; background: #fafbff; }
+        .rule-template-icon { font-size: 24px; margin-bottom: 8px; }
+        .rule-template-name { font-size: 13px; font-weight: 500; color: var(--text-default); }
+        .rule-template-desc { font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 16px; }
+
+        /* Area D - Chat fallback */
+        .mail-chat-input {
+            border-top: 1px solid var(--border-divider); padding: 16px 32px;
+            background: var(--bg-container); flex-shrink: 0;
+        }
+        .mail-chat-box {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--bg-base); border: 1px solid var(--border-divider);
+            border-radius: 14px; padding: 10px 16px;
+        }
+        .mail-chat-box input {
+            flex: 1; border: none; outline: none; background: transparent;
+            font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-default);
+        }
+        .mail-chat-box input::placeholder { color: var(--text-disabled); }
+        .mail-chat-send {
+            width: 32px; height: 32px; border-radius: 16px; border: none;
+            background: var(--bg-disabled); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s; flex-shrink: 0;
+        }
+        .mail-chat-send.active { background: var(--primary); }
+
+        /* Overlay */
+        .overlay {
+            position: fixed; inset: 0; z-index: 150; display: none;
+        }
+        .overlay.show { display: block; }
+
+        /* Email detail expanded */
+        .email-detail-expanded {
+            display: none; margin-top: 12px; padding: 16px;
+            background: var(--bg-base); border-radius: 10px;
+            border: 1px solid var(--border-divider);
+        }
+        .email-detail-expanded.show { display: block; }
+        .email-detail-original {
+            font-size: 13px; color: var(--text-default); line-height: 22px;
+            white-space: pre-line;
+        }
+        .email-detail-label {
+            font-size: 11px; font-weight: 600; color: var(--text-disabled);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
+        }
+
+        /* Progressive trust banner */
+        .trust-banner {
+            background: linear-gradient(135deg, #f0f5ff 0%, #e8f4fd 100%);
+            border: 1px solid #d6e4ff;
+            border-radius: 14px; padding: 16px 20px; margin-bottom: 24px;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .trust-banner-icon {
+            width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+            background: var(--white); display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(28,100,242,0.1);
+        }
+        .trust-banner-body { flex: 1; }
+        .trust-banner-title { font-size: 14px; font-weight: 600; color: var(--text-default); }
+        .trust-banner-desc { font-size: 13px; color: var(--text-secondary); margin-top: 2px; line-height: 20px; }
+        .trust-banner-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-inner">
+                <div class="sidebar-logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="11" fill="#131825"/>
+                        <circle cx="9" cy="10" r="2" fill="#fff"/>
+                        <circle cx="15" cy="10" r="2" fill="#fff"/>
+                        <path d="M8 15c0 0 2 3 4 3s4-3 4-3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <span class="sidebar-logo-text">Doraemon</span>
+            </div>
+            <div class="sidebar-collapse-btn" title="Collapse sidebar">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <rect x="3.125" y="3.125" width="13.75" height="13.75" rx="2" stroke="#73726e" stroke-width="1.5"/>
+                    <line x1="8.5" y1="3.5" x2="8.5" y2="16.5" stroke="#73726e" stroke-width="1.5"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="sidebar-content">
+            <div class="sidebar-new-chat">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M3.333 3.333h13.334A1.667 1.667 0 0118.333 5v7.5a1.667 1.667 0 01-1.666 1.667H5.833L3.333 16.667V3.333z" stroke="#131825" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>New Chat</span>
+            </div>
+
+            <!-- Expert Agent -->
+            <div class="sidebar-section" style="margin-top: 20px;">
+                <div class="sidebar-section-label">Expert Agent</div>
+                <div class="sidebar-item" data-view="home">
+                    <div class="sidebar-item-icon cs-icon">
+                        <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
+                            <path d="M2.5 4C2.5 2.067 4.067.5 6 .5h2c1.933 0 3.5 1.567 3.5 3.5S9.933 7.5 8 7.5H6C4.067 7.5 2.5 5.933 2.5 4z" fill="#fff"/>
+                        </svg>
+                    </div>
+                    <span class="sidebar-item-text">CS</span>
+                </div>
+                <div class="sidebar-item" data-view="home">
+                    <div class="sidebar-item-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <rect x="2" y="2" width="16" height="16" rx="4" fill="#E8563F"/>
+                            <text x="10" y="14" text-anchor="middle" fill="white" font-size="9" font-weight="600" font-family="Inter">i18n</text>
+                        </svg>
+                    </div>
+                    <span class="sidebar-item-text">i18n</span>
+                </div>
+            </div>
+
+            <!-- Projects -->
+            <div class="sidebar-section" style="margin-top: 16px;">
+                <div class="sidebar-section-header">
+                    <span>Projects</span>
+                    <div class="section-add">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 3v10M3 8h10" stroke="#ababa9" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="sidebar-item" data-view="home">
+                    <div class="sidebar-item-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M2.5 6.667V15a1.667 1.667 0 001.667 1.667h11.666A1.667 1.667 0 0017.5 15V8.333a1.667 1.667 0 00-1.667-1.666H10L8.333 5H4.167A1.667 1.667 0 002.5 6.667z" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span class="sidebar-item-text">Infra Upgrade</span>
+                </div>
+                <div class="sidebar-item" data-view="home">
+                    <div class="sidebar-item-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M2.5 6.667V15a1.667 1.667 0 001.667 1.667h11.666A1.667 1.667 0 0017.5 15V8.333a1.667 1.667 0 00-1.667-1.666H10L8.333 5H4.167A1.667 1.667 0 002.5 6.667z" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span class="sidebar-item-text">Product Launch</span>
+                </div>
+            </div>
+
+            <!-- Today -->
+            <div class="sidebar-section" style="margin-top: 16px;">
+                <div class="sidebar-section-label">Today</div>
+                <div class="sidebar-item" data-view="home">
+                    <span class="sidebar-item-text">AI Assistant Help</span>
+                </div>
+                <div class="sidebar-item" data-view="home">
+                    <span class="sidebar-item-text">Data Analysis Project</span>
+                    <div class="sidebar-item-status">
+                        <svg class="loading-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path d="M6 1a5 5 0 104.33 2.5" stroke="#73726e" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="sidebar-item" data-view="home">
+                    <span class="sidebar-item-text">Project Planning</span>
+                    <div class="sidebar-item-status"><div class="notification-dot"></div></div>
+                </div>
+            </div>
+
+            <!-- Yesterday -->
+            <div class="sidebar-section" style="margin-top: 16px;">
+                <div class="sidebar-section-label">Yesterday</div>
+                <div class="sidebar-item" data-view="home">
+                    <span class="sidebar-item-text">Marketing Campaign Id...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-avatar">
+                <div style="width:40px;height:40px;border-radius:20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;">
+                    <span style="color:#fff;font-size:16px;font-weight:600;">D</span>
+                </div>
+            </div>
+            <div class="sidebar-footer-info">
+                <div class="sidebar-footer-name">David chen</div>
+                <div class="sidebar-footer-role">Data Analyst</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+        <!-- Notification Bell (always visible) -->
+        <div class="notification-bell" id="notifBell">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 18.333a1.667 1.667 0 001.667-1.666H8.333A1.667 1.667 0 0010 18.333zM15 13.333V9.167a5 5 0 00-4.167-4.925V3.333a.833.833 0 10-1.666 0v.909A5 5 0 005 9.167v4.166L3.333 15v.833h13.334V15L15 13.333z" fill="#131825"/>
+            </svg>
+            <div class="notification-badge" id="notifBadge"><span>5</span></div>
+        </div>
+
+        <!-- ===== Notification Panel (第一层：通知带行动) ===== -->
+        <div class="notification-panel" id="notifPanel">
+            <div class="notification-panel-header">
+                <h3>通知中心</h3>
+                <span class="mark-read" id="markAllRead">全部标为已读</span>
+            </div>
+            <div class="notification-list">
+                <div class="notif-card unread">
+                    <div class="notif-card-top">
+                        <div class="notif-card-icon mail">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4l6 4 6-4M2 3h12v10H2V3z" stroke="#722ed1" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div class="notif-card-body">
+                            <div class="notif-card-title">收到 A 出版社监修回复</div>
+                            <div class="notif-card-desc">已自动分析邮件内容并准备感谢回复草稿，确认后即可发送</div>
+                        </div>
+                        <div class="notif-card-time">10 分钟前</div>
+                    </div>
+                    <div class="notif-card-actions">
+                        <button class="notif-btn primary">查看草稿</button>
+                        <button class="notif-btn secondary">直接发送</button>
+                        <button class="notif-btn ghost">忽略</button>
+                    </div>
+                </div>
+                <div class="notif-card unread">
+                    <div class="notif-card-top">
+                        <div class="notif-card-icon warning">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.333l6.667 11.334H1.333L8 1.333z" stroke="#d48806" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 6v3M8 11h.007" stroke="#d48806" stroke-width="1.3" stroke-linecap="round"/></svg>
+                        </div>
+                        <div class="notif-card-body">
+                            <div class="notif-card-title">XX 监修物品已逾期 3 天</div>
+                            <div class="notif-card-desc">已自动准备催促邮件草稿，包含逾期明细和跟进要求</div>
+                        </div>
+                        <div class="notif-card-time">30 分钟前</div>
+                    </div>
+                    <div class="notif-card-actions">
+                        <button class="notif-btn primary">查看草稿</button>
+                        <button class="notif-btn ghost">忽略</button>
+                    </div>
+                </div>
+                <div class="notif-card unread">
+                    <div class="notif-card-top">
+                        <div class="notif-card-icon warning">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#d48806" stroke-width="1.3"/><path d="M8 4.667V8l2.333 1.333" stroke="#d48806" stroke-width="1.3" stroke-linecap="round"/></svg>
+                        </div>
+                        <div class="notif-card-body">
+                            <div class="notif-card-title">客户 B 的邮件等了 48 小时未回复</div>
+                            <div class="notif-card-desc">该客户上周有 2 封邮件均在 24h 内回复，本次异常延迟</div>
+                        </div>
+                        <div class="notif-card-time">2 小时前</div>
+                    </div>
+                    <div class="notif-card-actions">
+                        <button class="notif-btn primary">去处理</button>
+                        <button class="notif-btn ghost">稍后提醒</button>
+                    </div>
+                </div>
+                <div class="notif-card unread">
+                    <div class="notif-card-top">
+                        <div class="notif-card-icon insight">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#1890ff" stroke-width="1.3"/><path d="M8 5.333v5.334M5.333 8h5.334" stroke="#1890ff" stroke-width="1.3" stroke-linecap="round"/></svg>
+                        </div>
+                        <div class="notif-card-body">
+                            <div class="notif-card-title">AI 发现行为模式</div>
+                            <div class="notif-card-desc">你每周花约 2 小时处理报销邮件。要不要我以后自动提取金额、每周五汇总？</div>
+                        </div>
+                        <div class="notif-card-time">今天 09:00</div>
+                    </div>
+                    <div class="notif-card-actions">
+                        <button class="notif-btn primary">开启</button>
+                        <button class="notif-btn ghost">不需要</button>
+                    </div>
+                </div>
+                <div class="notif-card">
+                    <div class="notif-card-top">
+                        <div class="notif-card-icon success">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#52c41a" stroke-width="1.3"/><path d="M5.333 8l2 2 3.334-3.333" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div class="notif-card-body">
+                            <div class="notif-card-title">已自动归档 12 封系统通知</div>
+                            <div class="notif-card-desc">包含 OA 系统通知 ×8、订阅邮件 ×4</div>
+                        </div>
+                        <div class="notif-card-time">昨天 18:30</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VIEW: HOME (default) ===== -->
+        <div class="view-home" id="viewHome">
+            <div class="welcome-section">
+                <h1 class="welcome-title">Good Afternoon, David</h1>
+                <p class="welcome-subtitle">Step Into a Smarter, More Efficient Way of Working</p>
+            </div>
+            <div class="mode-toggle">
+                <button class="mode-btn active" data-mode="general">General</button>
+                <button class="mode-btn" data-mode="analyst">Data Analyst</button>
+            </div>
+            <div class="input-container">
+                <div class="input-area">
+                    <textarea rows="2" placeholder="Create an expense claim for $120..."></textarea>
+                </div>
+                <div class="input-actions">
+                    <div class="input-tools">
+                        <button class="input-tool-btn" title="Attach file">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.071 9.428l-7.071 7.071a5 5 0 01-7.071-7.071l7.07-7.071a3.333 3.333 0 014.715 4.714l-7.071 7.072a1.667 1.667 0 01-2.357-2.357l6.364-6.364" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <button class="input-tool-btn" title="Mention">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13.333 10a3.333 3.333 0 11-6.666 0 3.333 3.333 0 016.666 0z" stroke="#73726e" stroke-width="1.5"/><path d="M13.333 10v1.667a2.5 2.5 0 005 0V10a8.333 8.333 0 10-3.333 6.667" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                    </div>
+                    <button class="send-btn" id="sendBtn" title="Send">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 15.833V4.167M5.833 8.333L10 4.167l4.167 4.166" stroke="#73726e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="work-overview">
+                <span class="work-overview-label">Work Overview</span>
+                <div class="work-overview-columns">
+                    <div class="work-column">
+                        <div class="work-column-header">
+                            <div class="work-column-icon tasks"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 18.333a8.333 8.333 0 100-16.666 8.333 8.333 0 000 16.666z" stroke="#d48806" stroke-width="1.5"/><path d="M7.5 10l1.667 1.667L12.5 8.333" stroke="#d48806" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                            <span class="work-column-title">Tasks</span>
+                        </div>
+                        <div class="work-card"><div class="work-card-info"><span class="work-card-title">Pending Approval Request</span><span class="work-card-time">5/19, 09:00 AM</span></div><div class="work-card-action"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16.667 12.5a1.667 1.667 0 01-1.667 1.667H5L1.667 17.5V3.333A1.667 1.667 0 013.333 1.667h11.667a1.667 1.667 0 011.667 1.666v9.167z" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+                        <div class="work-card"><div class="work-card-info"><span class="work-card-title">System Maintenance</span><span class="work-card-time">5/19, 09:00 AM</span></div><div class="work-card-action"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16.667 12.5a1.667 1.667 0 01-1.667 1.667H5L1.667 17.5V3.333A1.667 1.667 0 013.333 1.667h11.667a1.667 1.667 0 011.667 1.666v9.167z" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+                    </div>
+                    <div class="work-column">
+                        <div class="work-column-header">
+                            <div class="work-column-icon plans"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M11.667 1.667H5A1.667 1.667 0 003.333 3.333v13.334A1.667 1.667 0 005 18.333h10a1.667 1.667 0 001.667-1.666V7.5l-5-5.833z" stroke="#1890ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 12.5l1.667 1.667L12.5 10" stroke="#1890ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                            <span class="work-column-title">Plans</span>
+                        </div>
+                        <div class="work-card"><div class="work-card-info"><span class="work-card-title">Weekly Work Report</span><span class="work-card-time">5/19, 09:00 AM</span></div><div class="work-card-action"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16.667 12.5a1.667 1.667 0 01-1.667 1.667H5L1.667 17.5V3.333A1.667 1.667 0 013.333 1.667h11.667a1.667 1.667 0 011.667 1.666v9.167z" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+                        <div class="work-card"><div class="work-card-info"><span class="work-card-title">Daily Team Update</span><span class="work-card-time">5/19, 09:00 AM</span></div><div class="work-card-action"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16.667 12.5a1.667 1.667 0 01-1.667 1.667H5L1.667 17.5V3.333A1.667 1.667 0 013.333 1.667h11.667a1.667 1.667 0 011.667 1.666v9.167z" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+                    </div>
+                    <div class="work-column">
+                        <div class="work-column-header">
+                            <div class="work-column-icon schedule"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15.833 3.333H4.167A1.667 1.667 0 002.5 5v11.667a1.667 1.667 0 001.667 1.666h11.666a1.667 1.667 0 001.667-1.666V5a1.667 1.667 0 00-1.667-1.667zM13.333 1.667v3.333M6.667 1.667v3.333M2.5 8.333h15" stroke="#52c41a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                            <span class="work-column-title">Schedule</span>
+                        </div>
+                        <div class="work-card"><div class="work-card-info"><span class="work-card-title">Product Team Meeting</span><span class="work-card-time">5/19, 09:00 AM</span></div><div class="work-card-action"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16.667 12.5a1.667 1.667 0 01-1.667 1.667H5L1.667 17.5V3.333A1.667 1.667 0 013.333 1.667h11.667a1.667 1.667 0 011.667 1.666v9.167z" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+                        <div class="work-card"><div class="work-card-info"><span class="work-card-title">Client Presentation</span><span class="work-card-time">5/19, 09:00 AM</span></div><div class="work-card-action"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16.667 12.5a1.667 1.667 0 01-1.667 1.667H5L1.667 17.5V3.333A1.667 1.667 0 013.333 1.667h11.667a1.667 1.667 0 011.667 1.666v9.167z" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VIEW: MAIL TASK BOARD (邮件任务台 - 第二层) ===== -->
+        <div class="view-mail" id="viewMail">
+            <!-- Header -->
+            <div class="mail-header">
+                <div class="mail-header-left">
+                    <h2>邮件助手</h2>
+                    <div class="mail-header-tabs">
+                        <button class="mail-tab active" data-tab="action">需要处理</button>
+                        <button class="mail-tab" data-tab="auto">AI 已处理</button>
+                        <button class="mail-tab" data-tab="rules">自动化规则</button>
+                    </div>
+                </div>
+                <div class="mail-stats">
+                    <div class="mail-stat"><span class="mail-stat-num">23</span> 今日收到</div>
+                    <div class="mail-stat"><span class="mail-stat-num success">18</span> AI 已处理</div>
+                    <div class="mail-stat"><span class="mail-stat-num highlight">5</span> 需你关注</div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="mail-body" id="mailBody">
+
+                <!-- Tab: 需要处理 (Area A) -->
+                <div class="mail-tab-content" id="tabAction">
+                    <!-- Progressive trust banner (第三层：渐进式接管) -->
+                    <div class="trust-banner">
+                        <div class="trust-banner-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#1C64F2" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="#1C64F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div class="trust-banner-body">
+                            <div class="trust-banner-title">AI 提权建议</div>
+                            <div class="trust-banner-desc">你过去 10 次都直接发送了感谢邮件草稿，以后这类邮件要不要我直接发送，不再打扰你？</div>
+                        </div>
+                        <div class="trust-banner-actions">
+                            <button class="email-btn primary" onclick="this.closest('.trust-banner').style.display='none'">同意</button>
+                            <button class="email-btn ghost" onclick="this.closest('.trust-banner').style.display='none'">暂不</button>
+                        </div>
+                    </div>
+
+                    <div class="mail-section">
+                        <div class="mail-section-header">
+                            <div class="mail-section-title">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 18.333a8.333 8.333 0 100-16.666 8.333 8.333 0 000 16.666z" stroke="#f5222d" stroke-width="1.5"/><path d="M10 6.667V10l2.5 1.667" stroke="#f5222d" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                待回复邮件
+                                <span class="mail-section-count">5</span>
+                            </div>
+                            <span class="mail-section-action" id="batchSendBtn">批量确认发送</span>
+                        </div>
+
+                        <!-- Email 1 -->
+                        <div class="email-card" data-email-id="1">
+                            <div class="email-card-top">
+                                <div class="email-card-left">
+                                    <div class="email-card-meta">
+                                        <span class="email-priority urgent">紧急</span>
+                                        <span class="email-sender">田中太郎 (A 出版社)</span>
+                                        <span class="email-time">今天 14:23</span>
+                                    </div>
+                                    <div class="email-subject">关于「天剑」角色监修第 3 轮反馈</div>
+                                    <div class="email-summary">对方确认了 5 项修改中的 3 项，剩余 2 项提出新建议，需要在本周五前回复</div>
+                                </div>
+                            </div>
+                            <div class="email-draft-preview">
+                                <div class="email-draft-label">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#1C64F2" stroke-width="1.2"/><path d="M5 7l1.5 1.5L9 5.5" stroke="#1C64F2" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    AI 已准备草稿
+                                </div>
+                                <div class="email-draft-text">田中様、いつもお世話になっております。ご確認いただきありがとうございます。ご提案いただいた残り 2 点について、チームで検討の上、金曜日までにご返答いたします...</div>
+                            </div>
+                            <div class="email-card-actions">
+                                <button class="email-btn primary">编辑回复</button>
+                                <button class="email-btn outline">直接发送</button>
+                                <button class="email-btn ghost" onclick="toggleEmailDetail(this)">展开原文</button>
+                            </div>
+                            <div class="email-detail-expanded">
+                                <div class="email-detail-label">原始邮件</div>
+                                <div class="email-detail-original">お世話になっております。A出版社の田中です。
+
+「天剣」キャラクター監修第3回のフィードバックについてご連絡いたします。
+
+■ 確認済み（3件）
+1. メインキャラクターの色調整 → 承認
+2. サブキャラクターのポーズ変更 → 承認
+3. 背景エフェクトの修正 → 承認
+
+■ 追加提案（2件）
+4. メインキャラクターの表情 → 笑顔バージョンも追加してはいかがでしょうか
+5. 武器のディテール → もう少し光沢を加えることを提案します
+
+金曜日までにご返答いただけますと幸いです。
+
+よろしくお願いいたします。
+田中太郎</div>
+                            </div>
+                        </div>
+
+                        <!-- Email 2 -->
+                        <div class="email-card" data-email-id="2">
+                            <div class="email-card-top">
+                                <div class="email-card-left">
+                                    <div class="email-card-meta">
+                                        <span class="email-priority urgent">紧急</span>
+                                        <span class="email-sender">佐藤花子 (B 工作室)</span>
+                                        <span class="email-time">今天 11:05</span>
+                                    </div>
+                                    <div class="email-subject">版号申请材料补充通知</div>
+                                    <div class="email-summary">需要补充 3 份材料：游戏截图、内容评级说明、运营方案，截止日期为下周一</div>
+                                </div>
+                            </div>
+                            <div class="email-draft-preview">
+                                <div class="email-draft-label">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#1C64F2" stroke-width="1.2"/><path d="M5 7l1.5 1.5L9 5.5" stroke="#1C64F2" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    AI 已准备草稿
+                                </div>
+                                <div class="email-draft-text">佐藤様、ご連絡ありがとうございます。ご指摘の 3 点の補足資料について、来週月曜日の期限までにご用意いたします。現在チームで準備を進めておりますので...</div>
+                            </div>
+                            <div class="email-card-actions">
+                                <button class="email-btn primary">编辑回复</button>
+                                <button class="email-btn outline">直接发送</button>
+                                <button class="email-btn ghost" onclick="toggleEmailDetail(this)">展开原文</button>
+                            </div>
+                            <div class="email-detail-expanded">
+                                <div class="email-detail-label">原始邮件</div>
+                                <div class="email-detail-original">お世話になっております。B工作室の佐藤です。
+
+版号申請の件ですが、以下3点の補足資料が必要です。
+
+1. ゲーム内スクリーンショット（10枚以上）
+2. コンテンツレーティング説明書
+3. 運営計画書
+
+来週月曜日までにご提出をお願いいたします。</div>
+                            </div>
+                        </div>
+
+                        <!-- Email 3 -->
+                        <div class="email-card" data-email-id="3">
+                            <div class="email-card-top">
+                                <div class="email-card-left">
+                                    <div class="email-card-meta">
+                                        <span class="email-priority normal">一般</span>
+                                        <span class="email-sender">鈴木一郎 (C 游戏)</span>
+                                        <span class="email-time">今天 09:40</span>
+                                    </div>
+                                    <div class="email-subject">Q2 合作报价确认</div>
+                                    <div class="email-summary">发来了 Q2 季度合作方案报价单，总金额 ¥2,400,000，需确认后签署合同</div>
+                                </div>
+                            </div>
+                            <div class="email-draft-preview">
+                                <div class="email-draft-label">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#1C64F2" stroke-width="1.2"/><path d="M5 7l1.5 1.5L9 5.5" stroke="#1C64F2" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    AI 已准备草稿
+                                </div>
+                                <div class="email-draft-text">鈴木様、お見積りをいただきありがとうございます。内容を確認の上、社内で検討いたします。来週中にご返答させていただきます...</div>
+                            </div>
+                            <div class="email-card-actions">
+                                <button class="email-btn primary">编辑回复</button>
+                                <button class="email-btn outline">直接发送</button>
+                                <button class="email-btn ghost" onclick="toggleEmailDetail(this)">展开原文</button>
+                            </div>
+                            <div class="email-detail-expanded">
+                                <div class="email-detail-label">原始邮件</div>
+                                <div class="email-detail-original">お世話になっております。C游戏の鈴木です。
+
+Q2の提携プランのお見積りをお送りいたします。
+合計金額：¥2,400,000（税別）
+
+詳細は添付のPDFをご確認ください。
+ご確認後、契約書の締結をお願いいたします。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: AI 已处理 (Area B) -->
+                <div class="mail-tab-content" id="tabAuto" style="display:none;">
+                    <div class="mail-section">
+                        <div class="mail-section-header">
+                            <div class="mail-section-title">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#52c41a" stroke-width="1.5"/><path d="M7 10l2 2 4-4" stroke="#52c41a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                今日 AI 自动处理
+                            </div>
+                        </div>
+                        <div class="auto-processed-grid">
+                            <div class="auto-card">
+                                <div class="auto-card-icon archive">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2.5 5h15v2.5h-15V5z" stroke="#73726e" stroke-width="1.3"/><path d="M3.333 7.5V15a1.667 1.667 0 001.667 1.667h10A1.667 1.667 0 0016.667 15V7.5" stroke="#73726e" stroke-width="1.3"/><path d="M8.333 10h3.334" stroke="#73726e" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                </div>
+                                <div class="auto-card-num">12</div>
+                                <div class="auto-card-label">已归档<br>低价值邮件</div>
+                            </div>
+                            <div class="auto-card">
+                                <div class="auto-card-icon tag">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.333 10.833V4.167A.833.833 0 014.167 3.333h6.666l5.834 5.834-6.667 6.666-6.667-6.666z" stroke="#1890ff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1" fill="#1890ff"/></svg>
+                                </div>
+                                <div class="auto-card-num">8</div>
+                                <div class="auto-card-label">已自动打标签<br>（出版社 / 监修）</div>
+                            </div>
+                            <div class="auto-card">
+                                <div class="auto-card-icon sent">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2.5 10l7.5 5V5L2.5 10z" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 10h7.5" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                </div>
+                                <div class="auto-card-num">3</div>
+                                <div class="auto-card-label">已自动发送<br>（感谢回复）</div>
+                            </div>
+                            <div class="auto-card">
+                                <div class="auto-card-icon stats">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.333 15h3.334V8.333H3.333V15zM8.333 15h3.334V5H8.333v10zM13.333 15h3.334v-5h-3.334v5z" stroke="#722ed1" stroke-width="1.3"/></svg>
+                                </div>
+                                <div class="auto-card-num">23</div>
+                                <div class="auto-card-label">今日收件总数<br>AI 处理率 78%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mail-section">
+                        <div class="mail-section-header">
+                            <div class="mail-section-title">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2.5v15M5 5l5-2.5 5 2.5" stroke="#73726e" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                处理详情
+                            </div>
+                        </div>
+                        <div class="rules-list">
+                            <div class="rule-card">
+                                <div class="rule-icon" style="background: var(--bg-base);">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4h14v2H2V4z" stroke="#73726e" stroke-width="1.2"/><path d="M3 6v8a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0015 14V6" stroke="#73726e" stroke-width="1.2"/></svg>
+                                </div>
+                                <div class="rule-info">
+                                    <div class="rule-name">系统通知 ×5 → 已归档</div>
+                                    <div class="rule-desc">OA 系统审批通知、服务器监控告警</div>
+                                </div>
+                                <span style="font-size:12px;color:var(--text-disabled);">14:30</span>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon" style="background: var(--blue-bg);">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9.75V3.75a.75.75 0 01.75-.75h6l5.25 5.25-6 6-6-6z" stroke="#1890ff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </div>
+                                <div class="rule-info">
+                                    <div class="rule-name">出版社邮件 ×3 → 已标记「监修」</div>
+                                    <div class="rule-desc">来自 A 出版社、B 出版社的监修相关邮件</div>
+                                </div>
+                                <span style="font-size:12px;color:var(--text-disabled);">13:15</span>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon" style="background: var(--success-bg);">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.25 9l6.75 4.5V4.5L2.25 9z" stroke="#52c41a" stroke-width="1.2"/><path d="M9 9h6.75" stroke="#52c41a" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                </div>
+                                <div class="rule-info">
+                                    <div class="rule-name">感谢回复 ×3 → 已自动发送</div>
+                                    <div class="rule-desc">你已授权 AI 自动发送此类回复（第 4 周提权生效）</div>
+                                </div>
+                                <span style="font-size:12px;color:var(--text-disabled);">11:00</span>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon" style="background: var(--bg-base);">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4h14v2H2V4z" stroke="#73726e" stroke-width="1.2"/><path d="M3 6v8a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0015 14V6" stroke="#73726e" stroke-width="1.2"/></svg>
+                                </div>
+                                <div class="rule-info">
+                                    <div class="rule-name">订阅邮件 ×4 → 已归档</div>
+                                    <div class="rule-desc">Newsletter、营销推广类邮件</div>
+                                </div>
+                                <span style="font-size:12px;color:var(--text-disabled);">10:30</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: 自动化规则 (Area C) -->
+                <div class="mail-tab-content" id="tabRules" style="display:none;">
+                    <div class="mail-section">
+                        <div class="mail-section-header">
+                            <div class="mail-section-title">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2.5l2.5 5 5.5.833-4 3.834 1 5.5L10 15l-5 2.667 1-5.5-4-3.834 5.5-.833L10 2.5z" stroke="#722ed1" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                运行中的规则
+                            </div>
+                        </div>
+                        <div class="rules-list">
+                            <div class="rule-card">
+                                <div class="rule-icon active-rule">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#52c41a" stroke-width="1.3"/><path d="M6 9l2 2 4-4" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </div>
+                                <div class="rule-info">
+                                    <div class="rule-name">未回复自动提醒</div>
+                                    <div class="rule-desc">已发邮件超过 48 小时未收到回复时提醒</div>
+                                    <div class="rule-meta">
+                                        <span class="rule-meta-item">
+                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#ababa9" stroke-width="1"/><path d="M6 3v3l2 1" stroke="#ababa9" stroke-width="1" stroke-linecap="round"/></svg>
+                                            每 6 小时检查
+                                        </span>
+                                        <span class="rule-meta-item">上次触发: 今天 12:00</span>
+                                    </div>
+                                </div>
+                                <button class="rule-toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon active-rule">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#52c41a" stroke-width="1.3"/><path d="M6 9l2 2 4-4" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </div>
+                                <div class="rule-info">
+                                    <div class="rule-name">系统通知自动归档</div>
+                                    <div class="rule-desc">来自 OA 系统、监控平台的通知自动归档</div>
+                                    <div class="rule-meta">
+                                        <span class="rule-meta-item">
+                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#ababa9" stroke-width="1"/><path d="M6 3v3l2 1" stroke="#ababa9" stroke-width="1" stroke-linecap="round"/></svg>
+                                            实时触发
+                                        </span>
+                                        <span class="rule-meta-item">上次触发: 今天 14:30</span>
+                                    </div>
+                                </div>
+                                <button class="rule-toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon active-rule">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#52c41a" stroke-width="1.3"/><path d="M6 9l2 2 4-4" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </div>
+                                <div class="rule-info">
+                                    <div class="rule-name">感谢邮件自动发送</div>
+                                    <div class="rule-desc">收到监修确认回复后，自动发送感谢邮件（已提权）</div>
+                                    <div class="rule-meta">
+                                        <span class="rule-meta-item">
+                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#ababa9" stroke-width="1"/><path d="M6 3v3l2 1" stroke="#ababa9" stroke-width="1" stroke-linecap="round"/></svg>
+                                            实时触发
+                                        </span>
+                                        <span class="rule-meta-item">上次触发: 今天 11:00</span>
+                                    </div>
+                                </div>
+                                <button class="rule-toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon paused-rule">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#ababa9" stroke-width="1.3"/><path d="M7.5 6.5v5M10.5 6.5v5" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                </div>
+                                <div class="rule-info">
+                                    <div class="rule-name">每周五报销邮件汇总</div>
+                                    <div class="rule-desc">自动提取金额并汇总为报告（已暂停）</div>
+                                    <div class="rule-meta">
+                                        <span class="rule-meta-item">
+                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#ababa9" stroke-width="1"/><path d="M6 3v3l2 1" stroke="#ababa9" stroke-width="1" stroke-linecap="round"/></svg>
+                                            每周五 17:00
+                                        </span>
+                                        <span class="rule-meta-item" style="color:var(--warning);">已暂停</span>
+                                    </div>
+                                </div>
+                                <button class="rule-toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mail-section">
+                        <div class="mail-section-header">
+                            <div class="mail-section-title">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2.5v3.333M10 14.167v3.333M3.75 10H.417M19.583 10h-3.333M5.167 5.167L2.833 2.833M17.167 17.167l-2.334-2.334M5.167 14.833L2.833 17.167M17.167 2.833l-2.334 2.334" stroke="#722ed1" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                推荐规则模板
+                            </div>
+                        </div>
+                        <div class="rule-templates">
+                            <div class="rule-template" onclick="alert('已开启「逾期监修催促」规则')">
+                                <div class="rule-template-icon">⏰</div>
+                                <div class="rule-template-name">逾期监修自动催促</div>
+                                <div class="rule-template-desc">监修物品逾期后自动生成催促邮件草稿并通知</div>
+                            </div>
+                            <div class="rule-template" onclick="alert('已开启「订阅清理」规则')">
+                                <div class="rule-template-icon">🧹</div>
+                                <div class="rule-template-name">订阅邮件自动清理</div>
+                                <div class="rule-template-desc">Newsletter 和营销邮件自动归档，保持收件箱清洁</div>
+                            </div>
+                            <div class="rule-template" onclick="alert('已开启「截止日期提醒」规则')">
+                                <div class="rule-template-icon">📅</div>
+                                <div class="rule-template-name">截止日期自动提醒</div>
+                                <div class="rule-template-desc">识别邮件中的截止日期，到期前 24h 自动提醒</div>
+                            </div>
+                            <div class="rule-template" onclick="alert('已开启「VIP 邮件置顶」规则')">
+                                <div class="rule-template-icon">⭐</div>
+                                <div class="rule-template-name">VIP 联系人优先</div>
+                                <div class="rule-template-desc">重要客户和合作方邮件自动标记为高优先级</div>
+                            </div>
+                            <div class="rule-template" onclick="alert('已开启「合同金额提取」规则')">
+                                <div class="rule-template-icon">💰</div>
+                                <div class="rule-template-name">合同金额自动提取</div>
+                                <div class="rule-template-desc">自动从报价/合同邮件中提取金额并汇总</div>
+                            </div>
+                            <div class="rule-template" onclick="alert('已开启「周报自动生成」规则')">
+                                <div class="rule-template-icon">📊</div>
+                                <div class="rule-template-name">邮件周报自动生成</div>
+                                <div class="rule-template-desc">每周一自动汇总上周邮件处理情况</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Area D: Chat fallback (对话入口) -->
+            <div class="mail-chat-input">
+                <div class="mail-chat-box">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16.667 12.5a1.667 1.667 0 01-1.667 1.667H5L1.667 17.5V3.333A1.667 1.667 0 013.333 1.667h11.667a1.667 1.667 0 011.667 1.666v9.167z" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <input type="text" placeholder="对 AI 说：帮我把过去三个月和 A 出版社的邮件整理成时间线..." id="mailChatInput">
+                    <button class="mail-chat-send" id="mailChatSend">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 12.667V3.333M4.667 6.667L8 3.333l3.333 3.334" stroke="#73726e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay"></div>
+
+<script>
+    // View switching
+    const viewHome = document.getElementById('viewHome');
+    const viewMail = document.getElementById('viewMail');
+    const sidebarItems = document.querySelectorAll('.sidebar-item[data-view]');
+
+    function switchView(viewName) {
+        viewHome.classList.toggle('hidden', viewName !== 'home');
+        viewMail.classList.toggle('active', viewName === 'mail');
+        sidebarItems.forEach(item => {
+            item.classList.toggle('active', item.dataset.view === viewName && item.classList.contains('active'));
+        });
+    }
+
+    sidebarItems.forEach(item => {
+        item.addEventListener('click', () => {
+            sidebarItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            switchView(item.dataset.view);
+        });
+    });
+
+    // Mode toggle
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    // Home send button
+    const textarea = document.querySelector('.input-area textarea');
+    const sendBtn = document.getElementById('sendBtn');
+    if (textarea && sendBtn) {
+        textarea.addEventListener('input', () => {
+            sendBtn.classList.toggle('active', textarea.value.trim().length > 0);
+        });
+    }
+
+    // Mail chat input
+    const mailChatInput = document.getElementById('mailChatInput');
+    const mailChatSend = document.getElementById('mailChatSend');
+    if (mailChatInput && mailChatSend) {
+        mailChatInput.addEventListener('input', () => {
+            mailChatSend.classList.toggle('active', mailChatInput.value.trim().length > 0);
+        });
+    }
+
+    // Notification panel
+    const notifBell = document.getElementById('notifBell');
+    const notifPanel = document.getElementById('notifPanel');
+    const overlay = document.getElementById('overlay');
+
+    notifBell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notifPanel.classList.toggle('show');
+        overlay.classList.toggle('show', notifPanel.classList.contains('show'));
+    });
+
+    overlay.addEventListener('click', () => {
+        notifPanel.classList.remove('show');
+        overlay.classList.remove('show');
+    });
+
+    document.getElementById('markAllRead').addEventListener('click', () => {
+        document.querySelectorAll('.notif-card.unread').forEach(card => card.classList.remove('unread'));
+        document.getElementById('notifBadge').style.display = 'none';
+    });
+
+    // Mail tabs
+    document.querySelectorAll('.mail-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.mail-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.mail-tab-content').forEach(c => c.style.display = 'none');
+            const targetId = {action: 'tabAction', auto: 'tabAuto', rules: 'tabRules'}[tab.dataset.tab];
+            document.getElementById(targetId).style.display = 'block';
+        });
+    });
+
+    // Email detail expand/collapse
+    function toggleEmailDetail(btn) {
+        const card = btn.closest('.email-card');
+        const detail = card.querySelector('.email-detail-expanded');
+        detail.classList.toggle('show');
+        btn.textContent = detail.classList.contains('show') ? '收起原文' : '展开原文';
+    }
+
+    // Batch send confirmation
+    document.getElementById('batchSendBtn').addEventListener('click', () => {
+        if (confirm('确认批量发送所有 AI 准备好的草稿？')) {
+            alert('已发送 5 封邮件');
+        }
+    });
+</script>
+</body>
+</html>
