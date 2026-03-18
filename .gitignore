@@ -1,3 +1,9 @@
 .DS_Store
 *.swp
 *.swo
+
+# PRD & internal docs
+参考PRD.md
+消息中心优化PRD_Sprint43.md
+消息中心优化PRD_v2.md
+邮件工具优化.md

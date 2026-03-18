@@ -185,76 +185,6 @@
         .view-home { display: flex; flex-direction: column; align-items: center; width: 100%; }
         .view-home.hidden { display: none; }
 
-        .notification-bell {
-            position: fixed; top: 16px; right: 16px; z-index: 100;
-            width: 32px; height: 32px;
-            display: flex; align-items: center; justify-content: center;
-            padding: 6px; border-radius: 16px; cursor: pointer; transition: background 0.15s;
-        }
-        .notification-bell:hover { background: #f0f0f0; }
-        .notification-badge {
-            position: absolute; top: 0; right: -3px;
-            min-width: 19px; height: 12px;
-            background: var(--error-base); border: 1px solid var(--bg-container); border-radius: 7px;
-            display: flex; align-items: center; justify-content: center; padding: 0 3px;
-        }
-        .notification-badge span { font-size: 10px; font-weight: 400; line-height: 10px; color: var(--white); }
-
-        /* Notification Panel */
-        .notification-panel {
-            position: fixed; top: 52px; right: 16px; z-index: 200;
-            width: 420px; max-height: 560px;
-            background: var(--bg-container);
-            border: 1px solid var(--border-divider);
-            border-radius: 16px;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
-            display: none; flex-direction: column;
-        }
-        .notification-panel.show { display: flex; }
-        .notification-panel-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 20px; border-bottom: 1px solid var(--border-divider);
-        }
-        .notification-panel-header h3 { font-size: 16px; font-weight: 600; }
-        .notification-panel-header .mark-read { font-size: 12px; color: var(--primary); cursor: pointer; }
-        .notification-panel-header .mark-read:hover { text-decoration: underline; }
-
-        .notification-list { flex: 1; overflow-y: auto; padding: 8px 12px; }
-        .notification-list::-webkit-scrollbar { width: 4px; }
-        .notification-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
-
-        .notif-card {
-            padding: 14px 16px; border-radius: 12px;
-            margin-bottom: 6px; cursor: pointer; transition: background 0.15s;
-            border-left: 3px solid transparent;
-        }
-        .notif-card:hover { background: var(--bg-hover); }
-        .notif-card.unread { background: #f0f5ff; border-left-color: var(--primary); }
-        .notif-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-        .notif-card-icon {
-            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .notif-card-icon.mail { background: var(--purple-bg); }
-        .notif-card-icon.warning { background: var(--warning-bg); }
-        .notif-card-icon.insight { background: var(--blue-bg); }
-        .notif-card-icon.success { background: var(--success-bg); }
-        .notif-card-body { flex: 1; min-width: 0; }
-        .notif-card-title { font-size: 13px; font-weight: 500; line-height: 20px; color: var(--text-default); }
-        .notif-card-desc { font-size: 12px; line-height: 18px; color: var(--text-secondary); margin-top: 2px; }
-        .notif-card-time { font-size: 11px; color: var(--text-disabled); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
-        .notif-card-actions { display: flex; gap: 8px; margin-top: 10px; }
-        .notif-btn {
-            padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 500;
-            cursor: pointer; border: none; transition: all 0.15s; font-family: 'Inter', sans-serif;
-        }
-        .notif-btn.primary { background: var(--primary); color: var(--white); }
-        .notif-btn.primary:hover { background: var(--primary-hover); }
-        .notif-btn.secondary { background: var(--bg-active); color: var(--text-default); }
-        .notif-btn.secondary:hover { background: #e0e0e0; }
-        .notif-btn.ghost { background: transparent; color: var(--text-secondary); }
-        .notif-btn.ghost:hover { background: var(--bg-active); }
-
         /* Welcome */
         .welcome-section {
             display: flex; flex-direction: column; align-items: center;
@@ -692,101 +622,6 @@
 
     <!-- ===== MAIN CONTENT ===== -->
     <main class="main-content">
-
-        <!-- Notification Bell (always visible) -->
-        <div class="notification-bell" id="notifBell">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 18.333a1.667 1.667 0 001.667-1.666H8.333A1.667 1.667 0 0010 18.333zM15 13.333V9.167a5 5 0 00-4.167-4.925V3.333a.833.833 0 10-1.666 0v.909A5 5 0 005 9.167v4.166L3.333 15v.833h13.334V15L15 13.333z" fill="#131825"/>
-            </svg>
-            <div class="notification-badge" id="notifBadge"><span>5</span></div>
-        </div>
-
-        <!-- ===== Notification Panel (第一层：通知带行动) ===== -->
-        <div class="notification-panel" id="notifPanel">
-            <div class="notification-panel-header">
-                <h3>通知中心</h3>
-                <span class="mark-read" id="markAllRead">全部标为已读</span>
-            </div>
-            <div class="notification-list">
-                <div class="notif-card unread">
-                    <div class="notif-card-top">
-                        <div class="notif-card-icon mail">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4l6 4 6-4M2 3h12v10H2V3z" stroke="#722ed1" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </div>
-                        <div class="notif-card-body">
-                            <div class="notif-card-title">收到 A 出版社监修回复</div>
-                            <div class="notif-card-desc">已自动分析邮件内容并准备感谢回复草稿，确认后即可发送</div>
-                        </div>
-                        <div class="notif-card-time">10 分钟前</div>
-                    </div>
-                    <div class="notif-card-actions">
-                        <button class="notif-btn primary">查看草稿</button>
-                        <button class="notif-btn secondary">直接发送</button>
-                        <button class="notif-btn ghost">忽略</button>
-                    </div>
-                </div>
-                <div class="notif-card unread">
-                    <div class="notif-card-top">
-                        <div class="notif-card-icon warning">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.333l6.667 11.334H1.333L8 1.333z" stroke="#d48806" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 6v3M8 11h.007" stroke="#d48806" stroke-width="1.3" stroke-linecap="round"/></svg>
-                        </div>
-                        <div class="notif-card-body">
-                            <div class="notif-card-title">XX 监修物品已逾期 3 天</div>
-                            <div class="notif-card-desc">已自动准备催促邮件草稿，包含逾期明细和跟进要求</div>
-                        </div>
-                        <div class="notif-card-time">30 分钟前</div>
-                    </div>
-                    <div class="notif-card-actions">
-                        <button class="notif-btn primary">查看草稿</button>
-                        <button class="notif-btn ghost">忽略</button>
-                    </div>
-                </div>
-                <div class="notif-card unread">
-                    <div class="notif-card-top">
-                        <div class="notif-card-icon warning">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#d48806" stroke-width="1.3"/><path d="M8 4.667V8l2.333 1.333" stroke="#d48806" stroke-width="1.3" stroke-linecap="round"/></svg>
-                        </div>
-                        <div class="notif-card-body">
-                            <div class="notif-card-title">客户 B 的邮件等了 48 小时未回复</div>
-                            <div class="notif-card-desc">该客户上周有 2 封邮件均在 24h 内回复，本次异常延迟</div>
-                        </div>
-                        <div class="notif-card-time">2 小时前</div>
-                    </div>
-                    <div class="notif-card-actions">
-                        <button class="notif-btn primary">去处理</button>
-                        <button class="notif-btn ghost">稍后提醒</button>
-                    </div>
-                </div>
-                <div class="notif-card unread">
-                    <div class="notif-card-top">
-                        <div class="notif-card-icon insight">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#1890ff" stroke-width="1.3"/><path d="M8 5.333v5.334M5.333 8h5.334" stroke="#1890ff" stroke-width="1.3" stroke-linecap="round"/></svg>
-                        </div>
-                        <div class="notif-card-body">
-                            <div class="notif-card-title">AI 发现行为模式</div>
-                            <div class="notif-card-desc">你每周花约 2 小时处理报销邮件。要不要我以后自动提取金额、每周五汇总？</div>
-                        </div>
-                        <div class="notif-card-time">今天 09:00</div>
-                    </div>
-                    <div class="notif-card-actions">
-                        <button class="notif-btn primary">开启</button>
-                        <button class="notif-btn ghost">不需要</button>
-                    </div>
-                </div>
-                <div class="notif-card">
-                    <div class="notif-card-top">
-                        <div class="notif-card-icon success">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#52c41a" stroke-width="1.3"/><path d="M5.333 8l2 2 3.334-3.333" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </div>
-                        <div class="notif-card-body">
-                            <div class="notif-card-title">已自动归档 12 封系统通知</div>
-                            <div class="notif-card-desc">包含 OA 系统通知 ×8、订阅邮件 ×4</div>
-                        </div>
-                        <div class="notif-card-time">昨天 18:30</div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- ===== VIEW: HOME (default) ===== -->
         <div class="view-home" id="viewHome">
@@ -1252,9 +1087,6 @@ Q2の提携プランのお見積りをお送りいたします。
     </main>
 </div>
 
-<!-- Overlay -->
-<div class="overlay" id="overlay"></div>
-
 <script>
     // View switching
     const viewHome = document.getElementById('viewHome');
@@ -1303,27 +1135,6 @@ Q2の提携プランのお見積りをお送りいたします。
         });
     }
 
-    // Notification panel
-    const notifBell = document.getElementById('notifBell');
-    const notifPanel = document.getElementById('notifPanel');
-    const overlay = document.getElementById('overlay');
-
-    notifBell.addEventListener('click', (e) => {
-        e.stopPropagation();
-        notifPanel.classList.toggle('show');
-        overlay.classList.toggle('show', notifPanel.classList.contains('show'));
-    });
-
-    overlay.addEventListener('click', () => {
-        notifPanel.classList.remove('show');
-        overlay.classList.remove('show');
-    });
-
-    document.getElementById('markAllRead').addEventListener('click', () => {
-        document.querySelectorAll('.notif-card.unread').forEach(card => card.classList.remove('unread'));
-        document.getElementById('notifBadge').style.display = 'none';
-    });
-
     // Mail tabs
     document.querySelectorAll('.mail-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -1350,5 +1161,65 @@ Q2の提携プランのお見積りをお送りいたします。
         }
     });
 </script>
+
+<!-- ===== Notifications Component (v2 分组聚合) ===== -->
+<script>
+window.NotificationsConfig = {
+    title: 'Notifications',
+    items: [
+        // ═══ 🔴 紧急 (2条) — type=urgent，不可折叠 ═══
+        { id: 'urg-1', type: 'urgent', title: 'R19客服咨询消息', time: '09:15' },
+        { id: 'urg-2', type: 'urgent', title: 'R19客服咨询消息', time: '08:42' },
+
+        // ═══ 📝 翻译 (15条) — title 模式匹配自动归组 ═══
+
+        // gamedemo Text Translation ×5 → 聚合（>2条）
+        { id: 'tr-1', title: 'gamedemo Text Translation', appID: 'gamedemo', time: '10:30' },
+        { id: 'tr-2', title: 'gamedemo Text Translation', appID: 'gamedemo', time: '10:20' },
+        { id: 'tr-3', title: 'gamedemo Text Translation', appID: 'gamedemo', time: '10:10' },
+        { id: 'tr-4', title: 'gamedemo Text Translation', appID: 'gamedemo', time: '09:50' },
+        { id: 'tr-5', title: 'gamedemo Text Translation', appID: 'gamedemo', time: '09:30' },
+
+        // gamedemo Announcement Translation ×4 → 聚合（>2条）
+        { id: 'tr-6',  title: 'gamedemo Announcement Translation', appID: 'gamedemo', time: '10:00' },
+        { id: 'tr-7',  title: 'gamedemo Announcement Translation', appID: 'gamedemo', time: '09:45' },
+        { id: 'tr-8',  title: 'gamedemo Announcement Translation', appID: 'gamedemo', time: '09:35' },
+        { id: 'tr-9',  title: 'gamedemo Announcement Translation', appID: 'gamedemo', time: '09:25' },
+
+        // Text Translation Updated ×2 → 不聚合（≤2条，逐条展示）
+        { id: 'tr-10', title: 'Text Translation Updated', appID: 'gamedemo', time: '09:50' },
+        { id: 'tr-11', title: 'Text Translation Updated', appID: 'gamedemo', time: '09:40' },
+
+        // "有 X 个图片翻译任务待处理" → 不参与聚合，始终逐条展示
+        { id: 'tr-12', title: 'ja→en 有 89 个图片翻译任务待处理', time: '09:20' },
+        { id: 'tr-13', title: 'ja→zh-TW 有 92 个图片翻译任务待处理', time: '09:15' },
+
+        // ═══ 🎧 客服 (1条) — source_from=CS ═══
+        {
+            id: 'cs-1', source_from: 'CS',
+            title: '新客服咨询',
+            description: '用户反馈登录异常，需要人工介入处理',
+            time: '07:30'
+        },
+
+        // ═══ 📌 其他 (5条) — 未匹配以上规则的消息 ═══
+        { id: 'oth-1', title: '@你 在「版本评审」中提到了你', description: '请查看讨论内容并回复', time: '11:02' },
+        { id: 'oth-2', title: '对话「Q4规划」已完成', time: '10:45' },
+        {
+            id: 'oth-3', title: '审批待处理：XXX项目变更',
+            description: '项目范围变更申请，需要你的审批', time: '08:30', icon: 'warning'
+        },
+        { id: 'oth-4', title: '周末游玩计划调查', time: '08:00' },
+        { id: 'oth-5', title: '一周放3天假期好还是2天好', time: '07:45' }
+    ],
+    onItemClick: function(item) {
+        console.log('Notification clicked:', item.id, item.title);
+    },
+    onMarkGroupRead: function(groupId) {
+        console.log('Group marked as read:', groupId);
+    }
+};
+</script>
+<script src="notifications.js"></script>
 </body>
 </html>
