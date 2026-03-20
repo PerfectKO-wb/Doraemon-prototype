@@ -209,6 +209,23 @@
         .send-btn.active { background: var(--button-default); }
         .send-btn.active svg path { stroke: var(--white); }
         .send-btn.stop { background: var(--button-default); }
+
+        .confirm-action-btn {
+            display: inline-block; margin-top: 8px;
+            padding: 6px 16px; border-radius: 20px;
+            font-size: 14px; font-weight: 500; line-height: 20px;
+            border: none; cursor: pointer;
+            background: var(--button-default); color: var(--white);
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
+            width: auto;
+            align-self: flex-start;
+        }
+        .confirm-action-btn:hover { opacity: 0.85; }
+        .confirm-action-btn.confirmed {
+            background: var(--bg-active); color: var(--text-disabled);
+            cursor: default;
+        }
     </style>
 </head>
 <body>
@@ -424,37 +441,46 @@
 
     /* ====== 读取 URL 参数并渲染 ====== */
     const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const urlContent = params.get('content');
     const sceneName = params.get('scene') || 'default';
     const preset = CHAT_PRESETS[sceneName] || CHAT_PRESETS['default'];
-
-    if (preset.title) {
-        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        const activeItem = document.querySelector('.sidebar-item.active') || document.querySelector('.sidebar-section .sidebar-item');
-        if (activeItem) {
-            activeItem.classList.add('active');
-            const textEl = activeItem.querySelector('.sidebar-item-text');
-            if (textEl) textEl.textContent = preset.title;
-        }
-    }
-
-    if (preset.placeholder) {
-        chatTextarea.placeholder = preset.placeholder;
-    }
-
-    chatArea.innerHTML = '';
-    (preset.messages || []).forEach(m => {
-        if (m.role === 'user') chatArea.appendChild(createUserMsg(m.text, !!m.html));
-        else chatArea.appendChild(createAiMsg(m.text, !!m.html));
-    });
 
     /* ====== 输入与发送 ====== */
     const currentResponses = preset.responses || {};
     const defaultResponses = [
-        "I'll get that done for you right away. Let me process the request and set things up.",
-        "Great question! Based on the project context, I'd recommend starting with a phased approach.",
-        "I've analyzed the data and here are my recommendations for moving forward with this task.",
-        "Sure thing! I'll coordinate with the relevant systems to complete this efficiently.",
+        "好的，我来处理这个请求。",
+        "收到，我正在为你执行操作。",
+        "明白，让我来协助你完成。",
     ];
+    const confirmResponses = [
+        "已完成操作。",
+    ];
+
+    function parseActionContent(content) {
+        const lines = content.split('\n');
+        let system = '', action = '', details = '';
+        if (lines.length > 0) {
+            const firstLine = lines[0];
+            const match = firstLine.match(/^@(\S+)\s+(.+)$/);
+            if (match) { system = match[1]; action = match[2]; }
+            else { action = firstLine; }
+        }
+        if (lines.length > 1) {
+            details = lines.slice(1).join('\n').trim();
+        }
+        return { system, action, details };
+    }
+
+    function buildConfirmSummary(content) {
+        const { system, action, details } = parseActionContent(content);
+        let html = '我理解你想要执行以下操作：\n\n';
+        if (system) html += '系统：' + system + '\n';
+        html += '操作：' + action + '\n';
+        if (details) html += details + '\n';
+        html += '\n是否确认执行此操作？';
+        return html;
+    }
 
     function getResponse(userText) {
         const lower = userText.toLowerCase();
@@ -462,6 +488,65 @@
             if (lower.includes(key.toLowerCase())) return currentResponses[key];
         }
         return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    }
+
+    /**
+     * Dynamic content mode (from email_assistant):
+     *   mode=confirm → content shown as sent user message + AI auto-reply
+     *   mode=edit    → content prefilled in textarea, not sent
+     * Falls back to scene-based preset rendering.
+     */
+    function createAiMsgWithConfirmBtn(summaryText) {
+        const div = document.createElement('div');
+        div.className = 'msg msg-ai';
+        const bodyContent = escapeHtml(summaryText);
+        div.innerHTML = `<div class="msg-ai-avatar">${AI_AVATAR}</div><div class="msg-ai-body"><div class="msg-ai-text" style="white-space:pre-wrap;">${bodyContent}</div><button class="confirm-action-btn" onclick="confirmAction(this)">确认</button><div class="msg-actions" style="opacity:0;"><button class="msg-action-btn" title="Copy">${COPY_ICON}</button></div></div>`;
+        return div;
+    }
+
+    window.confirmAction = function(btn) {
+        if (btn.classList.contains('confirmed')) return;
+        btn.classList.add('confirmed');
+        btn.textContent = '✓ 已确认';
+        const reply = confirmResponses[Math.floor(Math.random() * confirmResponses.length)];
+        setTimeout(() => {
+            chatArea.appendChild(createAiMsg(reply));
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }, 300);
+    };
+
+    if (urlContent && mode) {
+        chatArea.innerHTML = '';
+        if (mode === 'confirm') {
+            chatArea.appendChild(createUserMsg(urlContent));
+            const summary = buildConfirmSummary(urlContent);
+            chatArea.appendChild(createAiMsgWithConfirmBtn(summary));
+            chatTextarea.placeholder = '继续对话…';
+        } else if (mode === 'edit') {
+            chatArea.appendChild(createAiMsg('请编辑下方内容后发送，或直接告诉我你想做的修改。'));
+            chatTextarea.value = urlContent;
+            chatTextarea.style.height = 'auto';
+            chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 120) + 'px';
+            sendBtn.classList.add('active');
+        }
+    } else {
+        if (preset.title) {
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            const activeItem = document.querySelector('.sidebar-item.active') || document.querySelector('.sidebar-section .sidebar-item');
+            if (activeItem) {
+                activeItem.classList.add('active');
+                const textEl = activeItem.querySelector('.sidebar-item-text');
+                if (textEl) textEl.textContent = preset.title;
+            }
+        }
+        if (preset.placeholder) {
+            chatTextarea.placeholder = preset.placeholder;
+        }
+        chatArea.innerHTML = '';
+        (preset.messages || []).forEach(m => {
+            if (m.role === 'user') chatArea.appendChild(createUserMsg(m.text, !!m.html));
+            else chatArea.appendChild(createAiMsg(m.text, !!m.html));
+        });
     }
 
     chatTextarea.addEventListener('input', () => {
