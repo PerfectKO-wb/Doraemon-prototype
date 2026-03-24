@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i18n Expert - Text Translation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --text-default: #131825;
+      --text-secondary: #73726e;
+      --text-disabled: #ababa9;
+      --bg-base: #f9fafb;
+      --bg-container: #ffffff;
+      --bg-active: #efefef;
+      --bg-hover: #f5f5f4;
+      --bg-base2: rgba(0,0,0,0.04);
+      --border-divider: #e5e7eb;
+      --primary: #1c64f2;
+      --error: #f5222d;
+      --button-default: #131825;
+      --white: #ffffff;
+      --shadow-popup: 0px 6px 16px 0px rgba(0,0,0,0.08), 0px 3px 6px -4px rgba(0,0,0,0.12);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-default);
+      height: 100vh; overflow: hidden;
+    }
+    .app { display: flex; height: 100vh; width: 100%; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 240px; min-width: 240px;
+      background: var(--bg-container);
+      border-right: 1px solid var(--border-divider);
+      display: flex; flex-direction: column; height: 100vh;
+    }
+    .sidebar-header {
+      height: 64px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px 0 24px;
+      border-bottom: 1px solid var(--border-divider);
+      border-right: 1px solid var(--border-divider);
+    }
+    .logo { display: flex; align-items: center; gap: 6px; }
+    .logo-icon { width: 24px; height: 24px; background: var(--text-default); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .logo-icon svg { width: 24px; height: 24px; color: white; }
+    .logo-text { font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: 16px; }
+    .sidebar-collapse-btn { width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+    .sidebar-collapse-btn:hover { background: var(--bg-hover); }
+
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 16px 16px 0; }
+    .sidebar-nav-item {
+      height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 8px;
+      border-radius: 12px; font-size: 14px; cursor: pointer; color: var(--text-default);
+    }
+    .sidebar-nav-item:hover { background: var(--bg-hover); }
+    .sidebar-nav-item.active { background: var(--bg-active); }
+    .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+    .nav-icon svg { width: 20px; height: 20px; }
+
+    .sidebar-section-title {
+      font-size: 12px; font-weight: 500; color: var(--text-disabled);
+      padding: 7px 8px; height: 32px; display: flex; align-items: center;
+    }
+    .expert-icon {
+      width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600; color: white; flex-shrink: 0;
+    }
+    .expert-icon.cs { background: var(--primary); }
+    .i18n-icon-wrap { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .i18n-icon-wrap svg { width: 20px; height: 20px; }
+
+    .ai-u-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 8px; height: 32px;
+    }
+    .ai-u-header span { font-size: 12px; font-weight: 500; color: var(--text-disabled); }
+    .ai-u-header .actions { display: flex; gap: 4px; }
+    .ai-u-header .actions button { width: 20px; height: 20px; border: none; background: none; cursor: pointer; color: var(--text-disabled); display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+    .ai-u-header .actions button:hover { color: var(--text-secondary); }
+
+    .avatar-small { width: 24px; height: 24px; border-radius: 12px; background: var(--bg-active); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .avatar-small img { width: 100%; height: 100%; object-fit: cover; }
+
+    .sidebar-footer {
+      border-top: 1px solid var(--border-divider);
+      border-right: 1px solid var(--border-divider);
+      padding: 16px; display: flex; align-items: center; justify-content: space-between; height: 72px;
+    }
+    .user-info { display: flex; align-items: center; gap: 8px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; overflow: hidden; }
+    .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-details { display: flex; flex-direction: column; }
+    .user-name { font-size: 14px; font-weight: 500; }
+    .user-role { font-size: 12px; color: var(--text-disabled); }
+    .ai-bot-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-base); display: flex; align-items: center; justify-content: center; }
+
+    /* ===== MIDDLE PANEL ===== */
+    .middle-panel {
+      width: 364px; min-width: 364px;
+      background: var(--bg-container);
+      border-right: 1px solid var(--border-divider);
+      display: flex; flex-direction: column; height: 100vh;
+    }
+    .middle-header {
+      border-bottom: 1px solid var(--border-divider);
+      padding: 20px 16px 0;
+    }
+    .expert-title { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .expert-avatar {
+      width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #ff9a56, #ff6b35);
+      display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: white; flex-shrink: 0;
+      position: relative; overflow: hidden;
+    }
+    .expert-avatar svg { width: 28px; height: 28px; }
+    .expert-info { display: flex; flex-direction: column; gap: 2px; }
+    .expert-name { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    .expert-members { display: flex; align-items: center; gap: 4px; }
+    .member-stack { display: flex; align-items: center; padding-right: 6px; }
+    .member-avatar {
+      width: 22px; height: 22px; border-radius: 11px; border: 0.5px solid var(--border-divider);
+      margin-right: -6px; overflow: hidden; background: var(--bg-active);
+    }
+    .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .member-count {
+      min-width: 22px; height: 22px; border-radius: 11px; background: var(--bg-active);
+      border: 0.5px solid var(--border-divider); margin-right: -6px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 4px; font-size: 12px; color: var(--text-default);
+    }
+    .info-icon { width: 18px; height: 18px; color: var(--text-disabled); cursor: pointer; }
+    .info-icon svg { width: 18px; height: 18px; }
+
+    .expert-actions { display: flex; gap: 8px; position: absolute; right: 16px; top: 28px; }
+    .expert-action-btn {
+      width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-divider);
+      background: var(--bg-container); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-secondary);
+    }
+    .expert-action-btn:hover { background: var(--bg-hover); }
+    .expert-action-btn svg { width: 20px; height: 20px; }
+
+    .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .filter-chip {
+      height: 36px; padding: 0 12px; border-radius: 12px;
+      border: 1px solid var(--button-default); background: var(--bg-active);
+      font-size: 14px; color: var(--text-default); cursor: pointer;
+      display: flex; align-items: center; font-family: inherit;
+    }
+
+    .search-bar {
+      height: 36px; border-radius: 12px; border: 1px solid var(--border-divider);
+      background: var(--bg-container); display: flex; align-items: center; gap: 8px;
+      padding: 0 12px; margin-bottom: 16px;
+    }
+    .search-bar svg { width: 20px; height: 20px; color: var(--text-disabled); flex-shrink: 0; }
+    .search-bar span { font-size: 14px; color: var(--text-disabled); }
+
+    /* Conversation List */
+    .conv-list { flex: 1; overflow-y: auto; }
+    .conv-entry {
+      display: flex; align-items: center; gap: 12px;
+      height: 72px; padding: 0 16px; border-bottom: 1px solid var(--bg-base);
+      cursor: pointer; position: relative;
+    }
+    .conv-entry:hover { background: var(--bg-hover); }
+    .conv-entry.active { background: var(--bg-active); }
+    .conv-icon {
+      width: 40px; height: 40px; border-radius: 8px; background: var(--bg-base2);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .conv-icon svg { width: 20px; height: 20px; color: var(--text-secondary); }
+    .conv-icon img { width: 20px; height: 20px; }
+    .conv-content { flex: 1; min-width: 0; }
+    .conv-title-row { display: flex; justify-content: space-between; align-items: center; }
+    .conv-title { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+    .conv-title .chevron { width: 16px; height: 16px; color: var(--text-disabled); }
+    .conv-time { font-size: 12px; color: var(--text-disabled); flex-shrink: 0; }
+    .conv-desc-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2px; }
+    .conv-desc { font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--button-default); flex-shrink: 0; }
+
+    /* ===== RIGHT PANEL (CHAT) ===== */
+    .right-panel { flex: 1; display: flex; flex-direction: column; height: 100vh; background: var(--bg-container); }
+    .chat-header {
+      height: 52px; flex-shrink: 0;
+      border-bottom: 1px solid var(--border-divider);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+    }
+    .chat-header-left { display: flex; align-items: center; gap: 12px; }
+    .pending-tag {
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+      color: #d97706; background: #fef3c7; border: 1px solid #fde68a;
+      padding: 2px 10px; border-radius: 4px; line-height: 18px;
+    }
+    .chat-header-title { font-size: 14px; font-weight: 500; position: absolute; left: 50%; transform: translateX(-50%); }
+    .chat-header-right { display: flex; align-items: center; }
+    .chat-bell-btn {
+      width: 32px; height: 32px; border: none; background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; color: var(--text-secondary); border-radius: 6px;
+    }
+    .chat-bell-btn:hover { background: var(--bg-hover); }
+    .chat-bell-btn svg { width: 20px; height: 20px; }
+
+    .chat-body { flex: 1; overflow-y: auto; padding: 24px 32px; }
+
+    .msg-row { display: flex; gap: 12px; }
+    .msg-avatar {
+      width: 40px; height: 40px; border-radius: 20px; flex-shrink: 0;
+      background: linear-gradient(135deg, #5ec6d0, #3ba5b0);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .msg-avatar svg { width: 22px; height: 22px; color: white; }
+    .msg-content { flex: 1; min-width: 0; }
+    .msg-sender { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .msg-from { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+    .msg-mentions { display: flex; gap: 8px; margin-bottom: 8px; }
+    .mention-tag {
+      font-size: 12px; color: var(--text-secondary); background: var(--bg-active);
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .msg-collapse {
+      display: flex; justify-content: center; padding: 4px 0 12px;
+    }
+    .msg-collapse svg { width: 20px; height: 20px; color: var(--text-disabled); cursor: pointer; }
+
+    .msg-card {
+      border: 1px solid var(--border-divider); border-radius: 12px;
+      overflow: hidden; margin-bottom: 16px;
+    }
+    .msg-card-header {
+      display: flex; align-items: center; gap: 6px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border-divider);
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .msg-card-header svg { width: 16px; height: 16px; }
+    .msg-card-body { padding: 16px; }
+    .card-mentions {
+      display: inline-flex; gap: 8px; background: #fef3c7; padding: 3px 8px;
+      border-radius: 4px; font-size: 14px; font-weight: 500; color: var(--text-default);
+      margin-bottom: 8px;
+    }
+    .card-assignment { display: flex; align-items: center; gap: 4px; font-size: 14px; margin-bottom: 10px; }
+    .card-assignment .flag-icon { font-size: 14px; }
+    .card-details { padding-left: 8px; margin-bottom: 14px; }
+    .card-details li {
+      font-size: 13px; line-height: 24px; color: var(--text-default);
+      list-style: disc inside;
+    }
+    .card-details li strong { font-weight: 500; }
+
+    .card-section-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .card-req-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; margin-bottom: 6px; padding-left: 8px;
+    }
+    .card-req-item .arrow { color: var(--text-secondary); }
+    .card-req-item .mention { font-weight: 500; }
+    .task-table-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--bg-active); padding: 2px 8px; border-radius: 4px;
+      font-size: 12px; color: var(--text-default); text-decoration: none;
+    }
+    .task-table-link svg { width: 12px; height: 12px; }
+
+    .card-env {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text-secondary);
+      padding: 10px 0; border-top: 1px solid var(--border-divider);
+      border-bottom: 1px solid var(--border-divider);
+      margin: 10px 0;
+    }
+    .card-env-link { color: var(--primary); text-decoration: none; }
+
+    .card-ai-note {
+      font-size: 14px; line-height: 22px; color: var(--text-default);
+      padding: 10px 0 4px;
+    }
+
+    .mark-reviewed-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      height: 36px; padding: 0 20px; border-radius: 8px;
+      background: var(--button-default); color: white;
+      font-size: 14px; font-weight: 500;
+      border: none; cursor: pointer; font-family: inherit;
+      margin-top: 12px;
+    }
+    .mark-reviewed-btn:hover { opacity: 0.85; }
+
+    .msg-reactions {
+      display: flex; align-items: center; gap: 4px;
+      margin-top: 14px;
+    }
+    .reaction-btn {
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-disabled); font-size: 15px;
+    }
+    .reaction-btn:hover { background: var(--bg-hover); }
+    .reaction-btn svg { width: 16px; height: 16px; }
+    .reaction-flag { width: 20px; height: 20px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+    /* Reply Input */
+    .chat-reply {
+      flex-shrink: 0; padding: 12px 24px 20px;
+    }
+    .reply-box {
+      border: 1px solid var(--border-divider); border-radius: 12px;
+      background: var(--bg-container); overflow: hidden;
+    }
+    .reply-input {
+      width: 100%; height: 40px; border: none; outline: none;
+      padding: 10px 16px; font-size: 14px; font-family: inherit;
+      color: var(--text-default); background: transparent;
+    }
+    .reply-input::placeholder { color: var(--text-disabled); }
+    .reply-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 12px 8px;
+    }
+    .reply-toolbar-left { display: flex; gap: 4px; }
+    .reply-tool-btn {
+      width: 28px; height: 28px; border: none; background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary); border-radius: 6px;
+    }
+    .reply-tool-btn:hover { background: var(--bg-hover); }
+    .reply-tool-btn svg { width: 18px; height: 18px; }
+    .reply-toolbar-right { display: flex; align-items: center; gap: 8px; }
+    .send-hint { font-size: 12px; color: var(--text-disabled); display: flex; align-items: center; gap: 2px; }
+    .send-hint kbd { font-family: inherit; }
+    .send-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--bg-active); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-disabled);
+    }
+    .send-btn svg { width: 18px; height: 18px; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-divider); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-disabled); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></div>
+          <span class="logo-text">Doraemon</span>
+        </div>
+        <button class="sidebar-collapse-btn" title="Collapse">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="8" y1="3" x2="8" y2="17"/></svg>
+        </button>
+      </div>
+      <div class="sidebar-content">
+        <div class="sidebar-nav-item">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 2H4a2 2 0 00-2 2v12a2 2 0 002 2h3l4 4 4-4h5a2 2 0 002-2V4a2 2 0 00-2-2z"/></svg></span>
+          <span>New Chat</span>
+        </div>
+        <div class="sidebar-nav-item">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+          <span>Work Space</span>
+        </div>
+
+        <div class="sidebar-section-title">Expert Agent</div>
+        <div class="sidebar-nav-item">
+          <div class="expert-icon cs">
+            <svg viewBox="0 0 14 14" fill="white" width="12" height="12"><path d="M7 1C3.7 1 1 3.7 1 7c0 1.2.4 2.3 1 3.2V13l2.5-1.3c.8.2 1.6.3 2.5.3 3.3 0 6-2.7 6-6S10.3 1 7 1z"/></svg>
+          </div>
+          <span>CS</span>
+        </div>
+        <div class="sidebar-nav-item active">
+          <div class="i18n-icon-wrap">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="16" height="16" rx="3"/><path d="M6 7h8M7 10.5c1 2 3 2.5 5 1"/><circle cx="6" cy="10" r="0.5" fill="currentColor"/></svg>
+          </div>
+          <span>i18n</span>
+        </div>
+
+        <div class="ai-u-header">
+          <span>AI U</span>
+          <div class="actions">
+            <button title="Add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button title="Apps"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></button>
+          </div>
+        </div>
+        <div class="sidebar-nav-item">
+          <div class="avatar-small"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="var(--text-secondary)" stroke-width="1.5"><circle cx="10" cy="6" r="4"/><path d="M3 18c0-4 3-7 7-7s7 3 7 7"/></svg></div>
+          <span>Al Research</span>
+        </div>
+        <div class="sidebar-nav-item">
+          <div class="avatar-small"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="var(--text-secondary)" stroke-width="1.5"><circle cx="10" cy="6" r="4"/><path d="M3 18c0-4 3-7 7-7s7 3 7 7"/></svg></div>
+          <span>Product Launch</span>
+        </div>
+
+        <div class="sidebar-section-title">Today</div>
+        <div class="sidebar-nav-item"><span style="padding-left:0">AI Assistant Help</span></div>
+        <div class="sidebar-nav-item" style="position:relative;">
+          <span style="padding-left:0">Data Analysis Project</span>
+          <svg style="position:absolute;right:8px;top:12px;width:16px;height:16px;color:var(--text-disabled);animation:spin 1.5s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 019.95 9"/></svg>
+        </div>
+        <div class="sidebar-nav-item" style="justify-content:space-between;">
+          <span style="padding-left:0">Project Planning</span>
+          <div class="unread-dot"></div>
+        </div>
+
+        <div class="sidebar-section-title">Yesterday</div>
+        <div class="sidebar-nav-item"><span style="padding-left:0">Marketing Campaign Id...</span></div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+            <img src="https://i.pravatar.cc/80?img=11" alt="">
+          </div>
+          <div class="user-details">
+            <span class="user-name">David chen</span>
+            <span class="user-role">Data Analyst</span>
+          </div>
+        </div>
+        <div class="ai-bot-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MIDDLE PANEL -->
+    <div class="middle-panel">
+      <div class="middle-header" style="position:relative;">
+        <div class="expert-title">
+          <div class="expert-avatar">
+            <svg viewBox="0 0 28 28" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="22" height="22" rx="5"/><path d="M8 10h12M10 14c1.5 3 5 3.5 8 1.5"/><circle cx="8" cy="14" r="0.8" fill="white"/></svg>
+          </div>
+          <div class="expert-info">
+            <div class="expert-name">i18n Expert</div>
+            <div class="expert-members">
+              <div class="member-stack">
+                <div class="member-avatar"><img src="https://i.pravatar.cc/44?img=1" alt=""></div>
+                <div class="member-avatar"><img src="https://i.pravatar.cc/44?img=2" alt=""></div>
+                <div class="member-avatar"><img src="https://i.pravatar.cc/44?img=3" alt=""></div>
+                <div class="member-avatar"><img src="https://i.pravatar.cc/44?img=4" alt=""></div>
+                <div class="member-avatar"><img src="https://i.pravatar.cc/44?img=5" alt=""></div>
+                <div class="member-avatar"><img src="https://i.pravatar.cc/44?img=6" alt=""></div>
+                <div class="member-count">+99</div>
+              </div>
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="expert-actions">
+          <button class="expert-action-btn" title="Clipboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
+          </button>
+          <button class="expert-action-btn" title="Book">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          </button>
+        </div>
+
+        <div class="filter-row">
+          <button class="filter-chip">Waiting</button>
+        </div>
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search by title</span>
+        </div>
+      </div>
+
+      <div class="conv-list">
+        <!-- Image Translation entry -->
+        <div class="conv-entry active">
+          <div class="conv-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </div>
+          <div class="conv-content">
+            <div class="conv-title-row">
+              <span class="conv-title">Image Translation <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+            </div>
+            <div class="conv-desc-row">
+              <span class="conv-desc">Pending review tasks</span>
+              <div class="unread-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- kumo conversations -->
+        <div class="conv-entry active">
+          <div class="conv-content" style="padding-left:0;">
+            <div class="conv-title-row">
+              <span class="conv-title" style="font-weight:500;">jya - Text Translation Update</span>
+              <span class="conv-time">08:25</span>
+            </div>
+            <div class="conv-desc-row">
+              <span class="conv-desc">jya - Text Translation Update</span>
+              <div class="unread-dot"></div>
+            </div>
+          </div>
+        </div>
+        <div class="conv-entry">
+          <div class="conv-content" style="padding-left:0;">
+            <div class="conv-title-row">
+              <span class="conv-title" style="font-weight:500;">kumo - Text Translation</span>
+              <span class="conv-time">08:25</span>
+            </div>
+            <div class="conv-desc-row">
+              <span class="conv-desc">kumo - Text Translation</span>
+              <div class="unread-dot"></div>
+            </div>
+          </div>
+        </div>
+        <div class="conv-entry">
+          <div class="conv-content" style="padding-left:0;">
+            <div class="conv-title-row">
+              <span class="conv-title" style="font-weight:500;">kumo - Text Translation</span>
+              <span class="conv-time">08:25</span>
+            </div>
+            <div class="conv-desc-row">
+              <span class="conv-desc">kumo - Text Translation</span>
+              <div class="unread-dot"></div>
+            </div>
+          </div>
+        </div>
+        <div class="conv-entry">
+          <div class="conv-content" style="padding-left:0;">
+            <div class="conv-title-row">
+              <span class="conv-title" style="font-weight:500;">kumo - Text Translation</span>
+              <span class="conv-time">08:25</span>
+            </div>
+            <div class="conv-desc-row">
+              <span class="conv-desc">kumo - Text Translation</span>
+              <div class="unread-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL (CHAT) -->
+    <div class="right-panel">
+      <!-- Chat Header -->
+      <div class="chat-header" style="position:relative;">
+        <div class="chat-header-left">
+          <span class="pending-tag">PENDING</span>
+        </div>
+        <span class="chat-header-title">jya - Text Translation Update</span>
+        <div class="chat-header-right">
+          <button class="chat-bell-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Body -->
+      <div class="chat-body">
+        <div class="msg-row">
+          <div class="msg-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3-7 7-7s7 3 7 7"/><path d="M12 2v1M8 3l.5.87M16 3l-.5.87"/></svg>
+          </div>
+          <div class="msg-content">
+            <div class="msg-sender">Xiaobao</div>
+            <div class="msg-from">From: system</div>
+            <div class="msg-mentions">
+              <span class="mention-tag">@陳柏全</span>
+              <span class="mention-tag">@林 幹夫</span>
+            </div>
+            <div class="msg-collapse">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+
+            <!-- Message Card -->
+            <div class="msg-card">
+              <div class="msg-card-body">
+                <div class="card-mentions">@陳柏全&nbsp;&nbsp;@林 幹夫</div>
+                <div class="card-assignment">
+                  <span class="flag-icon">🚩</span>
+                  <strong>Text Translation Update</strong>
+                </div>
+                <ul class="card-details">
+                  <li><strong>Game:</strong> jya</li>
+                  <li><strong>Task Type:</strong> text</li>
+                </ul>
+
+                <div class="card-section-title">Translation Requirements:</div>
+                <div class="card-req-item">
+                  <span>•</span>
+                  <span>JA <span class="arrow">→</span> EN:</span>
+                </div>
+                <div class="card-req-item" style="padding-left:16px;">
+                  <span class="mention">@林 幹夫</span>
+                  <a href="#" class="task-table-link">
+                    <span style="display:inline-flex;width:14px;height:14px;background:linear-gradient(135deg,#34d399,#059669);border-radius:3px;align-items:center;justify-content:center;">
+                      <svg viewBox="0 0 12 12" width="10" height="10" fill="white" stroke="none"><rect x="2" y="2" width="8" height="8" rx="1"/></svg>
+                    </span>
+                    i18n Task Table
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 17 17 7"/><polyline points="7 7 17 7 17 17"/></svg>
+                  </a>
+                </div>
+
+                <div class="card-ai-note">
+                  日文翻译已修改 请完成从 ja 到 en 的翻译审核
+                </div>
+
+                <button class="mark-reviewed-btn">Mark as Reviewed</button>
+              </div>
+            </div>
+
+            <!-- Reactions -->
+            <div class="msg-reactions">
+              <button class="reaction-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+              <button class="reaction-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+              <button class="reaction-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1"/><path d="M22 22l-5-10-5 10M14 18h6"/></svg></button>
+              <button class="reaction-btn"><span class="reaction-flag">🇨🇳</span></button>
+              <button class="reaction-btn"><span class="reaction-flag">🇬🇧</span></button>
+              <button class="reaction-btn"><span class="reaction-flag">🇯🇵</span></button>
+              <button class="reaction-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/></svg></button>
+              <button class="reaction-btn"><span class="reaction-flag">🇹🇼</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reply Input -->
+      <div class="chat-reply">
+        <div class="reply-box">
+          <input type="text" class="reply-input" placeholder="reply">
+          <div class="reply-toolbar">
+            <div class="reply-toolbar-left">
+              <button class="reply-tool-btn" title="Attach">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <button class="reply-tool-btn" title="Mention">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94"/></svg>
+              </button>
+            </div>
+            <div class="reply-toolbar-right">
+              <span class="send-hint">⇧ ↵ Send</span>
+              <button class="send-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i18n Text Table - Translation Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500&family=Noto+Sans+JP:wght@400;500&family=Noto+Sans+KR:wght@400;500&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --text-default: #131825;
+      --text-secondary: #73726e;
+      --text-disabled: #ababa9;
+      --bg-base: #f9fafb;
+      --bg-container: #ffffff;
+      --bg-active: #efefef;
+      --bg-hover: #f5f5f4;
+      --bg-disabled: #dbdbdb;
+      --border-divider: #e5e7eb;
+      --border-default: #d9d9d9;
+      --primary: #1c64f2;
+      --error: #f5222d;
+      --deploy-bg: #ff6b4a;
+      --button-default: #131825;
+      --white: #ffffff;
+      --green-bg: #d1fae5;
+      --green-text: #065f46;
+      --orange-bg: #fef3c7;
+      --orange-text: #92400e;
+      --tag-new-bg: #dcfce7;
+      --tag-new-text: #166534;
+      --tag-old-bg: #f3f4f6;
+      --tag-old-text: #6b7280;
+      --shadow-popup: 0px 6px 16px 0px rgba(0,0,0,0.08), 0px 3px 6px -4px rgba(0,0,0,0.12), 0px 9px 28px 8px rgba(0,0,0,0.05);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-default);
+      height: 100vh;
+      overflow: hidden;
+    }
+    .app { display: flex; height: 100vh; width: 100%; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 240px; min-width: 240px;
+      background: var(--bg-container);
+      border-right: 1px solid var(--border-divider);
+      display: flex; flex-direction: column; height: 100vh;
+    }
+    .sidebar-header {
+      height: 64px; display: flex; align-items: center;
+      justify-content: space-between; padding: 20px 18px 20px 24px;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .logo { display: flex; align-items: center; gap: 6px; }
+    .logo-icon {
+      width: 24px; height: 24px; border-radius: 6px;
+      background: var(--primary); display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { width: 14px; height: 14px; fill: white; }
+    .logo-text { font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: 16px; color: var(--text-default); }
+    .sidebar-collapse-btn {
+      width: 32px; height: 32px; border-radius: 6px;
+      background: var(--bg-container); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; color: var(--text-secondary);
+    }
+    .sidebar-collapse-btn:hover { background: var(--bg-active); }
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 16px; }
+    .sidebar-nav-item {
+      height: 40px; display: flex; align-items: center; gap: 8px;
+      padding: 0 8px; border-radius: 12px; cursor: pointer;
+      font-size: 14px; color: var(--text-default); transition: background 0.15s;
+      white-space: nowrap; overflow: hidden;
+    }
+    .sidebar-nav-item:hover { background: var(--bg-hover); }
+    .sidebar-nav-item.active { background: var(--bg-active); }
+    .sidebar-nav-item .nav-icon {
+      width: 20px; height: 20px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: var(--text-secondary);
+    }
+    .sidebar-nav-item .nav-label {
+      flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .sidebar-section-title {
+      font-size: 12px; font-weight: 500; color: var(--text-disabled);
+      padding: 7px 8px; margin-top: 12px;
+    }
+    .i18n-icon {
+      width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; color: white; font-weight: 700;
+    }
+    .bd-icon {
+      width: 20px; height: 20px; border-radius: 10px; flex-shrink: 0;
+      background: #f59e0b; display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: white; font-weight: 700;
+    }
+    .tech-icon {
+      width: 20px; height: 20px; border-radius: 10px; flex-shrink: 0;
+      background: #10b981; display: flex; align-items: center; justify-content: center;
+    }
+    .tech-icon svg { width: 12px; height: 12px; stroke: white; fill: none; }
+    .sidebar-sub-link {
+      height: 32px; display: flex; align-items: center; gap: 8px;
+      padding: 0 8px 0 28px; font-size: 13px; color: var(--text-secondary);
+      cursor: pointer; border-radius: 8px;
+    }
+    .sidebar-sub-link:hover { background: var(--bg-hover); color: var(--text-default); }
+    .unread-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--primary); flex-shrink: 0;
+    }
+    .ai-u-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 0; margin-top: 12px;
+    }
+    .ai-u-header span { font-size: 12px; font-weight: 500; color: var(--text-disabled); padding-left: 8px; }
+    .ai-u-header .header-actions { display: flex; gap: 4px; }
+    .ai-u-header .header-actions button {
+      width: 20px; height: 20px; border: none; background: none;
+      cursor: pointer; border-radius: 4px; display: flex;
+      align-items: center; justify-content: center; color: var(--text-secondary);
+    }
+    .ai-u-header .header-actions button:hover { background: var(--bg-active); }
+    .avatar-small {
+      width: 20px; height: 20px; border-radius: 10px; flex-shrink: 0;
+      background: var(--bg-active); display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
+    }
+    .sidebar-footer {
+      border-top: 1px solid var(--border-divider);
+      padding: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .user-info { flex: 1; display: flex; align-items: center; gap: 8px; }
+    .user-avatar {
+      width: 40px; height: 40px; border-radius: 20px;
+      background: linear-gradient(135deg, #f472b6, #ec4899);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 14px; font-weight: 600;
+    }
+    .user-details { display: flex; flex-direction: column; }
+    .user-name { font-size: 14px; font-weight: 500; color: var(--text-default); line-height: 22px; }
+    .user-role { font-size: 12px; color: var(--text-disabled); line-height: 18px; }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+    /* Title Bar */
+    .title-bar {
+      height: 48px; background: var(--bg-container);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; flex-shrink: 0;
+    }
+    .title-left { display: flex; align-items: center; gap: 12px; }
+    .back-btn {
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-secondary); border: none; background: none; border-radius: 4px;
+    }
+    .back-btn:hover { background: var(--bg-active); }
+    .title-name { font-size: 14px; font-weight: 500; color: var(--text-default); }
+    .title-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 24px; padding: 0 8px; border-radius: 6px;
+      font-size: 12px; border: 1px solid var(--border-divider); cursor: pointer;
+    }
+    .title-tag.game { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
+    .title-tag.game::before { content: 'G'; font-weight: 600; margin-right: 2px; }
+    .title-tag.lang { background: var(--bg-container); color: var(--text-secondary); }
+    .title-right { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: 8px; background: transparent;
+      border: none; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; color: var(--text-secondary); position: relative;
+    }
+    .icon-btn:hover { background: var(--bg-active); }
+    .notification-badge {
+      position: absolute; top: 2px; right: 0;
+      min-width: 16px; height: 14px; border-radius: 7px;
+      background: var(--error); border: 1.5px solid var(--bg-container);
+      color: white; font-size: 9px; display: flex; align-items: center;
+      justify-content: center; padding: 0 3px; line-height: 1; font-weight: 500;
+    }
+    .deploy-top-btn {
+      height: 32px; padding: 0 16px; border-radius: 8px;
+      background: var(--button-default); border: none; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: white; font-family: inherit;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .deploy-top-btn:hover { opacity: 0.85; }
+    .deploy-top-btn svg { width: 14px; height: 14px; }
+
+    /* Toolbar */
+    .toolbar {
+      height: 44px; background: var(--bg-container);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; flex-shrink: 0;
+    }
+    .toolbar-left { display: flex; align-items: center; gap: 8px; }
+    .toolbar-btn {
+      height: 28px; display: flex; align-items: center; gap: 6px;
+      padding: 0 10px; border-radius: 6px; background: var(--bg-container);
+      border: 1px solid var(--border-divider); cursor: pointer;
+      color: var(--text-default); font-size: 12px; font-family: inherit;
+    }
+    .toolbar-btn:hover { background: var(--bg-hover); }
+    .toolbar-btn svg { width: 14px; height: 14px; color: var(--text-secondary); flex-shrink: 0; }
+    .toolbar-btn.active-filter { background: #eff6ff; border-color: #bfdbfe; color: var(--primary); }
+    .toolbar-btn.active-filter svg { color: var(--primary); }
+    .toolbar-right { display: flex; align-items: center; gap: 6px; }
+    .toolbar-icon-btn {
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; color: var(--text-secondary);
+    }
+    .toolbar-icon-btn:hover { background: var(--bg-active); }
+    .toolbar-icon-btn svg { width: 16px; height: 16px; }
+
+    /* Table */
+    .table-container { flex: 1; overflow: auto; }
+    .data-table { border-collapse: collapse; width: max-content; min-width: 100%; }
+    .data-table th {
+      background: var(--bg-container); border-bottom: 1px solid var(--border-default);
+      border-right: 1px solid var(--border-divider); padding: 0 8px;
+      text-align: left; font-weight: 400; font-size: 13px; color: var(--text-default);
+      height: 36px; white-space: nowrap; position: sticky; top: 0; z-index: 2;
+    }
+    .data-table th .th-content { display: flex; align-items: center; gap: 4px; }
+    .data-table th .th-content svg { width: 14px; height: 14px; color: var(--text-disabled); flex-shrink: 0; }
+    .data-table td {
+      background: var(--bg-container); border-bottom: 1px solid var(--border-divider);
+      border-right: 1px solid var(--border-divider); padding: 4px 8px;
+      font-size: 13px; color: var(--text-default); height: 44px; vertical-align: top;
+      max-width: 280px;
+    }
+    .data-table tbody tr:hover td { background: var(--bg-hover); }
+    .data-table .col-id {
+      width: 48px; min-width: 48px; text-align: center;
+      border-right: 1px solid var(--border-default);
+      position: sticky; left: 0; z-index: 1;
+    }
+    .data-table th.col-id { z-index: 3; }
+    .row-checkbox {
+      width: 14px; height: 14px; border: 1px solid var(--border-default);
+      border-radius: 4px; cursor: pointer; appearance: none; background: transparent;
+    }
+    .row-number { font-size: 13px; color: var(--text-secondary); }
+    .col-appid { width: 100px; min-width: 100px; }
+    .col-zh { width: 200px; min-width: 200px; }
+    .col-source { width: 120px; min-width: 120px; }
+    .col-bkey { width: 160px; min-width: 160px; }
+    .col-ja { width: 240px; min-width: 240px; }
+    .col-en { width: 280px; min-width: 280px; }
+    .col-ko { width: 140px; min-width: 140px; }
+
+    .cell-text { line-height: 20px; word-break: break-all; }
+    .ja-cell { display: flex; flex-direction: column; gap: 2px; line-height: 20px; }
+    .ja-new, .ja-old { display: flex; align-items: flex-start; gap: 4px; }
+    .change-tag {
+      display: inline-flex; align-items: center; padding: 0 4px;
+      border-radius: 3px; font-size: 11px; font-weight: 500;
+      line-height: 18px; flex-shrink: 0; margin-top: 1px;
+    }
+    .change-tag.new { background: var(--tag-new-bg); color: var(--tag-new-text); }
+    .change-tag.old { background: var(--tag-old-bg); color: var(--tag-old-text); }
+    .ja-text { word-break: break-all; }
+    .highlight-yellow { background: #fef08a; padding: 0 1px; border-radius: 2px; }
+
+    /* Footer */
+    .table-footer {
+      height: 36px; background: var(--bg-container);
+      border-top: 1px solid var(--border-divider);
+      display: flex; align-items: center; padding: 0 24px;
+      font-size: 12px; color: var(--text-secondary); flex-shrink: 0;
+      gap: 4px;
+    }
+    .record-count { font-weight: 500; }
+
+    /* Deploy Modal */
+    .deploy-overlay { display: none; position: fixed; inset: 0; z-index: 100; }
+    .deploy-overlay.visible { display: block; }
+    .deploy-overlay .backdrop { position: absolute; inset: 0; }
+    .deploy-modal {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 272px; background: var(--bg-container); border: 1px solid var(--border-divider);
+      border-radius: 12px; box-shadow: var(--shadow-popup); padding: 4px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .deploy-field { padding: 7px 8px; display: flex; flex-direction: column; gap: 4px; }
+    .deploy-field label { font-size: 14px; color: var(--text-default); }
+    .deploy-select {
+      height: 32px; border: 1px solid var(--border-divider); border-radius: 6px;
+      padding: 0 12px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; background: var(--bg-container);
+    }
+    .deploy-select span { font-size: 14px; color: var(--text-disabled); }
+    .deploy-select svg { width: 16px; height: 16px; color: var(--text-secondary); }
+    .deploy-action { padding: 7px 8px; }
+    .deploy-btn {
+      width: 100%; height: 32px; border-radius: 12px; background: var(--bg-disabled);
+      border: none; cursor: not-allowed; font-size: 14px; color: var(--text-disabled);
+      font-family: inherit; display: flex; align-items: center; justify-content: center;
+    }
+
+    .confirm-dialog {
+      display: none; position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); width: 400px;
+      background: var(--bg-container); border-radius: 12px;
+      box-shadow: var(--shadow-popup); padding: 16px; z-index: 200;
+    }
+    .confirm-dialog.visible { display: flex; gap: 8px; }
+    .confirm-icon { width: 24px; height: 24px; color: #faad14; flex-shrink: 0; }
+    .confirm-content { flex: 1; }
+    .confirm-title { font-size: 16px; font-weight: 500; color: var(--text-default); line-height: 24px; margin-bottom: 16px; }
+    .confirm-buttons { display: flex; justify-content: flex-end; gap: 8px; }
+    .confirm-btn {
+      height: 32px; padding: 0 16px; border-radius: 6px; font-size: 14px;
+      font-family: inherit; cursor: pointer; border: 1px solid var(--border-divider);
+      background: var(--bg-container); color: var(--text-default);
+    }
+    .confirm-btn:hover { background: var(--bg-active); }
+    .confirm-btn.primary { background: var(--primary); border-color: var(--primary); color: white; }
+    .confirm-btn.primary:hover { opacity: 0.9; }
+
+    /* Megaphone Badge & Animation */
+    .megaphone-wrap { position: relative; }
+    .megaphone-wrap.has-changes svg {
+      animation: megaphone-pulse 2s ease-in-out infinite;
+      color: var(--error);
+    }
+    @keyframes megaphone-pulse {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.28) rotate(-8deg); }
+      30% { transform: scale(1) rotate(6deg); }
+      45% { transform: scale(1.18) rotate(-4deg); }
+      60% { transform: scale(1) rotate(0deg); }
+    }
+    .megaphone-badge {
+      position: absolute; top: -3px; right: -3px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--error); color: white;
+      font-size: 9px; font-weight: 700; line-height: 14px;
+      text-align: center;
+      border: 1.5px solid var(--bg-container);
+      pointer-events: none;
+    }
+    .megaphone-badge.hidden { display: none; }
+
+    /* Notify Popover */
+    .notify-popover {
+      display: none; position: absolute; top: 40px; right: 120px;
+      width: 272px; background: var(--bg-container);
+      border: 1px solid var(--border-divider); border-radius: 12px;
+      box-shadow: var(--shadow-popup); padding: 16px;
+      z-index: 50; flex-direction: column; gap: 16px;
+    }
+    .notify-popover.visible { display: flex; }
+    .notify-field { display: flex; flex-direction: column; gap: 8px; }
+    .notify-field label { font-size: 15px; font-weight: 500; color: var(--text-default); }
+    .notify-select {
+      height: 40px; border: 1px solid var(--border-divider); border-radius: 8px;
+      padding: 0 12px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; background: var(--bg-container); font-size: 14px;
+    }
+    .notify-hint {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 10px 12px; border-radius: 8px;
+      background: #fff7ed; border: 1px solid #fed7aa;
+      font-size: 13px; line-height: 18px; color: #9a3412;
+    }
+    .notify-hint svg { flex-shrink: 0; color: #ea580c; margin-top: 1px; }
+    .notify-hint.hidden { display: none; }
+    .notify-select svg { color: var(--text-disabled); }
+    .notify-action { margin-top: 4px; }
+    .notify-send-btn {
+      width: 100%; height: 44px; border-radius: 10px;
+      background: var(--button-default); border: none; cursor: pointer;
+      font-size: 15px; font-weight: 500; color: white; font-family: inherit;
+    }
+    .notify-send-btn:hover { opacity: 0.85; }
+
+    .toast {
+      position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px);
+      background: var(--button-default); color: white;
+      padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 500;
+      box-shadow: var(--shadow-popup); z-index: 300;
+      opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease;
+      pointer-events: none; white-space: nowrap;
+    }
+    .toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-divider); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-disabled); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></div>
+          <span class="logo-text">Doraemon</span>
+        </div>
+        <button class="sidebar-collapse-btn" title="Collapse">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="8" y1="3" x2="8" y2="17"/></svg>
+        </button>
+      </div>
+      <div class="sidebar-content">
+        <div class="sidebar-nav-item">
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 2H4a2 2 0 00-2 2v12a2 2 0 002 2h3l4 4 4-4h5a2 2 0 002-2V4a2 2 0 00-2-2z"/></svg></span>
+          <span class="nav-label">New Chat</span>
+        </div>
+        <div class="sidebar-nav-item">
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+          <span class="nav-label">Workspace</span>
+        </div>
+        <div class="sidebar-section-title">Expert Agent</div>
+        <div class="sidebar-nav-item active" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;"><div class="i18n-icon">i18</div><span>i18n</span></div>
+          <div class="unread-dot"></div>
+        </div>
+        <div class="sidebar-nav-item">
+          <div class="bd-icon">BD</div>
+          <span class="nav-label">BD</span>
+        </div>
+        <div class="sidebar-nav-item">
+          <div class="tech-icon"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83"/></svg></div>
+          <span class="nav-label">Tech</span>
+        </div>
+        <div class="sidebar-sub-link">← All Experts (2)</div>
+
+        <div class="ai-u-header">
+          <span>AI U</span>
+          <div class="header-actions">
+            <button title="Add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button title="Apps"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></button>
+          </div>
+        </div>
+        <div class="sidebar-nav-item">
+          <div class="avatar-small">📊</div>
+          <span class="nav-label">CP A票统计</span>
+        </div>
+        <div class="sidebar-nav-item">
+          <div class="avatar-small">⏰</div>
+          <span class="nav-label">早会提醒</span>
+        </div>
+
+        <div class="sidebar-section-title">Yesterday</div>
+        <div class="sidebar-nav-item">
+          <span class="nav-label">Alert for Translation Tas...</span>
+        </div>
+
+        <div class="sidebar-section-title">This Week</div>
+        <div class="sidebar-nav-item"><span class="nav-label">Over-Threshold Alert fo...</span></div>
+        <div class="sidebar-nav-item"><span class="nav-label">Translation Task Over-T...</span></div>
+        <div class="sidebar-nav-item"><span class="nav-label">创建任务-需求分析 (今...</span></div>
+        <div class="sidebar-nav-item"><span class="nav-label">给新添加cp expert 评估...</span></div>
+        <div class="sidebar-nav-item"><span class="nav-label">客服消息测试 rt0客服消...</span></div>
+        <div class="sidebar-nav-item"><span class="nav-label">测试客服消息</span></div>
+        <div class="sidebar-nav-item" style="margin-top:8px;"><span class="nav-label">new chat</span></div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">王</div>
+          <div class="user-details">
+            <span class="user-name">王彬</span>
+            <span class="user-role">wang.bin@ctw.inc</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="title-bar">
+        <div class="title-left">
+          <button class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <span class="title-name">i18n text table</span>
+          <span class="title-tag game">gamedemo <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+          <span class="title-tag lang">All languages <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
+        <div class="title-right">
+          <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></button>
+          <button class="icon-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span class="notification-badge">78</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="toolbar-btn">
+            All submissions
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            Hidden Fields
+          </button>
+          <button class="toolbar-btn active-filter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filter by app_id
+          </button>
+          <button class="toolbar-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h7M3 12h5M3 18h3M17 6v12M14 18l3 3 3-3"/></svg>
+            Sort
+          </button>
+        </div>
+        <div class="toolbar-right" style="position:relative;">
+          <button class="toolbar-icon-btn megaphone-wrap" title="Send Notification" id="megaphoneBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg>
+            <span class="megaphone-badge" id="megaphoneBadge">!</span>
+          </button>
+          <button class="toolbar-icon-btn" title="Download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+          <button class="toolbar-icon-btn" title="Open">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="16" height="16" rx="2"/><polyline points="15 3 21 3 21 9"/><line x1="14" y1="10" x2="21" y2="3"/></svg>
+          </button>
+          <button class="deploy-top-btn" id="deployTopBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            Deploy
+          </button>
+          <!-- Send Notification Popover -->
+          <div class="notify-popover" id="notifyPopover">
+            <div class="notify-hint" id="notifyHint">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>Japanese translations have been modified in this update.</span>
+            </div>
+            <div class="notify-field">
+              <label>Game</label>
+              <div class="notify-select">
+                <span style="color:var(--text-default);">gamedemo</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
+            <div class="notify-action">
+              <button class="notify-send-btn" id="sendNotifyBtn">Send Notification</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-id"><input type="checkbox" class="row-checkbox"></th>
+              <th class="col-appid"><div class="th-content"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 8h8M6 4h4"/></svg>app_id</div></th>
+              <th class="col-zh"><div class="th-content"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 8h8M6 4h4"/></svg>zh</div></th>
+              <th class="col-source"><div class="th-content"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 8h8M6 4h4"/></svg>source_filename</div></th>
+              <th class="col-bkey"><div class="th-content"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 8h8M6 4h4"/></svg>business_key</div></th>
+              <th class="col-ja"><div class="th-content"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 8h8M6 4h4"/></svg>ja</div></th>
+              <th class="col-en"><div class="th-content"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 8h8M6 4h4"/></svg>en</div></th>
+              <th class="col-ko"><div class="th-content"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 8h8M6 4h4"/></svg>ko</div></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-id"><span class="row-number">1</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">铃铛船</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">cloak_talent_name_130907</td>
+              <td class="col-ja">
+                <div class="ja-cell">
+                  <div class="ja-new"><span class="change-tag new">New</span><span class="ja-text"><span class="highlight-yellow">1111</span></span></div>
+                  <div class="ja-old"><span class="change-tag old">Old</span><span class="ja-text"><span class="highlight-yellow">88321</span></span></div>
+                </div>
+              </td>
+              <td class="col-en">1111</td>
+              <td class="col-ko">1111...</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">2</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">ヤマトの加護</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">ItemName_310</td>
+              <td class="col-ja">
+                <div class="ja-cell">
+                  <div class="ja-new"><span class="change-tag new">New</span><span class="ja-text">ヤマトの加護<span class="highlight-yellow">+change</span></span></div>
+                  <div class="ja-old"><span class="change-tag old">Old</span><span class="ja-text">ヤマトの加護</span></div>
+                </div>
+              </td>
+              <td class="col-en">Yamato's Blessing +change</td>
+              <td class="col-ko">아마토의 가...</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">3</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">グランエイプ</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">secretAdventureE...</td>
+              <td class="col-ja"><span class="cell-text">グランエイプ</span></td>
+              <td class="col-en">Grand Ape</td>
+              <td class="col-ko">그란 에이프</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">4</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">クールタイム</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">xdsfs100373</td>
+              <td class="col-ja"><span class="cell-text">クールタイム</span></td>
+              <td class="col-en">Cooldown</td>
+              <td class="col-ko">쿨타임</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">5</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">阿梅利亚千星</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">1112_test_002</td>
+              <td class="col-ja">
+                <div class="ja-cell">
+                  <div class="ja-new"><span class="change-tag new">New</span><span class="ja-text">アメリア昇格<span class="highlight-yellow">+change</span></span></div>
+                  <div class="ja-old"><span class="change-tag old">Old</span><span class="ja-text">アメリア昇格</span></div>
+                </div>
+              </td>
+              <td class="col-en">Amelia Promotion + change</td>
+              <td class="col-ko">아메리아...</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">6</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">【伝説】白騎士の護符</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">magicEquip_100081 11</td>
+              <td class="col-ja">
+                <div class="ja-cell">
+                  <div class="ja-new"><span class="change-tag new">New</span><span class="ja-text">【伝説】白騎士の護符<span class="highlight-yellow">+10911444666</span></span></div>
+                  <div class="ja-old"><span class="change-tag old">Old</span><span class="ja-text">【伝説】白騎士の護符+109114 446666</span></div>
+                </div>
+              </td>
+              <td class="col-en">[Legend B] White Knight's Talisman +109114446...</td>
+              <td class="col-ko">[전설 B] ...</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">7</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">SSR+共闘者を{0}体所持</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">taskDesc_31</td>
+              <td class="col-ja"><span class="cell-text">SSR+共闘者を{0}体所持</span></td>
+              <td class="col-en">Own {0} SSR+ Allies</td>
+              <td class="col-ko">SS...</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">8</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">ステージの累計挑戦回数260回</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">xdsfs100247</td>
+              <td class="col-ja">
+                <div class="ja-cell">
+                  <div class="ja-new"><span class="change-tag new">New</span><span class="ja-text">ステージの累計挑戦回数260回</span></div>
+                  <div class="ja-old"><span class="change-tag old">Old</span><span class="ja-text">ステージの累計挑戦回数260回<span class="highlight-yellow">+966</span></span></div>
+                </div>
+              </td>
+              <td class="col-en">Total stage attempts: 260</td>
+              <td class="col-ko">스테이지 누...</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">9</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">マラソン競争ナイトメア4</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">xdsfs100630</td>
+              <td class="col-ja"><span class="cell-text">マラソン競争ナイトメア4+4</span></td>
+              <td class="col-en">Marathon Race Nightmare 4+4 - Send notification 1333 after modification</td>
+              <td class="col-ko">마라톤 경쟁...</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">10</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">マラソン競技ハード1</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">xdsfs100622</td>
+              <td class="col-ja"><span class="cell-text">マラソン競技ハード1+4</span></td>
+              <td class="col-en">Marathon Competition Hard 1+4</td>
+              <td class="col-ko">마라톤 경...</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">11</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">微密な亀裂</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">xdsfs100526</td>
+              <td class="col-ja">
+                <div class="ja-cell">
+                  <div class="ja-new"><span class="change-tag new">New</span><span class="ja-text">微密な亀裂</span></div>
+                  <div class="ja-old"><span class="change-tag old">Old</span><span class="ja-text">微密な亀裂<span class="highlight-yellow">123</span></span></div>
+                </div>
+              </td>
+              <td class="col-en">Intimate Rift</td>
+              <td class="col-ko">친밀한 균...</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">12</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">排名</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">Entrance_name_04</td>
+              <td class="col-ja"><span class="cell-text">ランキング</span></td>
+              <td class="col-en"></td>
+              <td class="col-ko"></td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">13</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">对敌方前排单体造成1次攻击力100%的魔法伤害。</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">12_16_jctest331</td>
+              <td class="col-ja"><span class="cell-text">敵の前衛単体に1回、攻撃力100%の魔法ダメージを与える。</span></td>
+              <td class="col-en">Deals magic damage equal to 100% of Attack power to 1 enemy in the front row AppleApple</td>
+              <td class="col-ko"></td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">14</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">对敌方前排单体造成3次攻击力333%的魔法伤害。</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">12_26_jctest072</td>
+              <td class="col-ja"><span class="cell-text">敵の前衛単体に対して、3回攻撃力333%の魔法ダメージをシラス。</span></td>
+              <td class="col-en"></td>
+              <td class="col-ko"></td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="row-number">15</span></td>
+              <td class="col-appid">gamedemo</td>
+              <td class="col-zh"><span class="cell-text">你下来来和.01只蛤蟆1600白金...</span></td>
+              <td class="col-source">default-1.json</td>
+              <td class="col-bkey">01_07_jctest1184...</td>
+              <td class="col-ja"><span class="cell-text">ハムウリをメスト...</span></td>
+              <td class="col-en">When you eat Hami melon, Physical strength ...</td>
+              <td class="col-ko"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span class="record-count">7833 records</span>
+        <span>&lt;</span>
+      </div>
+    </main>
+  </div>
+
+  <!-- DEPLOY MODAL -->
+  <div class="deploy-overlay" id="deployOverlay">
+    <div class="backdrop" id="deployBackdrop"></div>
+    <div class="deploy-modal">
+      <div class="deploy-field"><label>Game</label><div class="deploy-select"><span>Select</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="deploy-field"><label>Language</label><div class="deploy-select"><span>Select</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="deploy-action"><button class="deploy-btn">Deploy to Production</button></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const deployTopBtn = document.getElementById('deployTopBtn');
+    const deployOverlay = document.getElementById('deployOverlay');
+    const deployBackdrop = document.getElementById('deployBackdrop');
+    const megaphoneBtn = document.getElementById('megaphoneBtn');
+    const notifyPopover = document.getElementById('notifyPopover');
+    const sendNotifyBtn = document.getElementById('sendNotifyBtn');
+
+    deployTopBtn.addEventListener('click', () => deployOverlay.classList.toggle('visible'));
+    deployBackdrop.addEventListener('click', () => deployOverlay.classList.remove('visible'));
+
+    const megaphoneBadge = document.getElementById('megaphoneBadge');
+    const notifyHint = document.getElementById('notifyHint');
+
+    function countJaModified() {
+      return document.querySelectorAll('.ja-cell').length;
+    }
+
+    function updateBadge() {
+      const hasChanges = countJaModified() > 0;
+      megaphoneBadge.classList.toggle('hidden', !hasChanges);
+      megaphoneBtn.classList.toggle('has-changes', hasChanges);
+      notifyHint.classList.toggle('hidden', !hasChanges);
+    }
+
+    updateBadge();
+
+    megaphoneBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      notifyPopover.classList.toggle('visible');
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 2500);
+    }
+
+    sendNotifyBtn.addEventListener('click', () => {
+      notifyPopover.classList.remove('visible');
+      document.querySelectorAll('.ja-cell').forEach(cell => {
+        const text = cell.querySelector('.ja-new .ja-text')?.textContent || '';
+        cell.parentElement.innerHTML = '<span class="cell-text">' + text + '</span>';
+      });
+      updateBadge();
+      showToast('Notification sent successfully');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!notifyPopover.contains(e.target) && !megaphoneBtn.contains(e.target)) {
+        notifyPopover.classList.remove('visible');
+      }
+    });
+  </script>
+</body>
+</html>
