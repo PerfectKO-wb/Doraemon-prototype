@@ -3,768 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doraemon - i18n text table</title>
+    <title>Doraemon — Project Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            color: #333;
-            font-size: 13px;
-            background: #fff;
+        :root {
+            --bg: #0c0e16;
+            --surface: #151821;
+            --surface-hover: #1c2030;
+            --border: rgba(255,255,255,0.06);
+            --text: #e8e4dd;
+            --text-dim: #6b6d7b;
+            --accent-amber: #f0b429;
+            --accent-amber-glow: rgba(240,180,41,0.15);
+            --accent-teal: #36d6b5;
+            --accent-teal-glow: rgba(54,214,181,0.15);
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Noto Sans SC', 'Outfit', sans-serif;
         }
-        .app { display: flex; width: 100%; height: 100%; }
 
-        /* ==================== SIDEBAR ==================== */
-        .sidebar {
-            width: 200px;
-            background: #1a1b2e;
-            color: #b0b0c0;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Ambient glow */
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .glow-orb.amber {
+            width: 500px; height: 500px;
+            background: var(--accent-amber);
+            opacity: 0.04;
+            top: -10%; left: 20%;
+        }
+        .glow-orb.teal {
+            width: 400px; height: 400px;
+            background: var(--accent-teal);
+            opacity: 0.035;
+            bottom: -5%; right: 15%;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 32px;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
-            font-size: 13px;
-            overflow-y: auto;
+            justify-content: center;
         }
-        .sidebar-header {
+
+        /* Header */
+        .header {
+            margin-bottom: 64px;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .brand {
             display: flex;
             align-items: center;
-            padding: 12px 14px;
-            gap: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            gap: 14px;
+            margin-bottom: 28px;
         }
-        .sidebar-logo {
-            width: 26px; height: 26px;
-            background: #4a90d9; border-radius: 6px;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .sidebar-logo svg { width: 18px; height: 18px; fill: #fff; }
-        .sidebar-title { color: #fff; font-size: 15px; font-weight: 600; flex: 1; }
-        .sidebar-header-icons { display: flex; gap: 6px; }
-        .sidebar-header-icons svg { width: 16px; height: 16px; fill: #666; cursor: pointer; opacity: 0.6; }
-        .sidebar-actions { padding: 8px 10px; }
-        .sidebar-action-btn {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 10px; border-radius: 6px; cursor: pointer;
-            color: #d0d0e0; font-size: 13px; transition: background 0.15s;
-        }
-        .sidebar-action-btn:hover { background: rgba(255,255,255,0.06); }
-        .sidebar-action-btn svg { width: 16px; height: 16px; fill: currentColor; opacity: 0.7; flex-shrink: 0; }
-        .sidebar-section-label {
-            padding: 14px 14px 6px; font-size: 11px; color: #666;
-            text-transform: capitalize; display: flex; align-items: center; justify-content: space-between;
-        }
-        .sidebar-section-label .label-actions { display: flex; gap: 4px; }
-        .sidebar-section-label .label-actions svg { width: 14px; height: 14px; fill: #555; cursor: pointer; }
-        .sidebar-item {
-            display: flex; align-items: center; gap: 10px; padding: 6px 14px;
-            cursor: pointer; font-size: 13px; color: #b0b0c0; transition: background 0.15s;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .sidebar-item:hover { background: rgba(255,255,255,0.05); }
-        .sidebar-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .sidebar-item .dot.green { background: #4caf50; }
-        .sidebar-item .dot.blue { background: #5c6bc0; }
-        .sidebar-item .avatar-sm {
-            width: 22px; height: 22px; border-radius: 50%; background: #333;
+
+        .brand-icon {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, #4a90d9, #6ba3e8);
+            border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; font-size: 10px; color: #aaa;
-        }
-        .sidebar-item-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .sidebar-footer {
-            margin-top: auto; padding: 12px 14px;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .sidebar-footer .user-avatar {
-            width: 30px; height: 30px; border-radius: 50%; background: #3a3b5e;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; font-size: 12px; color: #ccc;
-        }
-        .sidebar-footer .user-info { flex: 1; overflow: hidden; }
-        .sidebar-footer .user-name { color: #d0d0e0; font-size: 13px; font-weight: 500; }
-        .sidebar-footer .user-email { color: #666; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .sidebar-footer .emoji-btn { font-size: 18px; cursor: pointer; opacity: 0.6; }
-
-        /* ==================== MAIN ==================== */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
-
-        /* Tab Bar */
-        .tab-bar {
-            display: flex; align-items: center; height: 42px;
-            border-bottom: 1px solid #e8e8e8; padding: 0 12px; gap: 0; flex-shrink: 0;
-        }
-        .tab-bar .back-btn {
-            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: #666; border-radius: 4px; margin-right: 6px; flex-shrink: 0;
-        }
-        .tab-bar .back-btn:hover { background: #f0f0f0; }
-        .tab-title {
-            font-size: 14px; font-weight: 600; color: #333; margin-right: 12px;
-            white-space: nowrap; flex-shrink: 0;
+            box-shadow: 0 8px 32px rgba(74,144,217,0.25);
         }
 
-        /* View list toggle */
-        .view-list-toggle {
-            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; border-radius: 4px; margin-right: 4px; flex-shrink: 0; position: relative;
-        }
-        .view-list-toggle:hover { background: #f0f0f0; }
-        .view-list-toggle svg { width: 18px; height: 18px; fill: #555; }
-
-        /* View tabs container */
-        .view-tabs-container {
-            display: flex; align-items: center; gap: 0; flex: 1; overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .view-tabs-container::-webkit-scrollbar { display: none; }
-
-        .view-tab {
-            display: flex; align-items: center; gap: 5px;
-            padding: 6px 12px; cursor: pointer; font-size: 13px; color: #555;
-            border-radius: 6px; white-space: nowrap; position: relative;
-            user-select: none; flex-shrink: 0; border: 1px solid transparent;
-            transition: background 0.1s;
-        }
-        .view-tab:hover { background: #f5f5f5; }
-        .view-tab.active { background: #f0f0f0; color: #333; font-weight: 500; }
-        .view-tab.drag-over { border: 1px dashed #5c6bc0; }
-        .view-tab.dragging { opacity: 0.4; }
-        .view-tab svg { width: 16px; height: 16px; fill: #888; flex-shrink: 0; }
-        .view-tab .view-name {
-            outline: none; min-width: 20px; display: inline-block;
-        }
-        .view-tab .view-name[contenteditable="true"] {
-            background: #fff; border: 1px solid #5c6bc0; border-radius: 3px;
-            padding: 0 4px; color: #333;
+        .brand-icon svg {
+            width: 32px; height: 32px;
         }
 
-        .add-view-btn {
-            width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; border-radius: 4px; margin-left: 4px; flex-shrink: 0;
-            color: #999; font-size: 18px; font-weight: 300;
+        .brand-text {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #a0a4b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .add-view-btn:hover { background: #f0f0f0; color: #555; }
 
-        .tab-bar-right {
-            margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-dim);
+            font-weight: 300;
+            letter-spacing: 0.5px;
         }
-        .tab-bar-right .icon-btn {
-            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; border-radius: 50%; color: #666;
-        }
-        .tab-bar-right .icon-btn:hover { background: #f0f0f0; }
-        .tab-bar-right svg { width: 18px; height: 18px; fill: #555; }
 
-        /* Toolbar */
-        .toolbar {
-            display: flex; align-items: center; min-height: 42px; padding: 6px 12px;
-            gap: 6px; border-bottom: 1px solid #e8e8e8; flex-shrink: 0; flex-wrap: wrap;
+        /* Cards grid */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
         }
-        .toolbar-dropdown {
-            display: flex; align-items: center; gap: 4px; padding: 5px 10px;
-            border: 1px solid #e0e0e0; border-radius: 6px; font-size: 12px;
-            color: #333; cursor: pointer; white-space: nowrap; background: #fff;
+
+        .card {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 32px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text);
+            overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.22,1,0.36,1),
+                        box-shadow 0.35s cubic-bezier(0.22,1,0.36,1),
+                        border-color 0.3s ease;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.15s; }
+        .card:nth-child(2) { animation-delay: 0.3s; }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .card.amber::before {
+            background: radial-gradient(ellipse at 30% 20%, var(--accent-amber-glow) 0%, transparent 70%);
+        }
+
+        .card.teal::before {
+            background: radial-gradient(ellipse at 30% 20%, var(--accent-teal-glow) 0%, transparent 70%);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        .card.amber:hover {
+            box-shadow: 0 20px 60px rgba(240,180,41,0.08), 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .card.teal:hover {
+            box-shadow: 0 20px 60px rgba(54,214,181,0.08), 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .card-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-family: var(--font-display);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 22px;
             position: relative;
         }
-        .toolbar-dropdown.muted { color: #aaa; border-color: #e8e8e8; }
-        .toolbar-dropdown svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
-        .toolbar-dropdown.green-border { border-color: #36b5a0; color: #2a8f7e; }
-        .toolbar-dropdown.green-border svg { fill: #2a8f7e; }
 
-        .toolbar-search {
-            display: flex; align-items: center; gap: 4px; padding: 5px 10px;
-            border: 1px solid #e0e0e0; border-radius: 6px; font-size: 12px; color: #999; min-width: 110px;
+        .card.amber .card-badge {
+            background: rgba(240,180,41,0.12);
+            color: var(--accent-amber);
         }
-        .toolbar-search svg { width: 14px; height: 14px; fill: #999; }
-        .toolbar-search input {
-            border: none; outline: none; font-size: 12px; color: #333; width: 60px; background: transparent;
-        }
-        .toolbar-search input::placeholder { color: #bbb; }
-        .btn-replace {
-            padding: 5px 14px; border-radius: 6px; border: none;
-            background: #36b5a0; color: #fff; font-size: 12px; cursor: pointer; font-weight: 500;
-        }
-        .btn-replace:hover { background: #2ea692; }
-        .toolbar-right {
-            margin-left: auto; display: flex; align-items: center; gap: 6px;
-        }
-        .btn-deploy {
-            display: flex; align-items: center; gap: 5px; padding: 5px 14px;
-            border-radius: 6px; border: 1px solid #222; background: #1a1b2e;
-            color: #fff; font-size: 12px; cursor: pointer; font-weight: 500;
-        }
-        .btn-deploy svg { width: 12px; height: 12px; fill: #fff; }
 
-        /* ==================== DROPDOWNS ==================== */
-        .dropdown-menu {
-            position: absolute; top: calc(100% + 4px); left: 0; min-width: 180px;
-            background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 100;
-            padding: 4px 0; display: none;
+        .card.teal .card-badge {
+            background: rgba(54,214,181,0.12);
+            color: var(--accent-teal);
         }
-        .dropdown-menu.show { display: block; }
-        .dropdown-menu .dropdown-item {
-            padding: 8px 14px; font-size: 13px; color: #333; cursor: pointer;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .dropdown-menu .dropdown-item:hover { background: #f5f5f5; }
-        .dropdown-menu .dropdown-item.selected { color: #5c6bc0; font-weight: 500; }
-        .dropdown-menu .dropdown-item .check-mark { width: 16px; font-size: 14px; }
 
-        /* ==================== CONTEXT MENU ==================== */
-        .context-menu {
-            position: fixed; min-width: 180px; background: #fff;
-            border: 1px solid #e0e0e0; border-radius: 10px;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.12); z-index: 1000;
-            padding: 6px 0; display: none;
+        .card-badge-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
         }
-        .context-menu.show { display: block; }
-        .context-menu .ctx-item {
-            padding: 10px 18px; font-size: 14px; color: #333; cursor: pointer;
-        }
-        .context-menu .ctx-item:hover { background: #f5f5f5; }
-        .context-menu .ctx-item.danger { color: #e53935; }
-        .context-menu .ctx-divider { height: 1px; background: #eee; margin: 4px 0; }
 
-        /* ==================== VIEW LIST PANEL ==================== */
-        .view-list-panel {
-            position: absolute; top: calc(100% + 6px); left: 0; width: 260px;
-            background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.12); z-index: 200;
-            padding: 8px 0; display: none;
-        }
-        .view-list-panel.show { display: block; }
-        .view-list-panel .panel-search {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 14px; border-bottom: 1px solid #eee;
-        }
-        .view-list-panel .panel-search svg { width: 18px; height: 18px; fill: #aaa; flex-shrink: 0; }
-        .view-list-panel .panel-search input {
-            border: none; outline: none; font-size: 14px; color: #333; width: 100%; background: transparent;
-        }
-        .view-list-panel .panel-search input::placeholder { color: #bbb; }
-        .view-list-items { padding: 6px 0; max-height: 300px; overflow-y: auto; }
-        .view-list-item {
-            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-            cursor: pointer; font-size: 14px; color: #333; transition: background 0.1s;
-        }
-        .view-list-item:hover { background: #f5f5f5; }
-        .view-list-item.active { font-weight: 500; }
-        .view-list-item svg.grid-icon { width: 22px; height: 22px; fill: #555; flex-shrink: 0; }
-        .view-list-item .item-name { flex: 1; }
-        .view-list-item .item-menu {
-            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; border-radius: 4px; color: #aaa; font-size: 16px; letter-spacing: 1px;
-            opacity: 0; transition: opacity 0.15s;
-        }
-        .view-list-item:hover .item-menu { opacity: 1; }
-        .view-list-item .item-menu:hover { background: #eee; color: #555; }
-        .view-list-item.dragging-item { opacity: 0.4; }
-        .view-list-item.drag-over-item { border-top: 2px solid #5c6bc0; }
+        .card.amber .card-badge-dot { background: var(--accent-amber); }
+        .card.teal .card-badge-dot { background: var(--accent-teal); }
 
-        /* ==================== TABLE ==================== */
-        .table-wrapper { flex: 1; overflow: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        thead th {
-            position: sticky; top: 0; background: #fafafa; border-bottom: 1px solid #e8e8e8;
-            padding: 8px 12px; text-align: left; font-weight: 500; font-size: 12px;
-            color: #666; z-index: 1; white-space: nowrap;
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            margin-bottom: 10px;
+            position: relative;
         }
-        thead th.col-checkbox { width: 40px; text-align: center; }
-        thead th.col-num { width: 36px; text-align: center; }
-        thead th.col-key { width: 140px; }
-        thead th.col-zh { width: 35%; }
-        thead th.col-ja { width: 35%; }
-        .col-header-inner { display: flex; align-items: center; gap: 6px; }
-        .type-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 20px; height: 18px; border-radius: 3px; font-size: 11px; font-weight: 600; flex-shrink: 0;
-        }
-        .type-badge.text-type { background: #e8eaf6; color: #5c6bc0; }
-        .type-badge.lang-type { background: #fff3e0; color: #ef6c00; }
-        tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; }
-        tbody tr:hover { background: #fafbff; }
-        tbody td {
-            padding: 8px 12px; vertical-align: top; font-size: 13px; line-height: 1.5;
-            color: #333; word-wrap: break-word; overflow-wrap: break-word;
-        }
-        tbody td.cell-checkbox { text-align: center; vertical-align: middle; width: 40px; }
-        tbody td.cell-num { text-align: center; color: #999; font-size: 12px; vertical-align: top; width: 36px; padding-top: 10px; }
-        tbody td.cell-key { color: #555; font-size: 12px; font-family: 'SF Mono','Monaco','Menlo','Consolas', monospace; width: 140px; }
-        input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: #5c6bc0; }
 
-        /* Pagination */
-        .pagination {
-            height: 36px; display: flex; align-items: center; padding: 0 16px;
-            border-top: 1px solid #e8e8e8; font-size: 12px; color: #888; gap: 8px; flex-shrink: 0;
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 28px;
+            position: relative;
         }
-        .pagination .page-nav { display: flex; gap: 4px; margin-left: 4px; }
-        .pagination .page-nav span { cursor: pointer; padding: 2px 6px; border-radius: 3px; color: #999; }
-        .pagination .page-nav span:hover { background: #f0f0f0; color: #333; }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+        .card-arrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-size: 13px;
+            font-weight: 500;
+            position: relative;
+            transition: gap 0.3s ease;
+        }
 
-        /* Overlay to close panels */
-        .overlay { position: fixed; inset: 0; z-index: 50; display: none; }
-        .overlay.show { display: block; }
+        .card.amber .card-arrow { color: var(--accent-amber); }
+        .card.teal .card-arrow { color: var(--accent-teal); }
+
+        .card:hover .card-arrow { gap: 14px; }
+
+        .card-arrow svg {
+            width: 18px; height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-arrow svg {
+            transform: translateX(4px);
+        }
+
+        /* Corner decoration */
+        .card-corner {
+            position: absolute;
+            top: 0; right: 0;
+            width: 120px; height: 120px;
+            opacity: 0.04;
+            pointer-events: none;
+        }
+
+        .card.amber .card-corner { color: var(--accent-amber); }
+        .card.teal .card-corner { color: var(--accent-teal); }
+
+        /* Footer */
+        .footer {
+            margin-top: 80px;
+            padding-bottom: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeUp 0.8s ease 0.45s both;
+        }
+
+        .footer-left {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover { color: var(--text); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .page { padding: 0 20px; }
+            .cards { grid-template-columns: 1fr; }
+            .brand-text { font-size: 26px; }
+            .card-title { font-size: 20px; }
+            .header { margin-bottom: 48px; }
+        }
     </style>
 </head>
 <body>
-<div class="app">
-    <!-- ==================== SIDEBAR ==================== -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fff" opacity="0.9"/><circle cx="9" cy="10" r="1.5" fill="#333"/><circle cx="15" cy="10" r="1.5" fill="#333"/><ellipse cx="12" cy="14" rx="3" ry="2" fill="none" stroke="#333" stroke-width="1.2"/></svg>
-            </div>
-            <span class="sidebar-title">Doraemon</span>
-            <div class="sidebar-header-icons">
-                <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 00-2 2v14h2V3h12V1zm3 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg>
-                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-            </div>
-        </div>
-        <div class="sidebar-actions">
-            <div class="sidebar-action-btn">
-                <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2z"/></svg>
-                <span>New Chat</span>
-            </div>
-            <div class="sidebar-action-btn">
-                <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2z"/></svg>
-                <span>Workspace</span>
-            </div>
-        </div>
-        <div class="sidebar-section-label">Expert Agent</div>
-        <div class="sidebar-item"><span class="dot green"></span><span class="sidebar-item-text">i18n</span></div>
-        <div class="sidebar-item"><span class="dot green"></span><span class="sidebar-item-text">CS</span></div>
-        <div class="sidebar-item"><span class="dot blue"></span><span class="sidebar-item-text">Tech</span></div>
-        <div class="sidebar-section-label">
-            AI U
-            <span class="label-actions">
-                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                <svg viewBox="0 0 24 24"><path d="M19.14 12.94a7.07 7.07 0 000-.88l1.9-1.48a.45.45 0 00.11-.57l-1.8-3.12a.45.45 0 00-.55-.2l-2.24.9a6.8 6.8 0 00-.76-.44l-.34-2.38a.44.44 0 00-.44-.38h-3.6a.44.44 0 00-.43.38l-.34 2.38a6.3 6.3 0 00-.76.44l-2.24-.9a.45.45 0 00-.55.2l-1.8 3.12a.44.44 0 00.11.57l1.9 1.48a5.4 5.4 0 000 .88l-1.9 1.48a.45.45 0 00-.11.57l1.8 3.12a.45.45 0 00.55.2l2.24-.9c.24.17.49.32.76.44l.34 2.38a.44.44 0 00.43.38h3.6a.44.44 0 00.44-.38l.34-2.38c.27-.12.52-.27.76-.44l2.24.9a.45.45 0 00.55-.2l1.8-3.12a.45.45 0 00-.11-.57l-1.9-1.48zM12 15.5A3.5 3.5 0 1115.5 12 3.5 3.5 0 0112 15.5z"/></svg>
-            </span>
-        </div>
-        <div class="sidebar-item">
-            <span class="avatar-sm">👤</span>
-            <span class="sidebar-item-text">上海政策助手</span>
-        </div>
-        <div class="sidebar-footer">
-            <div class="user-avatar">王</div>
-            <div class="user-info">
-                <div class="user-name">王彬</div>
-                <div class="user-email">wang.bin@ctw.inc</div>
-            </div>
-            <span class="emoji-btn">😊</span>
-        </div>
-    </aside>
+    <div class="glow-orb amber"></div>
+    <div class="glow-orb teal"></div>
 
-    <!-- ==================== MAIN CONTENT ==================== -->
-    <main class="main-content">
-        <!-- Tab Bar: title + view tabs -->
-        <div class="tab-bar">
-            <div class="back-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
-            </div>
-            <span class="tab-title">i18n text table</span>
-
-            <!-- View list toggle -->
-            <div class="view-list-toggle" id="viewListToggle">
-                <svg viewBox="0 0 24 24"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/><circle cx="3" cy="5" r="1.2" fill="#555"/><circle cx="3" cy="12" r="1.2" fill="#555"/><circle cx="3" cy="19" r="1.2" fill="#555"/></svg>
-                <!-- View list panel -->
-                <div class="view-list-panel" id="viewListPanel">
-                    <div class="panel-search">
-                        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16a6.47 6.47 0 004.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1114 9.5 4.49 4.49 0 019.5 14z"/></svg>
-                        <input type="text" placeholder="Search view…" id="viewSearchInput">
-                    </div>
-                    <div class="view-list-items" id="viewListItems"></div>
+    <div class="page">
+        <div class="header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <circle cx="24" cy="24" r="18" fill="#fff" opacity="0.9"/>
+                        <circle cx="18" cy="21" r="2.8" fill="#2a2a3e"/>
+                        <circle cx="30" cy="21" r="2.8" fill="#2a2a3e"/>
+                        <path d="M18 30c0 0 3 4 6 4s6-4 6-4" stroke="#2a2a3e" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                        <circle cx="24" cy="26" r="2.2" fill="#e85d5d" opacity="0.9"/>
+                    </svg>
                 </div>
+                <span class="brand-text">Doraemon</span>
             </div>
-
-            <!-- View tabs (draggable) -->
-            <div class="view-tabs-container" id="viewTabsContainer"></div>
-
-            <!-- Add view button -->
-            <div class="add-view-btn" id="addViewBtn" title="Add view">+</div>
-
-            <div class="tab-bar-right">
-                <div class="icon-btn">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="#888" stroke-width="1.5"/></svg>
-                </div>
-                <div class="icon-btn">
-                    <svg viewBox="0 0 24 24"><path d="M12 22a2 2 0 002-2h-4a2 2 0 002 2zm6-6v-5a6 6 0 00-5-5.91V4a1 1 0 10-2 0v1.09A6 6 0 006 11v5l-2 2v1h16v-1l-2-2z" fill="#888"/></svg>
-                </div>
-                <div class="icon-btn">
-                    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 3a3 3 0 110 6 3 3 0 010-6zm0 14.2a7.2 7.2 0 01-6-3.22c.03-1.99 4-3.08 6-3.08s5.97 1.09 6 3.08a7.2 7.2 0 01-6 3.22z" fill="#888"/></svg>
-                </div>
-            </div>
+            <p class="subtitle">Product &amp; Design — Prototype Hub</p>
         </div>
 
-        <!-- Toolbar: filters row -->
-        <div class="toolbar">
-            <!-- Game dropdown -->
-            <div class="toolbar-dropdown green-border" id="gameDropdown">
-                <svg viewBox="0 0 24 24"><path d="M21 6H3a1 1 0 00-1 1v10a1 1 0 001 1h18a1 1 0 001-1V7a1 1 0 00-1-1zM7 15a2 2 0 110-4 2 2 0 010 4zm4-3.5a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2z"/></svg>
-                <span id="gameLabel">tenken</span>
-                <svg viewBox="0 0 24 24" style="width:10px;height:10px"><path d="M7 10l5 5 5-5z"/></svg>
-                <div class="dropdown-menu" id="gameMenu">
-                    <div class="dropdown-item" data-value="game1"><span class="check-mark"></span>game1</div>
-                    <div class="dropdown-item selected" data-value="tenken"><span class="check-mark">✓</span>tenken</div>
-                    <div class="dropdown-item" data-value="game2"><span class="check-mark"></span>game2</div>
+        <div class="cards">
+            <!-- Card 1: D系统原型 -->
+            <a class="card amber" href="homepage.html">
+                <svg class="card-corner" viewBox="0 0 120 120" fill="none">
+                    <circle cx="120" cy="0" r="80" stroke="currentColor" stroke-width="1"/>
+                    <circle cx="120" cy="0" r="50" stroke="currentColor" stroke-width="0.5"/>
+                </svg>
+                <div class="card-badge">
+                    <span class="card-badge-dot"></span>
+                    Prototype
                 </div>
-            </div>
-
-            <!-- Language dropdown -->
-            <div class="toolbar-dropdown" id="langDropdown">
-                <span id="langLabel">All languages</span>
-                <svg viewBox="0 0 24 24" style="width:10px;height:10px"><path d="M7 10l5 5 5-5z"/></svg>
-                <div class="dropdown-menu" id="langMenu">
-                    <div class="dropdown-item selected" data-value="all"><span class="check-mark">✓</span>All languages</div>
-                    <div class="dropdown-item" data-value="zh-ja"><span class="check-mark"></span>zh → ja</div>
-                    <div class="dropdown-item" data-value="ja-en"><span class="check-mark"></span>ja → en</div>
-                    <div class="dropdown-item" data-value="ja-ko"><span class="check-mark"></span>ja → ko</div>
+                <div class="card-title">D系统原型</div>
+                <div class="card-desc">AI 智能对话系统的交互原型，包含聊天界面、Agent 配置、工作台等核心模块。</div>
+                <div class="card-arrow">
+                    进入原型
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
-            </div>
+            </a>
 
-            <!-- Existing filters -->
-            <div class="toolbar-dropdown">
-                <svg viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
-                <span>submission-65a...</span>
-                <svg viewBox="0 0 24 24" style="width:10px;height:10px"><path d="M7 10l5 5 5-5z" fill="#999"/></svg>
-            </div>
-            <div class="toolbar-dropdown">
-                <span>All Status (8025)</span>
-            </div>
-            <div class="toolbar-dropdown muted"><span>Ref language</span></div>
-            <div class="toolbar-dropdown muted"><span>Sort</span></div>
-            <div class="toolbar-dropdown"><span>All</span></div>
-            <div class="toolbar-search">
-                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16a6.47 6.47 0 004.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1114 9.5 4.49 4.49 0 019.5 14z" fill="#999"/></svg>
-                <input type="text" placeholder="Search">
-            </div>
-            <button class="btn-replace">Replace</button>
-            <div class="toolbar-right">
-                <button class="btn-deploy">
-                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                    Deploy
-                </button>
-            </div>
+            <!-- Card 2: 调研相关 -->
+            <a class="card teal" href="会前准备.html">
+                <svg class="card-corner" viewBox="0 0 120 120" fill="none">
+                    <rect x="60" y="-30" width="60" height="60" rx="8" stroke="currentColor" stroke-width="1" transform="rotate(15)"/>
+                    <rect x="75" y="-15" width="40" height="40" rx="6" stroke="currentColor" stroke-width="0.5" transform="rotate(15)"/>
+                </svg>
+                <div class="card-badge">
+                    <span class="card-badge-dot"></span>
+                    Research
+                </div>
+                <div class="card-title">调研相关</div>
+                <div class="card-desc">竞品分析、用户调研与会前准备资料汇总，辅助产品决策与方向对齐。</div>
+                <div class="card-arrow">
+                    查看资料
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </a>
         </div>
 
-        <!-- Table -->
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="col-checkbox"><input type="checkbox"></th>
-                        <th class="col-num"></th>
-                        <th class="col-key"><div class="col-header-inner"><span class="type-badge text-type">A</span><span>business_key</span></div></th>
-                        <th class="col-zh"><div class="col-header-inner"><span class="type-badge lang-type">底</span><span>zh</span></div></th>
-                        <th class="col-ja"><div class="col-header-inner"><span class="type-badge lang-type">底</span><span>ja</span></div></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">1</td><td class="cell-key">ID_2000979</td><td>星卜灵券</td><td>星勤,回収券</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">2</td><td class="cell-key">ID_2000986</td><td>魔法圣盾</td><td>魔光高級パス</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">3</td><td class="cell-key">ID_10090260</td><td>寒霜领域展开后每$(0)秒翻造$(1)个冰制球在战场中辐射移动, 每$(2)秒造成$(3)%冰霜伤害并射出$(4)枚未强化的冰粒, 可以穿透所有敌人, 造成$(5)%冰霜伤害, 对处于冰伤的人造成最大生命$(6)%的冰霜伤害（不超过攻击力的$(7)%）, 冰封球接触同时会蓄积$(8)秒能量发生巨大爆炸, 造成$(9)%冰霜伤害</td><td>フローズン・エリアを展開後、$(0)秒ごとに$(1)個のアイシクル・コアが戦場を移動し、$(2)秒ごとに$(3)%の氷雪ダメージを与え、$(4)個の未強化のアイス・ランスを発射する。アイス・ランスは全ての敵を貫通し、$(5)%の氷雪ダメージを与え、凍傷状態の敵には最大生命値の$(6)%分の氷雪ダメージを与える（攻撃力の$(7)%を超えない）。アイシクル・コアが衝突すると、$(8)秒間エネルギーを蓄積し大爆発を起こし、$(9)%の氷雪ダメージを与える。</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">4</td><td class="cell-key">ID_2000980</td><td>星贴灵信</td><td>星勤Pt</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">5</td><td class="cell-key">ID_2500985</td><td>获得后解锁限定皮肤-雷鸣将军抽送活动的初级战令</td><td>限定スキン「Sランク冒険者」ガチャイベントの初級パスを解除する</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">6</td><td class="cell-key">ID_2000981</td><td>星卜初荧</td><td>星占いパス</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">7</td><td class="cell-key">ID_2500981</td><td>获得后解锁限定皮肤-星勤占卜抽送活动的初级战令</td><td>限定スキン「星勤の占い師」ガチャイベントの初級パスを解除できる</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">8</td><td class="cell-key">ID_1030316</td><td>魔能连续限定低级战令</td><td>マジック・レベル限定低級パス</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">9</td><td class="cell-key">ID_2500980</td><td>限定皮肤-星勤占卜抽送活动的战令积分</td><td>限定スキン「星勤の占い師」ガチャイベントのバスPt</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">10</td><td class="cell-key">ID_2000985</td><td>魔法初荧</td><td>魔光パス</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">11</td><td class="cell-key">ID_10100257</td><td>初始习得(冰粒), 冰粒额外释放$(0)次, 冰粒存活4+$(0)</td><td>戦闘開始時に「アイス・ランス」を習得、アイス・ランスが追加で$(0)回発動する、アイス・ランスの霊渦→$(0)</td></tr>
-                    <tr><td class="cell-checkbox"></td><td class="cell-num">12</td><td class="cell-key">ID_10090253</td><td>学习冰格后, 每$(0)秒展开$(1)次寒霜领域, 持续$(2)秒, 对大范围内的敌人每$(3)秒造成$(4)%冰霜伤害, 每次伤害额外追加持续$(5)秒可无限叠加的冰伤效果</td><td>アイス・ランスを習得後、$(0)秒ごとに$(1)回のフローズン・エリアを展開する。効果$(2)秒、広範囲内の敵に$(3)秒ごとに$(4)%の氷雪ダメージを与える。さらに毎回$(5)秒間の無限重複可能な凍傷を付与する。</td></tr>
-                </tbody>
-            </table>
+        <div class="footer">
+            <div class="footer-left">© 2026 Doraemon Team — Internal Use</div>
+            <div class="footer-links">
+                <a href="i18n-table.html">i18n Table</a>
+                <a href="workspace.html">Workspace</a>
+                <a href="cs-demo.html">CS Demo</a>
+            </div>
         </div>
-
-        <!-- Pagination -->
-        <div class="pagination">
-            <span>38 records</span>
-            <div class="page-nav"><span>&lt;</span><span>&gt;</span></div>
-        </div>
-    </main>
-</div>
-
-<!-- Context menu (shared) -->
-<div class="context-menu" id="contextMenu">
-    <div class="ctx-item" data-action="rename">Rename view</div>
-    <div class="ctx-divider"></div>
-    <div class="ctx-item" data-action="duplicate">Duplicate view</div>
-    <div class="ctx-divider"></div>
-    <div class="ctx-item danger" data-action="delete">Delete view</div>
-</div>
-
-<!-- Overlay -->
-<div class="overlay" id="overlay"></div>
-
-<script>
-const GRID_ICON_SVG = `<svg viewBox="0 0 24 24" class="grid-icon"><path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z" fill="currentColor"/></svg>`;
-
-let views = [
-    { id: 'v1', name: 'View' },
-    { id: 'v2', name: 'Game1' },
-    { id: 'v3', name: 'Task' },
-    { id: 'v4', name: 'Task' },
-];
-let activeViewId = 'v1';
-let viewIdCounter = 5;
-
-const viewTabsContainer = document.getElementById('viewTabsContainer');
-const viewListPanel = document.getElementById('viewListPanel');
-const viewListItems = document.getElementById('viewListItems');
-const viewSearchInput = document.getElementById('viewSearchInput');
-const viewListToggle = document.getElementById('viewListToggle');
-const addViewBtn = document.getElementById('addViewBtn');
-const contextMenu = document.getElementById('contextMenu');
-const overlay = document.getElementById('overlay');
-
-// ==================== DROPDOWN LOGIC ====================
-document.querySelectorAll('#gameDropdown, #langDropdown').forEach(dd => {
-    const menu = dd.querySelector('.dropdown-menu');
-    dd.addEventListener('click', e => {
-        if (e.target.closest('.dropdown-menu')) return;
-        e.stopPropagation();
-        closeAllPanels();
-        menu.classList.toggle('show');
-        if (menu.classList.contains('show')) overlay.classList.add('show');
-    });
-    menu.querySelectorAll('.dropdown-item').forEach(item => {
-        item.addEventListener('click', e => {
-            e.stopPropagation();
-            const val = item.dataset.value;
-            menu.querySelectorAll('.dropdown-item').forEach(i => {
-                i.classList.remove('selected');
-                i.querySelector('.check-mark').textContent = '';
-            });
-            item.classList.add('selected');
-            item.querySelector('.check-mark').textContent = '✓';
-            const label = dd.querySelector('span[id$="Label"]');
-            if (dd.id === 'gameDropdown') {
-                label.textContent = val;
-            } else {
-                const labels = { all: 'All languages', 'zh-ja': 'zh → ja', 'ja-en': 'ja → en', 'ja-ko': 'ja → ko' };
-                label.textContent = labels[val] || val;
-            }
-            menu.classList.remove('show');
-            overlay.classList.remove('show');
-        });
-    });
-});
-
-// ==================== VIEW TABS RENDERING ====================
-function renderViewTabs() {
-    viewTabsContainer.innerHTML = '';
-    views.forEach(v => {
-        const tab = document.createElement('div');
-        tab.className = 'view-tab' + (v.id === activeViewId ? ' active' : '');
-        tab.dataset.viewId = v.id;
-        tab.draggable = true;
-        tab.innerHTML = GRID_ICON_SVG + `<span class="view-name">${v.name}</span>`;
-        tab.addEventListener('click', e => {
-            if (e.target.closest('.view-name[contenteditable="true"]')) return;
-            activeViewId = v.id;
-            renderViewTabs();
-            renderViewListItems();
-        });
-        tab.addEventListener('dblclick', e => {
-            e.preventDefault();
-            startRenameTab(tab, v);
-        });
-        tab.addEventListener('contextmenu', e => {
-            e.preventDefault();
-            showContextMenu(e.clientX, e.clientY, v);
-        });
-        tab.addEventListener('dragstart', e => {
-            tab.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', v.id);
-            e.dataTransfer.effectAllowed = 'move';
-        });
-        tab.addEventListener('dragend', () => tab.classList.remove('dragging'));
-        tab.addEventListener('dragover', e => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            tab.classList.add('drag-over');
-        });
-        tab.addEventListener('dragleave', () => tab.classList.remove('drag-over'));
-        tab.addEventListener('drop', e => {
-            e.preventDefault();
-            tab.classList.remove('drag-over');
-            const draggedId = e.dataTransfer.getData('text/plain');
-            reorderViews(draggedId, v.id);
-        });
-        viewTabsContainer.appendChild(tab);
-    });
-}
-
-function startRenameTab(tab, view) {
-    const nameEl = tab.querySelector('.view-name');
-    nameEl.contentEditable = 'true';
-    nameEl.focus();
-    const range = document.createRange();
-    range.selectNodeContents(nameEl);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-
-    const finish = () => {
-        nameEl.contentEditable = 'false';
-        const newName = nameEl.textContent.trim();
-        if (newName) view.name = newName;
-        else nameEl.textContent = view.name;
-        renderViewListItems();
-    };
-    nameEl.addEventListener('blur', finish, { once: true });
-    nameEl.addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); }
-        if (e.key === 'Escape') { nameEl.textContent = view.name; nameEl.blur(); }
-    });
-}
-
-function reorderViews(draggedId, targetId) {
-    if (draggedId === targetId) return;
-    const dragIdx = views.findIndex(v => v.id === draggedId);
-    const targetIdx = views.findIndex(v => v.id === targetId);
-    if (dragIdx < 0 || targetIdx < 0) return;
-    const [item] = views.splice(dragIdx, 1);
-    views.splice(targetIdx, 0, item);
-    renderViewTabs();
-    renderViewListItems();
-}
-
-// ==================== ADD VIEW ====================
-addViewBtn.addEventListener('click', () => {
-    const newView = { id: 'v' + viewIdCounter++, name: 'New View' };
-    views.push(newView);
-    activeViewId = newView.id;
-    renderViewTabs();
-    renderViewListItems();
-    const tab = viewTabsContainer.querySelector(`[data-view-id="${newView.id}"]`);
-    if (tab) startRenameTab(tab, newView);
-});
-
-// ==================== VIEW LIST PANEL ====================
-viewListToggle.addEventListener('click', e => {
-    if (e.target.closest('.view-list-panel')) return;
-    e.stopPropagation();
-    closeAllPanels();
-    viewListPanel.classList.toggle('show');
-    if (viewListPanel.classList.contains('show')) {
-        overlay.classList.add('show');
-        renderViewListItems();
-        viewSearchInput.value = '';
-        viewSearchInput.focus();
-    }
-});
-viewListPanel.addEventListener('click', e => e.stopPropagation());
-
-viewSearchInput.addEventListener('input', () => renderViewListItems(viewSearchInput.value));
-
-function renderViewListItems(filter = '') {
-    viewListItems.innerHTML = '';
-    const filtered = views.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()));
-    filtered.forEach(v => {
-        const item = document.createElement('div');
-        item.className = 'view-list-item' + (v.id === activeViewId ? ' active' : '');
-        item.dataset.viewId = v.id;
-        item.draggable = true;
-        item.innerHTML = GRID_ICON_SVG +
-            `<span class="item-name">${v.name}</span>` +
-            `<span class="item-menu" data-view-id="${v.id}">⋮</span>`;
-        item.addEventListener('click', e => {
-            if (e.target.closest('.item-menu')) return;
-            activeViewId = v.id;
-            renderViewTabs();
-            renderViewListItems(filter);
-            closeAllPanels();
-        });
-        item.querySelector('.item-menu').addEventListener('click', e => {
-            e.stopPropagation();
-            const rect = e.target.getBoundingClientRect();
-            showContextMenu(rect.right, rect.bottom, v);
-        });
-        item.addEventListener('dragstart', e => {
-            item.classList.add('dragging-item');
-            e.dataTransfer.setData('text/plain', v.id);
-        });
-        item.addEventListener('dragend', () => item.classList.remove('dragging-item'));
-        item.addEventListener('dragover', e => {
-            e.preventDefault();
-            item.classList.add('drag-over-item');
-        });
-        item.addEventListener('dragleave', () => item.classList.remove('drag-over-item'));
-        item.addEventListener('drop', e => {
-            e.preventDefault();
-            item.classList.remove('drag-over-item');
-            reorderViews(e.dataTransfer.getData('text/plain'), v.id);
-            renderViewListItems(filter);
-        });
-        viewListItems.appendChild(item);
-    });
-}
-
-// ==================== CONTEXT MENU ====================
-let contextTargetView = null;
-
-function showContextMenu(x, y, view) {
-    contextTargetView = view;
-    contextMenu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
-    contextMenu.style.top = Math.min(y, window.innerHeight - 150) + 'px';
-    contextMenu.classList.add('show');
-    overlay.classList.add('show');
-}
-
-contextMenu.querySelectorAll('.ctx-item').forEach(item => {
-    item.addEventListener('click', e => {
-        e.stopPropagation();
-        const action = item.dataset.action;
-        if (!contextTargetView) return;
-
-        if (action === 'rename') {
-            closeAllPanels();
-            const tab = viewTabsContainer.querySelector(`[data-view-id="${contextTargetView.id}"]`);
-            if (tab) startRenameTab(tab, contextTargetView);
-        }
-        if (action === 'duplicate') {
-            const dup = { id: 'v' + viewIdCounter++, name: contextTargetView.name + ' Copy' };
-            const idx = views.findIndex(v => v.id === contextTargetView.id);
-            views.splice(idx + 1, 0, dup);
-            closeAllPanels();
-            renderViewTabs();
-            renderViewListItems();
-        }
-        if (action === 'delete') {
-            if (views.length <= 1) return;
-            views = views.filter(v => v.id !== contextTargetView.id);
-            if (activeViewId === contextTargetView.id) activeViewId = views[0].id;
-            closeAllPanels();
-            renderViewTabs();
-            renderViewListItems();
-        }
-        contextMenu.classList.remove('show');
-    });
-});
-
-// ==================== CLOSE PANELS ====================
-function closeAllPanels() {
-    contextMenu.classList.remove('show');
-    viewListPanel.classList.remove('show');
-    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
-    overlay.classList.remove('show');
-}
-
-overlay.addEventListener('click', closeAllPanels);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllPanels(); });
-
-// ==================== INIT ====================
-renderViewTabs();
-</script>
+    </div>
 </body>
 </html>
