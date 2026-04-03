@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-System 3.0 — 翻译官执行者视图 Demo</title>
+    <style>
+        :root { --accent-blue:#007aff; --accent-purple:#af52de; --success:#34c759; --warning:#ff9f0a; --error:#ff3b30; --blue-base:#1677ff; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue','Inter',sans-serif;background:linear-gradient(160deg,#f0f4f8,#e8edf5 50%,#f5f0fa);color:rgba(0,0,0,0.85);height:100vh;overflow:hidden;}
+        .ds3-root{position:relative;width:100vw;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+        .glass{background:rgba(255,255,255,0.25);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.5);box-shadow:0 8px 32px rgba(31,38,135,0.08),inset 0 1px 0 rgba(255,255,255,0.5);}
+        .glass-strong{background:rgba(255,255,255,0.45);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.6);box-shadow:0 8px 32px rgba(31,38,135,0.1),inset 0 1px 0 rgba(255,255,255,0.5);}
+        .ds3-scrollbar::-webkit-scrollbar{width:4px;}.ds3-scrollbar::-webkit-scrollbar-track{background:transparent;}.ds3-scrollbar::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:2px;}
+
+        .user-switcher{position:absolute;top:16px;left:16px;z-index:100;}
+        .user-btn{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:20px;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.3);backdrop-filter:blur(20px) saturate(180%);box-shadow:0 4px 16px rgba(31,38,135,0.06),inset 0 1px 0 rgba(255,255,255,0.5);color:rgba(0,0,0,0.8);cursor:pointer;font-size:13px;font-weight:500;}
+        .user-avatar{width:28px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+        .user-avatar.worker{background:rgba(0,122,255,0.12);color:#007aff;}.user-avatar.dm{background:rgba(175,82,222,0.12);color:#af52de;}.user-avatar.maintainer{background:rgba(52,199,89,0.12);color:#34c759;}
+        .user-dropdown{position:absolute;top:44px;left:0;padding:4px;border-radius:16px;min-width:220px;background:rgba(255,255,255,0.65);backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.6);box-shadow:0 8px 32px rgba(31,38,135,0.1),inset 0 1px 0 rgba(255,255,255,0.5);display:none;}
+        .user-dropdown.show{display:block;animation:fadeSlideIn .2s ease;}
+        .user-dropdown-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border:none;border-radius:10px;background:transparent;color:rgba(0,0,0,0.7);cursor:pointer;font-size:13px;text-align:left;font-weight:500;}
+        .user-dropdown-item:hover{background:rgba(0,0,0,0.04);}.user-dropdown-item.active{background:rgba(0,122,255,0.08);color:#007aff;}
+        .user-dropdown-item .role-label{font-size:11px;opacity:0.45;}
+
+        .main-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:50px 40px 40px;}
+        .stream-center{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
+        .wide-center{max-width:1100px;margin:0 auto;}
+        .date-main{font-size:32px;font-weight:800;color:rgba(0,0,0,0.85);line-height:1.2;}
+        .date-sub{font-size:14px;font-weight:500;color:rgba(0,0,0,0.35);margin-top:4px;}
+        .stream-text{font-size:16px;line-height:1.9;white-space:pre-wrap;max-width:600px;}
+        .stream-text.current{color:rgba(0,0,0,0.8);font-weight:500;}.stream-text.done{color:rgba(0,0,0,0.35);transition:color .6s ease;}.stream-text.spacer{height:12px;}
+        .cursor-blink{display:inline-block;width:2px;height:18px;background:rgba(0,0,0,0.7);margin-left:2px;vertical-align:text-bottom;animation:cursorBlink .8s step-end infinite;}
+
+        /* Task group (collapsible by type) */
+        .task-groups{display:flex;flex-direction:column;gap:10px;margin:0;}
+        .task-group{border-radius:20px;overflow:hidden;transition:all .3s ease;}
+        .task-group-header{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;transition:background .15s;user-select:none;}
+        .task-group-header:hover{background:rgba(255,255,255,0.55);}
+        .tg-icon{font-size:22px;flex-shrink:0;}
+        .tg-info{flex:1;min-width:0;}
+        .tg-title{font-size:14px;font-weight:700;color:rgba(0,0,0,0.75);display:flex;align-items:center;gap:8px;}
+        .tg-meta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
+        .tg-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;}
+        .tg-tag.count{background:rgba(0,122,255,0.08);color:#007aff;border:1px solid rgba(0,122,255,0.12);}
+        .tg-tag.est{background:rgba(175,82,222,0.08);color:#af52de;border:1px solid rgba(175,82,222,0.12);}
+        .tg-pills{display:flex;gap:4px;flex-wrap:wrap;}
+        .tg-status-pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;}
+        .tg-status-pill.done{background:rgba(52,199,89,0.1);color:#34c759;}
+        .tg-status-pill.progress{background:rgba(0,122,255,0.1);color:#007aff;}
+        .tg-status-pill.pending{background:rgba(0,0,0,0.04);color:rgba(0,0,0,0.4);}
+        .tg-chevron{font-size:12px;color:rgba(0,0,0,0.25);transition:transform .25s ease;flex-shrink:0;}
+        .task-group:hover .tg-chevron{transform:rotate(90deg);}
+        .tg-body{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(0.4,0,0.2,1);padding:0 12px;}
+        .task-group:hover .tg-body{max-height:2000px;padding:0 12px 12px;}
+        .tg-body .t-card{margin-bottom:8px;opacity:1;transform:none;padding:14px 18px;border-radius:16px;}
+        .tg-body .t-card-icon{width:36px;height:36px;font-size:16px;}
+
+        /* Task cards for translator */
+        .task-cards{display:flex;flex-direction:column;gap:10px;margin:16px 0;}
+        .t-card{border-radius:20px;padding:18px 22px;cursor:default;transition:all .25s ease;opacity:0;transform:translateY(12px);position:relative;overflow:hidden;}
+        .t-card.visible{opacity:1;transform:translateY(0);}
+        .t-card:hover{background:rgba(255,255,255,0.65)!important;transform:translateY(-1px);box-shadow:0 12px 40px rgba(31,38,135,0.12),inset 0 1px 0 rgba(255,255,255,0.6);}
+        .t-card-top{display:flex;align-items:flex-start;gap:14px;}
+        .t-card-icon{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(0,0,0,0.03);}
+        .t-card-body{flex:1;min-width:0;}
+        .t-card-title{font-size:15px;font-weight:700;color:rgba(0,0,0,0.8);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .t-card-meta{display:flex;align-items:center;gap:12px;margin-top:5px;flex-wrap:wrap;}
+        .t-card-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;}
+        .tag-count{background:rgba(0,122,255,0.08);color:#007aff;border:1px solid rgba(0,122,255,0.12);}
+        .tag-ddl{background:rgba(0,0,0,0.04);color:rgba(0,0,0,0.5);border:1px solid rgba(0,0,0,0.06);}
+        .tag-ddl.urgent{background:rgba(255,59,48,0.08);color:#ff3b30;border:1px solid rgba(255,59,48,0.12);}
+        .tag-est{background:rgba(175,82,222,0.08);color:#af52de;border:1px solid rgba(175,82,222,0.12);}
+        .status-pill{font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;letter-spacing:.3px;text-transform:uppercase;flex-shrink:0;}
+        .status-pending{background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.4);}
+        .status-progress{background:rgba(0,122,255,0.1);color:#007aff;}
+        .status-done{background:rgba(52,199,89,0.1);color:#34c759;}
+
+        .t-card-progress{margin-top:10px;}
+        .progress-bar{height:4px;border-radius:2px;background:rgba(0,0,0,0.06);overflow:hidden;}
+        .progress-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+        .progress-fill.normal{background:var(--accent-blue);}.progress-fill.warning{background:var(--warning);}.progress-fill.danger{background:var(--error);}
+        .progress-label{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:10px;color:rgba(0,0,0,0.35);font-weight:500;}
+
+        .t-card.color-warning{border-left:3px solid var(--warning);}
+        .t-card.color-danger{border-left:3px solid var(--error);}
+        .t-card.color-done{opacity:0.7;}.t-card.color-done .t-card-title{color:rgba(0,0,0,0.4);text-decoration:line-through;}
+
+        /* Hourly summary */
+        .hourly-card{border-radius:16px;padding:16px 20px;margin:12px 0;border-left:3px solid var(--accent-blue);opacity:0;animation:slideIn .5s ease forwards;}
+        .hourly-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+        .hourly-time{font-size:12px;font-weight:700;color:var(--accent-blue);background:rgba(0,122,255,0.08);padding:2px 8px;border-radius:6px;}
+        .hourly-label{font-size:13px;font-weight:600;color:rgba(0,0,0,0.6);}
+        .hourly-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+        .hourly-stat{text-align:center;padding:8px;border-radius:10px;background:rgba(0,0,0,0.02);}
+        .hourly-stat-value{font-size:20px;font-weight:800;line-height:1.2;}
+        .hourly-stat-label{font-size:10px;font-weight:500;color:rgba(0,0,0,0.35);margin-top:2px;}
+        .hourly-stat.completed .hourly-stat-value{color:var(--success);}
+        .hourly-stat.new-in .hourly-stat-value{color:var(--accent-blue);}
+        .hourly-stat.remaining .hourly-stat-value{color:rgba(0,0,0,0.6);}
+
+        /* Notification inline */
+        .notif-inline{border-radius:14px;padding:12px 16px;margin:8px 0;display:flex;align-items:center;gap:10px;opacity:0;animation:slideIn .4s ease forwards;}
+        .notif-icon{font-size:16px;flex-shrink:0;}.notif-text{font-size:13px;color:rgba(0,0,0,0.6);line-height:1.5;flex:1;}
+
+        /* Summary cards */
+        .summary-section{margin:16px 0;}
+        .summary-title{font-size:13px;font-weight:700;color:rgba(0,0,0,0.55);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;}
+        .summary-item{border-radius:14px;padding:14px 16px;text-align:center;}
+        .summary-item-value{font-size:22px;font-weight:800;line-height:1.2;}
+        .summary-item-label{font-size:10px;font-weight:600;color:rgba(0,0,0,0.35);margin-top:3px;}
+
+        /* DM view */
+        .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+        .metric-card{border-radius:14px;padding:14px 16px;}.metric-label{font-size:10px;font-weight:600;color:rgba(0,0,0,0.35);text-transform:uppercase;letter-spacing:.5px;}
+        .metric-value{font-size:24px;font-weight:800;color:rgba(0,0,0,0.7);margin-top:4px;}
+        .section-label{font-size:11px;font-weight:600;color:rgba(0,0,0,0.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
+        .team-table{width:100%;border-collapse:separate;border-spacing:0;}
+        .team-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:600;color:rgba(0,0,0,0.35);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(0,0,0,0.06);}
+        .team-table td{padding:10px 14px;font-size:13px;color:rgba(0,0,0,0.7);border-bottom:1px solid rgba(0,0,0,0.04);}
+        .team-table tr:hover td{background:rgba(255,255,255,0.3);}
+        .status-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;}
+        .status-badge.good{background:rgba(52,199,89,0.1);color:#34c759;}.status-badge.warn{background:rgba(255,159,10,0.1);color:#ff9f0a;}.status-badge.bad{background:rgba(255,59,48,0.1);color:#ff3b30;}
+
+        /* Maintainer */
+        .m-panels{display:flex;gap:12px;height:calc(100vh - 210px);min-height:480px;}
+        .m-panel-left{width:270px;flex-shrink:0;border-radius:20px;display:flex;flex-direction:column;overflow:hidden;}
+        .m-panel-right{flex:1;border-radius:20px;display:flex;flex-direction:column;overflow:hidden;}
+        .m-panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.04);flex-shrink:0;}
+        .m-panel-body{flex:1;overflow-y:auto;padding:6px;}
+        .wf-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;margin-bottom:2px;cursor:pointer;transition:all .15s;}
+        .wf-item:hover{background:rgba(0,0,0,0.03);}.wf-item.active{background:rgba(0,122,255,0.06);}
+        .wf-dot{width:8px;height:8px;border-radius:4px;flex-shrink:0;}.wf-dot.on{background:var(--success);}.wf-dot.off{background:rgba(0,0,0,0.15);}
+        .wf-body{flex:1;min-width:0;}.wf-name{font-size:13px;font-weight:600;color:rgba(0,0,0,0.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .wf-info{font-size:10px;color:rgba(0,0,0,0.35);margin-top:2px;}
+        .wf-tag{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;flex-shrink:0;}.wf-tag.sync{background:rgba(0,122,255,0.1);color:#007aff;}.wf-tag.monitor{background:rgba(52,199,89,0.1);color:#34c759;}.wf-tag.auto{background:rgba(175,82,222,0.1);color:#af52de;}
+        .chat-header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.04);flex-shrink:0;}
+        .chat-header-icon{font-size:16px;}.chat-header-title{font-size:14px;font-weight:600;color:rgba(0,0,0,0.7);}.chat-header-sub{font-size:11px;color:rgba(0,0,0,0.3);margin-left:auto;}
+        .chat-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px;}
+        .chat-msg{display:flex;gap:10px;max-width:92%;}.chat-msg.ai{align-self:flex-start;}.chat-msg.user{align-self:flex-end;flex-direction:row-reverse;}
+        .chat-av{width:28px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+        .chat-av.ai{background:rgba(52,199,89,0.12);color:#34c759;}.chat-av.user{background:rgba(0,122,255,0.12);color:#007aff;}
+        .chat-bubble{padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.7;white-space:pre-line;}
+        .chat-bubble.ai{background:rgba(0,0,0,0.035);border:1px solid rgba(0,0,0,0.05);border-top-left-radius:4px;}
+        .chat-bubble.user{background:rgba(0,122,255,0.07);border:1px solid rgba(0,122,255,0.1);border-top-right-radius:4px;color:rgba(0,0,0,0.75);}
+        .wf-summary{border-radius:16px;padding:16px 20px;margin:2px 0;background:rgba(255,255,255,0.5);border:1px solid rgba(52,199,89,0.2);}
+        .wf-summary-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+        .wf-summary-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}.wf-summary-label{font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);min-width:72px;flex-shrink:0;}
+        .wf-summary-value{font-size:12px;color:rgba(0,0,0,0.65);line-height:1.5;}.wf-summary-actions{display:flex;gap:8px;margin-top:14px;}
+        .chat-input-area{display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid rgba(0,0,0,0.04);flex-shrink:0;}
+        .chat-input{flex:1;padding:8px 14px;border-radius:20px;border:1px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.02);font-size:13px;font-family:inherit;outline:none;}
+        .chat-input:focus{border-color:rgba(0,122,255,0.3);background:rgba(255,255,255,0.5);}
+        .chat-send-btn{width:32px;height:32px;border-radius:16px;border:none;background:var(--accent-blue);color:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+        .dm-tabs{display:flex;gap:4px;margin-bottom:24px;padding:3px;border-radius:14px;width:fit-content;}
+        .dm-tab{padding:7px 18px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:rgba(0,0,0,0.4);transition:all .15s;}
+        .dm-tab.active{background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.7);}
+
+        .btn{padding:7px 16px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:inherit;}
+        .btn-blue{background:rgba(0,122,255,0.12);color:#007aff;border:1px solid rgba(0,122,255,0.2);}.btn-blue:hover{background:rgba(0,122,255,0.2);}
+        .btn-green{background:rgba(52,199,89,0.12);color:#34c759;border:1px solid rgba(52,199,89,0.2);}.btn-green:hover{background:rgba(52,199,89,0.22);}
+        .btn-ghost{background:rgba(0,0,0,0.04);color:rgba(0,0,0,0.5);border:1px solid rgba(0,0,0,0.06);}.btn-ghost:hover{background:rgba(0,0,0,0.08);}
+        .btn-sm{padding:5px 12px;font-size:11px;border-radius:10px;}
+
+        .view{display:none;height:100%;}.view.active{display:flex;flex-direction:column;}
+
+        .bottom-controls{position:fixed;bottom:20px;right:20px;z-index:300;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+        .ctrl-btn{border-radius:12px;padding:8px 16px;border:none;background:rgba(255,255,255,0.6);backdrop-filter:blur(20px) saturate(180%);box-shadow:0 8px 32px rgba(31,38,135,0.08),inset 0 1px 0 rgba(255,255,255,0.5);cursor:pointer;font-size:11px;font-weight:600;color:rgba(0,0,0,0.5);transition:all .15s;}
+        .ctrl-btn:hover{background:rgba(255,255,255,0.8);}
+        .ctrl-menu{border-radius:16px;padding:12px 6px;min-width:260px;background:rgba(255,255,255,0.75);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.6);box-shadow:0 8px 32px rgba(31,38,135,0.1);display:none;}
+        .ctrl-menu.show{display:block;animation:fadeSlideIn .2s ease;}
+        .ctrl-menu-title{font-size:9px;font-weight:700;color:rgba(0,0,0,0.3);text-transform:uppercase;letter-spacing:1px;padding:4px 12px 6px;border-bottom:1px solid rgba(0,0,0,0.06);margin-bottom:4px;}
+        .ctrl-menu-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:none;width:100%;background:transparent;cursor:pointer;text-align:left;transition:background .15s;}
+        .ctrl-menu-item:hover{background:rgba(0,0,0,0.03);}.ctrl-menu-item.active{background:rgba(0,0,0,0.06);}
+        .ctrl-menu-item .ci-icon{font-size:16px;width:28px;text-align:center;}
+        .ctrl-menu-item .ci-name{font-size:12px;font-weight:600;color:rgba(0,0,0,0.7);}
+        .ctrl-menu-item .ci-desc{font-size:10px;color:rgba(0,0,0,0.35);margin-top:1px;}
+
+        .alert-card{border-radius:14px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+        .alert-icon{font-size:18px;flex-shrink:0;}.alert-body{flex:1;}.alert-title{font-size:13px;font-weight:600;color:rgba(0,0,0,0.8);}.alert-desc{font-size:11px;color:rgba(0,0,0,0.4);margin-top:2px;}
+
+        /* Dashboard grid layout — 3 columns */
+        .db-grid{display:grid;grid-template-columns:1fr 280px 280px;gap:14px;margin-top:16px;opacity:0;animation:slideIn .5s ease forwards;align-items:start;}
+        .db-col{min-width:0;display:flex;flex-direction:column;gap:12px;}
+        .db-section-title{font-size:12px;font-weight:700;color:rgba(0,0,0,0.4);letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+        .db-side-card{border-radius:14px;padding:14px 16px;}
+        .db-notif-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:12px;color:rgba(0,0,0,0.55);line-height:1.5;}
+        .db-notif-item+.db-notif-item{border-top:1px solid rgba(0,0,0,0.04);}
+        .db-notif-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
+        .db-notif-time{font-size:10px;font-weight:600;color:rgba(0,0,0,0.3);min-width:36px;flex-shrink:0;margin-top:1px;}
+
+        /* Follow A-ticket cards */
+        .follow-section{margin:0;}
+        .follow-header{font-size:12px;font-weight:700;color:rgba(0,0,0,0.4);letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+        .follow-cards{display:flex;flex-direction:column;gap:8px;}
+        .follow-card{border-radius:14px;padding:12px 16px;border-left:3px solid var(--accent-purple);}
+        .follow-card-top{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap;}
+        .follow-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;}
+        .follow-tag.bug{background:rgba(255,59,48,0.08);color:#ff3b30;border:1px solid rgba(255,59,48,0.12);}
+        .follow-tag.general{background:rgba(0,122,255,0.08);color:#007aff;border:1px solid rgba(0,122,255,0.12);}
+        .follow-appid{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:rgba(175,82,222,0.08);color:#af52de;border:1px solid rgba(175,82,222,0.12);}
+        .follow-severity{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,0.04);color:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.06);}
+        .follow-title{font-size:13px;font-weight:700;color:rgba(0,0,0,0.75);margin-bottom:3px;}
+        .follow-context{font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;margin-bottom:6px;}
+        .follow-assignee{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(0,0,0,0.5);padding-top:6px;border-top:1px solid rgba(0,0,0,0.05);}
+        .follow-assignee-avatar{width:20px;height:20px;border-radius:10px;background:rgba(0,122,255,0.1);color:#007aff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        /* ticket status — prominent banner */
+        .follow-card{cursor:pointer;transition:all .15s;}
+        .follow-card:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(31,38,135,0.1);}
+        .follow-status-bar{display:flex;align-items:center;gap:6px;padding:6px 10px;margin:-12px -16px 10px;border-radius:11px 11px 0 0;font-size:11px;font-weight:700;letter-spacing:.3px;}
+        .fsb-pending{background:rgba(0,0,0,0.04);color:rgba(0,0,0,0.35);}
+        .fsb-inprogress{background:rgba(0,122,255,0.08);color:#007aff;}
+        .fsb-review{background:rgba(255,159,10,0.12);color:#e08600;animation:reviewBg 2s ease infinite;}
+        .fsb-completed{background:rgba(52,199,89,0.1);color:#28a745;}
+        .fsb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+        .fsb-pending .fsb-dot{background:rgba(0,0,0,0.2);}
+        .fsb-inprogress .fsb-dot{background:#007aff;}
+        .fsb-review .fsb-dot{background:#ff9f0a;animation:dotPulse 1.5s ease infinite;}
+        .fsb-completed .fsb-dot{background:#34c759;}
+        .follow-s-completed{border-left-color:var(--success);opacity:.65;}
+        .follow-s-completed .follow-title{text-decoration:line-through;color:rgba(0,0,0,0.35);}
+        .follow-s-review{border-left-color:var(--warning);}
+        .follow-s-inprogress{border-left-color:var(--accent-blue);}
+        .follow-s-pending{border-left-color:rgba(0,0,0,0.12);}
+        .follow-cp-note{font-size:11px;color:rgba(0,0,0,0.55);background:rgba(255,159,10,0.05);border:1px solid rgba(255,159,10,0.1);border-radius:8px;padding:8px 12px;margin:6px 0;line-height:1.6;}
+        .follow-cp-note strong{color:rgba(0,0,0,0.7);}
+        /* Other Tasks (self-created walkthrough tickets) */
+        .other-section{margin:0;}
+        .other-header{font-size:12px;font-weight:700;color:rgba(0,0,0,0.4);letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+        .other-cards{display:flex;flex-direction:column;gap:6px;}
+        .other-card{border-radius:12px;padding:10px 14px;border-left:3px solid rgba(0,0,0,0.12);cursor:pointer;transition:all .15s;}
+        .other-card:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(31,38,135,0.08);}
+        .other-card-top{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+        .other-card .other-game{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(175,82,222,0.08);color:#af52de;border:1px solid rgba(175,82,222,0.12);}
+        .other-card .other-type{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,0.04);color:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.06);}
+        .other-card .other-title{font-size:12px;font-weight:600;color:rgba(0,0,0,0.7);}
+        .other-card .other-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:auto;flex-shrink:0;}
+        .other-card.os-pending{border-left-color:rgba(0,0,0,0.12);}.other-card.os-pending .other-status{background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.4);}
+        .other-card.os-progress{border-left-color:var(--accent-blue);}.other-card.os-progress .other-status{background:rgba(0,122,255,0.1);color:#007aff;}
+        .other-card.os-done{border-left-color:var(--success);opacity:.65;}.other-card.os-done .other-status{background:rgba(52,199,89,0.1);color:#34c759;}.other-card.os-done .other-title{text-decoration:line-through;color:rgba(0,0,0,0.35);}
+        @keyframes reviewBg{0%,100%{background:rgba(255,159,10,0.12);}50%{background:rgba(255,159,10,0.06);}}
+        @keyframes dotPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}
+
+        /* Context info panel (top-right) */
+        .info-panel{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;align-items:flex-end;}
+        .info-toggle{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:none;background:rgba(255,255,255,0.35);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.5);box-shadow:0 4px 16px rgba(31,38,135,0.06),inset 0 1px 0 rgba(255,255,255,0.5);cursor:pointer;font-size:12px;font-weight:600;color:rgba(0,0,0,0.5);transition:all .15s;font-family:inherit;}
+        .info-toggle:hover{background:rgba(255,255,255,0.6);color:rgba(0,0,0,0.7);}
+        .info-toggle .arrow{font-size:10px;transition:transform .2s ease;display:inline-block;}
+        .info-toggle.open .arrow{transform:rotate(180deg);}
+        .info-body{width:420px;max-height:calc(100vh - 80px);overflow-y:auto;margin-top:8px;border-radius:16px;padding:20px 22px;background:rgba(255,255,255,0.7);backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.6);box-shadow:0 12px 48px rgba(31,38,135,0.12),inset 0 1px 0 rgba(255,255,255,0.5);display:none;animation:fadeSlideIn .25s ease;}
+        .info-body.show{display:block;}
+        .info-body h3{font-size:14px;font-weight:800;color:rgba(0,0,0,0.75);margin:0 0 14px;display:flex;align-items:center;gap:8px;}
+        .info-body h4{font-size:12px;font-weight:700;color:rgba(0,0,0,0.6);margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06);}
+        .info-body h4:first-of-type{margin-top:0;padding-top:0;border-top:none;}
+        .info-body ol,.info-body ul{padding-left:18px;margin:0;}
+        .info-body li{font-size:12px;color:rgba(0,0,0,0.55);line-height:1.8;margin-bottom:2px;}
+        .info-body li strong{color:rgba(0,0,0,0.7);font-weight:600;}
+        .info-body .info-note{font-size:11px;color:rgba(0,0,0,0.4);background:rgba(0,0,0,0.03);border-radius:8px;padding:8px 12px;margin-top:8px;line-height:1.6;}
+        .info-body .info-sub{padding-left:16px;margin-top:2px;}
+        .info-body .info-sub li{font-size:11px;color:rgba(0,0,0,0.45);}
+
+        @keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
+        @keyframes slideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+        @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+        @keyframes fadeSlideIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+    </style>
+</head>
+<body>
+<div class="ds3-root">
+    <div class="user-switcher">
+        <button class="user-btn" id="userBtn"><span class="user-avatar worker" id="userAvatar">ST</span><span id="userName">佐藤美咲</span><span style="font-size:10px;opacity:0.4;">▾</span></button>
+        <div class="user-dropdown" id="userDropdown"></div>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <button class="info-toggle" id="infoToggle">📋 翻译官日常工作 <span class="arrow">▼</span></button>
+        <div class="info-body ds3-scrollbar" id="infoBody">
+            <h3>📋 翻译官の日常工作</h3>
+            <h4>1. 翻译任务处理</h4>
+            <ul>
+                <li>根据 <strong>A 系统</strong>中的票依次处理翻译任务</li>
+                <li>目前只会自动创建 <strong>Text Translation</strong>、<strong>Announcement Translation</strong> 的票</li>
+                <li>工作内容：AI 翻译内容的<strong>监修</strong> → 测试环境 <strong>QA</strong> → 最后<strong>上线</strong></li>
+            </ul>
+            <h4>2. 图片翻译检查</h4>
+            <ul>
+                <li>检查 <strong>i18n</strong> 中 Image Translation 是否有游戏需要图片翻译</li>
+                <li>如果有，<strong>手动建票</strong></li>
+            </ul>
+            <h4>3. 维护字典</h4>
+            <ul>
+                <li><strong>新游戏项目</strong>：先维护「术语」表格（日语 → 英语、繁体中文、韩语），项目初期手工加入 i18n 字典</li>
+                <li><strong>日常运营期</strong>：完成翻译任务的同时维护字典</li>
+            </ul>
+            <h4>4. LQA</h4>
+            <ul>
+                <li>一般在游戏<strong>上线初期</strong>或有<strong>新活动</strong>时进行（手动创建 A 票）</li>
+                <li>部分游戏的钉钉项目群有机器人提醒活动时间，翻译官看到后会重点检查相关内容</li>
+            </ul>
+            <h4>5. 建 A 票给 CP，并负责 review</h4>
+            <ul>
+                <li>在游戏中发现翻译相关问题后，<strong>建 A 票给 CP</strong> 让其修改</li>
+                <li>CP 完成修改后，翻译官进行 <strong>review</strong>（review 通过，A 票 completed；review 未通过，进行打回 goback）</li>
+                <li>例：图片文本超框，对应语言已无法再缩短 → 需要 CP 修改底图</li>
+            </ul>
+            <h4>关于工作时间</h4>
+            <div class="info-note">完全取决于翻译任务中的翻译条数，没有固定的时间。</div>
+            <h4>关于 i18n Knowledge</h4>
+            <div class="info-note">调研中翻译官并没有用起来。</div>
+        </div>
+    </div>
+
+    <div class="view active" id="viewWorker"><div class="main-scroll ds3-scrollbar" id="workerScroll"><div class="stream-center" id="streamContainer"></div></div></div>
+    <div class="view" id="viewDM"><div class="main-scroll ds3-scrollbar"><div class="wide-center" style="padding-top:10px;" id="dmContent"></div></div></div>
+    <div class="view" id="viewMaintainer"><div class="main-scroll ds3-scrollbar"><div class="wide-center" style="padding-top:10px;max-width:960px;" id="maintainerContent"></div></div></div>
+
+    <div class="bottom-controls">
+        <div class="ctrl-menu" id="caseMenu">
+            <div class="ctrl-menu-title">Demo Scenarios · 翻译官一天的工作</div>
+            <button class="ctrl-menu-item active" data-case="morning"><div class="ci-icon">🌅</div><div><div class="ci-name">Case 1 · 晨间播报</div><div class="ci-desc">09:00 — AI 推送今日任务全景</div></div></button>
+            <button class="ctrl-menu-item" data-case="progress"><div class="ci-icon">⚡</div><div><div class="ci-name">Case 2 · 工作进行中</div><div class="ci-desc">14:00 — 任务推进 + 小时报 + 新任务</div></div></button>
+            <button class="ctrl-menu-item" data-case="endofday"><div class="ci-icon">🌙</div><div><div class="ci-name">Case 3 · 下班总结</div><div class="ci-desc">18:00 — 今日工作回收与明日预告</div></div></button>
+        </div>
+        <button class="ctrl-btn" id="caseBtn">🧪 Demo Scenarios</button>
+    </div>
+</div>
+
+<script>
+const USERS = {
+    worker: { name:'佐藤美咲', avatar:'ST', title:'执行者 · 翻译官', cls:'worker' },
+    dm:     { name:'田中裕子', avatar:'TY', title:'决策者 · 翻译组长', cls:'dm' },
+    mt:     { name:'赵明',     avatar:'ZM', title:'维护者 · 系统管理员', cls:'maintainer' }
+};
+
+const TASKS_MORNING = [
+    { id:'m1', game:'kusuriya', type:'Text Translation', icon:'📝', count:38, unit:'items', ddl:'今天 18:00', ddlCls:'urgent', estMin:114, status:'in-progress', elapsed:20, source:'A 系统' },
+    { id:'m2', game:'kingofprism', type:'Text Translation', icon:'📝', count:45, unit:'items', ddl:'明天 12:00', ddlCls:'', estMin:135, status:'pending', source:'A 系统' },
+    { id:'m3', game:'kumo', type:'Text Translation', icon:'📝', count:20, unit:'items', ddl:'03/28', ddlCls:'', estMin:60, status:'pending', source:'A 系统' },
+    { id:'m4', game:'ossan', type:'Text Translation', icon:'📝', count:15, unit:'items', ddl:'03/29', ddlCls:'', estMin:45, status:'pending', source:'A 系统' },
+    { id:'m5', game:'negima', type:'Text Translation', icon:'📝', count:22, unit:'items', ddl:'03/29', ddlCls:'', estMin:66, status:'pending', source:'A 系统' },
+    { id:'m6', game:'kusuriya', type:'Announcement Translation', icon:'📢', count:3, unit:'Announcements', ddl:'今天 18:00', ddlCls:'urgent', estMin:60, status:'pending', source:'A 系统' },
+    { id:'m7', game:'doraemon', type:'Announcement Translation', icon:'📢', count:2, unit:'Announcements', ddl:'明天 12:00', ddlCls:'', estMin:40, status:'pending', source:'A 系统' },
+    { id:'m8', game:'negima', type:'Announcement Translation', icon:'📢', count:1, unit:'Announcements', ddl:'03/28', ddlCls:'', estMin:20, status:'pending', source:'A 系统' },
+    { id:'m9', game:'doraemon', type:'Image Translation', icon:'🖼️', count:2, unit:'images', ddl:'03/29', ddlCls:'', estMin:30, status:'pending', source:'i18n' },
+    { id:'m10', game:'kumo', type:'Image Translation', icon:'🖼️', count:3, unit:'images', ddl:'03/30', ddlCls:'', estMin:45, status:'pending', source:'i18n' },
+    { id:'m11', game:'kingofprism', type:'Image Translation', icon:'🖼️', count:1, unit:'images', ddl:'03/30', ddlCls:'', estMin:15, status:'pending', source:'i18n' },
+];
+
+const TASKS_PROGRESS = [
+    { id:'p1', game:'kusuriya', type:'Text Translation', icon:'📝', count:38, unit:'items', ddl:'今天 18:00', ddlCls:'urgent', estMin:114, status:'done', actualMin:100, source:'A 系统' },
+    { id:'p2', game:'kingofprism', type:'Text Translation', icon:'📝', count:45, unit:'items', ddl:'明天 12:00', ddlCls:'', estMin:135, status:'in-progress', elapsed:80, source:'A 系统' },
+    { id:'p3', game:'kumo', type:'Text Translation', icon:'📝', count:20, unit:'items', ddl:'03/28', ddlCls:'', estMin:60, status:'pending', source:'A 系统' },
+    { id:'p4', game:'ossan', type:'Text Translation', icon:'📝', count:15, unit:'items', ddl:'03/29', ddlCls:'', estMin:45, status:'pending', source:'A 系统' },
+    { id:'p5', game:'negima', type:'Text Translation', icon:'📝', count:22, unit:'items', ddl:'03/29', ddlCls:'', estMin:66, status:'pending', source:'A 系统' },
+    { id:'p6', game:'doraemon', type:'Text Translation', icon:'📝', count:8, unit:'items', ddl:'03/28', ddlCls:'', estMin:24, status:'pending', source:'A 系统', isNew:true },
+    { id:'p7', game:'kusuriya', type:'Announcement Translation', icon:'📢', count:3, unit:'Announcements', ddl:'今天 18:00', ddlCls:'urgent', estMin:60, status:'done', actualMin:55, source:'A 系统' },
+    { id:'p8', game:'doraemon', type:'Announcement Translation', icon:'📢', count:2, unit:'Announcements', ddl:'明天 12:00', ddlCls:'', estMin:40, status:'pending', source:'A 系统' },
+    { id:'p9', game:'negima', type:'Announcement Translation', icon:'📢', count:1, unit:'Announcements', ddl:'03/28', ddlCls:'', estMin:20, status:'pending', source:'A 系统' },
+    { id:'p10', game:'doraemon', type:'Image Translation', icon:'🖼️', count:2, unit:'images', ddl:'03/29', ddlCls:'', estMin:30, status:'pending', source:'i18n' },
+    { id:'p11', game:'kumo', type:'Image Translation', icon:'🖼️', count:3, unit:'images', ddl:'03/30', ddlCls:'', estMin:45, status:'pending', source:'i18n' },
+    { id:'p12', game:'kingofprism', type:'Image Translation', icon:'🖼️', count:1, unit:'images', ddl:'03/30', ddlCls:'', estMin:15, status:'pending', source:'i18n' },
+    { id:'p13', game:'kusuriya', type:'Image Translation', icon:'🖼️', count:1, unit:'images', ddl:'03/28', ddlCls:'', estMin:15, status:'pending', source:'i18n', isNew:true },
+];
+
+const TASKS_ENDOFDAY = [
+    { id:'e1', game:'kusuriya', type:'Text Translation', icon:'📝', count:38, unit:'items', ddl:'今天 18:00', ddlCls:'', estMin:114, actualMin:100, status:'done', source:'A 系统' },
+    { id:'e2', game:'kingofprism', type:'Text Translation', icon:'📝', count:45, unit:'items', ddl:'明天 12:00', ddlCls:'', estMin:135, actualMin:120, status:'done', source:'A 系统' },
+    { id:'e3', game:'kumo', type:'Text Translation', icon:'📝', count:20, unit:'items', ddl:'03/28', ddlCls:'', estMin:60, elapsed:40, status:'in-progress', source:'A 系统' },
+    { id:'e4', game:'ossan', type:'Text Translation', icon:'📝', count:15, unit:'items', ddl:'03/29', ddlCls:'', estMin:45, actualMin:38, status:'done', source:'A 系统' },
+    { id:'e5', game:'negima', type:'Text Translation', icon:'📝', count:22, unit:'items', ddl:'03/29', ddlCls:'', estMin:66, actualMin:55, status:'done', source:'A 系统' },
+    { id:'e6', game:'doraemon', type:'Text Translation', icon:'📝', count:8, unit:'items', ddl:'03/28', ddlCls:'', estMin:24, actualMin:20, status:'done', source:'A 系统' },
+    { id:'e7', game:'kusuriya', type:'Announcement Translation', icon:'📢', count:3, unit:'Announcements', ddl:'今天 18:00', ddlCls:'', estMin:60, actualMin:55, status:'done', source:'A 系统' },
+    { id:'e8', game:'doraemon', type:'Announcement Translation', icon:'📢', count:2, unit:'Announcements', ddl:'明天 12:00', ddlCls:'', estMin:40, actualMin:35, status:'done', source:'A 系统' },
+    { id:'e9', game:'negima', type:'Announcement Translation', icon:'📢', count:1, unit:'Announcements', ddl:'03/28', ddlCls:'', estMin:20, actualMin:18, status:'done', source:'A 系统' },
+    { id:'e10', game:'doraemon', type:'Image Translation', icon:'🖼️', count:2, unit:'images', ddl:'03/29', ddlCls:'', estMin:30, actualMin:25, status:'done', source:'i18n' },
+    { id:'e11', game:'kumo', type:'Image Translation', icon:'🖼️', count:3, unit:'images', ddl:'03/30', ddlCls:'', estMin:45, actualMin:40, status:'done', source:'i18n' },
+    { id:'e12', game:'kingofprism', type:'Image Translation', icon:'🖼️', count:1, unit:'images', ddl:'03/30', ddlCls:'', estMin:15, actualMin:12, status:'done', source:'i18n' },
+    { id:'e13', game:'kusuriya', type:'Image Translation', icon:'🖼️', count:1, unit:'images', ddl:'03/28', ddlCls:'', estMin:15, actualMin:10, status:'done', source:'i18n' },
+];
+
+const FOLLOW_TICKETS = [
+    { category:'Bug', catCls:'bug', appid:'doraemon', title:'文本超框', context:'英文文本无法再缩短，需要修改图片使得英文文字不超框', severity:'Low', assignee:'田中太郎', assigneeRole:'CP', assigneeAvatar:'TT', ticketStatus:'Pending' },
+    { category:'General', catCls:'general', appid:'kumo', title:'图片文字修改', context:'Permanent Benefit Card 修改为 Infinite Pass', severity:'Low', assignee:'鈴木一郎', assigneeRole:'CP', assigneeAvatar:'SI', ticketStatus:'InProgress' },
+];
+
+const SELF_TICKETS_MORNING = [
+    { id:'st1', game:'kusuriya', type:'LQA', title:'New event walkthrough - Spring Festival', status:'pending', created:'03/24' },
+    { id:'st2', game:'doraemon', type:'LQA', title:'Post-update UI text check v2.3', status:'in-progress', created:'03/23' },
+];
+const SELF_TICKETS_PROGRESS = [
+    { id:'st1', game:'kusuriya', type:'LQA', title:'New event walkthrough - Spring Festival', status:'in-progress', created:'03/24' },
+    { id:'st2', game:'doraemon', type:'LQA', title:'Post-update UI text check v2.3', status:'done', created:'03/23' },
+];
+const SELF_TICKETS_ENDOFDAY = [
+    { id:'st1', game:'kusuriya', type:'LQA', title:'New event walkthrough - Spring Festival', status:'done', created:'03/24' },
+    { id:'st2', game:'doraemon', type:'LQA', title:'Post-update UI text check v2.3', status:'done', created:'03/23' },
+];
+
+let curRole = 'worker';
+let curCase = 'morning';
+
+function fmtTime(min) {
+    if (min >= 60) { const h = Math.floor(min/60), m = min%60; return m ? `${h}h${m}min` : `${h}h`; }
+    return `${min}min`;
+}
+
+function getColorClass(task) {
+    if (task.status === 'done') return 'color-done';
+    if (task.status === 'in-progress' && task.elapsed != null) {
+        const pct = task.elapsed / task.estMin;
+        if (pct >= 0.9) return 'color-danger';
+        if (pct >= 0.5) return 'color-warning';
+    }
+    return '';
+}
+
+function getProgressColor(task) {
+    if (!task.elapsed) return 'normal';
+    const pct = task.elapsed / task.estMin;
+    if (pct >= 0.9) return 'danger';
+    if (pct >= 0.5) return 'warning';
+    return 'normal';
+}
+
+function renderTaskCard(task) {
+    const colorCls = getColorClass(task);
+    const statusMap = { 'pending':'status-pending', 'in-progress':'status-progress', 'done':'status-done' };
+    const statusLabel = { 'pending':'pending', 'in-progress':'in-progress', 'done':'done' };
+
+    let progressHtml = '';
+    if (task.status === 'in-progress' && task.elapsed != null) {
+        const pct = Math.min((task.elapsed / task.estMin) * 100, 100);
+        const clr = getProgressColor(task);
+        progressHtml = `<div class="t-card-progress">
+            <div class="progress-bar"><div class="progress-fill ${clr}" style="width:${pct}%"></div></div>
+            <div class="progress-label"><span>Elapsed ${fmtTime(task.elapsed)} / Est. ${fmtTime(task.estMin)}</span><span>${Math.round(pct)}%</span></div>
+        </div>`;
+    }
+    if (task.status === 'done' && task.actualMin != null) {
+        progressHtml = `<div class="t-card-progress">
+            <div class="progress-bar"><div class="progress-fill normal" style="width:100%;background:var(--success);"></div></div>
+            <div class="progress-label"><span>Actual ${fmtTime(task.actualMin)} (Est. ${fmtTime(task.estMin)})</span><span>✓</span></div>
+        </div>`;
+    }
+
+    return `<div class="t-card glass ${colorCls}">
+        <div class="t-card-top">
+            <div class="t-card-icon">${task.icon}</div>
+            <div class="t-card-body">
+                <div class="t-card-title">
+                    《${task.game}》${task.type}
+                    <span class="status-pill ${statusMap[task.status]}">${statusLabel[task.status]}</span>
+                    ${task.isNew ? '<span class="status-pill" style="background:rgba(255,59,48,0.1);color:#ff3b30;">NEW</span>' : ''}
+                </div>
+                <div class="t-card-meta">
+                    <span class="t-card-tag tag-count">${task.count} ${task.unit}</span>
+                    <span class="t-card-tag tag-ddl ${task.ddlCls}">DDL ${task.ddl}</span>
+                    <span class="t-card-tag tag-est">Est. ${fmtTime(task.estMin)}</span>
+                </div>
+            </div>
+        </div>
+        ${progressHtml}
+    </div>`;
+}
+
+/* ===== USER SWITCHER ===== */
+function renderDropdown() {
+    const items = [
+        { role:'worker', ...USERS.worker },
+        { role:'dm', ...USERS.dm },
+        { role:'maintainer', ...USERS.mt }
+    ];
+    const dd = document.getElementById('userDropdown');
+    dd.innerHTML = items.map(it => `<button class="user-dropdown-item ${it.role===curRole?'active':''}" data-role="${it.role}">
+        <span class="user-avatar ${it.cls}" style="width:24px;height:24px;border-radius:12px;font-size:9px;">${it.avatar}</span>
+        <div><div style="font-weight:600;">${it.name}</div><div class="role-label">${it.title}</div></div></button>`).join('');
+    dd.querySelectorAll('.user-dropdown-item').forEach(item => item.addEventListener('click', () => switchRole(item.dataset.role)));
+    const cur = items.find(i => i.role === curRole);
+    document.getElementById('userName').textContent = cur.name;
+    const av = document.getElementById('userAvatar');
+    av.textContent = cur.avatar; av.className = 'user-avatar ' + cur.cls;
+}
+function switchRole(role) {
+    curRole = role; renderDropdown();
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById({worker:'viewWorker',dm:'viewDM',maintainer:'viewMaintainer'}[role]).classList.add('active');
+    document.getElementById('userDropdown').classList.remove('show');
+    if (role === 'dm') renderDM();
+    if (role === 'maintainer') initMaintainer();
+}
+document.getElementById('userBtn').onclick = () => document.getElementById('userDropdown').classList.toggle('show');
+document.addEventListener('click', e => {
+    if (!e.target.closest('.user-switcher')) document.getElementById('userDropdown').classList.remove('show');
+    if (!e.target.closest('.bottom-controls')) document.getElementById('caseMenu').classList.remove('show');
+    if (!e.target.closest('.info-panel')) { document.getElementById('infoBody').classList.remove('show'); document.getElementById('infoToggle').classList.remove('open'); }
+});
+
+/* ===== INFO PANEL ===== */
+document.getElementById('infoToggle').onclick = e => {
+    e.stopPropagation();
+    document.getElementById('infoBody').classList.toggle('show');
+    document.getElementById('infoToggle').classList.toggle('open');
+};
+
+/* ===== CASE SWITCH ===== */
+document.getElementById('caseBtn').onclick = e => { e.stopPropagation(); document.getElementById('caseMenu').classList.toggle('show'); };
+document.querySelectorAll('#caseMenu .ctrl-menu-item').forEach(item => item.addEventListener('click', () => {
+    curCase = item.dataset.case;
+    document.querySelectorAll('#caseMenu .ctrl-menu-item').forEach(i => i.classList.remove('active')); item.classList.add('active');
+    document.getElementById('caseMenu').classList.remove('show');
+    if (curRole === 'worker') runCase(curCase);
+}));
+
+/* ===== DM VIEW ===== */
+function renderDM() {
+    const colorMap = {success:'var(--success)',blue:'var(--accent-blue)',warning:'var(--warning)',error:'var(--error)'};
+    document.getElementById('dmContent').innerHTML = `
+        <div style="margin-bottom:24px;"><div class="date-main" style="font-size:22px;">翻译团队工作效率总览</div><div class="date-sub">实时监控翻译团队任务处理情况</div></div>
+        <div class="metrics-grid">
+            <div class="metric-card glass"><div class="metric-label">Total Tasks</div><div class="metric-value">18</div></div>
+            <div class="metric-card glass"><div class="metric-label">Done Rate</div><div class="metric-value" style="color:var(--success)">72%</div></div>
+            <div class="metric-card glass"><div class="metric-label">Est. vs Actual</div><div class="metric-value" style="color:var(--accent-blue)">-8%</div></div>
+            <div class="metric-card glass"><div class="metric-label">Alerts</div><div class="metric-value" style="color:var(--warning)">1</div></div>
+        </div>
+        <div class="section-label">⚠️ 异常告警</div>
+        <div class="alert-card glass" style="margin-bottom:20px;">
+            <div class="alert-icon">🟡</div>
+            <div class="alert-body">
+                <div class="alert-title">山本翔太</div>
+                <div class="alert-desc">2 tasks overdue (red), negima Announcement +15min over estimate</div>
+            </div>
+            <button class="btn btn-ghost btn-sm">查看</button>
+        </div>
+        <div class="section-label">📊 任务类型分布</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;">
+            <div class="glass" style="border-radius:16px;padding:16px 20px;">
+                <div style="font-size:13px;font-weight:700;margin-bottom:10px;">📝 Text Translation</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div><div style="font-size:9px;font-weight:600;color:rgba(0,0,0,0.35);">Total</div><div style="font-size:18px;font-weight:800;">245</div></div>
+                    <div><div style="font-size:9px;font-weight:600;color:rgba(0,0,0,0.35);">Done</div><div style="font-size:18px;font-weight:800;color:var(--success);">182</div></div>
+                </div>
+            </div>
+            <div class="glass" style="border-radius:16px;padding:16px 20px;">
+                <div style="font-size:13px;font-weight:700;margin-bottom:10px;">📢 Announcement</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div><div style="font-size:9px;font-weight:600;color:rgba(0,0,0,0.35);">Total</div><div style="font-size:18px;font-weight:800;">8</div></div>
+                    <div><div style="font-size:9px;font-weight:600;color:rgba(0,0,0,0.35);">Done</div><div style="font-size:18px;font-weight:800;color:var(--success);">6</div></div>
+                </div>
+            </div>
+            <div class="glass" style="border-radius:16px;padding:16px 20px;">
+                <div style="font-size:13px;font-weight:700;margin-bottom:10px;">🖼️ Image Translation</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div><div style="font-size:9px;font-weight:600;color:rgba(0,0,0,0.35);">Total</div><div style="font-size:18px;font-weight:800;">5</div></div>
+                    <div><div style="font-size:9px;font-weight:600;color:rgba(0,0,0,0.35);">Done</div><div style="font-size:18px;font-weight:800;color:var(--success);">3</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="section-label">👥 翻译官工作详情</div>
+        <div class="glass" style="border-radius:16px;overflow:hidden;margin-bottom:24px;">
+            <table class="team-table"><thead><tr><th>Translator</th><th>Tasks (done/total)</th><th>Items</th><th>Est. Gap</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr><td><strong>佐藤美咲</strong></td><td>4/5</td><td>82 items</td><td style="color:var(--success);">-8%</td><td><span class="status-badge good">Normal</span></td></tr>
+                <tr><td><strong>山本翔太</strong></td><td>3/6</td><td>95 items</td><td style="color:var(--error);">+22%</td><td><span class="status-badge warn">Slow</span></td></tr>
+                <tr><td><strong>铃木花</strong></td><td>6/7</td><td>68 items</td><td style="color:var(--success);">-3%</td><td><span class="status-badge good">Normal</span></td></tr>
+            </tbody></table>
+        </div>`;
+}
+
+/* ===== MAINTAINER VIEW ===== */
+const MT_WORKFLOWS = [
+    { id:'a-sync', name:'A 系统翻译票自动同步', tag:'同步', tagCls:'sync', on:true, info:'实时 · 全部翻译官' },
+    { id:'i18n-scan', name:'i18n 图片翻译自动巡检', tag:'监控', tagCls:'monitor', on:true, info:'每小时 · 全部翻译官' },
+    { id:'auto-ticket', name:'Image Translation 自动建票', tag:'自动化', tagCls:'auto', on:true, info:'巡检触发 · 推送确认' },
+    { id:'hourly-report', name:'每小时任务动态汇总', tag:'自动化', tagCls:'auto', on:true, info:'整点推送 · 全部翻译官' },
+    { id:'endofday', name:'下班前自动结算', tag:'自动化', tagCls:'auto', on:true, info:'每日 17:30 · 全部翻译官' },
+];
+const MT_AGENTS = [
+    { id:'task-router', name:'翻译任务路由 Agent', desc:'从 A 系统拉取翻译票，按 DDL + 翻译量排序推送', icon:'🔀' },
+    { id:'i18n-monitor', name:'i18n 监控 Agent', desc:'持续监控 i18n 系统，发现新图片翻译需求自动建票', icon:'👁️' },
+    { id:'progress-tracker', name:'进度追踪 Agent', desc:'监控任务状态变化，计算预估时间消耗，生成小时报', icon:'📊' },
+    { id:'settlement', name:'结算 Agent', desc:'下班前汇总工作成果，更新 A 票状态，生成日报', icon:'📋' },
+];
+
+const wfChats = {
+    'a-sync':[{role:'ai',text:'当前配置：\n· 数据源：A 系统\n· 同步范围：Text Translation、Announcement Translation\n· 同步频率：实时（A 系统创建票后 30s 内同步）\n· 排序策略：DDL 越近优先级越高，同一 DDL 下翻译条数越多优先级越高\n\n你想修改哪些配置？'}],
+    'i18n-scan':[{role:'ai',text:'当前配置：\n· 监控范围：i18n 系统 Image Translation 模块\n· 巡检频率：每小时一次\n· 发现新需求后：推送给翻译官确认，确认后自动建 A 票\n\n你想修改哪些配置？'}],
+    'auto-ticket':[{role:'ai',text:'当前配置：\n· 触发条件：i18n 巡检发现新图片翻译需求\n· 建票方式：推送给翻译官确认后建票（非全自动）\n· 票的默认 DDL：发现后 +3 个工作日\n\n你想修改哪些配置？'},{role:'user',text:'改成自动建票，不需要翻译官确认。DDL 改为 +2 个工作日。'},{role:'summary',data:{name:'Image Translation 自动建票',trigger:'i18n 巡检发现新需求',scope:'全部翻译官',strategy:'· 发现新图片翻译需求 → 自动创建 A 票\n· 默认 DDL：发现时间 +2 个工作日\n· 自动分配给对应游戏的翻译官',confirm:'全自动，无需确认'}}],
+    'hourly-report':[{role:'ai',text:'当前配置：\n· 推送时间：每整点（10:00、11:00...17:00）\n· 内容：本小时完成任务数、新进入任务数、当前剩余任务数\n· 推送对象：全部翻译官\n\n你想修改哪些配置？'}],
+    'endofday':[{role:'ai',text:'当前配置：\n· 触发时间：每日 17:30\n· 汇总内容：已完成翻译条数/类型、A 票状态更新、明日任务预告\n· 自动动作：已完成的票关闭、未完成的顺延\n· 推送对象：翻译官 + 翻译组长\n\n你想修改哪些配置？'}],
+    'new':[{role:'ai',text:'你好！请描述你想创建的工作流。\n\n我可以帮你配置：\n· A 系统票同步规则\n· i18n 监控策略\n· 自动建票规则\n· 定时汇报和结算\n\n你可以用自然语言描述。'}],
+};
+const agentChats = {
+    'task-router':[{role:'ai',text:'当前配置：\n· 数据源：A 系统 + i18n\n· 排序规则：DDL 升序 → 翻译条数降序\n· 预估系数：Text 3min/条、Announcement 20min/篇、Image 15min/张\n· 推送时机：每日上班时 + 新票实时推送\n\n你想修改哪些配置？'}],
+    'i18n-monitor':[{role:'ai',text:'当前配置：\n· 监控范围：所有游戏的 i18n Image Translation\n· 巡检频率：每小时\n· 检测逻辑：对比上次巡检结果，发现新增项\n\n你想修改哪些配置？'}],
+    'progress-tracker':[{role:'ai',text:'当前配置：\n· 状态源：A 系统票状态\n· 颜色阈值：50% 预估时间 → 黄色，90% → 红色\n· 小时报：整点汇总推送\n· 监控范围：所有 in-progress 状态的任务\n\n你想修改哪些配置？'}],
+    'settlement':[{role:'ai',text:'当前配置：\n· 结算时间：每日 17:30\n· 自动动作：done 任务关闭 A 票、in-progress 任务更新进度、pending 任务顺延\n· 推送明日预告：基于 A 系统已创建但未处理的票\n\n你想修改哪些配置？'}],
+};
+
+let curWfId = MT_WORKFLOWS[0].id, curAgentId = MT_AGENTS[0].id;
+
+function initMaintainer() {
+    curWfId = MT_WORKFLOWS[0].id; curAgentId = MT_AGENTS[0].id;
+    const mc = document.getElementById('maintainerContent');
+    mc.innerHTML = `<div style="margin-bottom:20px;"><div class="date-main" style="font-size:22px;">翻译 Agent & 工作流管理</div><div class="date-sub">管理翻译相关的自动化工作流和 Agent 配置</div></div>
+    <div class="dm-tabs glass" style="margin-bottom:16px;" id="mTabs"><button class="dm-tab active" data-mtab="workflows">工作流</button><button class="dm-tab" data-mtab="agent">Agent 配置</button><button class="dm-tab" data-mtab="logs">执行日志</button></div>
+    <div id="mTabWorkflows"><div class="m-panels"><div class="m-panel-left glass"><div class="m-panel-header"><span style="font-weight:600;font-size:13px;color:rgba(0,0,0,0.6);">工作流列表</span><button class="btn btn-blue btn-sm" id="newWfBtn">+ 新建</button></div><div class="m-panel-body ds3-scrollbar" id="wfList"></div></div><div class="m-panel-right glass"><div class="chat-header"><span class="chat-header-icon">💬</span><span class="chat-header-title" id="wfChatTitle"></span><span class="chat-header-sub" id="wfChatSub"></span></div><div class="chat-messages ds3-scrollbar" id="wfChat"></div><div class="chat-input-area"><input class="chat-input" placeholder="描述你想创建或修改的工作流..." /><button class="chat-send-btn">↑</button></div></div></div></div>
+    <div id="mTabAgent" style="display:none;"><div class="m-panels"><div class="m-panel-left glass"><div class="m-panel-header"><span style="font-weight:600;font-size:13px;color:rgba(0,0,0,0.6);">Agent 列表</span></div><div class="m-panel-body ds3-scrollbar" id="agentList"></div></div><div class="m-panel-right glass"><div class="chat-header"><span class="chat-header-icon">🤖</span><span class="chat-header-title" id="agentChatTitle"></span><span class="chat-header-sub" id="agentChatSub"></span></div><div class="chat-messages ds3-scrollbar" id="agentChat"></div><div class="chat-input-area"><input class="chat-input" placeholder="描述你想修改的 Agent 配置..." /><button class="chat-send-btn">↑</button></div></div></div></div>
+    <div id="mTabLogs" style="display:none;"><div class="section-label">今日执行日志</div><div class="glass" style="border-radius:14px;overflow:hidden;">${[
+        ['17:30','Settlement Agent → closed 4 A tickets, daily report sent'],
+        ['17:00','Hourly report → done 2, remaining 1'],
+        ['16:00','Hourly report → done 1, new 0'],
+        ['15:00','Hourly report → done 2, new 1'],
+        ['14:00','Hourly report → done 1, new 0'],
+        ['13:20','i18n scan → kusuriya 1 image, auto-created ticket'],
+        ['13:00','Hourly report → done 3, new 2'],
+        ['12:00','Hourly report → done 2, new 0'],
+        ['11:30','A-system sync → negima Text Translation 12 items'],
+        ['10:15','A-system sync → ossan Text Translation 8 items'],
+        ['11:00','Hourly report → done 1, new 0'],
+        ['10:00','Hourly report → done 1, new 1'],
+        ['09:00','晨间播报生成 → 汇总 4 个任务推送给佐藤美咲'],
+    ].map((r,i,a) => `<div style="display:flex;gap:10px;padding:10px 14px;${i<a.length-1?'border-bottom:1px solid rgba(0,0,0,0.04);':''}font-size:13px;"><span style="color:rgba(0,0,0,0.3);min-width:44px;">${r[0]}</span><span style="flex:1;color:rgba(0,0,0,0.6);">${r[1]}</span><span style="color:var(--success);font-size:11px;font-weight:600;">Done</span></div>`).join('')}</div></div>`;
+
+    mc.querySelectorAll('.dm-tab').forEach(tab => tab.addEventListener('click', () => {
+        mc.querySelectorAll('.dm-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
+        ['mTabWorkflows','mTabAgent','mTabLogs'].forEach(id => document.getElementById(id).style.display = 'none');
+        document.getElementById({workflows:'mTabWorkflows',agent:'mTabAgent',logs:'mTabLogs'}[tab.dataset.mtab]).style.display = 'block';
+        if (tab.dataset.mtab === 'agent') renderAgentList();
+    }));
+    document.getElementById('newWfBtn').onclick = () => { curWfId='new'; renderWfList(); document.getElementById('wfChatTitle').textContent='新建工作流'; document.getElementById('wfChatSub').textContent=''; renderChat(wfChats['new'], document.getElementById('wfChat')); };
+    renderWfList(); selectWf(curWfId); renderAgentList(); selectAgent(curAgentId);
+}
+
+function renderWfList() {
+    const c = document.getElementById('wfList');
+    c.innerHTML = MT_WORKFLOWS.map(w => `<div class="wf-item ${w.id===curWfId?'active':''}" data-wf="${w.id}"><div class="wf-dot ${w.on?'on':'off'}"></div><div class="wf-body"><div class="wf-name">${w.name}</div><div class="wf-info">${w.info}</div></div><span class="wf-tag ${w.tagCls}">${w.tag}</span></div>`).join('');
+    c.querySelectorAll('.wf-item').forEach(el => el.addEventListener('click', () => selectWf(el.dataset.wf)));
+}
+function renderAgentList() {
+    const c = document.getElementById('agentList');
+    c.innerHTML = MT_AGENTS.map(a => `<div class="wf-item ${a.id===curAgentId?'active':''}" data-agent="${a.id}"><div style="font-size:18px;flex-shrink:0;">${a.icon}</div><div class="wf-body"><div class="wf-name">${a.name}</div><div class="wf-info">${a.desc}</div></div></div>`).join('');
+    c.querySelectorAll('.wf-item').forEach(el => el.addEventListener('click', () => selectAgent(el.dataset.agent)));
+}
+function selectWf(id) {
+    curWfId = id; renderWfList();
+    const wf = MT_WORKFLOWS.find(w => w.id === id);
+    document.getElementById('wfChatTitle').textContent = wf ? wf.name : '新建工作流';
+    document.getElementById('wfChatSub').textContent = wf ? '运行中' : '';
+    renderChat(wfChats[id] || wfChats['new'], document.getElementById('wfChat'));
+}
+function selectAgent(id) {
+    curAgentId = id; renderAgentList();
+    const a = MT_AGENTS.find(x => x.id === id);
+    document.getElementById('agentChatTitle').textContent = a ? a.name : '';
+    document.getElementById('agentChatSub').textContent = '运行中';
+    renderChat(agentChats[id] || [{role:'ai',text:`「${a?a.name:''}」运行正常。\n\n你想修改哪些配置？`}], document.getElementById('agentChat'));
+}
+function renderChat(msgs, container) {
+    container.innerHTML = '';
+    msgs.forEach(msg => {
+        if (msg.role === 'summary') {
+            const d = msg.data, el = document.createElement('div');
+            el.style.cssText = 'max-width:92%;';
+            el.innerHTML = `<div class="wf-summary"><div class="wf-summary-title">📋 ${d.name}</div>
+                <div class="wf-summary-row"><span class="wf-summary-label">触发条件</span><span class="wf-summary-value">${d.trigger}</span></div>
+                <div class="wf-summary-row"><span class="wf-summary-label">应用范围</span><span class="wf-summary-value">${d.scope}</span></div>
+                <div class="wf-summary-row"><span class="wf-summary-label">执行策略</span><span class="wf-summary-value" style="white-space:pre-line;">${d.strategy}</span></div>
+                <div class="wf-summary-row"><span class="wf-summary-label">确认模式</span><span class="wf-summary-value">${d.confirm}</span></div>
+                <div class="wf-summary-actions"><button class="btn btn-green btn-sm">✓ 已确认</button><button class="btn btn-ghost btn-sm">继续编辑</button></div></div>`;
+            container.appendChild(el);
+        } else {
+            const isAi = msg.role === 'ai', el = document.createElement('div');
+            el.className = `chat-msg ${isAi?'ai':'user'}`;
+            el.innerHTML = `<div class="chat-av ${isAi?'ai':'user'}">${isAi?'AI':'ZM'}</div><div class="chat-bubble ${isAi?'ai':'user'}">${msg.text}</div>`;
+            container.appendChild(el);
+        }
+    });
+    container.scrollTop = container.scrollHeight;
+}
+
+/* ===== STREAM ENGINE ===== */
+const sc = document.getElementById('streamContainer'), ws = document.getElementById('workerScroll');
+let st = null;
+function clearStream() { if (st) clearTimeout(st); sc.innerHTML = ''; }
+function getDate() { const d = new Date(), days = ['日','一','二','三','四','五','六']; return { full:`${d.getFullYear()}年${String(d.getMonth()+1).padStart(2,'0')}月${String(d.getDate()).padStart(2,'0')}日`, weekday:`星期${days[d.getDay()]}` }; }
+function addDateHeader() { const{full,weekday}=getDate(), el=document.createElement('div'); el.style.marginBottom='24px'; el.innerHTML=`<div class="date-main">${full}</div><div class="date-sub">${weekday}</div>`; sc.appendChild(el); }
+function scrollB() { requestAnimationFrame(() => ws.scrollTo({top:ws.scrollHeight,behavior:'smooth'})); }
+
+function typeT(text, delay) {
+    return new Promise(r => {
+        st = setTimeout(() => {
+            if (!text) { const s=document.createElement('div'); s.className='stream-text spacer'; sc.appendChild(s); scrollB(); r(); return; }
+            const el = document.createElement('div'); el.className = 'stream-text current'; sc.appendChild(el);
+            let i = 0; const cur = document.createElement('span'); cur.className = 'cursor-blink';
+            const tick = () => { i++; el.textContent = text.slice(0,i); el.appendChild(cur); scrollB();
+                if (i < text.length) st = setTimeout(tick, 22);
+                else st = setTimeout(() => { el.className = 'stream-text done'; cur.remove(); r(); }, 350);
+            }; tick();
+        }, delay);
+    });
+}
+
+function renderHourlyHtml(data) {
+    const label = data.label != null ? data.label : '小时报';
+    return `<div class="hourly-card glass" style="margin:0;opacity:1;animation:none;">
+        <div class="hourly-header"><span class="hourly-time">${data.time}</span>${label ? `<span class="hourly-label">${label}</span>` : ''}</div>
+        <div class="hourly-stats">
+            <div class="hourly-stat completed"><div class="hourly-stat-value">${data.completed}</div><div class="hourly-stat-label">${data.completedLabel || 'Done'}</div></div>
+            <div class="hourly-stat new-in"><div class="hourly-stat-value">+${data.newIn}</div><div class="hourly-stat-label">New</div></div>
+            <div class="hourly-stat remaining"><div class="hourly-stat-value">${data.remaining}</div><div class="hourly-stat-label">Remaining</div></div>
+        </div>
+    </div>`;
+}
+
+const TS_MAP = {
+    'Pending':            { card:'follow-s-pending',    bar:'fsb-pending',     label:'Pending' },
+    'InProgress':         { card:'follow-s-inprogress', bar:'fsb-inprogress',  label:'InProgress' },
+    'InProgress: review': { card:'follow-s-review',     bar:'fsb-review',      label:'InProgress: review' },
+    'Completed':          { card:'follow-s-completed',  bar:'fsb-completed',   label:'Completed' },
+};
+
+function renderFollowHtml(tickets) {
+    return `<div class="follow-section">
+        <div class="follow-header">📌 需要跟进的 A 票（Follow）</div>
+        <div class="follow-cards">${tickets.map(t => {
+            const ts = TS_MAP[t.ticketStatus] || TS_MAP['Pending'];
+            const isReview = t.ticketStatus === 'InProgress: review';
+            return `<div class="follow-card glass ${ts.card}">
+                <div class="follow-status-bar ${ts.bar}"><span class="fsb-dot"></span>${ts.label}</div>
+                <div class="follow-card-top">
+                    <span class="follow-tag ${t.catCls}">${t.category}</span>
+                    <span class="follow-appid">${t.appid}</span>
+                    <span class="follow-severity">Severity: ${t.severity}</span>
+                </div>
+                <div class="follow-title">${t.title}</div>
+                <div class="follow-context">${t.context}</div>
+                ${isReview && t.cpNote ? `<div class="follow-cp-note">💬 <strong>CP:</strong> ${t.cpNote}</div>` : ''}
+                <div class="follow-assignee">
+                    <span class="follow-assignee-avatar">${t.assigneeAvatar}</span>
+                    <span><strong>${t.assignee}</strong> · ${t.assigneeRole}</span>
+                </div>
+            </div>`;
+        }).join('')}</div>
+    </div>`;
+}
+
+function renderNewTasksHtml(items) {
+    return items.map(it =>
+        `<div class="db-notif-item"><span class="db-notif-time">${it.time}</span><span class="db-notif-icon">📥</span><span>${it.text}</span></div>`
+    ).join('');
+}
+
+function renderSelfTicketsHtml(tickets) {
+    const statusCls = { 'pending':'os-pending', 'in-progress':'os-progress', 'done':'os-done' };
+    const statusLabel = { 'pending':'pending', 'in-progress':'in-progress', 'done':'done' };
+    return `<div class="other-section">
+        <div class="other-header">📝 Other Tasks (self-created)</div>
+        <div class="other-cards">${tickets.map(t =>
+            `<div class="other-card glass ${statusCls[t.status] || ''}">
+                <div class="other-card-top">
+                    <span class="other-game">${t.game}</span>
+                    <span class="other-type">${t.type}</span>
+                    <span class="other-status">${statusLabel[t.status]}</span>
+                </div>
+                <div class="other-title">${t.title}</div>
+            </div>`
+        ).join('')}</div>
+    </div>`;
+}
+
+const TYPE_ORDER = ['Text Translation','Announcement Translation','Image Translation'];
+const TYPE_ICONS = {'Text Translation':'📝','Announcement Translation':'📢','Image Translation':'🖼️'};
+
+function groupTasks(tasks) {
+    const map = {};
+    tasks.forEach(t => {
+        if (!map[t.type]) map[t.type] = [];
+        map[t.type].push(t);
+    });
+    return TYPE_ORDER.filter(tp => map[tp]).map(tp => {
+        const items = map[tp];
+        const totalCount = items.reduce((s,t) => s + t.count, 0);
+        const totalEst = items.reduce((s,t) => s + t.estMin, 0);
+        const doneCount = items.filter(t => t.status === 'done').length;
+        const progressCount = items.filter(t => t.status === 'in-progress').length;
+        const pendingCount = items.filter(t => t.status === 'pending').length;
+        const hasNew = items.some(t => t.isNew);
+        return { type: tp, icon: TYPE_ICONS[tp], items, totalCount, unit: items[0].unit, totalEst, doneCount, progressCount, pendingCount, hasNew };
+    });
+}
+
+function renderGroupedHtml(groups) {
+    return `<div class="task-groups">${groups.map((g, gi) =>
+        `<div class="task-group glass" data-group="${gi}">
+            <div class="task-group-header">
+                <div class="tg-icon">${g.icon}</div>
+                <div class="tg-info">
+                    <div class="tg-title">
+                        ${g.type}
+                        ${g.hasNew ? '<span class="status-pill" style="background:rgba(255,59,48,0.1);color:#ff3b30;font-size:9px;">NEW</span>' : ''}
+                    </div>
+                    <div class="tg-meta">
+                        <span class="tg-tag count">${g.items.length} tasks · ${g.totalCount} ${g.unit}</span>
+                        <span class="tg-tag est">Est. ${fmtTime(g.totalEst)}</span>
+                        <div class="tg-pills">
+                            ${g.doneCount ? `<span class="tg-status-pill done">${g.doneCount} done</span>` : ''}
+                            ${g.progressCount ? `<span class="tg-status-pill progress">${g.progressCount} in-progress</span>` : ''}
+                            ${g.pendingCount ? `<span class="tg-status-pill pending">${g.pendingCount} pending</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <span class="tg-chevron">▶</span>
+            </div>
+            <div class="tg-body">${g.items.map(t => renderTaskCard(t)).join('')}</div>
+        </div>`
+    ).join('')}</div>`;
+}
+
+function addDashboard(config, delay) {
+    return new Promise(r => {
+        st = setTimeout(() => {
+            const el = document.createElement('div');
+            el.className = 'db-grid';
+
+            let col1 = '';
+            if (config.tasks) {
+                const groups = groupTasks(config.tasks);
+                col1 = `<div class="db-section-title">📋 Tasks (${config.tasks.length})</div>` + renderGroupedHtml(groups);
+            }
+
+            let col2Parts = [];
+            if (config.follow) col2Parts.push(renderFollowHtml(config.follow));
+            if (config.selfTickets) col2Parts.push(renderSelfTicketsHtml(config.selfTickets));
+
+            let col3Parts = [];
+            if (config.hourly) col3Parts.push(renderHourlyHtml(config.hourly));
+            if (config.amReview) col3Parts.push(renderHourlyHtml(config.amReview));
+            if (config.newTasks && config.newTasks.length) {
+                col3Parts.push(`<div class="db-side-card glass">
+                    <div class="db-section-title" style="margin-bottom:6px;">📥 New Tasks Today</div>
+                    ${renderNewTasksHtml(config.newTasks)}
+                </div>`);
+            }
+
+            el.innerHTML = `<div class="db-col">${col1}</div><div class="db-col">${col2Parts.join('')}</div><div class="db-col">${col3Parts.join('')}</div>`;
+            sc.appendChild(el);
+            scrollB();
+            st = setTimeout(r, 600);
+        }, delay);
+    });
+}
+
+function addSummaryStats(stats, delay) {
+    return new Promise(r => {
+        st = setTimeout(() => {
+            const el = document.createElement('div');
+            el.className = 'summary-section';
+            el.style.opacity = '0'; el.style.animation = 'slideIn .5s ease forwards';
+            el.innerHTML = `<div class="summary-grid">${stats.map(s =>
+                `<div class="summary-item glass"><div class="summary-item-value" style="color:${s.color||'rgba(0,0,0,0.7)'}">${s.value}</div><div class="summary-item-label">${s.label}</div></div>`
+            ).join('')}</div>`;
+            sc.appendChild(el); scrollB();
+            st = setTimeout(r, 600);
+        }, delay);
+    });
+}
+
+function addNotif(icon, text, delay) {
+    return new Promise(r => {
+        st = setTimeout(() => {
+            const el = document.createElement('div');
+            el.className = 'notif-inline glass';
+            el.style.maxWidth = '600px';
+            el.innerHTML = `<div class="notif-icon">${icon}</div><div class="notif-text">${text}</div>`;
+            sc.appendChild(el); scrollB();
+            st = setTimeout(r, 400);
+        }, delay);
+    });
+}
+
+/* ===== DEMO CASES ===== */
+async function runCase(caseId) {
+    clearStream(); addDateHeader(); curCase = caseId;
+    const totalEst = TASKS_MORNING.reduce((s,t) => s + t.estMin, 0);
+
+    if (caseId === 'morning') {
+        await typeT('早上好 ☀️', 300);
+        await typeT(`今天有 ${TASKS_MORNING.length} 个翻译任务需要处理，预估总耗时约 ${fmtTime(totalEst)}。`, 200);
+        await typeT('任务已按 DDL + 翻译量自动排序，从上往下做即可。祝今天工作顺利！', 200);
+        await addDashboard({
+            tasks: TASKS_MORNING,
+            follow: FOLLOW_TICKETS,
+            selfTickets: SELF_TICKETS_MORNING,
+        }, 300);
+
+    } else if (caseId === 'progress') {
+        const pTotal = TASKS_PROGRESS.length;
+        const FOLLOW_PROGRESS = [
+            { ...FOLLOW_TICKETS[0], ticketStatus:'InProgress: review', cpNote:'底图已调整，英文文字区域扩大了 20%，请确认是否还有超框问题' },
+            { ...FOLLOW_TICKETS[1], ticketStatus:'InProgress' },
+        ];
+        await typeT('下午好，以下是当前任务状态：', 300);
+        await addDashboard({
+            tasks: TASKS_PROGRESS,
+            hourly: { time:'14:00 - 14:59', label:'Hourly Report', completed:2, newIn:0, remaining: pTotal - TASKS_PROGRESS.filter(t=>t.status==='done').length },
+            amReview: { time:'09:00 - 12:00', label:'AM Review', completed:2, completedLabel:'Done', newIn:2, remaining: pTotal - 2 },
+            newTasks: [
+                { time:'10:15', text:'doraemon Text Translation <strong>8 items</strong>' },
+                { time:'11:30', text:'negima Announcement Translation <strong>1 article</strong>' },
+                { time:'13:45', text:'ossan Text Translation <strong>12 items</strong>' },
+            ],
+            follow: FOLLOW_PROGRESS,
+            selfTickets: SELF_TICKETS_PROGRESS,
+        }, 300);
+
+    } else if (caseId === 'endofday') {
+        const eDone = TASKS_ENDOFDAY.filter(t=>t.status==='done').length;
+        const selfDone = SELF_TICKETS_ENDOFDAY.filter(t=>t.status==='done').length;
+        const totalTickets = TASKS_ENDOFDAY.length + SELF_TICKETS_ENDOFDAY.length;
+        const totalTicketsDone = eDone + selfDone;
+        const ticketPct = Math.round(totalTicketsDone / totalTickets * 100);
+        const textItems = TASKS_ENDOFDAY.filter(t=>t.type==='Text Translation'&&t.status==='done').reduce((s,t)=>s+t.count,0);
+        const annCount = TASKS_ENDOFDAY.filter(t=>t.type==='Announcement Translation'&&t.status==='done').reduce((s,t)=>s+t.count,0);
+        const imgCount = TASKS_ENDOFDAY.filter(t=>t.type==='Image Translation'&&t.status==='done').reduce((s,t)=>s+t.count,0);
+        const FOLLOW_ENDOFDAY = [
+            { ...FOLLOW_TICKETS[0], ticketStatus:'Completed' },
+            { ...FOLLOW_TICKETS[1], ticketStatus:'InProgress: review', cpNote:'已将 Permanent Benefit Card 替换为 Infinite Pass，请确认' },
+        ];
+        await typeT('辛苦了，今天的工作即将结束 🌙', 300);
+        await typeT('以下是今日工作总结：', 200);
+        await addSummaryStats([
+            { label:'A-tickets', value: `${totalTicketsDone}/${totalTickets} (${ticketPct}%)`, color:'var(--success)' },
+        ], 200);
+        await addSummaryStats([
+            { label:'Text Translation', value: `${textItems} items`, color:'var(--accent-blue)' },
+            { label:'Announcement', value: `${annCount} articles`, color:'var(--accent-purple)' },
+            { label:'Image Translation', value: `${imgCount} images`, color:'var(--warning)' },
+        ], 200);
+        await addDashboard({
+            tasks: TASKS_ENDOFDAY,
+            follow: FOLLOW_ENDOFDAY,
+            selfTickets: SELF_TICKETS_ENDOFDAY,
+        }, 300);
+        await typeT('', 200);
+        await typeT('今天表现很出色！早点休息 👏', 200);
+    }
+}
+
+/* ===== INIT ===== */
+renderDropdown();
+runCase('morning');
+</script>
+</body>
+</html>
