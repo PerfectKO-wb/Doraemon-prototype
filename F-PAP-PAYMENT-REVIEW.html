@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F Expert - Payment Review</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f9fafb;
+            --bg-container: #ffffff;
+            --bg-active: #efefef;
+            --bg-hover: #efefef;
+            --bg-hover2: #dbdbdb;
+            --bg-disabled: #dbdbdb;
+            --text-default: #131825;
+            --text-secondary: #73726e;
+            --text-disabled: #ababa9;
+            --border-divider: #e5e7eb;
+            --border-default: #d9d9d9;
+            --button-default: #131825;
+            --white: #ffffff;
+            --error-base: #f5222d;
+            --primary: #1C64F2;
+            --green-base: #10b981;
+            --green-light: #d1fae5;
+            --green-border: #6ee7b7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-default);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app { display: flex; width: 100%; height: 100vh; }
+
+        /* Icon Rail */
+        .icon-rail {
+            width: 48px;
+            height: 100vh;
+            background: var(--bg-container);
+            border-right: 1px solid var(--border-divider);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 0;
+            flex-shrink: 0;
+        }
+        .icon-rail-btn {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; cursor: pointer;
+            transition: background 0.15s;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+        }
+        .icon-rail-btn:hover { background: var(--bg-hover); }
+        .icon-rail-btn.active { color: var(--primary); }
+        .icon-rail-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .icon-rail-avatar {
+            width: 28px; height: 28px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #34d399, #059669);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 600; color: #fff;
+            cursor: pointer;
+        }
+
+        /* Sidebar List Panel */
+        .sidebar-panel {
+            width: 300px;
+            height: 100vh;
+            background: var(--bg-container);
+            border-right: 1px solid var(--border-divider);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .sidebar-header-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .expert-icon {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #34d399, #059669);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .expert-title {
+            font-size: 18px; font-weight: 700; line-height: 26px;
+        }
+        .header-icons {
+            display: flex; align-items: center; gap: 4px; margin-left: auto;
+        }
+        .header-icon-btn {
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; cursor: pointer;
+            transition: background 0.15s;
+            color: var(--text-secondary);
+        }
+        .header-icon-btn:hover { background: var(--bg-hover); }
+        .avatar-stack {
+            display: flex; align-items: center; margin-bottom: 12px;
+        }
+        .avatar-circle {
+            width: 24px; height: 24px;
+            border-radius: 12px;
+            border: 2px solid #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 600; color: #fff;
+            margin-left: -6px;
+        }
+        .avatar-circle:first-child { margin-left: 0; }
+        .avatar-more {
+            width: 24px; height: 24px;
+            border-radius: 12px;
+            background: var(--bg-active);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 500; color: var(--text-secondary);
+            margin-left: -6px;
+        }
+        .search-box {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-divider);
+            border-radius: 8px;
+            background: var(--bg-container);
+            margin-bottom: 8px;
+        }
+        .search-box input {
+            border: none; outline: none; flex: 1;
+            font-size: 13px; font-family: inherit;
+            color: var(--text-default);
+            background: transparent;
+        }
+        .search-box input::placeholder { color: var(--text-disabled); }
+        .filter-tag {
+            display: inline-flex; align-items: center;
+            padding: 4px 12px;
+            border: 1px solid var(--border-default);
+            border-radius: 6px;
+            font-size: 13px; font-weight: 500;
+            color: var(--text-default);
+            cursor: pointer;
+            background: var(--bg-container);
+        }
+
+        .sidebar-list {
+            flex: 1; overflow-y: auto;
+        }
+        .sidebar-list::-webkit-scrollbar { width: 4px; }
+        .sidebar-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+        .list-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-divider);
+            display: flex;
+            gap: 8px;
+            transition: background 0.15s;
+        }
+        .list-item:hover { background: var(--bg-hover); }
+        .list-item.active { background: #f0fdf4; }
+        .list-item-content { flex: 1; min-width: 0; }
+        .list-item-title {
+            font-size: 13px; font-weight: 500; line-height: 20px;
+            color: var(--text-default);
+            margin-bottom: 2px;
+        }
+        .list-item-desc {
+            font-size: 12px; line-height: 18px;
+            color: var(--text-secondary);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            margin-bottom: 4px;
+        }
+        .list-item-tag {
+            display: inline-block;
+            padding: 1px 8px;
+            background: var(--bg-active);
+            border-radius: 4px;
+            font-size: 11px; color: var(--text-secondary);
+        }
+        .list-item-dot {
+            width: 8px; height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-base);
+            position: relative;
+        }
+
+        /* Viewer Header */
+        .viewer-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: var(--bg-container);
+            border-bottom: 1px solid var(--border-divider);
+            gap: 12px;
+        }
+        .viewer-hamburger {
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .viewer-hamburger:hover { background: var(--bg-hover); }
+        .viewer-filename {
+            flex: 1;
+            font-size: 14px; font-weight: 500;
+            color: var(--text-default);
+            text-align: center;
+        }
+        .pending-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px; font-weight: 600;
+        }
+        .pending-badge.pending {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        /* PDF Viewer */
+        .pdf-viewer {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            position: relative;
+            padding: 24px;
+        }
+        .pdf-container {
+            background: var(--bg-container);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            position: relative;
+            width: 580px;
+            overflow: hidden;
+        }
+
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg-container);
+            border: 1px solid var(--border-divider);
+            border-radius: 8px;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            z-index: 5;
+        }
+        .zoom-btn {
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            border: none; background: transparent;
+            cursor: pointer; border-radius: 4px;
+            font-size: 14px; color: var(--text-secondary);
+            transition: background 0.15s;
+        }
+        .zoom-btn:hover { background: var(--bg-hover); }
+        .zoom-level {
+            padding: 2px 8px;
+            background: var(--bg-active);
+            border-radius: 4px;
+            font-size: 12px; font-weight: 500;
+            color: var(--text-default);
+        }
+
+        /* Approve / Reject Buttons */
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-container);
+            border-top: 1px solid var(--border-divider);
+        }
+        .action-btn {
+            width: 48px; height: 48px;
+            border-radius: 24px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .action-btn.approve {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .action-btn.approve:hover {
+            background: #a7f3d0;
+            transform: scale(1.05);
+        }
+        .action-btn.reject {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .action-btn.reject:hover {
+            background: #fecaca;
+            transform: scale(1.05);
+        }
+
+        /* Summary Panel */
+        .summary-panel {
+            width: 320px;
+            height: 100vh;
+            background: var(--bg-container);
+            border-left: 1px solid var(--border-divider);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+        .summary-panel::-webkit-scrollbar { width: 4px; }
+        .summary-panel::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .summary-tab {
+            padding: 4px 14px;
+            border-radius: 6px;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: var(--text-secondary);
+        }
+        .summary-tab.active {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        .summary-tab-label {
+            font-size: 14px; font-weight: 600;
+            color: var(--text-default);
+        }
+
+        .summary-body {
+            padding: 16px 20px;
+        }
+        .summary-row {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label {
+            width: 130px;
+            flex-shrink: 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 20px;
+        }
+        .summary-value {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-default);
+            line-height: 20px;
+            word-break: break-all;
+        }
+        .summary-value.editable {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .edit-icon {
+            width: 18px; height: 18px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: var(--text-disabled);
+            border-radius: 4px;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .edit-icon:hover { color: var(--primary); }
+        .submitter-detail {
+            font-size: 11px;
+            color: var(--text-disabled);
+            margin-top: 2px;
+        }
+
+        /* Invoice Simulation */
+        .invoice-sim {
+            padding: 32px 40px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #333;
+            font-family: 'MS Gothic', 'Hiragino Kaku Gothic Pro', monospace;
+        }
+        .invoice-sim .header-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .invoice-title-box {
+            display: inline-block;
+            border: 2px solid #333;
+            padding: 6px 24px;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            margin: 16px auto;
+            text-align: center;
+        }
+        .invoice-sim table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+        .invoice-sim th, .invoice-sim td {
+            border: 1px solid #999;
+            padding: 4px 8px;
+            font-size: 11px;
+            text-align: center;
+        }
+        .invoice-sim th {
+            background: #f5f5f5;
+            font-weight: 500;
+        }
+        .total-box {
+            display: inline-block;
+            border: 2px solid #333;
+            padding: 8px 20px;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 12px auto;
+            text-align: center;
+            background: #fffde7;
+        }
+        .stamp {
+            width: 56px; height: 56px;
+            border: 2px solid #c0392b;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #c0392b;
+            font-size: 10px;
+            font-weight: 700;
+            transform: rotate(-15deg);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- Icon Rail -->
+    <nav class="icon-rail">
+        <div class="icon-rail-btn" title="Home">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </div>
+        <div class="icon-rail-btn" title="Chat">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="icon-rail-btn" title="People">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div style="height:16px;"></div>
+        <div class="icon-rail-btn" style="font-size:10px;font-weight:600;color:var(--text-disabled);" title="CS">CS</div>
+        <div class="icon-rail-btn" style="font-size:10px;font-weight:600;color:var(--text-disabled);" title="i18n">i18n</div>
+        <div class="icon-rail-btn" style="font-size:10px;font-weight:600;color:var(--text-disabled);" title="CP">CP</div>
+        <div class="icon-rail-btn active" style="font-size:10px;font-weight:600;" title="F">F</div>
+        <div class="icon-rail-btn" style="font-size:10px;font-weight:600;color:var(--text-disabled);" title="Tech">Tech</div>
+        <div class="icon-rail-btn" style="font-size:10px;font-weight:600;color:var(--text-disabled);" title="BD">BD</div>
+        <div class="icon-rail-bottom">
+            <div class="icon-rail-btn" title="Download">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <div class="icon-rail-btn" title="Settings">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <div class="icon-rail-avatar">LW</div>
+        </div>
+    </nav>
+
+    <!-- Sidebar List Panel -->
+    <aside class="sidebar-panel">
+        <div class="sidebar-header">
+            <div class="sidebar-header-top">
+                <div class="expert-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <span class="expert-title">F Expert</span>
+                <div class="header-icons">
+                    <div class="header-icon-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                    </div>
+                    <div class="header-icon-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    </div>
+                    <div class="header-icon-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="avatar-stack">
+                <div class="avatar-circle" style="background:#1C64F2;">i</div>
+                <div class="avatar-circle" style="background:#F59E0B;">A</div>
+                <div class="avatar-circle" style="background:#8B5CF6;">S</div>
+                <div class="avatar-circle" style="background:#EC4899;">D</div>
+                <div class="avatar-circle" style="background:#10B981;">L</div>
+                <div class="avatar-more">+4</div>
+            </div>
+            <div class="search-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ababa9" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Search by title or project...">
+            </div>
+            <div class="filter-tag">Waiting</div>
+        </div>
+
+        <div class="sidebar-list" id="sidebarList">
+        </div>
+    </aside>
+
+    <!-- Main Content: PDF Viewer -->
+    <main class="main">
+        <div class="viewer-header">
+            <div class="viewer-hamburger">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </div>
+            <span class="viewer-filename" id="viewerFilename">1775115442174-r64zpb.pdf</span>
+            <span class="pending-badge pending" id="pendingBadge">18 &nbsp;pending</span>
+        </div>
+
+        <div class="pdf-viewer">
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomOut()">−</button>
+                <span class="zoom-level" id="zoomLevel">100%</span>
+                <button class="zoom-btn" onclick="zoomIn()">+</button>
+                <button class="zoom-btn" title="Fit page">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                </button>
+            </div>
+
+            <div class="pdf-container" id="pdfContainer">
+                <div class="invoice-sim">
+                    <div class="header-row">
+                        <div>
+                            <div style="font-size:10px;">請求書 No.</div>
+                            <div>52_1</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:10px;">135966_0001</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <div>〒106-0032</div>
+                        <div>東京都港区六本木1-9-10アークヒルズ仙石山森タワー29F</div>
+                    </div>
+
+                    <div style="text-align:center; margin: 20px 0;">
+                        <div class="invoice-title-box">請 求 書</div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                        <div>
+                            <div style="font-weight:600;">CTW株式会社</div>
+                            <div style="margin-top:4px;">管理本部　長島　洋志　様</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:600;">エムスリーキャリア株式会社</div>
+                            <div>代表取締役　沼倉　雅顕</div>
+                            <div style="margin-top:4px; font-size:10px;">登録番号：T 1-0104-0108-8946</div>
+                            <div style="margin-top:8px;">
+                                <div class="stamp">エムスリー<br>キャリア</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:40px; margin-bottom:12px; font-size:11px;">
+                        <div>
+                            <div>〒105-0001</div>
+                            <div>東京都港区虎ノ門4-1-28</div>
+                            <div>虎ノ門タワーズオフィス</div>
+                            <div>健康経営グループ</div>
+                            <div>TEL：03-6895-1702</div>
+                            <div>FAX：03-6735-4600</div>
+                        </div>
+                    </div>
+
+                    <table style="width:auto; margin-bottom:8px;">
+                        <tr>
+                            <td style="text-align:left; font-weight:500;">振込先</td>
+                            <td>：三菱UFJ銀行</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left; font-weight:500;"></td>
+                            <td>本店　　普通　2285736</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left; font-weight:500;">口座名書</td>
+                            <td>：エムスリーキャリア(株</td>
+                        </tr>
+                    </table>
+
+                    <div style="font-size:11px; margin-bottom:4px;">
+                        <span>支払期限　：2026年02月25日</span>
+                    </div>
+                    <div style="font-size:10px; color:#666; margin-bottom:16px;">
+                        ※振込手数料は貴社にてご負担をお願いいたします
+                    </div>
+
+                    <div style="text-align:center; margin: 16px 0;">
+                        <div class="total-box">合計金額　¥33,000</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>10%対象（税込）</th>
+                                <th>内消費税（10%）</th>
+                                <th>8%対象（税込）</th>
+                                <th>内消費税（8%）</th>
+                                <th>0%対象</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>33,000</td>
+                                <td>3,000</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table style="margin-top:12px;">
+                        <thead>
+                            <tr>
+                                <th colspan="2">請求項目</th>
+                                <th>単価</th>
+                                <th>数量<br>単位</th>
+                                <th>税抜金額</th>
+                                <th>消費税<br>(税率)</th>
+                                <th>税込金額</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align:left;" colspan="2">
+                                    <div>請求項目１</div>
+                                    <div style="font-size:10px; color:#666;">サービス提供月 2026年1月</div>
+                                    <div style="font-size:10px; color:#666;">産業医委託費</div>
+                                </td>
+                                <td>¥30,000</td>
+                                <td>1<br>式</td>
+                                <td>¥30,000</td>
+                                <td>¥3,000</td>
+                                <td>¥33,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn approve" onclick="handleApprove()" title="Approve">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="action-btn reject" onclick="handleReject()" title="Reject">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+    </main>
+
+    <!-- Summary Panel -->
+    <aside class="summary-panel">
+        <div class="summary-header">
+            <span class="summary-tab active">JPY</span>
+            <span class="summary-tab-label">Summary</span>
+        </div>
+        <div class="summary-body" id="summaryBody">
+        </div>
+    </aside>
+</div>
+
+<script>
+    const sidebarItems = [
+        { title: 'March Invoice Collection', sub: 'Submitted 26', dot: true, href: 'F-PAP-PAYMENT-REQUEST.html' },
+        { title: 'March Invoice Review', sub: 'Pending 18', dot: true, href: 'F-PAP-PAYMENT-REVIEW.html' },
+    ];
+
+    const summaryFields = [
+        { label: 'Bank Code', value: '' },
+        { label: 'Bank Name', value: 'ミツビシUFJギンコウ' },
+        { label: 'Branch Code', value: '' },
+        { label: 'Branch Name', value: 'ホンテン' },
+        { label: 'Account Type', value: '1' },
+        { label: 'Account Number', value: '2285736' },
+        { label: 'Account Name', value: 'エムスリーキャリア株' },
+        { label: 'Payment Amount', value: '33000' },
+        { label: 'Currency', value: 'JPY' },
+        { label: 'Payment Purpose', value: '産業医顧問サービス請求書', editable: true },
+        { label: 'Submitter', value: '金莎拉', detail: 'sarah.jin@ctw.example' },
+        { label: 'Submitted At', value: '04/02/2026, 15:37' },
+    ];
+
+    function renderSidebar() {
+        const list = document.getElementById('sidebarList');
+        list.innerHTML = sidebarItems.map((item, i) => `
+            <div class="list-item${i === 1 ? ' active' : ''}" onclick="if('${item.href}'){window.location.href='${item.href}'}else{selectSidebarItem(this)}">
+                <div class="list-item-content">
+                    <div class="list-item-title">${item.title}</div>
+                    ${item.sub ? `<div class="list-item-desc" style="font-weight:500;">${item.sub}</div>` : ''}
+                    ${item.desc ? `<div class="list-item-desc">${item.desc}</div>` : ''}
+                    ${item.tag ? `<span class="list-item-tag">${item.tag}</span>` : ''}
+                </div>
+                ${item.dot ? '<div class="list-item-dot"></div>' : ''}
+            </div>
+        `).join('');
+    }
+
+    function renderSummary() {
+        const body = document.getElementById('summaryBody');
+        body.innerHTML = summaryFields.map(f => `
+            <div class="summary-row">
+                <div class="summary-label">${f.label}</div>
+                <div class="summary-value${f.editable ? ' editable' : ''}">
+                    <span>${f.value || '<span style="color:var(--text-disabled);">—</span>'}</span>
+                    ${f.editable ? `<div class="edit-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>` : ''}
+                    ${f.detail ? `<div class="submitter-detail" style="position:absolute;margin-top:22px;">${f.detail}</div>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function selectSidebarItem(el) {
+        document.querySelectorAll('.list-item').forEach(li => li.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    let zoomValue = 100;
+
+    function zoomIn() {
+        zoomValue = Math.min(200, zoomValue + 10);
+        applyZoom();
+    }
+
+    function zoomOut() {
+        zoomValue = Math.max(50, zoomValue - 10);
+        applyZoom();
+    }
+
+    function applyZoom() {
+        document.getElementById('zoomLevel').textContent = zoomValue + '%';
+        const container = document.getElementById('pdfContainer');
+        container.style.transform = `scale(${zoomValue / 100})`;
+        container.style.transformOrigin = 'top center';
+    }
+
+    function handleApprove() {
+        const badge = document.getElementById('pendingBadge');
+        badge.textContent = '17  pending';
+        const btn = document.querySelector('.action-btn.approve');
+        btn.style.background = '#059669';
+        btn.querySelector('svg').setAttribute('stroke', '#fff');
+        setTimeout(() => {
+            btn.style.background = '#d1fae5';
+            btn.querySelector('svg').setAttribute('stroke', '#059669');
+        }, 800);
+    }
+
+    function handleReject() {
+        const btn = document.querySelector('.action-btn.reject');
+        btn.style.background = '#dc2626';
+        btn.querySelector('svg').setAttribute('stroke', '#fff');
+        setTimeout(() => {
+            btn.style.background = '#fee2e2';
+            btn.querySelector('svg').setAttribute('stroke', '#dc2626');
+        }, 800);
+    }
+
+    renderSidebar();
+    renderSummary();
+</script>
+</body>
+</html>

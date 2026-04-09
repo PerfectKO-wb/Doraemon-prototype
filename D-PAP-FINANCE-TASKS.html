@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAP — 财务任务中心</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            background: #f5f5f7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .ds3-ui-layer {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 80%, rgba(120,119,198,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 20%, rgba(59,130,246,0.05) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,255,255,0.4) 0%, transparent 70%),
+                linear-gradient(180deg, #f8f9fa 0%, #f0f1f3 100%);
+        }
+
+        /* ── User Badge (top-left) ── */
+        .user-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 100;
+        }
+        .user-badge button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px 6px 6px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.3);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: 0 4px 16px rgba(31,38,135,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+            color: rgba(0,0,0,0.8);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .user-badge button:hover {
+            background: rgba(255,255,255,0.5);
+            box-shadow: 0 4px 20px rgba(31,38,135,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+        .user-badge .avatar {
+            width: 28px; height: 28px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(16,185,129,0.12);
+            color: #059669;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .user-badge .user-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.3;
+            text-align: left;
+        }
+        .user-badge .user-name { font-weight: 500; }
+        .user-badge .user-role {
+            font-size: 10px;
+            opacity: 0.45;
+            font-weight: 400;
+        }
+        .user-badge .dropdown-arrow {
+            font-size: 10px;
+            opacity: 0.4;
+        }
+
+        /* ── Scrollable Content ── */
+        .scroll-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        .scroll-inner {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 50px 40px 40px;
+            min-height: 100vh;
+        }
+        .scroll-inner::-webkit-scrollbar { width: 6px; }
+        .scroll-inner::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+        }
+
+        .content {
+            max-width: 560px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* ── Date ── */
+        .date-block {
+            margin-bottom: 24px;
+        }
+        .date-main {
+            font-size: 32px;
+            font-weight: 800;
+            color: rgba(0,0,0,0.85);
+            line-height: 1.2;
+        }
+        .date-sub {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(0,0,0,0.35);
+            margin-top: 4px;
+        }
+
+        /* ── Greeting ── */
+        .greeting-line {
+            font-size: 16px;
+            color: rgba(0,0,0,0.35);
+            line-height: 1.9;
+            white-space: pre-wrap;
+            transition: color 0.6s ease;
+        }
+        .typewriter-cursor {
+            display: inline-block;
+            width: 2px; height: 16px;
+            background: rgba(0,0,0,0.3);
+            margin-left: 1px;
+            vertical-align: text-bottom;
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .reminder-icon {
+            flex-shrink: 0;
+            font-size: 18px;
+            margin-top: 1px;
+        }
+        .reminder-content { flex: 1; }
+        .reminder-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+        .reminder-desc {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        /* ── Section Label ── */
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: rgba(0,0,0,0.3);
+            margin: 24px 0 8px;
+        }
+        .section-label:first-child { margin-top: 16px; }
+
+        /* ── Task Cards Container ── */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 0 0 8px;
+        }
+
+        /* ── Task Card ── */
+        .task-card {
+            background: rgba(255,255,255,0.45);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 8px 32px rgba(31,38,135,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+            border-radius: 20px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-decoration: none;
+            cursor: pointer;
+            color: inherit;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        .task-card:hover {
+            background: rgba(255,255,255,0.65);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 40px rgba(31,38,135,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+        .task-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .task-card .card-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.03);
+            font-size: 22px;
+        }
+
+        .task-card .card-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .task-card .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 3px;
+            color: rgba(0,0,0,0.85);
+        }
+        .task-card .card-desc {
+            font-size: 12px;
+            color: rgba(0,0,0,0.45);
+            line-height: 1.5;
+        }
+
+        /* ── Card header row (title + status pill) ── */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+
+        /* ── Status pill ── */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            flex-shrink: 0;
+        }
+        .status-pill.in-progress {
+            background: rgba(59,130,246,0.1);
+            color: rgba(37,99,235,0.85);
+        }
+        .status-pill.in-progress::before {
+            content: '';
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: rgba(59,130,246,0.7);
+            animation: pulse-dot 1.5s infinite;
+        }
+        .status-pill.pending {
+            background: rgba(0,0,0,0.05);
+            color: rgba(0,0,0,0.4);
+        }
+
+        /* ── Meta tags row inside card body ── */
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .card-meta .meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+        .meta-pill.ticket {
+            background: rgba(251,191,36,0.12);
+            color: rgba(180,83,9,0.8);
+        }
+
+
+        /* ── Count area (right side) ── */
+        .card-count {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .card-count .count-number {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1;
+            color: rgba(0,0,0,0.7);
+        }
+        .card-count .count-label {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            color: rgba(0,0,0,0.3);
+        }
+
+        .card-chevron {
+            font-size: 16px;
+            color: rgba(0,0,0,0.2);
+            flex-shrink: 0;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .task-card:hover .card-chevron {
+            color: rgba(0,0,0,0.4);
+            transform: translateX(2px);
+        }
+
+        /* ── Urgent card (red border on 16th reminder) ── */
+        .task-card.urgent {
+            border: 1.5px solid rgba(239,68,68,0.5);
+            box-shadow: 0 8px 32px rgba(239,68,68,0.10), inset 0 1px 0 rgba(255,255,255,0.5);
+            background: rgba(255,245,245,0.5);
+        }
+        .task-card.urgent:hover {
+            border-color: rgba(239,68,68,0.65);
+            box-shadow: 0 12px 40px rgba(239,68,68,0.15), inset 0 1px 0 rgba(255,255,255,0.6);
+            background: rgba(255,245,245,0.7);
+        }
+        .task-card.urgent .card-icon {
+            background: rgba(239,68,68,0.06);
+        }
+        .task-card.urgent .count-number {
+            color: rgba(220,38,38,0.85);
+        }
+        .task-card.urgent .count-label {
+            color: rgba(220,38,38,0.5);
+        }
+        .urgent-hint {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(220,38,38,0.75);
+        }
+        .urgent-hint .dot {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: rgba(239,68,68,0.6);
+            animation: pulse-dot 1.5s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+        }
+        .task-card.urgent .urgent-hint { display: inline-flex; }
+
+        /* ── Success banner (month-end all done) ── */
+        .success-banner {
+            display: none;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px 20px;
+            background: rgba(240,253,244,0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(16,185,129,0.25);
+            border-radius: 16px;
+            margin: 12px 0 0;
+            animation: fadeSlideIn 0.5s ease-out;
+        }
+        .success-banner.show { display: flex; }
+        .success-banner .reminder-content { flex: 1; }
+        .success-banner .reminder-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(5,150,105,0.9);
+            margin-bottom: 3px;
+        }
+        .success-banner .reminder-desc {
+            font-size: 12px;
+            color: rgba(6,95,70,0.7);
+            line-height: 1.6;
+        }
+
+        /* Card in all-done state */
+        .task-card.all-done {
+            border-color: rgba(16,185,129,0.3);
+            background: rgba(240,253,244,0.4);
+        }
+        .task-card.all-done:hover {
+            border-color: rgba(16,185,129,0.45);
+            background: rgba(240,253,244,0.6);
+        }
+        .task-card.all-done .card-icon {
+            background: rgba(16,185,129,0.08);
+        }
+        .task-card.all-done .count-number {
+            color: rgba(5,150,105,0.85);
+        }
+        .task-card.all-done .count-label {
+            color: rgba(5,150,105,0.5);
+        }
+
+        /* ── Test Case Button (bottom-right) ── */
+        .fab-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .fab-btn button {
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: none;
+            box-shadow: 0 8px 32px rgba(31,38,135,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+            border-radius: 12px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+        .fab-btn button:hover {
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 8px 32px rgba(31,38,135,0.14), inset 0 1px 0 rgba(255,255,255,0.7);
+        }
+
+        /* ── Test Case Panel ── */
+        .test-panel {
+            display: none;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 12px 48px rgba(31,38,135,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+            border-radius: 16px;
+            padding: 16px 20px;
+            min-width: 240px;
+        }
+        .test-panel.show { display: block; }
+        .test-panel-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(0,0,0,0.7);
+            margin-bottom: 10px;
+        }
+        .test-btn {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.5);
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(0,0,0,0.6);
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .test-btn:last-child { margin-bottom: 0; }
+        .test-btn:hover {
+            background: rgba(0,0,0,0.04);
+            color: rgba(0,0,0,0.8);
+        }
+        .test-btn.active {
+            background: rgba(79,70,229,0.08);
+            border-color: rgba(79,70,229,0.2);
+            color: rgba(79,70,229,0.9);
+            font-weight: 600;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .scroll-inner { padding: 50px 20px 40px; }
+            .date-main { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+<div class="ds3-ui-layer">
+    <!-- User Badge -->
+    <div class="user-badge">
+        <button>
+            <span class="avatar">ZM</span>
+            <div class="user-info">
+                <span class="user-name">张明</span>
+                <span class="user-role">财务专员</span>
+            </div>
+            <span class="dropdown-arrow">▾</span>
+        </button>
+    </div>
+
+    <!-- Main Scrollable Area -->
+    <div class="scroll-area">
+        <div class="scroll-inner">
+            <div class="content">
+                <!-- Date Block -->
+                <div class="date-block">
+                    <div class="date-main" id="dateMain"></div>
+                    <div class="date-sub" id="dateSub"></div>
+                </div>
+
+                <!-- Greeting Lines -->
+                <div class="greeting-line" id="greeting1"></div>
+                <div class="greeting-line" id="greeting2"></div>
+
+                <!-- Success Banner (month-end all done only) -->
+                <div class="success-banner" id="successBanner">
+                    <span class="reminder-icon">✅</span>
+                    <div class="reminder-content">
+                        <div class="reminder-title" id="successTitle"></div>
+                        <div class="reminder-desc" id="successDesc"></div>
+                    </div>
+                </div>
+
+                <!-- Task Cards -->
+                <div id="taskList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Case FAB -->
+    <div class="fab-btn">
+        <div class="test-panel" id="testPanel">
+            <div class="test-panel-title">🧪 模拟日期场景</div>
+            <button class="test-btn active" id="btnToday" onclick="simulateDate('today')">📅 今天</button>
+            <button class="test-btn" onclick="simulateDate('mid')">⚠️ 月中（15日）提醒</button>
+            <button class="test-btn" onclick="simulateDate('end')">🔴 月底（28日）提醒</button>
+            <button class="test-btn" onclick="simulateDate('done')">🎉 月底全部完成</button>
+        </div>
+        <button onclick="toggleTestPanel()">🧪 Test Case</button>
+    </div>
+</div>
+
+<script>
+    const today = new Date();
+    const dayOfMonth = today.getDate();
+    const month = today.getMonth();
+    const year = today.getFullYear();
+    const weekDays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+    const monthNames = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+
+    // ── Mock Data: each invoice = one card ──
+    const invoices = [
+        { id: 'INV-2026-04-001', submitter: 'エムスリーキャリア株式会社', amount: '¥33,000', aTicket: 'A-FIN-2026-04-001', status: 'in-progress' },
+        { id: 'INV-2026-04-002', submitter: '株式会社リクルート', amount: '¥128,700', aTicket: 'A-FIN-2026-04-002', status: 'pending' },
+        { id: 'INV-2026-04-003', submitter: 'AWS Japan 合同会社', amount: '¥456,200', aTicket: 'A-FIN-2026-04-003', status: 'pending' },
+    ];
+
+    const paymentTask = {
+        icon: '💰',
+        name: '财务打款',
+        desc: '处理已审核通过但尚未关联 JE 的 Invoice，完成银行打款并录入系统。',
+        status: 'pending',
+        count: 15,
+        aTicket: 'A-FIN-2026-04-PMT',
+        href: '#',
+    };
+
+    // ── Render Date ──
+    document.getElementById('dateMain').textContent =
+        `${year}年${monthNames[month]}月${String(dayOfMonth).padStart(2,'0')}日`;
+    document.getElementById('dateSub').textContent = weekDays[today.getDay()];
+
+    // ── Typewriter ──
+    function typewrite(el, text, delay) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                let i = 0;
+                el.innerHTML = '';
+                function tick() {
+                    if (i < text.length) {
+                        el.innerHTML = text.slice(0, i + 1) + '<span class="typewriter-cursor"></span>';
+                        i++;
+                        setTimeout(tick, 25 + Math.random() * 15);
+                    } else {
+                        el.textContent = text;
+                        resolve();
+                    }
+                }
+                tick();
+            }, delay);
+        });
+    }
+
+    // ── Greeting ──
+    function getGreetingText(allDone) {
+        if (allDone) return '你好，本月任务已全部完成 🎉';
+        const allCards = [...invoices, paymentTask];
+        const inProgress = allCards.filter(c => c.status === 'in-progress').length;
+        const pending = allCards.filter(c => c.status === 'pending').length;
+        return `你好，这是你今天的任务，${inProgress} 条进行中，${pending} 条待处理。`;
+    }
+
+    typewrite(document.getElementById('greeting1'), '你好 👋', 200)
+        .then(() => typewrite(document.getElementById('greeting2'), getGreetingText(false), 100));
+
+    // ── Helpers ──
+    function statusPillHtml(status, allDone) {
+        if (allDone) return '<span class="status-pill pending">已完成</span>';
+        if (status === 'in-progress') return '<span class="status-pill in-progress">进行中</span>';
+        return '<span class="status-pill pending">待开始</span>';
+    }
+
+    // ── Render ──
+    function renderAll(simDay, allDone) {
+        const taskList = document.getElementById('taskList');
+        const isMidReminder = simDay >= 15 && simDay <= 25;
+        const isMonthEnd = simDay >= 26;
+        const isAllDone = !!allDone;
+
+        let html = '';
+        let cardIdx = 0;
+
+        // ── Invoice review cards ──
+        html += `<div class="section-label">📋 Invoice 审核 · ${invoices.length} 条</div>`;
+        html += '<div class="task-list">';
+        invoices.forEach(inv => {
+            const cardClass = isAllDone ? ' all-done' : '';
+            html += `
+            <a class="task-card${cardClass}" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
+               style="transition: opacity 0.5s ease ${cardIdx * 100}ms, transform 0.5s ease ${cardIdx * 100}ms, background 0.2s, box-shadow 0.2s;">
+                <span class="card-icon">📋</span>
+                <div class="card-body">
+                    <div class="card-header">
+                        <div class="card-title">${inv.submitter}</div>
+                        ${statusPillHtml(inv.status, isAllDone)}
+                    </div>
+                    <div class="card-desc">金额 ${inv.amount}</div>
+                    <div class="card-meta">
+                        <span class="meta-pill ticket">🎫 ${inv.aTicket}</span>
+                    </div>
+                </div>
+                <span class="card-chevron">›</span>
+            </a>`;
+            cardIdx++;
+        });
+        html += '</div>';
+
+        // ── Payment card ──
+        const isPaymentUrgent = (isMidReminder || isMonthEnd) && !isAllDone;
+        let urgentHint = '';
+        if (isPaymentUrgent) {
+            const label = isMonthEnd
+                ? `月底将至，还有 ${paymentTask.count} 条 Invoice 未打款，请尽快处理！`
+                : `本月有 ${paymentTask.count} 条 Invoice 待打款，请安排打款。`;
+            urgentHint = `<div class="urgent-hint"><span class="dot"></span>${label}</div>`;
+        }
+        const pmtClass = isPaymentUrgent ? ' urgent' : (isAllDone ? ' all-done' : '');
+
+        html += `<div class="section-label">💰 财务打款</div>`;
+        html += '<div class="task-list">';
+        html += `
+        <a class="task-card${pmtClass}" href="${paymentTask.href}"
+           style="transition: opacity 0.5s ease ${cardIdx * 100}ms, transform 0.5s ease ${cardIdx * 100}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
+            <span class="card-icon">${paymentTask.icon}</span>
+            <div class="card-body">
+                <div class="card-header">
+                    <div class="card-title">${paymentTask.name}</div>
+                    ${statusPillHtml(paymentTask.status, isAllDone)}
+                </div>
+                <div class="card-desc">${paymentTask.desc}</div>
+                <div class="card-meta">
+                    <span class="meta-pill ticket">🎫 ${paymentTask.aTicket}</span>
+                </div>
+                ${urgentHint}
+            </div>
+            <div class="card-count">
+                <span class="count-number">${isAllDone ? '✓' : paymentTask.count}</span>
+                <span class="count-label">${isAllDone ? 'A票已关闭' : '待打款'}</span>
+            </div>
+            <span class="card-chevron">›</span>
+        </a>`;
+        html += '</div>';
+
+        taskList.innerHTML = html;
+
+        setTimeout(() => {
+            taskList.querySelectorAll('.task-card').forEach((card, i) => {
+                setTimeout(() => card.classList.add('visible'), i * 100);
+            });
+        }, 100);
+
+        // Success banner
+        const successBanner = document.getElementById('successBanner');
+        successBanner.classList.remove('show');
+        if (isAllDone) {
+            document.getElementById('successTitle').textContent = '本月任务全部完成';
+            document.getElementById('successDesc').textContent =
+                `${invoices.length} 条 Invoice 审核完毕，${paymentTask.count} 条打款完成，所有 Invoice 已关联 JE，A Ticket 已自动关闭。`;
+            successBanner.classList.add('show');
+        }
+
+        document.getElementById('greeting2').textContent = getGreetingText(isAllDone);
+    }
+
+    renderAll(dayOfMonth, false);
+    document.getElementById('btnToday').textContent = `📅 今天（${month + 1}月${dayOfMonth}日）`;
+
+    // ── Test Case Panel ──
+    function toggleTestPanel() {
+        document.getElementById('testPanel').classList.toggle('show');
+    }
+
+    function simulateDate(scenario) {
+        document.querySelectorAll('.test-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+
+        let simDay, allDone = false, dateLabel;
+        switch(scenario) {
+            case 'mid':
+                simDay = 15;
+                dateLabel = `${year}年${monthNames[month]}月15日`;
+                document.getElementById('dateSub').textContent = '模拟：月中提醒';
+                break;
+            case 'end':
+                simDay = 28;
+                dateLabel = `${year}年${monthNames[month]}月28日`;
+                document.getElementById('dateSub').textContent = '模拟：月底提醒';
+                break;
+            case 'done':
+                simDay = 31; allDone = true;
+                dateLabel = `${year}年${monthNames[month]}月31日`;
+                document.getElementById('dateSub').textContent = '模拟：月底全部完成';
+                break;
+            default:
+                simDay = dayOfMonth;
+                dateLabel = `${year}年${monthNames[month]}月${String(dayOfMonth).padStart(2,'0')}日`;
+                document.getElementById('dateSub').textContent = weekDays[today.getDay()];
+        }
+        document.getElementById('dateMain').textContent = dateLabel;
+        renderAll(simDay, allDone);
+        document.getElementById('testPanel').classList.remove('show');
+    }
+</script>
+</body>
+</html>
