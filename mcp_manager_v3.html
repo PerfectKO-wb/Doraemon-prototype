@@ -269,7 +269,6 @@ body{font-family:var(--font-family);background:var(--bg-base);color:var(--text-d
         <div class="pane-tools">
           <div class="pane-tools-header"><span class="pane-tools-title">Tools</span><span class="tool-count" id="toolCount">4 tools</span></div>
           <div class="pane-tools-list" id="toolList"></div>
-          <div class="select-bar" id="selectBar"><span id="selectInfo"><strong>0</strong> selected</span><button class="btn-sm" onclick="selectAll()">All</button><button class="btn-sm" onclick="selectNone()">Clear</button></div>
         </div>
         <div class="pane-chat">
           <div class="chat-messages" id="chatMessages"></div>
@@ -392,13 +391,11 @@ function updateSelection(){
     el.classList.toggle('checked',el.querySelector('.tl-cb').checked);
   });
   const count=checked.length;
-  document.getElementById('selectInfo').innerHTML='<strong>'+count+'</strong> selected';
   const bar=document.getElementById('scopeBar');
   if(count>0){
     bar.classList.add('active');
     const names=Array.from(checked).map(c=>c.dataset.tool);
-    bar.innerHTML=names.map(n=>'<span class="scope-tag"><span class="dot"></span>'+n+'</span>').join('')
-      +'<button class="scope-clear" onclick="selectNone()">— clear</button>';
+    bar.innerHTML=names.map(n=>'<span class="scope-tag"><span class="dot"></span>@'+n+'</span>').join('');
   }else{
     bar.classList.remove('active');
   }
