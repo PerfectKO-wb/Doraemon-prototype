@@ -165,6 +165,17 @@ body{font-family:var(--font-family);background:var(--bg-base);color:var(--text-d
 .chat-send svg{width:18px;height:18px;stroke:#fff;fill:none}
 .input-hint{font-size:11px;color:var(--text-disabled);margin-top:6px;display:flex;align-items:center;gap:12px}
 .hint-key{display:inline-flex;padding:1px 6px;border:1px solid var(--border-divider);border-radius:4px;font-size:10px;font-family:var(--font-mono);background:var(--bg-base);color:var(--text-secondary)}
+.quick-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.qa-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--border-divider);border-radius:18px;font-size:12px;font-weight:500;color:var(--text-secondary);cursor:pointer;background:var(--bg-container);font-family:var(--font-family);transition:all .15s;white-space:nowrap}
+.qa-chip:hover{border-color:var(--cs-primary-color);color:var(--cs-primary-color);background:#f5f8ff}
+.qa-chip .qa-icon{width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.qa-chip .qa-icon.add-agent{background:#f59e0b}
+.qa-chip .qa-icon.add-role{background:#8b5cf6}
+.qa-chip .qa-icon.add-user{background:#3b82f6}
+.qa-chip .qa-icon.add-dept{background:#10b981}
+.qa-chip .qa-icon.rm-agent{background:#ef4444}
+.qa-chip .qa-icon.rm-role{background:#ef4444}
+.qa-chip .qa-cmd{font-family:var(--font-mono);font-size:11px;color:var(--text-disabled)}
 /* Slash popover */
 .slash-popover{display:none;position:absolute;bottom:calc(100% + 6px);left:0;right:48px;background:var(--bg-container);border:1px solid var(--border-divider);border-radius:12px;box-shadow:var(--shadow-popover);z-index:50;max-height:300px;overflow:hidden;flex-direction:column}
 .slash-popover.open{display:flex}
@@ -262,7 +273,15 @@ body{font-family:var(--font-family);background:var(--bg-base);color:var(--text-d
             <div class="slash-popover" id="slashPopover"><div class="slash-popover-header"><span class="slash-popover-title" id="slashTitle">Agents</span><button class="slash-popover-close" onclick="closeSlash()"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div class="slash-search"><input type="text" id="slashSearch" placeholder="Filter..." oninput="filterSlash()"></div><div class="slash-list" id="slashList"></div></div>
             <div class="autocomplete-popover" id="acPopover"><div class="ac-hint">Tab to complete</div><div id="acList"></div></div>
             <div class="chat-input-row"><div class="chat-input-wrap"><textarea class="chat-input" id="chatInput" rows="1" placeholder="Describe permission changes or type / for commands..." oninput="onInput()" onkeydown="handleKeyDown(event)"></textarea></div><button class="chat-send" onclick="sendMessage()"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg></button></div>
-            <div class="input-hint"><span><span class="hint-key">/</span> Commands</span><span><span class="hint-key">Tab</span> Autocomplete</span><span><span class="hint-key">Enter</span> Send</span></div>
+            <div class="quick-actions">
+              <span class="qa-chip" onclick="quickAction('add','agent')"><span class="qa-icon add-agent">+</span>/add agent<span class="qa-cmd">↵</span></span>
+              <span class="qa-chip" onclick="quickAction('add','role')"><span class="qa-icon add-role">+</span>/add role<span class="qa-cmd">↵</span></span>
+              <span class="qa-chip" onclick="quickAction('add','user')"><span class="qa-icon add-user">+</span>/add user<span class="qa-cmd">↵</span></span>
+              <span class="qa-chip" onclick="quickAction('add','dept')"><span class="qa-icon add-dept">+</span>/add dept<span class="qa-cmd">↵</span></span>
+              <span class="qa-chip" onclick="quickAction('remove','agent')"><span class="qa-icon rm-agent">−</span>/remove agent<span class="qa-cmd">↵</span></span>
+              <span class="qa-chip" onclick="quickAction('remove','role')"><span class="qa-icon rm-role">−</span>/remove role<span class="qa-cmd">↵</span></span>
+            </div>
+            <div class="input-hint"><span><span class="hint-key">Tab</span> Autocomplete</span><span><span class="hint-key">Enter</span> Send</span></div>
           </div>
         </div>
       </div>
@@ -443,18 +462,19 @@ function confirmChange(btn){const f=btn.closest('.diff-card-footer');const b=btn
 function cancelChange(btn){const f=btn.closest('.diff-card-footer');const b=btn.closest('.msg-bubble');f.remove();const t=document.createElement('div');t.className='cancelled-text';t.textContent='Cancelled';b.appendChild(t);}
 
 // Slash commands
-let slashMode=null,slashData=[],slashActiveIdx=0;
+let slashMode=null,slashData=[],slashActiveIdx=0,slashAction='add';
 const SLASH_COMMANDS={
   '/agent':{title:'Agents',data:()=>AGENTS.map(a=>({name:a,desc:'Agent',icon:'agent',letter:'A'}))},
   '/role':{title:'Roles',data:()=>ROLES.map(r=>({name:r,desc:'Role',icon:'role',letter:'R'}))},
   '/user':{title:'Users',data:()=>USERS.map(u=>({name:u.name,desc:u.email,icon:'user',letter:u.name[0]}))},
   '/dept':{title:'Departments',data:()=>DEPTS.map(d=>({name:d,desc:'Department',icon:'dept',letter:'D'}))},
 };
-function openSlash(cmd){const cfg=SLASH_COMMANDS[cmd];if(!cfg)return;slashMode=cmd;slashData=cfg.data();slashActiveIdx=0;document.getElementById('slashTitle').textContent=cfg.title;document.getElementById('slashSearch').value='';renderSlashList(slashData);document.getElementById('slashPopover').classList.add('open');document.getElementById('slashSearch').focus();}
-function closeSlash(){document.getElementById('slashPopover').classList.remove('open');slashMode=null;}
-function renderSlashList(items){const list=document.getElementById('slashList');list.innerHTML=items.map((item,i)=>'<div class="slash-item'+(i===slashActiveIdx?' active':'')+'" onclick="selectSlashItem(\''+escapeHtml(item.name).replace(/'/g,"\\'")+'\')"><div class="slash-item-icon '+item.icon+'">'+item.letter+'</div><div class="slash-item-text"><div class="slash-item-name">'+escapeHtml(item.name)+'</div>'+(item.desc?'<div class="slash-item-desc">'+escapeHtml(item.desc)+'</div>':'')+'</div><span class="slash-item-action">Select ↵</span></div>').join('');}
-function filterSlash(){const q=document.getElementById('slashSearch').value.toLowerCase();const filtered=slashData.filter(item=>item.name.toLowerCase().includes(q)||(item.desc||'').toLowerCase().includes(q));slashActiveIdx=0;renderSlashList(filtered);}
-function selectSlashItem(name){const input=document.getElementById('chatInput');const prefix=slashMode==='/agent'?'添加 agent: ':slashMode==='/role'?'添加 role: ':slashMode==='/user'?'添加 user: ':slashMode==='/dept'?'添加 dept: ':'';input.value=prefix+name;closeSlash();input.focus();}
+function quickAction(action,type){slashAction=action;openSlash('/'+type);}
+function openSlash(cmd){const cfg=SLASH_COMMANDS[cmd];if(!cfg)return;slashMode=cmd;slashData=cfg.data();slashActiveIdx=0;const actionLabel=slashAction==='remove'?'Remove':'Select';document.getElementById('slashTitle').textContent=(slashAction==='remove'?'Remove ':'Add ')+cfg.title;document.getElementById('slashSearch').value='';renderSlashList(slashData,actionLabel);document.getElementById('slashPopover').classList.add('open');document.getElementById('slashSearch').focus();}
+function closeSlash(){document.getElementById('slashPopover').classList.remove('open');slashMode=null;slashAction='add';}
+function renderSlashList(items,actionLabel){const al=actionLabel||'Select';const list=document.getElementById('slashList');list.innerHTML=items.map((item,i)=>'<div class="slash-item'+(i===slashActiveIdx?' active':'')+'" onclick="selectSlashItem(\''+escapeHtml(item.name).replace(/'/g,"\\'")+'\')"><div class="slash-item-icon '+item.icon+'">'+item.letter+'</div><div class="slash-item-text"><div class="slash-item-name">'+escapeHtml(item.name)+'</div>'+(item.desc?'<div class="slash-item-desc">'+escapeHtml(item.desc)+'</div>':'')+'</div><span class="slash-item-action">'+al+' ↵</span></div>').join('');}
+function filterSlash(){const q=document.getElementById('slashSearch').value.toLowerCase();const filtered=slashData.filter(item=>item.name.toLowerCase().includes(q)||(item.desc||'').toLowerCase().includes(q));slashActiveIdx=0;const actionLabel=slashAction==='remove'?'Remove':'Select';renderSlashList(filtered,actionLabel);}
+function selectSlashItem(name){const input=document.getElementById('chatInput');const verb=slashAction==='remove'?'移除':'添加';const typeLabel=slashMode==='/agent'?'agent':slashMode==='/role'?'role':slashMode==='/user'?'user':slashMode==='/dept'?'dept':'';input.value=verb+' '+typeLabel+': '+name;closeSlash();input.focus();}
 
 // Autocomplete
 let acItems=[],acActiveIdx=0;
@@ -464,8 +484,18 @@ function renderAC(query){const list=document.getElementById('acList');list.inner
 function applyAC(idx){const item=acItems[idx];if(!item)return;const input=document.getElementById('chatInput');const val=input.value;const lastSpace=Math.max(val.lastIndexOf(' '),val.lastIndexOf(':'),val.lastIndexOf('：'));input.value=val.substring(0,lastSpace+1)+item.name;closeAC();input.focus();}
 
 function onInput(){
-  const val=document.getElementById('chatInput').value;
-  if(val.match(/^\/\w*$/)){const cmds=Object.keys(SLASH_COMMANDS);const matching=cmds.filter(c=>c.startsWith(val));if(val==='/'||matching.length>0){if(matching.length===1&&val===matching[0]){document.getElementById('chatInput').value='';openSlash(matching[0]);}return;}}
+  const val=document.getElementById('chatInput').value.trim();
+  const addMatch=val.match(/^\/(add|remove)\s+(\w*)$/i);
+  if(addMatch){
+    const act=addMatch[1].toLowerCase()==='remove'?'remove':'add';
+    const type=addMatch[2].toLowerCase();
+    const types=['agent','role','user','dept'];
+    const matched=types.filter(t=>t.startsWith(type));
+    if(type===''||matched.length>1)return;
+    if(matched.length===1){document.getElementById('chatInput').value='';slashAction=act;openSlash('/'+matched[0]);return;}
+    return;
+  }
+  if(val.match(/^\/\w*$/)){const cmds=Object.keys(SLASH_COMMANDS);const matching=cmds.filter(c=>c.startsWith(val));if(val==='/'||matching.length>0){if(matching.length===1&&val===matching[0]){document.getElementById('chatInput').value='';slashAction='add';openSlash(matching[0]);}return;}}
   const lastToken=val.split(/[\s:：]/).pop();
   if(lastToken&&lastToken.length>=2&&!val.startsWith('/'))openAC(lastToken);else closeAC();
 }
