@@ -329,7 +329,7 @@ const SERVER_DATA={
 };
 
 const CS_DEMO_CHAT=`
-<div class="msg msg-system"><div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div><div class="msg-bubble">Welcome to <strong>CS</strong> server permission config. <strong>4 tools</strong> available. Select tools on the left, then describe changes or use <code>/agent</code> <code>/role</code> commands.</div></div></div>
+<div class="msg msg-system"><div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div><div class="msg-bubble">Welcome to <strong>CS</strong> server permission config. <strong>4 tools</strong> available. Select tools on the left, then describe changes or use <code>/add</code> and <code>/remove</code> commands.</div></div></div>
 <div class="msg msg-user"><div class="msg-bubble">选中 cs_query 和 cs_respond，添加 cs_expert 和 cs_user_agent 两个 agent</div></div>
 <div class="msg msg-system"><div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div><div class="msg-bubble">已为 <code>cs_query</code>, <code>cs_respond</code> 添加 2 个 agents:<div class="diff-card"><div class="diff-card-header"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Batch: 2 tools × 2 agents</div><div class="diff-card-body"><div class="diff-line diff-add">agent: cs_expert → cs_query, cs_respond</div><div class="diff-line diff-add">agent: cs_user_agent → cs_query, cs_respond</div></div></div><div class="applied-badge"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Applied</div></div></div></div>
 <div class="msg msg-user"><div class="msg-bubble">再给这两个 tool 加上 cs_expert_responder 和 cs_expert_evaluator 两个 role</div></div>
@@ -408,7 +408,7 @@ function getSelectedTools(){return Array.from(document.querySelectorAll('.tl-cb:
 function renderChat(){
   const el=document.getElementById('chatMessages');
   if(currentServer==='cs'){el.innerHTML=CS_DEMO_CHAT;return;}
-  el.innerHTML='<div class="msg msg-system"><div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div><div class="msg-bubble">Welcome to <strong>'+SERVER_DATA[currentServer].name+'</strong> permission config. Select tools and describe changes, or use <code>/agent</code> <code>/role</code> <code>/user</code> <code>/dept</code> commands.</div></div></div>';
+  el.innerHTML='<div class="msg msg-system"><div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div><div class="msg-bubble">Welcome to <strong>'+SERVER_DATA[currentServer].name+'</strong> permission config. Select tools and describe changes, or use <code>/add</code> and <code>/remove</code> commands.</div></div></div>';
 }
 
 function renderJSON(){
