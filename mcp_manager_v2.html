@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP Manager v2 — Chat-driven Permission</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --text-default: #131825;
+  --text-secondary: #73726e;
+  --text-disabled: #ababa9;
+  --bg-base: #f9fafb;
+  --bg-container: #ffffff;
+  --bg-active: #efefef;
+  --bg-hover: #efefef;
+  --bg-disabled: #dbdbdb;
+  --border-divider: #e5e7eb;
+  --border-default: #d9d9d9;
+  --cs-primary-color: #1C64F2;
+  --button-default: #131825;
+  --error-base: #f5222d;
+  --error-bg: #fff1f0;
+  --green-base: #52c41a;
+  --green-bg: #f6ffed;
+  --green-border: #b7eb8f;
+  --shadow-dropdown: 0 6px 16px rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.12), 0 9px 28px 8px rgba(0,0,0,0.05);
+  --font-family: 'Inter', 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+  --font-family-logo: 'Urbanist', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-base);
+  color: var(--text-default);
+  font-size: 14px;
+  line-height: 22px;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-layout { display: flex; height: 100vh; }
+
+/* ===== Left Nav Sidebar ===== */
+.nav-sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--bg-container);
+  border-right: 1px solid var(--border-divider);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+.nav-logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-divider);
+}
+.nav-logo-icon {
+  width: 28px; height: 28px;
+  background: var(--cs-primary-color);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-logo-icon svg { width: 16px; height: 16px; fill: #fff; }
+.nav-logo-text { font-family: var(--font-family-logo); font-weight: 700; font-size: 18px; color: var(--text-default); }
+.nav-items { flex: 1; padding: 8px 12px; overflow-y: auto; }
+.nav-section-label { font-size: 12px; font-weight: 500; color: var(--text-disabled); padding: 12px 8px 4px; line-height: 18px; }
+.nav-item {
+  display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 40px;
+  border-radius: 8px; cursor: pointer; color: var(--text-secondary); font-size: 14px;
+  transition: background 0.15s; text-decoration: none;
+}
+.nav-item:hover { background: var(--bg-hover); }
+.nav-item.active { background: var(--bg-active); color: var(--text-default); font-weight: 500; }
+.nav-item svg { width: 20px; height: 20px; flex-shrink: 0; stroke: currentColor; fill: none; }
+.nav-item-sub { padding-left: 44px; }
+
+/* ===== MCP Servers Panel ===== */
+.servers-panel {
+  width: 300px; min-width: 300px;
+  background: var(--bg-container);
+  border-right: 1px solid var(--border-divider);
+  display: flex; flex-direction: column;
+}
+.servers-header {
+  padding: 16px 20px; display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--border-divider); flex-shrink: 0;
+}
+.servers-title { font-size: 16px; font-weight: 600; color: var(--text-default); flex: 1; }
+.btn-add {
+  display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px;
+  border: none; border-radius: 6px; background: var(--cs-primary-color); color: #fff;
+  font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font-family);
+}
+.btn-add:hover { opacity: 0.9; }
+.btn-add svg { width: 14px; height: 14px; stroke: #fff; fill: none; }
+.servers-list { flex: 1; overflow-y: auto; padding: 8px; }
+.server-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  border-radius: 8px; cursor: pointer; transition: background 0.15s;
+}
+.server-item:hover { background: var(--bg-hover); }
+.server-item.active { background: var(--cs-primary-color); }
+.server-item.active .server-name { color: #fff; }
+.server-item.active .server-desc { color: rgba(255,255,255,0.75); }
+.server-item.active .server-status-dot { background: #86efac; }
+.server-item.active .server-status-text { color: rgba(255,255,255,0.75); }
+.server-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: var(--bg-base);
+}
+.server-item.active .server-icon { background: rgba(255,255,255,0.2); }
+.server-icon svg { width: 18px; height: 18px; stroke: var(--text-secondary); fill: none; }
+.server-item.active .server-icon svg { stroke: #fff; }
+.server-info { flex: 1; min-width: 0; }
+.server-name { font-size: 14px; font-weight: 500; color: var(--text-default); }
+.server-desc { font-size: 12px; color: var(--text-disabled); line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.server-status { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.server-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-base); }
+.server-status-text { font-size: 12px; color: var(--text-disabled); }
+
+/* ===== Main Content ===== */
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.content-topbar {
+  display: flex; align-items: center; padding: 0 24px; height: 52px;
+  border-bottom: 1px solid var(--border-divider); background: var(--bg-container); gap: 4px; flex-shrink: 0;
+}
+.tab-group { display: flex; gap: 0; }
+.tab-item {
+  padding: 14px 16px; font-size: 14px; color: var(--text-secondary); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+}
+.tab-item:hover { color: var(--text-default); }
+.tab-item.active { color: var(--text-default); font-weight: 500; border-bottom-color: var(--cs-primary-color); }
+.topbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+  color: var(--green-base); font-weight: 500;
+}
+.status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--green-base); }
+.version-badge { padding: 2px 10px; border: 1px solid var(--border-default); border-radius: 4px; font-size: 13px; color: var(--text-secondary); }
+.content-body { flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--bg-container); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ===== Capabilities Tab ===== */
+.capabilities-header { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+.capabilities-title { font-size: 18px; font-weight: 600; color: var(--text-default); }
+.tools-section { margin-top: 8px; }
+.tools-section-header { display: flex; align-items: center; gap: 8px; padding: 8px 0; cursor: pointer; user-select: none; }
+.tools-section-header svg { width: 16px; height: 16px; stroke: var(--text-default); fill: none; }
+.tools-section-title { font-size: 15px; font-weight: 600; color: var(--text-default); display: flex; align-items: center; gap: 6px; }
+.tools-section-title .info-icon { width: 14px; height: 14px; stroke: var(--text-disabled); }
+.tool-list { margin-top: 8px; display: flex; flex-direction: column; gap: 2px; }
+.tool-item {
+  display: flex; align-items: flex-start; padding: 14px 16px;
+  border: 1px solid var(--border-divider); border-radius: 8px;
+  background: var(--bg-container); transition: background 0.15s; gap: 12px;
+}
+.tool-item:hover { background: var(--bg-base); }
+.tool-name { font-size: 14px; font-weight: 500; color: var(--text-default); font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; white-space: nowrap; padding-top: 1px; }
+.tool-badges { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.badge-permission { background: var(--bg-base); border: 1px solid var(--border-divider); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+.badge-permission:hover { border-color: var(--cs-primary-color); color: var(--cs-primary-color); }
+.tool-desc { font-size: 13px; color: var(--text-secondary); line-height: 20px; flex: 1; min-width: 0; }
+
+/* ===== Configuration / JSON ===== */
+.section-title { font-size: 18px; font-weight: 600; color: var(--text-default); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.section-title .info-icon { width: 16px; height: 16px; stroke: var(--text-disabled); cursor: help; }
+.section-header { display: flex; align-items: center; margin-bottom: 20px; }
+.refresh-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); cursor: pointer; background: none; border: none; font-family: var(--font-family); margin-left: auto; }
+.refresh-btn:hover { color: var(--text-default); }
+.refresh-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+.form-group { margin-bottom: 20px; }
+.form-label { font-size: 14px; font-weight: 500; color: var(--text-default); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.form-label .info-icon { width: 14px; height: 14px; stroke: var(--text-disabled); cursor: help; }
+.form-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border-default); border-radius: 6px; font-size: 14px; font-family: var(--font-family); color: var(--text-default); background: var(--bg-container); outline: none; transition: border-color 0.15s; line-height: 22px; }
+.form-input:focus { border-color: var(--cs-primary-color); }
+.form-textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border-default); border-radius: 6px; font-size: 14px; font-family: var(--font-family); color: var(--text-default); background: var(--bg-container); outline: none; resize: vertical; min-height: 64px; line-height: 22px; }
+.form-textarea:focus { border-color: var(--cs-primary-color); }
+.section-divider { height: 1px; background: var(--border-divider); margin: 28px 0; }
+.type-tag { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 4px; background: #dbeafe; color: var(--cs-primary-color); font-size: 13px; font-weight: 500; border: 1px solid #93c5fd; }
+.type-desc { font-size: 13px; color: var(--text-secondary); line-height: 20px; }
+.transport-type { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.form-hint { font-size: 12px; color: var(--text-disabled); margin-top: 4px; }
+.header-sublabel { font-size: 13px; color: var(--text-disabled); font-weight: 400; margin-left: 4px; }
+.common-headers { margin-top: 12px; }
+.common-headers-title { font-size: 12px; color: var(--text-disabled); margin-bottom: 6px; }
+.common-headers-list { list-style: none; font-size: 12px; color: var(--text-disabled); line-height: 20px; padding-left: 12px; }
+.common-headers-list li::before { content: '•'; margin-right: 6px; }
+.btn-delete { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--error-base); border-radius: 6px; background: var(--bg-container); color: var(--error-base); font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-family); margin-top: 32px; }
+.btn-delete:hover { background: var(--error-bg); }
+.btn-delete svg { width: 16px; height: 16px; stroke: var(--error-base); fill: none; }
+.json-view { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; line-height: 22px; color: var(--text-default); white-space: pre; tab-size: 4; overflow-x: auto; }
+.json-key { color: #0451a5; }
+.json-string { color: #a31515; }
+.json-bool { color: #0000ff; }
+.json-null { color: #0000ff; }
+.btn-disconnect { padding: 6px 14px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-container); font-size: 13px; color: var(--text-secondary); cursor: pointer; font-family: var(--font-family); font-weight: 500; }
+.btn-disconnect:hover { background: var(--bg-hover); }
+.topbar-icon-btn { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-default); background: var(--bg-container); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.topbar-icon-btn:hover { background: var(--bg-hover); }
+.topbar-icon-btn svg { width: 16px; height: 16px; stroke: var(--text-secondary); fill: none; }
+.topbar-link { font-size: 13px; color: var(--cs-primary-color); cursor: pointer; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+.topbar-link:hover { text-decoration: underline; }
+.btn-protocol { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-container); font-size: 13px; color: var(--text-secondary); cursor: pointer; font-family: var(--font-family); }
+.btn-protocol:hover { background: var(--bg-hover); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-disabled); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-disabled); }
+
+/* ===== Permission Panel (Slide-over) ===== */
+.perm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 100;
+}
+.perm-overlay.open { display: flex; justify-content: flex-end; }
+
+.perm-panel {
+  width: 560px;
+  height: 100vh;
+  background: var(--bg-container);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 32px rgba(0,0,0,0.1);
+  animation: slideIn 0.25s ease-out;
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.perm-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-divider);
+  flex-shrink: 0;
+}
+.perm-panel-header .tool-icon {
+  width: 36px; height: 36px; border-radius: 8px; background: #eff6ff;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.perm-panel-header .tool-icon svg { width: 18px; height: 18px; stroke: var(--cs-primary-color); fill: none; }
+.perm-panel-title { flex: 1; }
+.perm-panel-title h3 { font-size: 16px; font-weight: 600; color: var(--text-default); }
+.perm-panel-title p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.perm-close {
+  width: 32px; height: 32px; border-radius: 6px; border: none; background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.perm-close:hover { background: var(--bg-hover); }
+.perm-close svg { width: 20px; height: 20px; stroke: var(--text-secondary); fill: none; }
+
+/* Summary cards area */
+.perm-summary {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-divider);
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 40vh;
+}
+.summary-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.summary-row:last-child { margin-bottom: 0; }
+.summary-cat {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-disabled);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-width: 80px;
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+.summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex: 1;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  gap: 5px;
+}
+.chip.agent { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.chip.role { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+.chip.user { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.chip.dept { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.chip.position { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
+.chip.group { background: #f0f9ff; color: #075985; border: 1px solid #bae6fd; }
+.chip .chip-x {
+  width: 12px; height: 12px; cursor: pointer; stroke: currentColor; fill: none;
+  opacity: 0.5; transition: opacity 0.15s;
+}
+.chip .chip-x:hover { opacity: 1; }
+.summary-empty { font-size: 12px; color: var(--text-disabled); font-style: italic; padding-top: 4px; }
+
+/* Chat area */
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.msg { display: flex; gap: 10px; animation: fadeUp 0.25s ease-out; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.msg-user { justify-content: flex-end; }
+.msg-user .msg-bubble {
+  background: var(--cs-primary-color);
+  color: #fff;
+  border-radius: 16px 16px 4px 16px;
+  padding: 10px 16px;
+  max-width: 85%;
+  font-size: 14px;
+  line-height: 22px;
+}
+.msg-system .msg-avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.msg-system .msg-avatar svg { width: 14px; height: 14px; fill: #fff; stroke: none; }
+.msg-system .msg-bubble {
+  background: var(--bg-base);
+  border: 1px solid var(--border-divider);
+  border-radius: 4px 16px 16px 16px;
+  padding: 12px 16px;
+  max-width: 90%;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--text-default);
+}
+
+/* Diff card inside system message */
+.diff-card {
+  background: var(--bg-container);
+  border: 1px solid var(--border-divider);
+  border-radius: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.diff-card-header {
+  padding: 10px 14px;
+  background: var(--bg-base);
+  border-bottom: 1px solid var(--border-divider);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.diff-card-header svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+.diff-card-body { padding: 12px 14px; }
+.diff-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  line-height: 22px;
+}
+.diff-add { background: #f0fdf4; color: #166534; }
+.diff-add::before { content: '+'; font-weight: 700; color: #16a34a; }
+.diff-remove { background: #fef2f2; color: #991b1b; }
+.diff-remove::before { content: '−'; font-weight: 700; color: #dc2626; }
+.diff-card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-divider);
+}
+.diff-btn {
+  padding: 6px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: all 0.15s;
+}
+.diff-btn-confirm { background: var(--cs-primary-color); color: #fff; border: none; }
+.diff-btn-confirm:hover { opacity: 0.9; }
+.diff-btn-cancel { background: var(--bg-container); color: var(--text-secondary); border: 1px solid var(--border-default); }
+.diff-btn-cancel:hover { background: var(--bg-hover); }
+
+/* Applied badge */
+.applied-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--green-bg);
+  color: var(--green-base);
+  border: 1px solid var(--green-border);
+}
+.applied-badge svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
+
+/* Chat input area */
+.chat-input-area {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-divider);
+  flex-shrink: 0;
+}
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.suggestion-chip {
+  padding: 5px 12px;
+  border: 1px solid var(--border-divider);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: var(--bg-container);
+  font-family: var(--font-family);
+  transition: all 0.15s;
+}
+.suggestion-chip:hover { border-color: var(--cs-primary-color); color: var(--cs-primary-color); background: #f5f8ff; }
+
+.chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.chat-input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: var(--font-family);
+  color: var(--text-default);
+  outline: none;
+  resize: none;
+  line-height: 22px;
+  min-height: 44px;
+  max-height: 120px;
+  transition: border-color 0.15s;
+}
+.chat-input:focus { border-color: var(--cs-primary-color); }
+.chat-input::placeholder { color: var(--text-disabled); }
+.chat-send {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--cs-primary-color); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: opacity 0.15s;
+}
+.chat-send:hover { opacity: 0.9; }
+.chat-send svg { width: 18px; height: 18px; stroke: #fff; fill: none; }
+
+/* Typing indicator */
+.typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.typing-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-disabled);
+  animation: bounce 1.4s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- Left Navigation Sidebar -->
+  <aside class="nav-sidebar">
+    <div class="nav-logo">
+      <div class="nav-logo-icon"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+      <span class="nav-logo-text">Admin</span>
+    </div>
+    <nav class="nav-items">
+      <div class="nav-section-label">Application</div>
+      <a class="nav-item nav-item-sub" href="#"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>Apps</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>Knowledge</a>
+      <a class="nav-item active" href="#"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>MCP Manager</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>Integration Log</a>
+    </nav>
+  </aside>
+
+  <!-- MCP Servers Panel -->
+  <div class="servers-panel">
+    <div class="servers-header">
+      <span class="servers-title">MCP Servers</span>
+      <button class="btn-protocol"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>Protocol</button>
+      <button class="btn-add"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Add</button>
+    </div>
+    <div class="servers-list">
+      <div class="server-item active" data-server="doraemon">
+        <div class="server-icon"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg></div>
+        <div class="server-info"><div class="server-name">Doraemon</div><div class="server-desc">Doraemon tools</div></div>
+        <div class="server-status"><div class="server-status-dot"></div><span class="server-status-text">connected</span></div>
+      </div>
+      <div class="server-item" data-server="cs">
+        <div class="server-icon"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg></div>
+        <div class="server-info"><div class="server-name">CS</div><div class="server-desc">CS MCP Server</div></div>
+        <div class="server-status"><div class="server-status-dot"></div><span class="server-status-text">connected</span></div>
+      </div>
+      <div class="server-item" data-server="agentable">
+        <div class="server-icon"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg></div>
+        <div class="server-info"><div class="server-name">Agentable</div><div class="server-desc">Manages tables with CRUD operations.</div></div>
+        <div class="server-status"><div class="server-status-dot"></div><span class="server-status-text">connected</span></div>
+      </div>
+      <div class="server-item" data-server="cp">
+        <div class="server-icon"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg></div>
+        <div class="server-info"><div class="server-name">CP</div><div class="server-desc">CP knowledge retrieval</div></div>
+        <div class="server-status"><div class="server-status-dot"></div><span class="server-status-text">connected</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="content-topbar">
+      <div class="tab-group">
+        <div class="tab-item" data-tab="configuration">Configuration</div>
+        <div class="tab-item active" data-tab="capabilities">Capabilities</div>
+        <div class="tab-item" data-tab="json-view">JSON View</div>
+      </div>
+      <div class="topbar-right">
+        <a class="topbar-link" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>Try in Playground</a>
+        <span class="version-badge">1.0</span>
+        <span class="status-badge">CONNECTED</span>
+        <button class="topbar-icon-btn" title="Add version"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg></button>
+        <button class="btn-disconnect">Disconnect</button>
+      </div>
+    </div>
+
+    <!-- Configuration Tab -->
+    <div class="content-body tab-content" id="tab-configuration">
+      <div class="section-header">
+        <h2 class="section-title">Server Information<svg class="info-icon" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg></h2>
+        <button class="refresh-btn"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>Refresh</button>
+      </div>
+      <div class="form-group"><label class="form-label">Name</label><input class="form-input" type="text" value="Doraemon" /></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" rows="2">Doraemon tools</textarea></div>
+      <div class="section-divider"></div>
+      <h2 class="section-title" style="margin-bottom: 16px;">Transport Configuration</h2>
+      <div class="form-group"><label class="form-label">Type</label><div class="transport-type"><span class="type-tag">streamable_http</span><span class="type-desc">Standard MCP transport protocol.</span></div></div>
+      <div class="form-group"><label class="form-label">Base URL</label><input class="form-input" type="text" value="http://localhost:8080/api/mcp/doraemon/v1" /><div class="form-hint">Base URL without path.</div></div>
+      <button class="btn-delete"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>Delete Current Version</button>
+    </div>
+
+    <!-- Capabilities Tab -->
+    <div class="content-body tab-content active" id="tab-capabilities">
+      <div class="capabilities-header"><h2 class="capabilities-title">Server Capabilities</h2></div>
+      <div class="tools-section">
+        <div class="tools-section-header open">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+          <div class="tools-section-title">Tools<svg class="info-icon" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8.25h.008M12 11.25v4.5"/></svg></div>
+        </div>
+        <div class="tool-list">
+          <div class="tool-item" data-tool="cid_memo_get">
+            <span class="tool-name">cid_memo_get</span>
+            <div class="tool-badges"><span class="badge badge-permission" onclick="openPermPanel('cid_memo_get')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>Permission</span></div>
+            <span class="tool-desc">Retrieve session-level memo content for the current conversation.</span>
+          </div>
+          <div class="tool-item" data-tool="cid_memo_set">
+            <span class="tool-name">cid_memo_set</span>
+            <div class="tool-badges"><span class="badge badge-permission" onclick="openPermPanel('cid_memo_set')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>Permission</span></div>
+            <span class="tool-desc">Store session-level memo content. Overwrites any previous content.</span>
+          </div>
+          <div class="tool-item" data-tool="create_timed_reminder">
+            <span class="tool-name">create_timed_reminder</span>
+            <div class="tool-badges"><span class="badge badge-permission" onclick="openPermPanel('create_timed_reminder')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>Permission</span></div>
+            <span class="tool-desc">Create a timed reminder (once or cron). WARNING: UTC only.</span>
+          </div>
+          <div class="tool-item" data-tool="notify">
+            <span class="tool-name">notify</span>
+            <div class="tool-badges"><span class="badge badge-permission" onclick="openPermPanel('notify')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>Permission</span></div>
+            <span class="tool-desc">Send D-system notifications to specified users.</span>
+          </div>
+          <div class="tool-item" data-tool="query_creative_rank_badge">
+            <span class="tool-name">query_creative_rank_badge</span>
+            <div class="tool-badges"><span class="badge badge-permission" onclick="openPermPanel('query_creative_rank_badge')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>Permission</span></div>
+            <span class="tool-desc">Query creative rank badges.</span>
+          </div>
+          <div class="tool-item" data-tool="query_email_by_id">
+            <span class="tool-name">query_email_by_id</span>
+            <div class="tool-badges"><span class="badge badge-permission" onclick="openPermPanel('query_email_by_id')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>Permission</span></div>
+            <span class="tool-desc">Query a specific enterprise email by id.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON View Tab -->
+    <div class="content-body tab-content" id="tab-json-view">
+      <h2 class="section-title" style="margin-bottom: 20px;">JSON Schema</h2>
+      <div class="json-view" id="jsonContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Permission Slide-over Panel -->
+<div class="perm-overlay" id="permOverlay">
+  <div class="perm-panel">
+    <div class="perm-panel-header">
+      <div class="tool-icon"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></div>
+      <div class="perm-panel-title">
+        <h3 id="permToolName">cid_memo_get</h3>
+        <p>Permission Configuration</p>
+      </div>
+      <button class="perm-close" onclick="closePermPanel()"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+
+    <!-- Current permissions summary -->
+    <div class="perm-summary" id="permSummary">
+      <div class="summary-row">
+        <span class="summary-cat">Agents</span>
+        <div class="summary-chips" id="sum-agents">
+          <span class="chip agent">workflow_agent<svg class="chip-x" viewBox="0 0 24 24" stroke-width="2" onclick="removeChip(this,'agents','workflow_agent')"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></span>
+          <span class="chip agent">os_agent<svg class="chip-x" viewBox="0 0 24 24" stroke-width="2" onclick="removeChip(this,'agents','os_agent')"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></span>
+        </div>
+      </div>
+      <div class="summary-row">
+        <span class="summary-cat">Roles</span>
+        <div class="summary-chips" id="sum-roles">
+          <span class="chip role">cs_expert_responder<svg class="chip-x" viewBox="0 0 24 24" stroke-width="2" onclick="removeChip(this,'roles','cs_expert_responder')"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></span>
+        </div>
+      </div>
+      <div class="summary-row">
+        <span class="summary-cat">Users</span>
+        <div class="summary-chips" id="sum-users">
+          <span class="chip user">佐々木 龍一<svg class="chip-x" viewBox="0 0 24 24" stroke-width="2" onclick="removeChip(this,'users','佐々木 龍一')"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></span>
+        </div>
+      </div>
+      <div class="summary-row">
+        <span class="summary-cat">Depts</span>
+        <div class="summary-chips" id="sum-depts">
+          <span class="chip dept">tech<svg class="chip-x" viewBox="0 0 24 24" stroke-width="2" onclick="removeChip(this,'depts','tech')"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></span>
+        </div>
+      </div>
+      <div class="summary-row">
+        <span class="summary-cat">Groups</span>
+        <div class="summary-chips" id="sum-groups"><span class="summary-empty">—</span></div>
+      </div>
+    </div>
+
+    <!-- Chat conversation area -->
+    <div class="chat-area">
+      <div class="chat-messages" id="chatMessages">
+        <!-- History: Applied change -->
+        <div class="msg msg-user"><div class="msg-bubble">添加 bd_expert 到 agents</div></div>
+        <div class="msg msg-system">
+          <div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+          <div>
+            <div class="msg-bubble">
+              已将 <strong>bd_expert</strong> 添加到 Allowed Agents。
+              <div class="diff-card">
+                <div class="diff-card-header"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Agents</div>
+                <div class="diff-card-body"><div class="diff-line diff-add">bd_expert</div></div>
+              </div>
+              <div class="applied-badge"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Applied</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- History: Applied multi change -->
+        <div class="msg msg-user"><div class="msg-bubble">把 tech 部门和佐々木 龍一 加到权限，移除 marketing</div></div>
+        <div class="msg msg-system">
+          <div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+          <div>
+            <div class="msg-bubble">
+              已完成以下权限变更：
+              <div class="diff-card">
+                <div class="diff-card-header"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Permission Changes</div>
+                <div class="diff-card-body">
+                  <div class="diff-line diff-add">dept: tech</div>
+                  <div class="diff-line diff-add">user: 佐々木 龍一</div>
+                  <div class="diff-line diff-remove">dept: marketing</div>
+                </div>
+              </div>
+              <div class="applied-badge"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Applied</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending: awaiting confirmation -->
+        <div class="msg msg-user"><div class="msg-bubble">开放给所有 cs 相关的 role</div></div>
+        <div class="msg msg-system" id="pendingMsg">
+          <div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+          <div>
+            <div class="msg-bubble">
+              找到 2 个匹配的 CS 角色，确认添加？
+              <div class="diff-card">
+                <div class="diff-card-header"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Roles — add 2 items</div>
+                <div class="diff-card-body">
+                  <div class="diff-line diff-add">cs_expert_evaluator</div>
+                  <div class="diff-line diff-add">cs_expert_responder  <span style="font-size:11px;color:var(--text-disabled);font-family:var(--font-family);">(already exists)</span></div>
+                </div>
+                <div class="diff-card-actions">
+                  <button class="diff-btn diff-btn-confirm" onclick="confirmChange()">Confirm</button>
+                  <button class="diff-btn diff-btn-cancel" onclick="cancelChange()">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input area -->
+      <div class="chat-input-area">
+        <div class="suggestion-chips">
+          <span class="suggestion-chip" onclick="fillInput('添加 agent: ')">+ Agent</span>
+          <span class="suggestion-chip" onclick="fillInput('添加 role: ')">+ Role</span>
+          <span class="suggestion-chip" onclick="fillInput('添加 user: ')">+ User</span>
+          <span class="suggestion-chip" onclick="fillInput('添加 department: ')">+ Department</span>
+          <span class="suggestion-chip" onclick="fillInput('移除 ')">Remove...</span>
+          <span class="suggestion-chip" onclick="fillInput('复制权限从 ')">Copy from tool...</span>
+        </div>
+        <div class="chat-input-row">
+          <textarea class="chat-input" id="chatInput" rows="1" placeholder="Describe the permission change you want to make..." onkeydown="handleKeyDown(event)"></textarea>
+          <button class="chat-send" onclick="sendMessage()"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const jsonData = {
+  name: "Doraemon", description: "Doraemon tools", scope: "Doraemon", version: "1.0",
+  type: "TOOL_EXECUTION", status: { is_connected: true, is_healthy: true },
+  transport: "streamable_http",
+  capabilities: { tools: [
+    { name: "cid_memo_get", description: "Retrieve session-level memo content." },
+    { name: "cid_memo_set", description: "Store session-level memo content." },
+    { name: "create_timed_reminder", description: "Create a timed reminder." },
+    { name: "notify", description: "Send D-system notifications." },
+    { name: "query_creative_rank_badge", description: "Query creative rank badges." },
+    { name: "query_email_by_id", description: "Query enterprise email by id." }
+  ]}
+};
+
+function syntaxHighlight(json) {
+  const str = JSON.stringify(json, null, 4);
+  return str.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+    let cls = 'json-string';
+    if (/^"/.test(match)) { if (/:$/.test(match)) { cls = 'json-key'; return '<span class="' + cls + '">' + match.slice(0, -1) + '</span>:'; } }
+    else if (/true|false/.test(match)) cls = 'json-bool';
+    else if (/null/.test(match)) cls = 'json-null';
+    return '<span class="' + cls + '">' + match + '</span>';
+  });
+}
+document.getElementById('jsonContent').innerHTML = syntaxHighlight(jsonData);
+
+// Tab switching
+document.querySelectorAll('.tab-item').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Server selection
+document.querySelectorAll('.server-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.server-item').forEach(s => s.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+
+// Permission panel
+function openPermPanel(toolName) {
+  document.getElementById('permToolName').textContent = toolName;
+  document.getElementById('permOverlay').classList.add('open');
+  scrollChatToBottom();
+}
+function closePermPanel() {
+  document.getElementById('permOverlay').classList.remove('open');
+}
+document.getElementById('permOverlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closePermPanel();
+});
+
+// Remove chip from summary
+function removeChip(el, category, value) {
+  el.closest('.chip').remove();
+  const container = document.getElementById('sum-' + category);
+  if (container.querySelectorAll('.chip').length === 0) {
+    container.innerHTML = '<span class="summary-empty">—</span>';
+  }
+  addSystemMessage('已移除 <strong>' + value + '</strong>。',
+    '<div class="diff-line diff-remove">' + category.replace('depts','dept') + ': ' + value + '</div>', true);
+}
+
+// Chat functions
+function fillInput(text) {
+  const input = document.getElementById('chatInput');
+  input.value = text;
+  input.focus();
+}
+
+function handleKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function scrollChatToBottom() {
+  const container = document.getElementById('chatMessages');
+  setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50);
+}
+
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'msg msg-user';
+  msgDiv.innerHTML = '<div class="msg-bubble">' + escapeHtml(text) + '</div>';
+  document.getElementById('chatMessages').appendChild(msgDiv);
+  scrollChatToBottom();
+
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    simulateResponse(text);
+    scrollChatToBottom();
+  }, 1200);
+}
+
+function showTyping() {
+  const typing = document.createElement('div');
+  typing.className = 'msg msg-system';
+  typing.id = 'typingIndicator';
+  typing.innerHTML = '<div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div class="msg-bubble"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>';
+  document.getElementById('chatMessages').appendChild(typing);
+  scrollChatToBottom();
+}
+
+function hideTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function simulateResponse(text) {
+  const lower = text.toLowerCase();
+  let msg = '', diff = '', autoApply = false;
+
+  if (lower.includes('agent')) {
+    const name = text.replace(/.*[:：]\s*/, '').trim() || 'cs_expert';
+    msg = '将 <strong>' + name + '</strong> 添加到 Allowed Agents，确认？';
+    diff = '<div class="diff-line diff-add">agent: ' + name + '</div>';
+  } else if (lower.includes('role')) {
+    const name = text.replace(/.*[:：]\s*/, '').trim() || 'cp_expert_evaluator';
+    msg = '将 <strong>' + name + '</strong> 添加到 Roles，确认？';
+    diff = '<div class="diff-line diff-add">role: ' + name + '</div>';
+  } else if (lower.includes('移除') || lower.includes('remove') || lower.includes('删除')) {
+    const name = text.replace(/(移除|remove|删除)\s*/i, '').trim() || 'bd_expert';
+    msg = '将移除 <strong>' + name + '</strong>，确认？';
+    diff = '<div class="diff-line diff-remove">' + name + '</div>';
+  } else if (lower.includes('复制') || lower.includes('copy')) {
+    msg = '将从 <strong>notify</strong> 复制完整权限配置到当前工具，确认？';
+    diff = '<div class="diff-line diff-add">agent: workflow_agent</div><div class="diff-line diff-add">agent: os_agent</div><div class="diff-line diff-add">role: cs_expert_responder</div><div class="diff-line diff-add">dept: tech</div>';
+  } else {
+    msg = '理解了。我将根据你的描述来调整权限：';
+    diff = '<div class="diff-line diff-add">' + escapeHtml(text) + '</div>';
+  }
+
+  addSystemMessage(msg, diff, false);
+}
+
+function addSystemMessage(msg, diffBody, applied) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg msg-system';
+  const appliedHtml = applied
+    ? '<div class="applied-badge"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Applied</div>'
+    : '';
+  const actionsHtml = applied
+    ? ''
+    : '<div class="diff-card-actions"><button class="diff-btn diff-btn-confirm" onclick="confirmChange()">Confirm</button><button class="diff-btn diff-btn-cancel" onclick="cancelChange()">Cancel</button></div>';
+
+  div.innerHTML = '<div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>'
+    + '<div><div class="msg-bubble">' + msg
+    + '<div class="diff-card"><div class="diff-card-header"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Changes</div>'
+    + '<div class="diff-card-body">' + diffBody + '</div>'
+    + actionsHtml + '</div>'
+    + appliedHtml + '</div></div>';
+  container.appendChild(div);
+  scrollChatToBottom();
+}
+
+function confirmChange() {
+  document.querySelectorAll('.diff-card-actions').forEach(el => {
+    const card = el.closest('.msg-bubble');
+    el.remove();
+    const badge = document.createElement('div');
+    badge.className = 'applied-badge';
+    badge.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Applied';
+    card.appendChild(badge);
+  });
+  scrollChatToBottom();
+}
+
+function cancelChange() {
+  document.querySelectorAll('.diff-card-actions').forEach(el => {
+    const card = el.closest('.msg-bubble');
+    el.remove();
+    const badge = document.createElement('div');
+    badge.style.cssText = 'margin-top:8px;font-size:12px;color:var(--text-disabled);font-style:italic;';
+    badge.textContent = 'Cancelled';
+    card.appendChild(badge);
+  });
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
