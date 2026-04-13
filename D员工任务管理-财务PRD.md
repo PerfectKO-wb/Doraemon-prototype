@@ -90,6 +90,7 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 
 - [ ] 仅显示**当前用户**审核通过的 Invoice
 - [ ] 卡片标题为提交方名称（Account Name），描述为 "Review Amount ¥XX,XXX"
+- [ ] 点击卡片跳转至 F-Expert 对应的票据审核页面
 
 ### Case4：查看打款任务
 
@@ -99,9 +100,10 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 - [ ] 仅显示**当前用户审核通过**的 Invoice 中需要打款的（status=approved, je_id IS NULL）
 - [ ] 卡片标题为 **"{Account Name} Payment"**
 - [ ] 卡片描述为 **"Payment Amount ¥XX,XXX"**
+- [ ] 点击卡片跳转至 F System 的 Invoice 管理列表页
 - [ ] 月中（15日早上起）未关联 JE 的卡片变为黄色边框，提示 "Remember to make payment"
 - [ ] 月末（最后一天早上起）未关联 JE 的卡片变为红色边框，提示 "Month-end approaching, please complete payment soon"
-- [ ] 系统查询该 Invoice 已关联 JE（`je_id IS NOT NULL`）→ 卡片自动移至 Payment Completed 区
+- [ ] 系统查询该 Invoice 已关联 JE（`je_id IS NOT NULL`）→ 卡片自动移至 Payment Completed 区（点击同样跳转至 F System 的 Invoice 管理列表页）
 
 ### Case5：月中提醒
 
@@ -164,7 +166,7 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 | 图标 | 📋 |
 | 标题 | Account Name |
 | 描述 | "Review Amount ¥XX,XXX" |
-| 交互 | 点击跳转至 F-Expert Review 界面 |
+| 交互 | 点击跳转至 F Expert 对应的票据审核页面 |
 
 **✅ Reviewed（仅当前用户）**
 
@@ -173,6 +175,7 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 | 图标 | ✅ |
 | 标题 | Account Name |
 | 描述 | "Review Amount ¥XX,XXX" |
+| 交互 | 点击跳转至 F Expert 对应的票据审核页面 |
 | 样式 | 完成态（灰色半透明背景） |
 
 **💰 Pending Payment（仅当前用户审核过的）**
@@ -182,6 +185,7 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 | 图标 | 💰 |
 | 标题 | "{Account Name} Payment" |
 | 描述 | "Payment Amount ¥XX,XXX" |
+| 交互 | 点击跳转至 F System 的 Invoice 管理列表页 |
 | 黄色边框 | 月中（15日早上起）：warning 状态，提示 "Remember to make payment" |
 | 红色边框 | 月末（最后一天早上起）：urgent 状态，提示 "Month-end approaching, please complete payment soon" |
 
@@ -192,6 +196,7 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 | 图标 | ✅ |
 | 标题 | "{Account Name} Payment" |
 | 描述 | "Payment Amount ¥XX,XXX · JE Linked" |
+| 交互 | 点击跳转至 F System 的 Invoice 管理列表页 |
 | 样式 | 完成态（灰色半透明背景） |
 
 ### 5.2 打款完成判定

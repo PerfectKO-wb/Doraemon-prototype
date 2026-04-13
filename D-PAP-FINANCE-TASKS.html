@@ -617,7 +617,7 @@
             html += '<div class="task-list">';
             reviewedList.forEach(inv => {
                 html += `
-                <div class="task-card all-done"
+                <a class="task-card all-done" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
                    style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s;">
                     <span class="card-icon">✅</span>
                     <div class="card-body">
@@ -625,7 +625,7 @@
                         <div class="card-desc">Review Amount ${inv.amount}</div>
                     </div>
                     <span class="card-chevron">›</span>
-                </div>`;
+                </a>`;
                 cardIdx++;
             });
             html += '</div>';
@@ -649,7 +649,7 @@
                     hint = `<div class="card-hint"><span class="dot"></span>Remember to make payment</div>`;
                 }
                 html += `
-                <a class="task-card${cls}" href="#"
+                <a class="task-card${cls}" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
                    style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
                     <span class="card-icon">💰</span>
                     <div class="card-body">
@@ -677,7 +677,7 @@
             html += '<div class="task-list">';
             settlementStillUnpaid.forEach(inv => {
                 html += `
-                <a class="task-card" href="#"
+                <a class="task-card" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
                    style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
                     <span class="card-icon">💰</span>
                     <div class="card-body">
@@ -697,14 +697,14 @@
             html += '<div class="task-list">';
             doneList.forEach(inv => {
                 html += `
-                <div class="task-card all-done"
+                <a class="task-card all-done" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
                    style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s;">
                     <span class="card-icon">✅</span>
                     <div class="card-body">
                         <div class="card-title">${inv.account} Payment</div>
                         <div class="card-desc">Payment Amount ${inv.amount} · JE Linked</div>
                     </div>
-                </div>`;
+                </a>`;
                 cardIdx++;
             });
             html += '</div>';
