@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAP — 财务任务中心</title>
+    <title>PAP — Finance Task Center</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -240,87 +240,6 @@
             line-height: 1.5;
         }
 
-        /* ── Card header row (title + status pill) ── */
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 3px;
-        }
-
-        /* ── Status pill ── */
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 8px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            flex-shrink: 0;
-        }
-        .status-pill.in-progress {
-            background: rgba(59,130,246,0.1);
-            color: rgba(37,99,235,0.85);
-        }
-        .status-pill.in-progress::before {
-            content: '';
-            width: 5px; height: 5px;
-            border-radius: 50%;
-            background: rgba(59,130,246,0.7);
-            animation: pulse-dot 1.5s infinite;
-        }
-        .status-pill.pending {
-            background: rgba(0,0,0,0.05);
-            color: rgba(0,0,0,0.4);
-        }
-
-        /* ── Meta tags row inside card body ── */
-        .card-meta {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-        .card-meta .meta-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 8px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-        }
-        .meta-pill.ticket {
-            background: rgba(251,191,36,0.12);
-            color: rgba(180,83,9,0.8);
-        }
-
-
-        /* ── Count area (right side) ── */
-        .card-count {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-        .card-count .count-number {
-            font-size: 18px;
-            font-weight: 800;
-            line-height: 1;
-            color: rgba(0,0,0,0.7);
-        }
-        .card-count .count-label {
-            font-size: 9px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            color: rgba(0,0,0,0.3);
-        }
-
         .card-chevron {
             font-size: 16px;
             color: rgba(0,0,0,0.2);
@@ -332,7 +251,22 @@
             transform: translateX(2px);
         }
 
-        /* ── Urgent card (red border on 16th reminder) ── */
+        /* ── Warning card (yellow – mid-month reminder) ── */
+        .task-card.warning {
+            border: 1.5px solid rgba(234,179,8,0.5);
+            box-shadow: 0 8px 32px rgba(234,179,8,0.10), inset 0 1px 0 rgba(255,255,255,0.5);
+            background: rgba(254,252,232,0.55);
+        }
+        .task-card.warning:hover {
+            border-color: rgba(234,179,8,0.65);
+            box-shadow: 0 12px 40px rgba(234,179,8,0.15), inset 0 1px 0 rgba(255,255,255,0.6);
+            background: rgba(254,252,232,0.75);
+        }
+        .task-card.warning .card-icon {
+            background: rgba(234,179,8,0.08);
+        }
+
+        /* ── Urgent card (red – month-end reminder) ── */
         .task-card.urgent {
             border: 1.5px solid rgba(239,68,68,0.5);
             box-shadow: 0 8px 32px rgba(239,68,68,0.10), inset 0 1px 0 rgba(255,255,255,0.5);
@@ -346,32 +280,38 @@
         .task-card.urgent .card-icon {
             background: rgba(239,68,68,0.06);
         }
-        .task-card.urgent .count-number {
-            color: rgba(220,38,38,0.85);
-        }
-        .task-card.urgent .count-label {
-            color: rgba(220,38,38,0.5);
-        }
-        .urgent-hint {
+
+        .card-hint {
             display: none;
             align-items: center;
             gap: 4px;
             margin-top: 6px;
             font-size: 11px;
             font-weight: 600;
-            color: rgba(220,38,38,0.75);
         }
-        .urgent-hint .dot {
+        .card-hint .dot {
             width: 5px; height: 5px;
             border-radius: 50%;
-            background: rgba(239,68,68,0.6);
             animation: pulse-dot 1.5s infinite;
+        }
+        .task-card.warning .card-hint {
+            display: inline-flex;
+            color: rgba(161,98,7,0.8);
+        }
+        .task-card.warning .card-hint .dot {
+            background: rgba(234,179,8,0.7);
+        }
+        .task-card.urgent .card-hint {
+            display: inline-flex;
+            color: rgba(220,38,38,0.75);
+        }
+        .task-card.urgent .card-hint .dot {
+            background: rgba(239,68,68,0.6);
         }
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(0.7); }
         }
-        .task-card.urgent .urgent-hint { display: inline-flex; }
 
         /* ── Success banner (month-end all done) ── */
         .success-banner {
@@ -520,7 +460,7 @@
             <span class="avatar">ZM</span>
             <div class="user-info">
                 <span class="user-name">张明</span>
-                <span class="user-role">财务专员</span>
+                <span class="user-role">Finance Specialist</span>
             </div>
             <span class="dropdown-arrow">▾</span>
         </button>
@@ -558,11 +498,11 @@
     <!-- Test Case FAB -->
     <div class="fab-btn">
         <div class="test-panel" id="testPanel">
-            <div class="test-panel-title">🧪 模拟日期场景</div>
-            <button class="test-btn active" id="btnToday" onclick="simulateDate('today')">📅 今天</button>
-            <button class="test-btn" onclick="simulateDate('mid')">⚠️ 月中（15日）提醒</button>
-            <button class="test-btn" onclick="simulateDate('end')">🔴 月底（28日）提醒</button>
-            <button class="test-btn" onclick="simulateDate('done')">🎉 月底全部完成</button>
+            <div class="test-panel-title">🧪 Simulate Date Scenario</div>
+            <button class="test-btn active" id="btnToday" onclick="simulateDate('today')">📅 Today</button>
+            <button class="test-btn" onclick="simulateDate('mid')">⚠️ Mid-month (15th)</button>
+            <button class="test-btn" onclick="simulateDate('end')">🔴 Month-end (28th)</button>
+            <button class="test-btn" onclick="simulateDate('done')">🎉 Month-end Settlement</button>
         </div>
         <button onclick="toggleTestPanel()">🧪 Test Case</button>
     </div>
@@ -573,29 +513,34 @@
     const dayOfMonth = today.getDate();
     const month = today.getMonth();
     const year = today.getFullYear();
-    const weekDays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+    const weekDays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const monthNames = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+    const currentUser = '张明';
 
-    // ── Mock Data: each invoice = one card ──
-    const invoices = [
-        { id: 'INV-2026-04-001', submitter: 'エムスリーキャリア株式会社', amount: '¥33,000', aTicket: 'A-FIN-2026-04-001', status: 'in-progress' },
-        { id: 'INV-2026-04-002', submitter: '株式会社リクルート', amount: '¥128,700', aTicket: 'A-FIN-2026-04-002', status: 'pending' },
-        { id: 'INV-2026-04-003', submitter: 'AWS Japan 合同会社', amount: '¥456,200', aTicket: 'A-FIN-2026-04-003', status: 'pending' },
+    // ── Mock Data ──
+    // 待审核：所有财务可见
+    const pendingInvoices = [
+        { id: 'INV-2026-04-001', account: 'エムスリーキャリア株式会社', amount: '¥33,000' },
+        { id: 'INV-2026-04-002', account: '株式会社リクルート', amount: '¥128,700' },
+        { id: 'INV-2026-04-003', account: 'AWS Japan 合同会社', amount: '¥456,200' },
     ];
 
-    const paymentTask = {
-        icon: '💰',
-        name: '财务打款',
-        desc: '处理已审核通过但尚未关联 JE 的 Invoice，完成银行打款并录入系统。',
-        status: 'pending',
-        count: 15,
-        aTicket: 'A-FIN-2026-04-PMT',
-        href: '#',
-    };
+    // 已审核：仅显示当前用户审核通过的
+    const approvedInvoices = [
+        { id: 'INV-2026-04-010', account: 'Google Cloud Japan', amount: '¥89,100', reviewer: '张明' },
+        { id: 'INV-2026-04-011', account: '株式会社マイナビ', amount: '¥55,000', reviewer: '张明' },
+    ];
+
+    // 打款：当前用户审核过的 invoice，每条独立卡片，月底查 JE 判断是否完成
+    const paymentInvoices = [
+        { id: 'INV-2026-03-045', account: 'Slack Technologies', amount: '¥220,000', jeLinked: false },
+        { id: 'INV-2026-03-046', account: 'Salesforce Japan', amount: '¥185,000', jeLinked: false },
+        { id: 'INV-2026-03-047', account: 'Adobe Systems', amount: '¥67,500', jeLinked: true },
+    ];
 
     // ── Render Date ──
     document.getElementById('dateMain').textContent =
-        `${year}年${monthNames[month]}月${String(dayOfMonth).padStart(2,'0')}日`;
+        `${monthNames[month]}/${String(dayOfMonth).padStart(2,'0')}/${year}`;
     document.getElementById('dateSub').textContent = weekDays[today.getDay()];
 
     // ── Typewriter ──
@@ -620,118 +565,174 @@
     }
 
     // ── Greeting ──
-    function getGreetingText(allDone) {
-        if (allDone) return '你好，本月任务已全部完成 🎉';
-        const allCards = [...invoices, paymentTask];
-        const inProgress = allCards.filter(c => c.status === 'in-progress').length;
-        const pending = allCards.filter(c => c.status === 'pending').length;
-        return `你好，这是你今天的任务，${inProgress} 条进行中，${pending} 条待处理。`;
+    function getGreetingText(isSettlement) {
+        if (isSettlement) return 'Hi, month-end settlement is done 🎉';
+        const unpaid = paymentInvoices.filter(p => !p.jeLinked).length;
+        return `Hi, here are your tasks today: ${pendingInvoices.length} pending review, ${unpaid} pending payment.`;
     }
 
-    typewrite(document.getElementById('greeting1'), '你好 👋', 200)
+    typewrite(document.getElementById('greeting1'), 'Hi 👋', 200)
         .then(() => typewrite(document.getElementById('greeting2'), getGreetingText(false), 100));
 
-    // ── Helpers ──
-    function statusPillHtml(status, allDone) {
-        if (allDone) return '<span class="status-pill pending">已完成</span>';
-        if (status === 'in-progress') return '<span class="status-pill in-progress">进行中</span>';
-        return '<span class="status-pill pending">待开始</span>';
-    }
-
     // ── Render ──
-    function renderAll(simDay, allDone) {
+    // scenario: 'normal' | 'settlement' (month-end 18:00 settlement – all reviews done, partial payments)
+    function renderAll(simDay, scenario) {
         const taskList = document.getElementById('taskList');
-        const isMidReminder = simDay >= 15 && simDay <= 25;
+        const isMidMonth = simDay >= 15 && simDay < 26;
         const isMonthEnd = simDay >= 26;
-        const isAllDone = !!allDone;
+        const isSettlement = scenario === 'settlement';
 
         let html = '';
         let cardIdx = 0;
 
-        // ── Invoice review cards ──
-        html += `<div class="section-label">📋 Invoice 审核 · ${invoices.length} 条</div>`;
-        html += '<div class="task-list">';
-        invoices.forEach(inv => {
-            const cardClass = isAllDone ? ' all-done' : '';
-            html += `
-            <a class="task-card${cardClass}" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
-               style="transition: opacity 0.5s ease ${cardIdx * 100}ms, transform 0.5s ease ${cardIdx * 100}ms, background 0.2s, box-shadow 0.2s;">
-                <span class="card-icon">📋</span>
-                <div class="card-body">
-                    <div class="card-header">
-                        <div class="card-title">${inv.submitter}</div>
-                        ${statusPillHtml(inv.status, isAllDone)}
+        // ── 1. Pending Review ──
+        if (!isSettlement && pendingInvoices.length > 0) {
+            html += `<div class="section-label">📋 Pending Review · ${pendingInvoices.length}</div>`;
+            html += '<div class="task-list">';
+            pendingInvoices.forEach(inv => {
+                html += `
+                <a class="task-card" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
+                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
+                    <span class="card-icon">📋</span>
+                    <div class="card-body">
+                        <div class="card-title">${inv.account}</div>
+                        <div class="card-desc">Review Amount ${inv.amount}</div>
                     </div>
-                    <div class="card-desc">金额 ${inv.amount}</div>
-                    <div class="card-meta">
-                        <span class="meta-pill ticket">🎫 ${inv.aTicket}</span>
-                    </div>
-                </div>
-                <span class="card-chevron">›</span>
-            </a>`;
-            cardIdx++;
-        });
-        html += '</div>';
-
-        // ── Payment card ──
-        const isPaymentUrgent = (isMidReminder || isMonthEnd) && !isAllDone;
-        let urgentHint = '';
-        if (isPaymentUrgent) {
-            const label = isMonthEnd
-                ? `月底将至，还有 ${paymentTask.count} 条 Invoice 未打款，请尽快处理！`
-                : `本月有 ${paymentTask.count} 条 Invoice 待打款，请安排打款。`;
-            urgentHint = `<div class="urgent-hint"><span class="dot"></span>${label}</div>`;
+                    <span class="card-chevron">›</span>
+                </a>`;
+                cardIdx++;
+            });
+            html += '</div>';
         }
-        const pmtClass = isPaymentUrgent ? ' urgent' : (isAllDone ? ' all-done' : '');
 
-        html += `<div class="section-label">💰 财务打款</div>`;
-        html += '<div class="task-list">';
-        html += `
-        <a class="task-card${pmtClass}" href="${paymentTask.href}"
-           style="transition: opacity 0.5s ease ${cardIdx * 100}ms, transform 0.5s ease ${cardIdx * 100}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
-            <span class="card-icon">${paymentTask.icon}</span>
-            <div class="card-body">
-                <div class="card-header">
-                    <div class="card-title">${paymentTask.name}</div>
-                    ${statusPillHtml(paymentTask.status, isAllDone)}
-                </div>
-                <div class="card-desc">${paymentTask.desc}</div>
-                <div class="card-meta">
-                    <span class="meta-pill ticket">🎫 ${paymentTask.aTicket}</span>
-                </div>
-                ${urgentHint}
-            </div>
-            <div class="card-count">
-                <span class="count-number">${isAllDone ? '✓' : paymentTask.count}</span>
-                <span class="count-label">${isAllDone ? 'A票已关闭' : '待打款'}</span>
-            </div>
-            <span class="card-chevron">›</span>
-        </a>`;
-        html += '</div>';
+        // ── 2. Reviewed (current user) ──
+        const myApproved = approvedInvoices.filter(inv => inv.reviewer === currentUser);
+        const reviewedList = isSettlement
+            ? [...myApproved, ...pendingInvoices.map(inv => ({...inv, reviewer: currentUser}))]
+            : myApproved;
+        if (reviewedList.length > 0) {
+            html += `<div class="section-label">✅ Reviewed (${currentUser}) · ${reviewedList.length}</div>`;
+            html += '<div class="task-list">';
+            reviewedList.forEach(inv => {
+                html += `
+                <div class="task-card all-done"
+                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s;">
+                    <span class="card-icon">✅</span>
+                    <div class="card-body">
+                        <div class="card-title">${inv.account}</div>
+                        <div class="card-desc">Review Amount ${inv.amount}</div>
+                    </div>
+                    <span class="card-chevron">›</span>
+                </div>`;
+                cardIdx++;
+            });
+            html += '</div>';
+        }
+
+        // ── 3. Payment ──
+        const unpaidInvoices = paymentInvoices.filter(p => !p.jeLinked);
+        const paidInvoices = paymentInvoices.filter(p => p.jeLinked);
+
+        if (!isSettlement && unpaidInvoices.length > 0) {
+            html += `<div class="section-label">💰 Pending Payment · ${unpaidInvoices.length}</div>`;
+            html += '<div class="task-list">';
+            unpaidInvoices.forEach(inv => {
+                let cls = '';
+                let hint = '';
+                if (isMonthEnd) {
+                    cls = ' urgent';
+                    hint = `<div class="card-hint"><span class="dot"></span>Month-end approaching, please complete payment soon</div>`;
+                } else if (isMidMonth) {
+                    cls = ' warning';
+                    hint = `<div class="card-hint"><span class="dot"></span>Remember to make payment</div>`;
+                }
+                html += `
+                <a class="task-card${cls}" href="#"
+                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
+                    <span class="card-icon">💰</span>
+                    <div class="card-body">
+                        <div class="card-title">${inv.account} Payment</div>
+                        <div class="card-desc">Payment Amount ${inv.amount}</div>
+                        ${hint}
+                    </div>
+                    <span class="card-chevron">›</span>
+                </a>`;
+                cardIdx++;
+            });
+            html += '</div>';
+        }
+
+        // Settlement scenario: 1 of 2 unpaid invoices got JE linked at settlement
+        const settlementPaid = isSettlement
+            ? [...paidInvoices, { ...unpaidInvoices[0], jeLinked: true }]
+            : paidInvoices;
+        const settlementStillUnpaid = isSettlement
+            ? unpaidInvoices.slice(1)
+            : [];
+
+        if (settlementStillUnpaid.length > 0) {
+            html += `<div class="section-label">💰 Pending Payment · ${settlementStillUnpaid.length}</div>`;
+            html += '<div class="task-list">';
+            settlementStillUnpaid.forEach(inv => {
+                html += `
+                <a class="task-card" href="#"
+                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
+                    <span class="card-icon">💰</span>
+                    <div class="card-body">
+                        <div class="card-title">${inv.account} Payment</div>
+                        <div class="card-desc">Payment Amount ${inv.amount}</div>
+                    </div>
+                    <span class="card-chevron">›</span>
+                </a>`;
+                cardIdx++;
+            });
+            html += '</div>';
+        }
+
+        if (settlementPaid.length > 0 || isSettlement) {
+            const doneList = isSettlement ? settlementPaid : paidInvoices;
+            html += `<div class="section-label">✅ Payment Completed · ${doneList.length}</div>`;
+            html += '<div class="task-list">';
+            doneList.forEach(inv => {
+                html += `
+                <div class="task-card all-done"
+                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s;">
+                    <span class="card-icon">✅</span>
+                    <div class="card-body">
+                        <div class="card-title">${inv.account} Payment</div>
+                        <div class="card-desc">Payment Amount ${inv.amount} · JE Linked</div>
+                    </div>
+                </div>`;
+                cardIdx++;
+            });
+            html += '</div>';
+        }
 
         taskList.innerHTML = html;
 
         setTimeout(() => {
             taskList.querySelectorAll('.task-card').forEach((card, i) => {
-                setTimeout(() => card.classList.add('visible'), i * 100);
+                setTimeout(() => card.classList.add('visible'), i * 80);
             });
         }, 100);
 
         // Success banner
         const successBanner = document.getElementById('successBanner');
         successBanner.classList.remove('show');
-        if (isAllDone) {
-            document.getElementById('successTitle').textContent = '本月任务全部完成';
-            document.getElementById('successDesc').textContent =
-                `${invoices.length} 条 Invoice 审核完毕，${paymentTask.count} 条打款完成，所有 Invoice 已关联 JE，A Ticket 已自动关闭。`;
+        if (isSettlement) {
+            const settled = settlementPaid.length;
+            const remaining = settlementStillUnpaid.length;
+            document.getElementById('successTitle').textContent = 'Month-end Settlement Completed';
+            document.getElementById('successDesc').innerHTML =
+                `All invoices reviewed. ${settled} payment(s) completed, <span style="color:#dc2626;font-weight:600">${remaining} still pending</span>.`;
             successBanner.classList.add('show');
         }
 
-        document.getElementById('greeting2').textContent = getGreetingText(isAllDone);
+        document.getElementById('greeting2').textContent = getGreetingText(isSettlement);
     }
 
-    renderAll(dayOfMonth, false);
-    document.getElementById('btnToday').textContent = `📅 今天（${month + 1}月${dayOfMonth}日）`;
+    renderAll(dayOfMonth, 'normal');
+    document.getElementById('btnToday').textContent = `📅 Today (${monthNames[month]}/${dayOfMonth})`;
 
     // ── Test Case Panel ──
     function toggleTestPanel() {
@@ -742,30 +743,30 @@
         document.querySelectorAll('.test-btn').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
 
-        let simDay, allDone = false, dateLabel;
+        let simDay, scn = 'normal', dateLabel;
         switch(scenario) {
             case 'mid':
                 simDay = 15;
-                dateLabel = `${year}年${monthNames[month]}月15日`;
-                document.getElementById('dateSub').textContent = '模拟：月中提醒';
+                dateLabel = `${monthNames[month]}/15/${year}`;
+                document.getElementById('dateSub').textContent = 'Simulate: Mid-month';
                 break;
             case 'end':
                 simDay = 28;
-                dateLabel = `${year}年${monthNames[month]}月28日`;
-                document.getElementById('dateSub').textContent = '模拟：月底提醒';
+                dateLabel = `${monthNames[month]}/28/${year}`;
+                document.getElementById('dateSub').textContent = 'Simulate: Month-end Reminder';
                 break;
             case 'done':
-                simDay = 31; allDone = true;
-                dateLabel = `${year}年${monthNames[month]}月31日`;
-                document.getElementById('dateSub').textContent = '模拟：月底全部完成';
+                simDay = 31; scn = 'settlement';
+                dateLabel = `${monthNames[month]}/31/${year}`;
+                document.getElementById('dateSub').textContent = 'Simulate: Settlement (18:00)';
                 break;
             default:
                 simDay = dayOfMonth;
-                dateLabel = `${year}年${monthNames[month]}月${String(dayOfMonth).padStart(2,'0')}日`;
+                dateLabel = `${monthNames[month]}/${String(dayOfMonth).padStart(2,'0')}/${year}`;
                 document.getElementById('dateSub').textContent = weekDays[today.getDay()];
         }
         document.getElementById('dateMain').textContent = dateLabel;
-        renderAll(simDay, allDone);
+        renderAll(simDay, scn);
         document.getElementById('testPanel').classList.remove('show');
     }
 </script>
