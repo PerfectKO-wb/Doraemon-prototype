@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP Manager — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --text-default: #131825;
+  --text-secondary: #73726e;
+  --text-disabled: #ababa9;
+  --bg-base: #f9fafb;
+  --bg-layout: #f9fafb;
+  --bg-container: #ffffff;
+  --bg-active: #efefef;
+  --bg-hover: #efefef;
+  --bg-hover2: #dbdbdb;
+  --bg-disabled: #dbdbdb;
+  --border-divider: #e5e7eb;
+  --border-default: #d9d9d9;
+  --cs-primary-color: #1C64F2;
+  --button-default: #131825;
+  --logo: #71747c;
+  --error-base: #f5222d;
+  --error-bg: #fff1f0;
+  --green-base: #52c41a;
+  --green-bg: #f6ffed;
+  --green-border: #b7eb8f;
+  --shadow-dropdown: 0 6px 16px rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.12), 0 9px 28px 8px rgba(0,0,0,0.05);
+  --font-family: 'Inter', 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+  --font-family-logo: 'Urbanist', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-base);
+  color: var(--text-default);
+  font-size: 14px;
+  line-height: 22px;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* ===== Left Nav Sidebar ===== */
+.nav-sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--bg-container);
+  border-right: 1px solid var(--border-divider);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.nav-logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-divider);
+}
+
+.nav-logo-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--cs-primary-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-logo-icon svg { width: 16px; height: 16px; fill: #fff; }
+
+.nav-logo-text {
+  font-family: var(--font-family-logo);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text-default);
+}
+
+.nav-items {
+  flex: 1;
+  padding: 8px 12px;
+  overflow-y: auto;
+}
+
+.nav-section-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-disabled);
+  padding: 12px 8px 4px;
+  line-height: 18px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+
+.nav-item:hover { background: var(--bg-hover); }
+.nav-item.active { background: var(--bg-active); color: var(--text-default); font-weight: 500; }
+
+.nav-item svg { width: 20px; height: 20px; flex-shrink: 0; stroke: currentColor; fill: none; }
+
+.nav-item-sub {
+  padding-left: 44px;
+}
+
+.nav-group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.nav-chevron {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-disabled);
+  transition: transform 0.2s;
+}
+
+.nav-chevron.open { transform: rotate(90deg); }
+
+/* ===== MCP Servers List Panel ===== */
+.servers-panel {
+  width: 300px;
+  min-width: 300px;
+  background: var(--bg-container);
+  border-right: 1px solid var(--border-divider);
+  display: flex;
+  flex-direction: column;
+}
+
+.servers-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-divider);
+  flex-shrink: 0;
+}
+
+.servers-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-default);
+  flex: 1;
+}
+
+.btn-protocol {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: var(--bg-container);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: background 0.15s;
+}
+.btn-protocol:hover { background: var(--bg-hover); }
+
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background: var(--cs-primary-color);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: opacity 0.15s;
+}
+.btn-add:hover { opacity: 0.9; }
+.btn-add svg { width: 14px; height: 14px; stroke: #fff; fill: none; }
+
+.servers-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.server-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.server-item:hover { background: var(--bg-hover); }
+.server-item.active { background: var(--cs-primary-color); }
+.server-item.active .server-name { color: #fff; }
+.server-item.active .server-desc { color: rgba(255,255,255,0.75); }
+.server-item.active .server-status-dot { background: #86efac; }
+.server-item.active .server-status-text { color: rgba(255,255,255,0.75); }
+
+.server-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--bg-base);
+}
+.server-item.active .server-icon { background: rgba(255,255,255,0.2); }
+
+.server-icon svg { width: 18px; height: 18px; stroke: var(--text-secondary); fill: none; }
+.server-item.active .server-icon svg { stroke: #fff; }
+
+.server-info { flex: 1; min-width: 0; }
+.server-name { font-size: 14px; font-weight: 500; color: var(--text-default); }
+.server-desc {
+  font-size: 12px;
+  color: var(--text-disabled);
+  line-height: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.server-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.server-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green-base);
+}
+.server-status-text {
+  font-size: 12px;
+  color: var(--text-disabled);
+}
+
+/* ===== Main Content Area ===== */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.content-topbar {
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  height: 52px;
+  border-bottom: 1px solid var(--border-divider);
+  background: var(--bg-container);
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tab-group {
+  display: flex;
+  gap: 0;
+}
+
+.tab-item {
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  position: relative;
+}
+.tab-item:hover { color: var(--text-default); }
+.tab-item.active {
+  color: var(--text-default);
+  font-weight: 500;
+  border-bottom-color: var(--cs-primary-color);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.topbar-link {
+  font-size: 13px;
+  color: var(--cs-primary-color);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.topbar-link:hover { text-decoration: underline; }
+
+.version-badge {
+  padding: 2px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: var(--bg-container);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--green-base);
+  font-weight: 500;
+}
+.status-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green-base);
+}
+
+.topbar-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.topbar-icon-btn:hover { background: var(--bg-hover); }
+.topbar-icon-btn svg { width: 16px; height: 16px; stroke: var(--text-secondary); fill: none; }
+
+.btn-disconnect {
+  padding: 6px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: var(--bg-container);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.btn-disconnect:hover { background: var(--bg-hover); }
+
+.content-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  background: var(--bg-container);
+}
+
+/* ===== Configuration Tab ===== */
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-default);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title .info-icon {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-disabled);
+  cursor: help;
+}
+
+.refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font-family);
+  margin-left: auto;
+}
+.refresh-btn:hover { color: var(--text-default); }
+.refresh-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-default);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-label .info-icon {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-disabled);
+  cursor: help;
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: var(--font-family);
+  color: var(--text-default);
+  background: var(--bg-container);
+  outline: none;
+  transition: border-color 0.15s;
+  line-height: 22px;
+}
+.form-input:focus { border-color: var(--cs-primary-color); }
+.form-input::placeholder { color: var(--text-disabled); }
+
+.form-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: var(--font-family);
+  color: var(--text-default);
+  background: var(--bg-container);
+  outline: none;
+  resize: vertical;
+  min-height: 64px;
+  line-height: 22px;
+  transition: border-color 0.15s;
+}
+.form-textarea:focus { border-color: var(--cs-primary-color); }
+
+.section-divider {
+  height: 1px;
+  background: var(--border-divider);
+  margin: 28px 0;
+}
+
+.transport-type {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.type-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 4px;
+  background: #dbeafe;
+  color: var(--cs-primary-color);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid #93c5fd;
+}
+
+.type-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 20px;
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--text-disabled);
+  margin-top: 4px;
+  line-height: 18px;
+}
+
+.header-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-default);
+  margin-bottom: 4px;
+}
+
+.header-sublabel {
+  font-size: 13px;
+  color: var(--text-disabled);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.common-headers {
+  margin-top: 12px;
+  padding: 0;
+}
+.common-headers-title {
+  font-size: 12px;
+  color: var(--text-disabled);
+  margin-bottom: 6px;
+}
+.common-headers-list {
+  list-style: none;
+  font-size: 12px;
+  color: var(--text-disabled);
+  line-height: 20px;
+  padding-left: 12px;
+}
+.common-headers-list li::before {
+  content: '•';
+  margin-right: 6px;
+  color: var(--text-disabled);
+}
+
+.btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--error-base);
+  border-radius: 6px;
+  background: var(--bg-container);
+  color: var(--error-base);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-family);
+  margin-top: 32px;
+  transition: background 0.15s;
+}
+.btn-delete:hover { background: var(--error-bg); }
+.btn-delete svg { width: 16px; height: 16px; stroke: var(--error-base); fill: none; }
+
+/* ===== Capabilities Tab ===== */
+.capabilities-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.capabilities-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-default);
+}
+
+.tools-section {
+  margin-top: 8px;
+}
+
+.tools-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tools-section-header svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-default);
+  fill: none;
+  transition: transform 0.2s;
+}
+.tools-section-header.open svg { transform: rotate(0deg); }
+
+.tools-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-default);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tools-section-title .info-icon {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-disabled);
+}
+
+.tool-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tool-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1px solid var(--border-divider);
+  border-radius: 8px;
+  background: var(--bg-container);
+  transition: background 0.15s;
+  gap: 12px;
+}
+.tool-item:hover { background: var(--bg-base); }
+
+.tool-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-default);
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  white-space: nowrap;
+  padding-top: 1px;
+}
+
+.tool-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-permission {
+  background: var(--bg-base);
+  border: 1px solid var(--border-divider);
+  color: var(--text-secondary);
+}
+
+.badge-lock svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--text-disabled);
+  fill: none;
+}
+
+.tool-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 20px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tool-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.tool-toggle {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--border-default);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tool-toggle:hover { border-color: var(--cs-primary-color); }
+.tool-toggle.active {
+  background: var(--cs-primary-color);
+  border-color: var(--cs-primary-color);
+}
+
+/* ===== JSON View Tab ===== */
+.json-view {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--text-default);
+  background: var(--bg-container);
+  white-space: pre;
+  tab-size: 4;
+  overflow-x: auto;
+}
+
+.json-key { color: #0451a5; }
+.json-string { color: #a31515; }
+.json-bool { color: #0000ff; }
+.json-bracket { color: var(--text-default); }
+.json-null { color: #0000ff; }
+
+/* ===== Hidden tab content ===== */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-disabled); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-disabled); }
+
+/* ===== Permission Modal ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--bg-container);
+  border-radius: 12px;
+  box-shadow: var(--shadow-dropdown);
+  width: 640px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-divider);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-default);
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.modal-close:hover { background: var(--bg-hover); }
+.modal-close svg { width: 20px; height: 20px; stroke: var(--text-secondary); fill: none; }
+
+.modal-body {
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-section {
+  padding: 20px 24px;
+}
+
+.modal-section + .modal-section {
+  border-top: 1px solid var(--border-divider);
+}
+
+.modal-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-default);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-section-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 20px;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-default);
+  cursor: pointer;
+  background: var(--bg-container);
+  transition: all 0.15s;
+  user-select: none;
+}
+.checkbox-tag:hover { background: var(--bg-hover); border-color: var(--cs-primary-color); }
+.checkbox-tag.selected {
+  background: #eff6ff;
+  border-color: var(--cs-primary-color);
+  color: var(--cs-primary-color);
+}
+
+.checkbox-tag .check-icon {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--border-default);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.checkbox-tag.selected .check-icon {
+  background: var(--cs-primary-color);
+  border-color: var(--cs-primary-color);
+}
+.checkbox-tag.selected .check-icon svg { opacity: 1; }
+.checkbox-tag .check-icon svg {
+  width: 10px;
+  height: 10px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 2.5;
+  opacity: 0;
+}
+
+/* Permission tabs */
+.perm-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-divider);
+  margin-bottom: 12px;
+}
+
+.perm-tab {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  user-select: none;
+}
+.perm-tab:hover { color: var(--text-default); }
+.perm-tab.active {
+  color: var(--text-default);
+  font-weight: 500;
+  border-bottom-color: var(--text-default);
+}
+
+/* Search input */
+.perm-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: var(--bg-container);
+  transition: border-color 0.15s;
+}
+.perm-search:focus-within { border-color: var(--cs-primary-color); }
+.perm-search svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-disabled);
+  fill: none;
+  flex-shrink: 0;
+}
+.perm-search input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  font-family: var(--font-family);
+  color: var(--text-default);
+  background: transparent;
+  width: 100%;
+  line-height: 22px;
+}
+.perm-search input::placeholder { color: var(--text-disabled); }
+
+/* Permission list */
+.perm-list {
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.perm-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+.perm-list-item:hover { background: var(--bg-hover); }
+
+.perm-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  overflow: hidden;
+  background: var(--bg-disabled);
+}
+.perm-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.perm-avatar.dept { background: var(--text-secondary); border-radius: 8px; }
+.perm-avatar.position { background: var(--button-default); border-radius: 8px; }
+.perm-avatar.group { background: var(--text-secondary); border-radius: 8px; }
+.perm-avatar.user { background: var(--bg-disabled); }
+
+.perm-avatar svg {
+  width: 20px;
+  height: 20px;
+  fill: #fff;
+  stroke: none;
+}
+
+.perm-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.perm-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-default);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.perm-item-email {
+  font-size: 12px;
+  color: var(--text-disabled);
+  line-height: 18px;
+}
+
+
+/* Tab panel visibility */
+.perm-tab-panel { display: none; }
+.perm-tab-panel.active { display: block; }
+
+/* Empty state */
+.perm-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-disabled);
+  font-size: 13px;
+}
+
+/* Checkbox in list items */
+.perm-cb {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--cs-primary-color);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.perm-list-item { cursor: pointer; }
+.perm-list-item.checked { background: #f0f5ff; }
+.perm-avatar.role { background: #6366f1; border-radius: 8px; font-size: 12px; font-weight: 600; }
+
+/* Selected bar */
+.selected-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-divider);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  min-height: 38px;
+}
+.selected-bar-label {
+  font-size: 12px;
+  color: var(--text-disabled);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.selected-bar-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #eff6ff;
+  color: var(--cs-primary-color);
+  border: 1px solid #bfdbfe;
+}
+.selected-bar-tag .remove-tag {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  stroke: var(--cs-primary-color);
+  fill: none;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.selected-bar-tag .remove-tag:hover { opacity: 1; }
+
+/* Summary styles */
+.summary-group {
+  margin-bottom: 20px;
+}
+.summary-group:last-child { margin-bottom: 0; }
+.summary-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.summary-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.summary-tag.agent { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.summary-tag.role { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+.summary-tag.user { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.summary-tag.dept { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.summary-tag.position { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
+.summary-tag.group { background: #f0f9ff; color: #075985; border: 1px solid #bae6fd; }
+.summary-empty {
+  font-size: 13px;
+  color: var(--text-disabled);
+  font-style: italic;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-divider);
+}
+
+.btn-cancel {
+  padding: 8px 20px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: var(--bg-container);
+  color: var(--text-default);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: background 0.15s;
+}
+.btn-cancel:hover { background: var(--bg-hover); }
+
+.btn-primary {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  background: var(--cs-primary-color);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- Left Navigation Sidebar -->
+  <aside class="nav-sidebar">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="nav-logo-text">Admin</span>
+    </div>
+    <nav class="nav-items">
+      <div class="nav-section-label">Application</div>
+      <a class="nav-item nav-item-sub" href="#">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+        Apps
+      </a>
+      <a class="nav-item nav-item-sub" href="#">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
+        Pipeline
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+        Knowledge
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+        Event Center
+      </a>
+      <a class="nav-item active" href="#">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        MCP Manager
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
+        Integration Log
+      </a>
+    </nav>
+  </aside>
+
+  <!-- MCP Servers List Panel -->
+  <div class="servers-panel">
+    <div class="servers-header">
+      <span class="servers-title">MCP Servers</span>
+      <button class="btn-protocol">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+        Protocol
+      </button>
+      <button class="btn-add">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Add
+      </button>
+    </div>
+    <div class="servers-list">
+      <div class="server-item active" data-server="doraemon">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">Doraemon</div>
+          <div class="server-desc">Doraemon tools</div>
+        </div>
+        <div class="server-status">
+          <div class="server-status-dot"></div>
+          <span class="server-status-text">connected</span>
+        </div>
+      </div>
+      <div class="server-item" data-server="e">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">E</div>
+          <div class="server-desc">My awesome MCP service</div>
+        </div>
+        <div class="server-status">
+          <div class="server-status-dot"></div>
+          <span class="server-status-text">connected</span>
+        </div>
+      </div>
+      <div class="server-item" data-server="cs">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">CS</div>
+          <div class="server-desc">CS MCP Server</div>
+        </div>
+        <div class="server-status">
+          <div class="server-status-dot"></div>
+          <span class="server-status-text">connected</span>
+        </div>
+      </div>
+      <div class="server-item" data-server="agentable">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">Agentable</div>
+          <div class="server-desc">Manages tables with create, update, delete, and query operations.</div>
+        </div>
+        <div class="server-status">
+          <div class="server-status-dot"></div>
+          <span class="server-status-text">connected</span>
+        </div>
+      </div>
+      <div class="server-item" data-server="p">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">P</div>
+          <div class="server-desc">P</div>
+        </div>
+        <div class="server-status">
+          <div class="server-status-dot"></div>
+          <span class="server-status-text">connected</span>
+        </div>
+      </div>
+      <div class="server-item" data-server="i18n">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">I18n</div>
+          <div class="server-desc">I18n in D</div>
+        </div>
+        <div class="server-status">
+          <div class="server-status-dot"></div>
+          <span class="server-status-text">connected</span>
+        </div>
+      </div>
+      <div class="server-item" data-server="plan">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">Plan</div>
+          <div class="server-desc">Manager user plans</div>
+        </div>
+        <div class="server-status">
+          <div class="server-status-dot"></div>
+          <span class="server-status-text">connected</span>
+        </div>
+      </div>
+      <div class="server-item" data-server="misc">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">Misc</div>
+          <div class="server-desc">Misc</div>
+        </div>
+        <div class="server-status">
+          <div class="server-status-dot"></div>
+          <span class="server-status-text">connected</span>
+        </div>
+      </div>
+      <div class="server-item" data-server="cp">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">CP</div>
+          <div class="server-desc">Provides CP users with knowledge base retrieval capabilities</div>
+        </div>
+        <div class="server-status">
+          <div class="server-status-dot"></div>
+          <span class="server-status-text">connected</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <div class="content-topbar">
+      <div class="tab-group">
+        <div class="tab-item active" data-tab="configuration">Configuration</div>
+        <div class="tab-item" data-tab="capabilities">Capabilities</div>
+        <div class="tab-item" data-tab="json-view">JSON View</div>
+      </div>
+      <div class="topbar-right">
+        <a class="topbar-link" href="#">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
+          Try in Playground
+        </a>
+        <span class="version-badge">1.0</span>
+        <span class="status-badge">CONNECTED</span>
+        <button class="topbar-icon-btn" title="Add version">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        </button>
+        <button class="btn-disconnect">Disconnect</button>
+      </div>
+    </div>
+
+    <!-- Configuration Tab -->
+    <div class="content-body tab-content active" id="tab-configuration">
+      <div class="section-header">
+        <h2 class="section-title">
+          Server Information
+          <svg class="info-icon" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+        </h2>
+        <button class="refresh-btn">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>
+          Refresh
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          Name
+          <svg class="info-icon" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8.25h.008M12 11.25v4.5"/></svg>
+        </label>
+        <input class="form-input" type="text" value="Doraemon" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          Description
+          <svg class="info-icon" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8.25h.008M12 11.25v4.5"/></svg>
+        </label>
+        <textarea class="form-textarea" rows="2">Doraemon tools</textarea>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <h2 class="section-title" style="margin-bottom: 16px;">Transport Configuration</h2>
+
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <div class="transport-type">
+          <span class="type-tag">streamable_http</span>
+          <span class="type-desc">Supports both REST API and SSE streaming for real-time responses. This is the standard MCP transport protocol.</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Base URL</label>
+        <input class="form-input" type="text" value="http://localhost:8080/api/mcp/doraemon/v1" />
+        <div class="form-hint">Base URL without path. MCP endpoints will be appended automatically.</div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">
+          Headers
+          <span class="header-sublabel">Optional – For authentication</span>
+        </div>
+        <textarea class="form-textarea" rows="4" style="font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px;">{}</textarea>
+        <div class="common-headers">
+          <div class="common-headers-title">Common headers:</div>
+          <ul class="common-headers-list">
+            <li>Authorization: Bearer TOKEN – OAuth2/JWT authentication</li>
+            <li>X-API-Key: KEY – API key authentication</li>
+            <li>Content-Type: application/json – Usually set automatically</li>
+          </ul>
+        </div>
+      </div>
+
+      <button class="btn-delete">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+        Delete Current Version
+      </button>
+    </div>
+
+    <!-- Capabilities Tab -->
+    <div class="content-body tab-content" id="tab-capabilities">
+      <div class="capabilities-header">
+        <h2 class="capabilities-title">Server Capabilities</h2>
+        <svg class="info-icon" width="16" height="16" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="var(--text-disabled)"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8.25h.008M12 11.25v4.5"/></svg>
+      </div>
+
+      <div class="tools-section">
+        <div class="tools-section-header open">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+          <div class="tools-section-title">
+            Tools
+            <svg class="info-icon" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8.25h.008M12 11.25v4.5"/></svg>
+          </div>
+        </div>
+
+        <div class="tool-list">
+          <div class="tool-item" data-tool="cid_memo_get">
+            <span class="tool-name">cid_memo_get</span>
+            <div class="tool-badges">
+              <span class="badge badge-permission" style="cursor:pointer;" onclick="openPermission('cid_memo_get')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                Permission
+              </span>
+            </div>
+            <span class="tool-desc">Retrieve session-level memo content for the current conversation.</span>
+          </div>
+          <div class="tool-item" data-tool="cid_memo_set">
+            <span class="tool-name">cid_memo_set</span>
+            <div class="tool-badges">
+              <span class="badge badge-permission" style="cursor:pointer;" onclick="openPermission('cid_memo_set')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                Permission
+              </span>
+            </div>
+            <span class="tool-desc">Store session-level memo content for the current conversation. Overwrites any previous content.</span>
+          </div>
+          <div class="tool-item" data-tool="create_timed_reminder">
+            <span class="tool-name">create_timed_reminder</span>
+            <div class="tool-badges">
+              <span class="badge badge-permission" style="cursor:pointer;" onclick="openPermission('create_timed_reminder')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                Permission
+              </span>
+            </div>
+            <span class="tool-desc">Create a timed reminder (once or cron). WARNING: UTC only (execute_at|cron|start_time|end_time).</span>
+          </div>
+          <div class="tool-item" data-tool="delete_timed_reminder">
+            <span class="tool-name">delete_timed_reminder</span>
+            <div class="tool-badges">
+              <span class="badge badge-permission" style="cursor:pointer;" onclick="openPermission('delete_timed_reminder')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                Permission
+              </span>
+            </div>
+            <span class="tool-desc">Delete timed reminders. WARNING: This action is irreversible and cannot be undone.</span>
+          </div>
+          <div class="tool-item" data-tool="notify">
+            <span class="tool-name">notify</span>
+            <div class="tool-badges">
+              <span class="badge badge-permission" style="cursor:pointer;" onclick="openPermission('notify')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                Permission
+              </span>
+            </div>
+            <span class="tool-desc">Send D-system notifications to specified users. Use ONLY when explicitly asked to send D-system notifications.</span>
+          </div>
+          <div class="tool-item" data-tool="query_creative_rank_badge">
+            <span class="tool-name">query_creative_rank_badge</span>
+            <div class="tool-badges">
+              <span class="badge badge-permission" style="cursor:pointer;" onclick="openPermission('query_creative_rank_badge')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                Permission
+              </span>
+            </div>
+            <span class="tool-desc">Query creative rank badges. Returns: email, position_code, percentile badge.</span>
+          </div>
+          <div class="tool-item" data-tool="query_email_by_id">
+            <span class="tool-name">query_email_by_id</span>
+            <div class="tool-badges">
+              <span class="badge badge-permission" style="cursor:pointer;" onclick="openPermission('query_email_by_id')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                Permission
+              </span>
+            </div>
+            <span class="tool-desc">Query a specific enterprise email by id.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON View Tab -->
+    <div class="content-body tab-content" id="tab-json-view">
+      <h2 class="section-title" style="margin-bottom: 20px;">JSON Schema</h2>
+      <div class="json-view" id="jsonContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Permission Modal -->
+<div class="modal-overlay" id="permissionModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalToolName">Tool Permission — cid_memo_get</span>
+      <button class="modal-close" onclick="closePermission()">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Top-level tabs: Summary / Allowed Agents / Manage Permissions -->
+    <div class="perm-tabs" style="padding: 0 24px; margin-bottom: 0;">
+      <div class="perm-tab active" data-modal-tab="summary">Summary</div>
+      <div class="perm-tab" data-modal-tab="agents">Allowed Agents</div>
+      <div class="perm-tab" data-modal-tab="permissions">Manage Permissions</div>
+    </div>
+
+    <div class="modal-body">
+      <!-- Summary Tab -->
+      <div class="perm-tab-panel active" id="modal-panel-summary">
+        <div class="modal-section" id="summaryContent">
+          <div class="summary-group">
+            <div class="summary-label">Agents</div>
+            <div class="summary-tags" id="summary-agents"><span class="summary-tag agent">workflow_agent</span><span class="summary-tag agent">os_agent</span></div>
+          </div>
+          <div class="summary-group">
+            <div class="summary-label">Roles</div>
+            <div class="summary-tags" id="summary-roles"><span class="summary-tag role">cs_expert_responder</span><span class="summary-tag role">management_expert_responder</span></div>
+          </div>
+          <div class="summary-group">
+            <div class="summary-label">Users</div>
+            <div class="summary-tags" id="summary-users"><span class="summary-tag user">佐々木 龍一</span><span class="summary-tag user">林 幹夫</span></div>
+          </div>
+          <div class="summary-group">
+            <div class="summary-label">Departments</div>
+            <div class="summary-tags" id="summary-departments"><span class="summary-tag dept">tech</span></div>
+          </div>
+          <div class="summary-group">
+            <div class="summary-label">Positions</div>
+            <div class="summary-tags" id="summary-positions"><span class="summary-empty">No positions selected</span></div>
+          </div>
+          <div class="summary-group">
+            <div class="summary-label">Groups</div>
+            <div class="summary-tags" id="summary-groups"><span class="summary-tag group">crafters</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Allowed Agents Tab -->
+      <div class="perm-tab-panel" id="modal-panel-agents">
+        <div class="modal-section">
+          <div class="modal-section-desc">Select which Agents can invoke this tool.</div>
+          <div class="selected-bar" id="agentSelectedBar"><span class="selected-bar-label">Selected:</span></div>
+          <div class="checkbox-group" id="agentCheckboxes">
+            <label class="checkbox-tag selected" data-value="workflow_agent"><span class="check-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>workflow_agent</label>
+            <label class="checkbox-tag selected" data-value="os_agent"><span class="check-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>os_agent</label>
+            <label class="checkbox-tag" data-value="cs_expert"><span class="check-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>cs_expert</label>
+            <label class="checkbox-tag" data-value="bd_expert"><span class="check-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>bd_expert</label>
+            <label class="checkbox-tag" data-value="data_agent"><span class="check-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>data_agent</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manage Permissions Tab -->
+      <div class="perm-tab-panel" id="modal-panel-permissions">
+        <div class="modal-section">
+          <div class="modal-section-desc">Assign access by role, user, department, position, or group.</div>
+          <div class="selected-bar" id="permSelectedBar"><span class="selected-bar-label">Selected:</span></div>
+
+          <div class="perm-tabs" style="margin-bottom: 12px;">
+            <div class="perm-tab active" data-perm-tab="role">Role</div>
+            <div class="perm-tab" data-perm-tab="user">User</div>
+            <div class="perm-tab" data-perm-tab="department">Department</div>
+            <div class="perm-tab" data-perm-tab="position">Position</div>
+            <div class="perm-tab" data-perm-tab="group">Group</div>
+          </div>
+
+          <!-- Role Tab -->
+          <div class="perm-tab-panel active" id="perm-panel-role">
+            <div class="perm-search"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg><input type="text" placeholder="Search roles..." oninput="filterPermList(this, 'role')" /></div>
+            <div class="perm-list" id="perm-list-role">
+              <label class="perm-list-item checked" data-name="cs_expert_responder"><input type="checkbox" class="perm-cb" checked><div class="perm-avatar role">R</div><div class="perm-item-info"><div class="perm-item-name">cs_expert_responder</div></div></label>
+              <label class="perm-list-item" data-name="cs_expert_evaluator"><input type="checkbox" class="perm-cb"><div class="perm-avatar role">R</div><div class="perm-item-info"><div class="perm-item-name">cs_expert_evaluator</div></div></label>
+              <label class="perm-list-item" data-name="executive_expert_responder"><input type="checkbox" class="perm-cb"><div class="perm-avatar role">R</div><div class="perm-item-info"><div class="perm-item-name">executive_expert_responder</div></div></label>
+              <label class="perm-list-item" data-name="executive_expert_evaluator"><input type="checkbox" class="perm-cb"><div class="perm-avatar role">R</div><div class="perm-item-info"><div class="perm-item-name">executive_expert_evaluator</div></div></label>
+              <label class="perm-list-item" data-name="cp_expert_responder"><input type="checkbox" class="perm-cb"><div class="perm-avatar role">R</div><div class="perm-item-info"><div class="perm-item-name">cp_expert_responder</div></div></label>
+              <label class="perm-list-item" data-name="cp_expert_evaluator"><input type="checkbox" class="perm-cb"><div class="perm-avatar role">R</div><div class="perm-item-info"><div class="perm-item-name">cp_expert_evaluator</div></div></label>
+              <label class="perm-list-item checked" data-name="management_expert_responder"><input type="checkbox" class="perm-cb" checked><div class="perm-avatar role">R</div><div class="perm-item-info"><div class="perm-item-name">management_expert_responder</div></div></label>
+            </div>
+          </div>
+
+          <!-- User Tab -->
+          <div class="perm-tab-panel" id="perm-panel-user">
+            <div class="perm-search"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg><input type="text" placeholder="Search users..." oninput="filterPermList(this, 'user')" /></div>
+            <div class="perm-list" id="perm-list-user">
+              <label class="perm-list-item checked" data-name="佐々木 龍一 ceo"><input type="checkbox" class="perm-cb" checked><div class="perm-avatar user" style="background:#7c8ea6;">佐</div><div class="perm-item-info"><div class="perm-item-name">佐々木 龍一</div><div class="perm-item-email">ceo@ctw.inc</div></div></label>
+              <label class="perm-list-item checked" data-name="林 幹夫 hayashi"><input type="checkbox" class="perm-cb" checked><div class="perm-avatar user" style="background:#8b7ea6;">林</div><div class="perm-item-info"><div class="perm-item-name">林 幹夫</div><div class="perm-item-email">hayashi.m@ctw.inc</div></div></label>
+              <label class="perm-list-item" data-name="石渡 章博 ishiwata"><input type="checkbox" class="perm-cb"><div class="perm-avatar user" style="background:#6ea68b;">石</div><div class="perm-item-info"><div class="perm-item-name">石渡 章博</div><div class="perm-item-email">ishiwata.a@ctw.inc</div></div></label>
+              <label class="perm-list-item" data-name="大友 優衣子 otomo"><input type="checkbox" class="perm-cb"><div class="perm-avatar user" style="background:#a6856e;">大</div><div class="perm-item-info"><div class="perm-item-name">大友 優衣子</div><div class="perm-item-email">otomo.y@ctw.inc</div></div></label>
+              <label class="perm-list-item" data-name="李 怡菲 li.y"><input type="checkbox" class="perm-cb"><div class="perm-avatar user" style="background:#a67c8e;">李</div><div class="perm-item-info"><div class="perm-item-name">李 怡菲</div><div class="perm-item-email">li.y@ctw.inc</div></div></label>
+              <label class="perm-list-item" data-name="TONG HAIRIHAN tong"><input type="checkbox" class="perm-cb"><div class="perm-avatar user" style="background:#6e8ba6;">T</div><div class="perm-item-info"><div class="perm-item-name">TONG HAIRIHAN</div><div class="perm-item-email">tong@ctw.inc</div></div></label>
+              <label class="perm-list-item" data-name="岩谷 知樹 iwatani"><input type="checkbox" class="perm-cb"><div class="perm-avatar user" style="background:#7ca68e;">岩</div><div class="perm-item-info"><div class="perm-item-name">岩谷 知樹</div><div class="perm-item-email">iwatani.t@ctw.inc</div></div></label>
+              <label class="perm-list-item" data-name="有馬 千愛 kohama"><input type="checkbox" class="perm-cb"><div class="perm-avatar user" style="background:#a6946e;">有</div><div class="perm-item-info"><div class="perm-item-name">有馬 千愛</div><div class="perm-item-email">kohama.c@ctw.inc</div></div></label>
+              <label class="perm-list-item" data-name="岡村 一慶 okamura"><input type="checkbox" class="perm-cb"><div class="perm-avatar user" style="background:#8e7ca6;">岡</div><div class="perm-item-info"><div class="perm-item-name">岡村 一慶</div><div class="perm-item-email">okamura.k@ctw.inc</div></div></label>
+            </div>
+          </div>
+
+          <!-- Department Tab -->
+          <div class="perm-tab-panel" id="perm-panel-department">
+            <div class="perm-search"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg><input type="text" placeholder="Search departments..." oninput="filterPermList(this, 'department')" /></div>
+            <div class="perm-list" id="perm-list-department">
+              <label class="perm-list-item checked" data-name="tech"><input type="checkbox" class="perm-cb" checked><div class="perm-avatar dept"><svg viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">tech</div></div></label>
+              <label class="perm-list-item" data-name="creative"><input type="checkbox" class="perm-cb"><div class="perm-avatar dept"><svg viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">creative</div></div></label>
+              <label class="perm-list-item" data-name="marketing"><input type="checkbox" class="perm-cb"><div class="perm-avatar dept"><svg viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">marketing</div></div></label>
+              <label class="perm-list-item" data-name="operation"><input type="checkbox" class="perm-cb"><div class="perm-avatar dept"><svg viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">operation</div></div></label>
+              <label class="perm-list-item" data-name="management"><input type="checkbox" class="perm-cb"><div class="perm-avatar dept"><svg viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">management</div></div></label>
+              <label class="perm-list-item" data-name="executive"><input type="checkbox" class="perm-cb"><div class="perm-avatar dept"><svg viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">executive</div></div></label>
+            </div>
+          </div>
+
+          <!-- Position Tab -->
+          <div class="perm-tab-panel" id="perm-panel-position">
+            <div class="perm-search"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg><input type="text" placeholder="Search positions..." oninput="filterPermList(this, 'position')" /></div>
+            <div class="perm-list" id="perm-list-position">
+              <label class="perm-list-item" data-name="IR"><input type="checkbox" class="perm-cb"><div class="perm-avatar position"><svg viewBox="0 0 24 24"><path d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg></div><div class="perm-item-info"><div class="perm-item-name">IR</div></div></label>
+              <label class="perm-list-item" data-name="PR"><input type="checkbox" class="perm-cb"><div class="perm-avatar position"><svg viewBox="0 0 24 24"><path d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg></div><div class="perm-item-info"><div class="perm-item-name">PR</div></div></label>
+              <label class="perm-list-item" data-name="admin"><input type="checkbox" class="perm-cb"><div class="perm-avatar position"><svg viewBox="0 0 24 24"><path d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg></div><div class="perm-item-info"><div class="perm-item-name">admin</div></div></label>
+              <label class="perm-list-item" data-name="audit"><input type="checkbox" class="perm-cb"><div class="perm-avatar position"><svg viewBox="0 0 24 24"><path d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg></div><div class="perm-item-info"><div class="perm-item-name">audit</div></div></label>
+              <label class="perm-list-item" data-name="background"><input type="checkbox" class="perm-cb"><div class="perm-avatar position"><svg viewBox="0 0 24 24"><path d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg></div><div class="perm-item-info"><div class="perm-item-name">background</div></div></label>
+              <label class="perm-list-item" data-name="banner"><input type="checkbox" class="perm-cb"><div class="perm-avatar position"><svg viewBox="0 0 24 24"><path d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg></div><div class="perm-item-info"><div class="perm-item-name">banner</div></div></label>
+            </div>
+          </div>
+
+          <!-- Group Tab -->
+          <div class="perm-tab-panel" id="perm-panel-group">
+            <div class="perm-search"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg><input type="text" placeholder="Search groups..." oninput="filterPermList(this, 'group')" /></div>
+            <div class="perm-list" id="perm-list-group">
+              <label class="perm-list-item" data-name="corp comms"><input type="checkbox" class="perm-cb"><div class="perm-avatar group"><svg viewBox="0 0 24 24"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">corp comms</div></div></label>
+              <label class="perm-list-item checked" data-name="crafters"><input type="checkbox" class="perm-cb" checked><div class="perm-avatar group"><svg viewBox="0 0 24 24"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">crafters</div></div></label>
+              <label class="perm-list-item" data-name="data"><input type="checkbox" class="perm-cb"><div class="perm-avatar group"><svg viewBox="0 0 24 24"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">data</div></div></label>
+              <label class="perm-list-item" data-name="efficiency"><input type="checkbox" class="perm-cb"><div class="perm-avatar group"><svg viewBox="0 0 24 24"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">efficiency</div></div></label>
+              <label class="perm-list-item" data-name="cloud"><input type="checkbox" class="perm-cb"><div class="perm-avatar group"><svg viewBox="0 0 24 24"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">cloud</div></div></label>
+              <label class="perm-list-item" data-name="seo"><input type="checkbox" class="perm-cb"><div class="perm-avatar group"><svg viewBox="0 0 24 24"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">seo</div></div></label>
+              <label class="perm-list-item" data-name="performance"><input type="checkbox" class="perm-cb"><div class="perm-avatar group"><svg viewBox="0 0 24 24"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">performance</div></div></label>
+              <label class="perm-list-item" data-name="planner"><input type="checkbox" class="perm-cb"><div class="perm-avatar group"><svg viewBox="0 0 24 24"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">planner</div></div></label>
+              <label class="perm-list-item" data-name="finance"><input type="checkbox" class="perm-cb"><div class="perm-avatar group"><svg viewBox="0 0 24 24"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div><div class="perm-item-info"><div class="perm-item-name">finance</div></div></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closePermission()">Cancel</button>
+      <button class="btn-primary" onclick="closePermission()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const jsonData = {
+  name: "Doraemon",
+  description: "Doraemon tools",
+  scope: "Doraemon",
+  version: "1.0",
+  type: "TOOL_EXECUTION",
+  status: {
+    is_connected: true,
+    is_healthy: true
+  },
+  transport: "streamable_http",
+  capabilities: {
+    tools: [
+      {
+        _meta: { must_confirm: false },
+        name: "cid_memo_get",
+        description: "Retrieve session-level memo content for the current conversation.",
+        inputSchema: {
+          properties: {
+            cid: { description: "conversation ID", type: "string" }
+          },
+          required: ["cid"],
+          type: "object"
+        }
+      },
+      {
+        _meta: { must_confirm: false },
+        name: "cid_memo_set",
+        description: "Store session-level memo content for the current conversation. Overwrites any previous content.",
+        inputSchema: {
+          properties: {
+            cid: { description: "conversation ID", type: "string" },
+            content: { description: "memo content to store", type: "string" }
+          },
+          required: ["cid", "content"],
+          type: "object"
+        }
+      },
+      {
+        _meta: { must_confirm: false },
+        name: "create_timed_reminder",
+        description: "Create a timed reminder (once or cron). WARNING: UTC only.",
+        inputSchema: {
+          properties: {
+            title: { description: "reminder title", type: "string" },
+            execute_at: { description: "UTC datetime", type: "string" },
+            cron: { description: "cron expression", type: "string" }
+          },
+          required: ["title"],
+          type: "object"
+        }
+      },
+      {
+        _meta: { must_confirm: true },
+        name: "delete_timed_reminder",
+        description: "Delete timed reminders. WARNING: This action is irreversible.",
+        inputSchema: {
+          properties: {
+            id: { description: "reminder ID", type: "string" }
+          },
+          required: ["id"],
+          type: "object"
+        }
+      },
+      {
+        _meta: { must_confirm: false },
+        name: "notify",
+        description: "Send D-system notifications to specified users.",
+        inputSchema: {
+          properties: {
+            user_ids: { description: "target user IDs", type: "array", items: { type: "string" } },
+            message: { description: "notification message", type: "string" }
+          },
+          required: ["user_ids", "message"],
+          type: "object"
+        }
+      },
+      {
+        _meta: { must_confirm: false },
+        name: "query_creative_rank_badge",
+        description: "Query creative rank badges. Returns: email, position_code, percentile badge.",
+        inputSchema: {
+          properties: {
+            email: { description: "user email", type: "string" }
+          },
+          required: ["email"],
+          type: "object"
+        }
+      },
+      {
+        _meta: { must_confirm: false },
+        name: "query_email_by_id",
+        description: "Query a specific enterprise email by id.",
+        inputSchema: {
+          properties: {
+            id: { description: "email ID", type: "string" }
+          },
+          required: ["id"],
+          type: "object"
+        }
+      }
+    ]
+  }
+};
+
+function syntaxHighlight(json) {
+  const str = JSON.stringify(json, null, 4);
+  return str.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+    let cls = 'json-string';
+    if (/^"/.test(match)) {
+      if (/:$/.test(match)) {
+        cls = 'json-key';
+        return '<span class="' + cls + '">' + match.slice(0, -1) + '</span>:';
+      }
+    } else if (/true|false/.test(match)) {
+      cls = 'json-bool';
+    } else if (/null/.test(match)) {
+      cls = 'json-null';
+    }
+    return '<span class="' + cls + '">' + match + '</span>';
+  });
+}
+
+document.getElementById('jsonContent').innerHTML = syntaxHighlight(jsonData);
+
+// Tab switching
+document.querySelectorAll('.tab-item').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Server item selection
+document.querySelectorAll('.server-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.server-item').forEach(s => s.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+
+// Checkbox tag toggle
+document.querySelectorAll('.checkbox-tag').forEach(tag => {
+  tag.addEventListener('click', () => {
+    tag.classList.toggle('selected');
+    updateAgentSelectedBar();
+    updateSummary();
+  });
+});
+
+// Tool toggle
+document.querySelectorAll('.tool-toggle').forEach(toggle => {
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggle.classList.toggle('active');
+  });
+});
+
+// Permission modal
+function openPermission(toolName) {
+  document.getElementById('modalToolName').textContent = 'Tool Permission — ' + toolName;
+  document.getElementById('permissionModal').classList.add('open');
+  switchModalTab('summary');
+  updateAgentSelectedBar();
+  updatePermSelectedBar();
+  updateSummary();
+}
+
+function closePermission() {
+  document.getElementById('permissionModal').classList.remove('open');
+}
+
+document.getElementById('permissionModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closePermission();
+});
+
+// Top-level modal tabs (Summary / Agents / Permissions)
+function switchModalTab(tabName) {
+  document.querySelectorAll('[data-modal-tab]').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('[id^="modal-panel-"]').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-modal-tab="' + tabName + '"]').classList.add('active');
+  document.getElementById('modal-panel-' + tabName).classList.add('active');
+  if (tabName === 'summary') updateSummary();
+}
+document.querySelectorAll('[data-modal-tab]').forEach(tab => {
+  tab.addEventListener('click', () => switchModalTab(tab.dataset.modalTab));
+});
+
+// Sub-level permission tabs (Role / User / Dept / Position / Group)
+const permPanel = document.getElementById('modal-panel-permissions');
+permPanel.querySelectorAll('.perm-tab[data-perm-tab]').forEach(tab => {
+  tab.addEventListener('click', () => {
+    permPanel.querySelectorAll('.perm-tab[data-perm-tab]').forEach(t => t.classList.remove('active'));
+    permPanel.querySelectorAll('.perm-tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('perm-panel-' + tab.dataset.permTab).classList.add('active');
+  });
+});
+
+// Checkbox list item toggle
+document.querySelectorAll('.perm-list-item .perm-cb').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.closest('.perm-list-item').classList.toggle('checked', cb.checked);
+    updatePermSelectedBar();
+    updateSummary();
+  });
+});
+
+// Search filter for permission lists
+function filterPermList(input, type) {
+  const query = input.value.toLowerCase();
+  const list = document.getElementById('perm-list-' + type);
+  list.querySelectorAll('.perm-list-item').forEach(item => {
+    const name = (item.dataset.name || '').toLowerCase();
+    item.style.display = name.includes(query) ? '' : 'none';
+  });
+}
+
+// Selected bar updates
+function updateAgentSelectedBar() {
+  const bar = document.getElementById('agentSelectedBar');
+  const tags = [];
+  document.querySelectorAll('#agentCheckboxes .checkbox-tag.selected').forEach(tag => {
+    tags.push(tag.dataset.value);
+  });
+  bar.innerHTML = '<span class="selected-bar-label">Selected:</span>';
+  if (tags.length === 0) {
+    bar.innerHTML += '<span style="font-size:12px;color:var(--text-disabled);font-style:italic;">None</span>';
+  } else {
+    tags.forEach(t => {
+      bar.innerHTML += '<span class="selected-bar-tag">' + t + '<svg class="remove-tag" viewBox="0 0 24 24" stroke-width="2" onclick="removeAgent(\'' + t + '\')"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></span>';
+    });
+  }
+}
+
+function removeAgent(val) {
+  const tag = document.querySelector('#agentCheckboxes .checkbox-tag[data-value="' + val + '"]');
+  if (tag) { tag.classList.remove('selected'); updateAgentSelectedBar(); updateSummary(); }
+}
+
+function updatePermSelectedBar() {
+  const bar = document.getElementById('permSelectedBar');
+  const items = [];
+  document.querySelectorAll('#modal-panel-permissions .perm-list-item.checked').forEach(item => {
+    const name = item.querySelector('.perm-item-name').textContent;
+    items.push(name);
+  });
+  bar.innerHTML = '<span class="selected-bar-label">Selected:</span>';
+  if (items.length === 0) {
+    bar.innerHTML += '<span style="font-size:12px;color:var(--text-disabled);font-style:italic;">None</span>';
+  } else {
+    items.forEach(n => {
+      bar.innerHTML += '<span class="selected-bar-tag">' + n + '</span>';
+    });
+  }
+}
+
+// Summary tab
+function updateSummary() {
+  const getSelected = (listId) => {
+    const names = [];
+    document.querySelectorAll('#perm-list-' + listId + ' .perm-list-item.checked .perm-item-name').forEach(el => names.push(el.textContent));
+    return names;
+  };
+  const agents = [];
+  document.querySelectorAll('#agentCheckboxes .checkbox-tag.selected').forEach(t => agents.push(t.dataset.value));
+
+  const data = {
+    agents: { items: agents, cls: 'agent' },
+    roles: { items: getSelected('role'), cls: 'role' },
+    users: { items: getSelected('user'), cls: 'user' },
+    departments: { items: getSelected('department'), cls: 'dept' },
+    positions: { items: getSelected('position'), cls: 'position' },
+    groups: { items: getSelected('group'), cls: 'group' }
+  };
+
+  for (const [key, val] of Object.entries(data)) {
+    const el = document.getElementById('summary-' + key);
+    if (val.items.length === 0) {
+      el.innerHTML = '<span class="summary-empty">No ' + key + ' selected</span>';
+    } else {
+      el.innerHTML = val.items.map(i => '<span class="summary-tag ' + val.cls + '">' + i + '</span>').join('');
+    }
+  }
+}
+
+updateAgentSelectedBar();
+updatePermSelectedBar();
+</script>
+</body>
+</html>
