@@ -254,6 +254,95 @@ body {
 .ac-type { font-size: 11px; color: var(--text-disabled); }
 .ac-hint { font-size: 10px; color: var(--text-disabled); padding: 4px 12px; }
 
+/* ===== Scope tag in input ===== */
+.scope-bar {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-divider);
+  background: var(--bg-container);
+  flex-shrink: 0;
+}
+.scope-bar.active { display: flex; }
+.scope-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cs-primary-color);
+  font-family: var(--font-mono);
+}
+.scope-tag .scope-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cs-primary-color); flex-shrink: 0; }
+.scope-server { font-size: 12px; color: var(--text-disabled); }
+.scope-entities { font-size: 12px; color: var(--text-disabled); margin-left: 4px; }
+.scope-clear {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--cs-primary-color);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font-family);
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.scope-clear:hover { background: #eff6ff; }
+
+/* Scope empty state in chat */
+.scope-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 40px;
+}
+.scope-empty-title { font-size: 16px; font-weight: 600; color: var(--text-default); }
+.scope-empty-desc { font-size: 13px; color: var(--text-secondary); max-width: 320px; line-height: 20px; }
+.scope-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 4px; }
+.scope-chip {
+  padding: 6px 16px;
+  border: 1px solid var(--border-divider);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: var(--bg-container);
+  font-family: var(--font-family);
+  transition: all 0.15s;
+}
+.scope-chip:hover { border-color: var(--cs-primary-color); color: var(--cs-primary-color); background: #f5f8ff; }
+
+/* Tool left panel: click-to-scope */
+.tl-item { position: relative; }
+.tl-item.scoped { background: #eff6ff; border-left: 3px solid var(--cs-primary-color); }
+.tl-scope-btn {
+  display: none;
+  position: absolute;
+  right: 8px; top: 50%;
+  transform: translateY(-50%);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--cs-primary-color);
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  cursor: pointer;
+  font-family: var(--font-family);
+  white-space: nowrap;
+}
+.tl-item:hover .tl-scope-btn { display: block; }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -320,25 +409,35 @@ body {
     </div>
 
     <div class="two-pane">
-      <!-- Left pane: Tools -->
+      <!-- Left pane: Tools grouped by server -->
       <div class="pane-tools">
         <div class="pane-tools-header">
-          <span class="pane-tools-title">Tools</span>
-          <span class="tool-count" id="toolCount">7 tools</span>
+          <span class="pane-tools-title">Permissions</span>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--green-base);"></span><span style="font-size:11px;color:var(--text-disabled);">Doraemon</span>
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--green-base);margin-left:6px;"></span><span style="font-size:11px;color:var(--text-disabled);">CS</span>
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--green-base);margin-left:6px;"></span><span style="font-size:11px;color:var(--text-disabled);">Agentable</span>
+          </div>
         </div>
         <div class="pane-tools-list" id="toolList">
-          <label class="tl-item selected"><input type="checkbox" class="tl-cb" checked data-tool="cid_memo_get"><span class="tl-name">cid_memo_get</span><span class="tl-chips"><span class="tl-chip a">2 agents</span><span class="tl-chip r">1 role</span></span></label>
-          <label class="tl-item selected"><input type="checkbox" class="tl-cb" checked data-tool="cid_memo_set"><span class="tl-name">cid_memo_set</span><span class="tl-chips"><span class="tl-chip a">2 agents</span><span class="tl-chip r">1 role</span></span></label>
-          <label class="tl-item"><input type="checkbox" class="tl-cb" data-tool="create_timed_reminder"><span class="tl-name">create_timed_reminder</span><span class="tl-chips"><span class="tl-chip a">1 agent</span></span></label>
-          <label class="tl-item"><input type="checkbox" class="tl-cb" data-tool="delete_timed_reminder"><span class="tl-name">delete_timed_reminder</span><span class="tl-chips"><span class="tl-chip a">1 agent</span></span></label>
-          <label class="tl-item"><input type="checkbox" class="tl-cb" data-tool="notify"><span class="tl-name">notify</span><span class="tl-chips"><span class="tl-chip a">3 agents</span><span class="tl-chip r">2 roles</span><span class="tl-chip more">+3</span></span></label>
-          <label class="tl-item"><input type="checkbox" class="tl-cb" data-tool="query_creative_rank_badge"><span class="tl-name">query_creative_rank_badge</span><span class="tl-chips"><span class="tl-chip a">1 agent</span></span></label>
-          <label class="tl-item"><input type="checkbox" class="tl-cb" data-tool="query_email_by_id"><span class="tl-name">query_email_by_id</span><span class="tl-chips"><span class="tl-chip a">2 agents</span></span></label>
-        </div>
-        <div class="select-actions">
-          <span class="select-info" id="selectInfo"><strong>2</strong> tools selected</span>
-          <button class="btn-sm" onclick="selectAll()">Select All</button>
-          <button class="btn-sm" onclick="selectNone()">Clear</button>
+          <div style="font-size:12px;font-weight:600;color:var(--text-default);padding:12px 12px 4px;display:flex;align-items:center;justify-content:space-between;">Doraemon<span class="tool-count">3/6</span></div>
+          <div class="tl-item" data-tool="cid_memo_get" data-server="doraemon" data-entities="3" onclick="scopeTool(this)"><span class="tl-name">cid_memo_get</span><span class="tl-chips"><span class="tl-chip a">3</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="cid_memo_set" data-server="doraemon" data-entities="3" onclick="scopeTool(this)"><span class="tl-name">cid_memo_set</span><span class="tl-chips"><span class="tl-chip a">3</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="create_timed_reminder" data-server="doraemon" data-entities="5" onclick="scopeTool(this)"><span class="tl-name">create_timed_reminder</span><span class="tl-chips"><span class="tl-chip a">5</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="notify" data-server="doraemon" data-entities="4" onclick="scopeTool(this)"><span class="tl-name">notify</span><span class="tl-chips"><span class="tl-chip a">4</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="query_creative_rank_badge" data-server="doraemon" data-entities="0" onclick="scopeTool(this)"><span class="tl-name">query_creative_rank_b...</span><span class="tl-chips"><span class="tl-chip more">0</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="query_email_by_id" data-server="doraemon" data-entities="2" onclick="scopeTool(this)"><span class="tl-name">query_email_by_id</span><span class="tl-chips"><span class="tl-chip a">2</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+
+          <div style="font-size:12px;font-weight:600;color:var(--text-default);padding:16px 12px 4px;display:flex;align-items:center;justify-content:space-between;">CS<span class="tool-count">2/4</span></div>
+          <div class="tl-item" data-tool="cs_query" data-server="cs" data-entities="3" onclick="scopeTool(this)"><span class="tl-name">cs_query</span><span class="tl-chips"><span class="tl-chip a">3</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="cs_respond" data-server="cs" data-entities="3" onclick="scopeTool(this)"><span class="tl-name">cs_respond</span><span class="tl-chips"><span class="tl-chip a">3</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="cs_escalate" data-server="cs" data-entities="0" onclick="scopeTool(this)"><span class="tl-name" style="color:var(--text-disabled);">cs_escalate</span><span class="tl-chips"><span class="tl-chip more">0</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="cs_satisfaction" data-server="cs" data-entities="0" onclick="scopeTool(this)"><span class="tl-name" style="color:var(--text-disabled);">cs_satisfaction</span><span class="tl-chips"><span class="tl-chip more">0</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+
+          <div style="font-size:12px;font-weight:600;color:var(--text-default);padding:16px 12px 4px;display:flex;align-items:center;justify-content:space-between;">Agentable<span class="tool-count">0/3</span></div>
+          <div class="tl-item" data-tool="manage_tables" data-server="agentable" data-entities="0" onclick="scopeTool(this)"><span class="tl-name" style="color:var(--text-disabled);">manage_tables</span><span class="tl-chips"><span class="tl-chip more">0</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="query_tables" data-server="agentable" data-entities="0" onclick="scopeTool(this)"><span class="tl-name" style="color:var(--text-disabled);">query_tables</span><span class="tl-chips"><span class="tl-chip more">0</span></span><span class="tl-scope-btn">Scope ↵</span></div>
+          <div class="tl-item" data-tool="sync_tables" data-server="agentable" data-entities="0" onclick="scopeTool(this)"><span class="tl-name" style="color:var(--text-disabled);">sync_tables</span><span class="tl-chips"><span class="tl-chip more">0</span></span><span class="tl-scope-btn">Scope ↵</span></div>
         </div>
       </div>
 
@@ -348,63 +447,44 @@ body {
           <div class="chat-header-icon"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
           <div class="chat-header-text">
             <h4>Permission Assistant</h4>
-            <p>Configure permissions for selected tools via chat</p>
-          </div>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-          <!-- Welcome -->
-          <div class="msg msg-system">
-            <div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-            <div><div class="msg-bubble">
-              Hi! I'm your permission assistant for <strong>Doraemon</strong> server. You selected <strong>2 tools</strong>. Try:
-              <div style="margin-top:8px; display:flex; flex-direction:column; gap:4px;">
-                <code>/agent</code> — browse &amp; select agents
-                <code>/role</code> — browse &amp; select roles
-                <code>/user</code> — browse &amp; select users
-                <code>/dept</code> — browse departments
-              </div>
-              <div style="margin-top:8px; font-size:13px; color:var(--text-secondary);">Or just describe what you want in natural language.</div>
-            </div></div>
-          </div>
-
-          <!-- Demo: batch operation -->
-          <div class="msg msg-user"><div class="msg-bubble">给选中的 2 个 tool 都加上 workflow_agent 和 os_agent</div></div>
-          <div class="msg msg-system">
-            <div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-            <div><div class="msg-bubble">
-              已为 <strong>cid_memo_get</strong>、<strong>cid_memo_set</strong> 添加 agents:
-              <div class="diff-card">
-                <div class="diff-card-header"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Batch: 2 tools &times; 2 agents</div>
-                <div class="diff-card-body">
-                  <div class="diff-line diff-add">agent: workflow_agent → cid_memo_get, cid_memo_set</div>
-                  <div class="diff-line diff-add">agent: os_agent → cid_memo_get, cid_memo_set</div>
-                </div>
-              </div>
-              <div class="applied-badge"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Applied</div>
-            </div></div>
-          </div>
-
-          <!-- Demo: slash command result -->
-          <div class="msg msg-user"><div class="msg-bubble">添加 role: cs_expert_responder</div></div>
-          <div class="msg msg-system">
-            <div class="msg-avatar"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-            <div><div class="msg-bubble">
-              确认为选中的 2 个 tool 添加角色？
-              <div class="diff-card">
-                <div class="diff-card-header"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Roles — add to 2 tools</div>
-                <div class="diff-card-body">
-                  <div class="diff-line diff-add">role: cs_expert_responder</div>
-                </div>
-                <div class="diff-card-footer">
-                  <button class="diff-btn diff-btn-confirm" onclick="confirmChange(this)">Confirm</button>
-                  <button class="diff-btn diff-btn-cancel" onclick="cancelChange(this)">Cancel</button>
-                </div>
-              </div>
-            </div></div>
+            <p>Click a tool on the left to scope, or type globally</p>
           </div>
         </div>
 
-        <!-- Chat input -->
+        <!-- Scope empty state (visible by default) -->
+        <div class="scope-empty" id="scopeEmpty">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-base);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-disabled)" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg></div>
+          <div class="scope-empty-title">Select a tool to begin</div>
+          <div class="scope-empty-desc">Click any tool from the left panel to scope your commands. Or type below to apply changes globally.</div>
+          <div class="scope-chips" id="suggestChips">
+            <span class="scope-chip" onclick="fillInput('Add bd_expert')">Add bd_expert</span>
+            <span class="scope-chip" onclick="fillInput('Grant tech dept')">Grant tech dept</span>
+            <span class="scope-chip" onclick="fillInput('Remove os_agent')">Remove os_agent</span>
+          </div>
+        </div>
+
+        <!-- Scoped editing state (hidden by default) -->
+        <div class="scope-empty" id="scopedState" style="display:none;">
+          <div style="width:56px;height:56px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--cs-primary-color)" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></div>
+          <div class="scope-empty-title" id="scopedTitle">Editing query_creative_rank_badge</div>
+          <div class="scope-empty-desc">Commands apply to this tool. Clear the scope above to go global.</div>
+          <div class="scope-chips" id="scopedChips">
+            <span class="scope-chip" onclick="fillInput('Add bd_expert')">Add bd_expert</span>
+            <span class="scope-chip" onclick="fillInput('Grant tech dept')">Grant tech dept</span>
+            <span class="scope-chip" onclick="fillInput('Remove os_agent')">Remove os_agent</span>
+          </div>
+        </div>
+
+        <!-- Chat messages (hidden initially, shown after first message) -->
+        <div class="chat-messages" id="chatMessages" style="display:none;"></div>
+
+        <!-- Scope bar + Chat input -->
+        <div class="scope-bar" id="scopeBar">
+          <span class="scope-tag"><span class="scope-dot"></span><span id="scopeToolName">query_creative_rank_badge</span></span>
+          <span class="scope-server" id="scopeServer">on doraemon</span>
+          <span class="scope-entities" id="scopeEntities">· 0 entities</span>
+          <button class="scope-clear" onclick="clearScope()">— clear</button>
+        </div>
         <div class="chat-input-area">
           <!-- Slash command popover -->
           <div class="slash-popover" id="slashPopover">
@@ -424,7 +504,7 @@ body {
 
           <div class="chat-input-row">
             <div class="chat-input-wrap">
-              <textarea class="chat-input" id="chatInput" rows="1" placeholder="Type a command or describe permission changes..." oninput="onInput()" onkeydown="handleKeyDown(event)"></textarea>
+              <textarea class="chat-input" id="chatInput" rows="1" placeholder="Describe permission changes or type / for commands..." oninput="onInput()" onkeydown="handleKeyDown(event)"></textarea>
             </div>
             <button class="chat-send" onclick="sendMessage()"><svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg></button>
           </div>
@@ -465,28 +545,52 @@ document.querySelectorAll('.server-item').forEach(item => {
   });
 });
 
-// ===== Tool selection =====
-function updateToolSelection() {
-  document.querySelectorAll('.tl-item').forEach(item => {
-    const cb = item.querySelector('.tl-cb');
-    item.classList.toggle('selected', cb.checked);
-  });
-  const count = document.querySelectorAll('.tl-cb:checked').length;
-  document.getElementById('selectInfo').innerHTML = '<strong>' + count + '</strong> tool' + (count !== 1 ? 's' : '') + ' selected';
-}
-document.querySelectorAll('.tl-cb').forEach(cb => cb.addEventListener('change', updateToolSelection));
+// ===== Scope management =====
+let currentScope = null;
 
-function selectAll() {
-  document.querySelectorAll('.tl-cb').forEach(cb => { cb.checked = true; });
-  updateToolSelection();
+function scopeTool(el) {
+  const toolName = el.dataset.tool;
+  const server = el.dataset.server;
+  const entities = el.dataset.entities || '0';
+
+  document.querySelectorAll('.tl-item').forEach(t => t.classList.remove('scoped'));
+  el.classList.add('scoped');
+
+  currentScope = { tool: toolName, server: server, entities: entities };
+  document.getElementById('scopeBar').classList.add('active');
+  document.getElementById('scopeToolName').textContent = toolName;
+  document.getElementById('scopeServer').textContent = 'on ' + server;
+  document.getElementById('scopeEntities').textContent = '· ' + entities + ' entities';
+  document.getElementById('chatInput').placeholder = 'Command scoped to ' + toolName + '...';
+
+  document.getElementById('scopeEmpty').style.display = 'none';
+  document.getElementById('scopedState').style.display = 'flex';
+  document.getElementById('scopedTitle').textContent = 'Editing ' + toolName;
+  document.getElementById('chatMessages').style.display = 'none';
+
+  document.getElementById('chatInput').focus();
 }
-function selectNone() {
-  document.querySelectorAll('.tl-cb').forEach(cb => { cb.checked = false; });
-  updateToolSelection();
+
+function clearScope() {
+  currentScope = null;
+  document.querySelectorAll('.tl-item').forEach(t => t.classList.remove('scoped'));
+  document.getElementById('scopeBar').classList.remove('active');
+  document.getElementById('chatInput').placeholder = 'Describe permission changes or type / for commands...';
+
+  if (document.getElementById('chatMessages').children.length > 0) {
+    document.getElementById('scopeEmpty').style.display = 'none';
+    document.getElementById('scopedState').style.display = 'none';
+    document.getElementById('chatMessages').style.display = 'flex';
+  } else {
+    document.getElementById('scopeEmpty').style.display = 'flex';
+    document.getElementById('scopedState').style.display = 'none';
+    document.getElementById('chatMessages').style.display = 'none';
+  }
 }
 
 function getSelectedTools() {
-  return Array.from(document.querySelectorAll('.tl-cb:checked')).map(cb => cb.dataset.tool);
+  if (currentScope) return [currentScope.tool];
+  return ['(global)'];
 }
 
 // ===== Chat =====
@@ -505,13 +609,11 @@ function sendMessage() {
   closeSlash();
   closeAC();
 
-  const tools = getSelectedTools();
-  if (tools.length === 0) {
-    addMsg('user', text);
-    addMsg('system', 'Please select at least one tool from the left panel first.');
-    return;
-  }
+  document.getElementById('scopeEmpty').style.display = 'none';
+  document.getElementById('scopedState').style.display = 'none';
+  document.getElementById('chatMessages').style.display = 'flex';
 
+  const tools = getSelectedTools();
   addMsg('user', text);
   showTyping();
   setTimeout(() => { hideTyping(); simulateResponse(text, tools); }, 900);
@@ -542,29 +644,34 @@ function hideTyping() { const el = document.getElementById('typingInd'); if (el)
 
 function simulateResponse(text, tools) {
   const lower = text.toLowerCase();
-  const toolStr = tools.map(t => '<code>' + t + '</code>').join(', ');
-  const count = tools.length;
+  const isScoped = currentScope !== null;
+  const target = isScoped ? '<code>' + currentScope.tool + '</code>' : '<strong>all tools (global)</strong>';
+  const targetLabel = isScoped ? currentScope.tool : 'global';
   let diffLines = '';
   let header = '';
 
   if (lower.includes('agent') || lower.startsWith('/agent')) {
     const name = text.replace(/.*[:：]\s*/, '').replace(/^\/agent\s*/, '').trim() || 'cs_expert';
-    header = 'Agents — add to ' + count + ' tools';
-    diffLines = '<div class="diff-line diff-add">agent: ' + escapeHtml(name) + ' → ' + tools.join(', ') + '</div>';
+    header = 'Agents → ' + targetLabel;
+    diffLines = '<div class="diff-line diff-add">agent: ' + escapeHtml(name) + '</div>';
   } else if (lower.includes('role') || lower.startsWith('/role')) {
     const name = text.replace(/.*[:：]\s*/, '').replace(/^\/role\s*/, '').trim() || 'cp_expert_evaluator';
-    header = 'Roles — add to ' + count + ' tools';
+    header = 'Roles → ' + targetLabel;
     diffLines = '<div class="diff-line diff-add">role: ' + escapeHtml(name) + '</div>';
   } else if (lower.includes('移除') || lower.includes('remove') || lower.includes('删除')) {
     const name = text.replace(/(移除|remove|删除)\s*/i, '').trim() || 'bd_expert';
-    header = 'Remove from ' + count + ' tools';
+    header = 'Remove → ' + targetLabel;
     diffLines = '<div class="diff-line diff-remove">' + escapeHtml(name) + '</div>';
+  } else if (lower.includes('grant') || lower.includes('dept') || lower.includes('部门')) {
+    const name = text.replace(/(grant|添加|dept|部门)\s*/gi, '').trim() || 'tech';
+    header = 'Department → ' + targetLabel;
+    diffLines = '<div class="diff-line diff-add">dept: ' + escapeHtml(name) + '</div>';
   } else {
-    header = 'Changes — ' + count + ' tools';
+    header = 'Changes → ' + targetLabel;
     diffLines = '<div class="diff-line diff-add">' + escapeHtml(text) + '</div>';
   }
 
-  const html = '确认对 ' + toolStr + ' 执行以下变更？'
+  const html = '确认对 ' + target + ' 执行以下变更？'
     + '<div class="diff-card"><div class="diff-card-header"><svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>' + header + '</div>'
     + '<div class="diff-card-body">' + diffLines + '</div>'
     + '<div class="diff-card-footer"><button class="diff-btn diff-btn-confirm" onclick="confirmChange(this)">Confirm</button><button class="diff-btn diff-btn-cancel" onclick="cancelChange(this)">Cancel</button></div></div>';
@@ -589,6 +696,12 @@ function cancelChange(btn) {
   t.className = 'cancelled-text';
   t.textContent = 'Cancelled';
   bubble.appendChild(t);
+}
+
+function fillInput(text) {
+  const input = document.getElementById('chatInput');
+  input.value = text;
+  input.focus();
 }
 
 // ===== Slash Commands =====
