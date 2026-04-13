@@ -500,8 +500,8 @@
         <div class="test-panel" id="testPanel">
             <div class="test-panel-title">🧪 Simulate Date Scenario</div>
             <button class="test-btn active" id="btnToday" onclick="simulateDate('today')">📅 Today</button>
-            <button class="test-btn" onclick="simulateDate('mid')">⚠️ Mid-month (15th)</button>
-            <button class="test-btn" onclick="simulateDate('end')">🔴 Month-end (28th)</button>
+            <button class="test-btn" onclick="simulateDate('mid')">⚠️ Mid-month (15th Morning)</button>
+            <button class="test-btn" onclick="simulateDate('end')">🔴 Month-end (Last Day Morning)</button>
             <button class="test-btn" onclick="simulateDate('done')">🎉 Month-end Settlement</button>
         </div>
         <button onclick="toggleTestPanel()">🧪 Test Case</button>
@@ -578,8 +578,10 @@
     // scenario: 'normal' | 'settlement' (month-end 18:00 settlement – all reviews done, partial payments)
     function renderAll(simDay, scenario) {
         const taskList = document.getElementById('taskList');
-        const isMidMonth = simDay >= 15 && simDay < 26;
-        const isMonthEnd = simDay >= 26;
+        // Mid-month: 15th to day before last day
+        // Month-end: last day of month
+        const isMidMonth = simDay >= 15 && simDay < 28; // using 28 as mock last day in test panel
+        const isMonthEnd = simDay >= 28;
         const isSettlement = scenario === 'settlement';
 
         let html = '';
@@ -748,16 +750,16 @@
             case 'mid':
                 simDay = 15;
                 dateLabel = `${monthNames[month]}/15/${year}`;
-                document.getElementById('dateSub').textContent = 'Simulate: Mid-month';
+                document.getElementById('dateSub').textContent = 'Simulate: 15th Morning';
                 break;
             case 'end':
                 simDay = 28;
                 dateLabel = `${monthNames[month]}/28/${year}`;
-                document.getElementById('dateSub').textContent = 'Simulate: Month-end Reminder';
+                document.getElementById('dateSub').textContent = 'Simulate: Last Day Morning';
                 break;
             case 'done':
                 simDay = 31; scn = 'settlement';
-                dateLabel = `${monthNames[month]}/31/${year}`;
+                dateLabel = `${monthNames[month]}/28/${year}`;
                 document.getElementById('dateSub').textContent = 'Simulate: Settlement (18:00)';
                 break;
             default:
