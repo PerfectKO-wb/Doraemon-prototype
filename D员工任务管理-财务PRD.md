@@ -87,9 +87,9 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 
 > 作为财务专员，我希望看到我需要处理的打款 Invoice，以便了解打款工作量。
 
-- [ ] 将**当前用户审核通过的（已审核）**且**未关联 JE（待打款）**的 Invoice 聚合展示为一张 "Pending Payment" 卡片（因为审核完成后即进入待打款状态）
-- [ ] 卡片显示待打款的数量，例如 "X invoice(s)"
-- [ ] 点击卡片整体跳转至 F System 的 Invoice 管理列表页
+- [ ] 将**当前用户审核通过的（已审核）**且**未关联 JE（待打款）**的 Invoice 聚合在一起（因为审核完成后即进入待打款状态）
+- [ ] 以 Invoice 维度展示，每条一张卡片，显示 {Account Name} Payment 及打款金额
+- [ ] 点击卡片跳转至 F System 的 Invoice 管理列表页
 - [ ] 月中（15日早上起）未关联 JE 的卡片变为黄色边框，提示 "Remember to make payment"
 - [ ] 月末（最后一天早上起）未关联 JE 的卡片变为红色边框，提示 "Month-end approaching, please complete payment soon"
 
@@ -166,14 +166,14 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 
 **💰 Pending Payment（仅当前用户审核过的）**
 
-将已审核和待打款的 Invoice 聚合展示：
+将已审核和待打款的 Invoice 聚合在这一区域，**以 Invoice 维度逐条展示卡片**：
 
 | 元素 | 说明 |
 |------|------|
 | 图标 | 💰 |
-| 标题 | Pending Payment |
-| 描述 | "X invoice(s)" |
-| 交互 | 点击卡片整体跳转至 F System 的 Invoice 管理列表页 |
+| 标题 | "{Account Name} Payment" |
+| 描述 | "Payment Amount ¥XX,XXX" |
+| 交互 | 点击卡片跳转至 F System 的 Invoice 管理列表页 |
 | 黄色边框 | 月中（15日早上起）：warning 状态，提示 "Remember to make payment" |
 | 红色边框 | 月末（最后一天早上起）：urgent 状态，提示 "Month-end approaching, please complete payment soon" |
 

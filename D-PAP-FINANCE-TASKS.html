@@ -578,20 +578,28 @@
 
         // Base counts
         let pendingReviewCount = pendingInvoices.length;
-        let pendingPaymentCount = approvedInvoices.filter(inv => inv.reviewer === currentUser).length + paymentInvoices.filter(p => !p.jeLinked).length;
+        
+        let pendingPaymentsList = [
+            ...approvedInvoices.filter(inv => inv.reviewer === currentUser),
+            ...paymentInvoices.filter(p => !p.jeLinked)
+        ];
+        
         let paymentCompletedCount = paymentInvoices.filter(p => p.jeLinked).length;
 
         // Settlement mock modifications
         if (isSettlement) {
-            pendingPaymentCount += pendingReviewCount; // all reviews done, move to pending payment
+            let newApproved = pendingInvoices.map(inv => ({...inv, reviewer: currentUser}));
+            pendingPaymentsList = [...pendingPaymentsList, ...newApproved];
             pendingReviewCount = 0;
 
             // 1 payment completes
-            if (pendingPaymentCount > 0) {
-                pendingPaymentCount -= 1;
+            if (pendingPaymentsList.length > 0) {
+                pendingPaymentsList.shift(); // remove the first one to simulate it being paid
                 paymentCompletedCount += 1;
             }
         }
+        
+        let pendingPaymentCount = pendingPaymentsList.length;
 
         let html = '<div class="task-list">';
         let cardIdx = 0;
@@ -612,29 +620,31 @@
         }
 
         // ── 2. Pending Payment ──
-        if (pendingPaymentCount > 0) {
-            let cls = '';
-            let hint = '';
-            if (isMonthEnd && !isSettlement) {
-                cls = ' urgent';
-                hint = `<div class="card-hint"><span class="dot"></span>Month-end approaching, please complete payment soon</div>`;
-            } else if (isMidMonth && !isSettlement) {
-                cls = ' warning';
-                hint = `<div class="card-hint"><span class="dot"></span>Remember to make payment</div>`;
-            }
-            
-            html += `
-            <a class="task-card${cls}" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
-               style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
-                <span class="card-icon">💰</span>
-                <div class="card-body">
-                    <div class="card-title">Pending Payment</div>
-                    <div class="card-desc">${pendingPaymentCount} invoice(s)</div>
-                    ${hint}
-                </div>
-                <span class="card-chevron">›</span>
-            </a>`;
-            cardIdx++;
+        if (pendingPaymentsList.length > 0) {
+            pendingPaymentsList.forEach(inv => {
+                let cls = '';
+                let hint = '';
+                if (isMonthEnd && !isSettlement) {
+                    cls = ' urgent';
+                    hint = `<div class="card-hint"><span class="dot"></span>Month-end approaching, please complete payment soon</div>`;
+                } else if (isMidMonth && !isSettlement) {
+                    cls = ' warning';
+                    hint = `<div class="card-hint"><span class="dot"></span>Remember to make payment</div>`;
+                }
+                
+                html += `
+                <a class="task-card${cls}" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
+                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
+                    <span class="card-icon">💰</span>
+                    <div class="card-body">
+                        <div class="card-title">${inv.account} Payment</div>
+                        <div class="card-desc">Payment Amount ${inv.amount}</div>
+                        ${hint}
+                    </div>
+                    <span class="card-chevron">›</span>
+                </a>`;
+                cardIdx++;
+            });
         }
 
         // ── 3. Payment Completed ──
