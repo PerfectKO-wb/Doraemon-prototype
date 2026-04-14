@@ -89,6 +89,8 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 
 - [ ] 将**当前用户审核通过的（已审核）**且**未关联 JE（待打款）**的 Invoice 聚合在一起（因为审核完成后即进入待打款状态）
 - [ ] 以 Invoice 维度展示，每条一张卡片，显示 {Account Name} Payment 及打款金额
+- [ ] 卡片高度设计更小（紧凑模式）
+- [ ] 默认最多显示 5 条，超过 5 条时底部显示 "View More" 按钮，点击后展开全部
 - [ ] 点击卡片跳转至 F System 的 Invoice 管理列表页
 - [ ] 月中（15日早上起）未关联 JE 的卡片变为黄色边框，提示 "Remember to make payment"
 - [ ] 月末（最后一天早上起）未关联 JE 的卡片变为红色边框，提示 "Month-end approaching, please complete payment soon"
@@ -173,6 +175,8 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 | 图标 | 💰 |
 | 标题 | "{Account Name} Payment" |
 | 描述 | "Payment Amount ¥XX,XXX" |
+| 样式 | 卡片高度较小（紧凑设计） |
+| 展示逻辑 | 默认最多显示 5 条。超过 5 条时，底部显示 "View More" 按钮，点击展开全部 |
 | 交互 | 点击卡片跳转至 F System 的 Invoice 管理列表页 |
 | 黄色边框 | 月中（15日早上起）：warning 状态，提示 "Remember to make payment" |
 | 红色边框 | 月末（最后一天早上起）：urgent 状态，提示 "Month-end approaching, please complete payment soon" |

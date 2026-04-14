@@ -165,6 +165,17 @@
             line-height: 1.6;
         }
 
+        /* ── Section Label ── */
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: rgba(0,0,0,0.4);
+            margin: 24px 0 12px;
+        }
+        .section-label:first-child { margin-top: 16px; }
+
         /* ── Task Cards Container ── */
         .task-list {
             display: flex;
@@ -200,6 +211,47 @@
         .task-card.visible {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* ── Compact Card ── */
+        .task-card.compact {
+            padding: 12px 16px;
+            gap: 12px;
+            border-radius: 16px;
+        }
+        .task-card.compact .card-icon {
+            width: 36px; height: 36px;
+            font-size: 18px;
+            border-radius: 10px;
+        }
+        .task-card.compact .card-title {
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+        .task-card.compact .card-desc {
+            font-size: 11px;
+        }
+
+        /* ── View More Button ── */
+        .view-more-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            background: transparent;
+            border: 1px dashed rgba(0,0,0,0.1);
+            border-radius: 12px;
+            color: rgba(0,0,0,0.5);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: all 0.2s;
+        }
+        .view-more-btn:hover {
+            background: rgba(0,0,0,0.02);
+            color: rgba(0,0,0,0.7);
+            border-color: rgba(0,0,0,0.2);
         }
 
         .task-card .card-icon {
@@ -524,6 +576,8 @@
     const paymentInvoices = [
         { id: 'INV-2026-03-045', account: 'Slack Technologies', amount: '¥220,000', jeLinked: false },
         { id: 'INV-2026-03-046', account: 'Salesforce Japan', amount: '¥185,000', jeLinked: false },
+        { id: 'INV-2026-03-048', account: 'Microsoft Japan', amount: '¥110,000', jeLinked: false },
+        { id: 'INV-2026-03-049', account: 'Oracle Corporation', amount: '¥45,000', jeLinked: false },
         { id: 'INV-2026-03-047', account: 'Adobe Systems', amount: '¥67,500', jeLinked: true },
     ];
 
@@ -566,9 +620,20 @@
             typewrite(document.getElementById('greeting2'), getGreetingText(false, pendingReviewCount, pendingPaymentCount), 100);
         });
 
+    let currentSimDay = dayOfMonth;
+    let currentScenario = 'normal';
+    let isExpanded = false;
+
+    function toggleExpand() {
+        isExpanded = !isExpanded;
+        renderAll(currentSimDay, currentScenario);
+    }
+
     // ── Render ──
     // scenario: 'normal' | 'settlement' (month-end 18:00 settlement – all reviews done, partial payments)
     function renderAll(simDay, scenario) {
+        currentSimDay = simDay;
+        currentScenario = scenario;
         const taskList = document.getElementById('taskList');
         // Mid-month: 15th to day before last day
         // Month-end: last day of month
@@ -606,6 +671,8 @@
 
         // ── 1. Pending Review ──
         if (pendingReviewCount > 0) {
+            html += `<div class="section-label">📋 Pending Review</div>`;
+            html += `<div class="task-list">`;
             html += `
             <a class="task-card" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
                style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
@@ -616,19 +683,25 @@
                 </div>
                 <span class="card-chevron">›</span>
             </a>`;
+            html += `</div>`;
             cardIdx++;
         }
 
         // ── 2. Pending Payment ──
         if (pendingPaymentsList.length > 0) {
-            pendingPaymentsList.forEach(inv => {
-                let cls = '';
+            html += `<div class="section-label">💰 Pending Payment</div>`;
+            html += `<div class="task-list">`;
+            
+            const displayList = isExpanded ? pendingPaymentsList : pendingPaymentsList.slice(0, 5);
+
+            displayList.forEach(inv => {
+                let cls = ' compact';
                 let hint = '';
                 if (isMonthEnd && !isSettlement) {
-                    cls = ' urgent';
-                    hint = `<div class="card-hint"><span class="dot"></span>Month-end approaching, please complete payment soon</div>`;
+                    cls += ' urgent';
+                    hint = `<div class="card-hint"><span class="dot"></span>Month-end approaching</div>`;
                 } else if (isMidMonth && !isSettlement) {
-                    cls = ' warning';
+                    cls += ' warning';
                     hint = `<div class="card-hint"><span class="dot"></span>Remember to make payment</div>`;
                 }
                 
@@ -645,10 +718,18 @@
                 </a>`;
                 cardIdx++;
             });
+
+            if (pendingPaymentsList.length > 5) {
+                const btnText = isExpanded ? 'Show Less' : `View More (${pendingPaymentsList.length - 5} more)`;
+                html += `<button class="view-more-btn" onclick="toggleExpand()">${btnText}</button>`;
+            }
+            html += `</div>`;
         }
 
         // ── 3. Payment Completed ──
         if (paymentCompletedCount > 0 || isSettlement) {
+            html += `<div class="section-label">✅ Payment Completed</div>`;
+            html += `<div class="task-list">`;
             html += `
             <a class="task-card all-done" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
                style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s;">
@@ -658,6 +739,7 @@
                     <div class="card-desc">${paymentCompletedCount} invoice(s)</div>
                 </div>
             </a>`;
+            html += `</div>`;
             cardIdx++;
         }
 
