@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS Agent v2 - Doraemon</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&family=Noto+Sans+SC:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base: #f9fafb; --bg-container: #fff; --bg-hover: #f3f4f6; --bg-active: #eff6ff;
+  --border: #e5e7eb; --text-1: #131825; --text-2: #6b7280; --text-3: #9ca3af;
+  --primary: #1c64f2; --primary-light: #eff6ff; --success: #10b981; --success-light: #ecfdf5;
+  --success-border: #a7f3d0; --warning: #f59e0b; --error: #ef4444;
+  --tool-bg: #f0f5ff; --tool-border: #bfdbfe; --result-bg: #f0fdf4; --result-border: #86efac;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',system-ui,sans-serif; background:var(--bg-base); color:var(--text-1); height:100vh; overflow:hidden; }
+.app { display:flex; height:100vh; }
+
+/* Sidebar */
+.sidebar { width:220px; background:var(--bg-container); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
+.sidebar-logo { height:52px; display:flex; align-items:center; padding:0 16px; border-bottom:1px solid var(--border); gap:8px; }
+.sidebar-logo svg { width:20px; height:20px; }
+.sidebar-logo span { font-family:'Urbanist',sans-serif; font-weight:700; font-size:15px; }
+.sidebar-nav { flex:1; padding:8px; overflow-y:auto; }
+.nav-label { font-size:10px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:0.5px; padding:12px 8px 4px; }
+.nav-item { height:34px; display:flex; align-items:center; padding:0 8px; gap:8px; border-radius:8px; font-size:13px; color:var(--text-2); cursor:pointer; }
+.nav-item:hover { background:var(--bg-hover); }
+.nav-item.active { background:var(--bg-active); color:var(--primary); font-weight:500; }
+.nav-item svg { width:15px; height:15px; flex-shrink:0; }
+.nav-dot { width:6px; height:6px; border-radius:50%; }
+.sidebar-user { padding:10px 12px; border-top:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.sidebar-user .av { width:30px; height:30px; border-radius:50%; background:#ddd; }
+.sidebar-user .name { font-size:12px; font-weight:500; }
+.sidebar-user .role { font-size:11px; color:var(--text-3); }
+
+/* Conversation list */
+.conv-list { width:340px; background:var(--bg-container); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
+.conv-header { padding:12px; border-bottom:1px solid var(--border); }
+.conv-header-top { display:flex; align-items:center; gap:8px; }
+.conv-icon { width:36px; height:36px; background:var(--primary); border-radius:18px; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600; flex-shrink:0; }
+.conv-title { font-size:15px; font-weight:600; }
+.conv-tabs { display:flex; gap:2px; margin-top:10px; background:var(--bg-base); border-radius:8px; padding:2px; }
+.conv-tab { flex:1; height:28px; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--text-2); border-radius:6px; cursor:pointer; border:none; background:transparent; font-family:inherit; }
+.conv-tab.active { background:var(--bg-container); color:var(--text-1); font-weight:500; box-shadow:0 1px 2px rgba(0,0,0,0.06); }
+.conv-search { margin:8px 12px 0; height:32px; border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; padding:0 8px; gap:6px; }
+.conv-search svg { width:14px; height:14px; color:var(--text-3); }
+.conv-search input { border:none; outline:none; font-size:12px; flex:1; font-family:inherit; }
+.conv-search input::placeholder { color:var(--text-3); }
+.conv-items { flex:1; overflow-y:auto; padding:4px; }
+.conv-item { padding:10px 12px; border-radius:8px; cursor:pointer; margin-bottom:2px; }
+.conv-item:hover { background:var(--bg-hover); }
+.conv-item.active { background:var(--bg-active); }
+.conv-item-row { display:flex; align-items:center; gap:6px; }
+.r-badge { height:18px; padding:0 5px; background:#ef4444; border-radius:4px; font-size:10px; font-weight:600; color:white; display:flex; align-items:center; flex-shrink:0; }
+.conv-item-title { font-size:13px; font-weight:500; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.conv-item-time { font-size:10px; color:var(--text-3); flex-shrink:0; }
+.conv-item-desc { font-size:11px; color:var(--text-2); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.conv-item-tags { display:flex; gap:4px; margin-top:5px; align-items:center; }
+.tag-sm { height:18px; padding:0 5px; border:1px solid var(--border); border-radius:3px; font-size:10px; color:var(--text-2); display:flex; align-items:center; background:var(--bg-base); }
+.dot-unread { width:6px; height:6px; background:var(--primary); border-radius:50%; margin-left:auto; }
+
+/* Chat area */
+.chat-area { flex:1; display:flex; flex-direction:column; background:var(--bg-base); min-width:0; }
+.chat-header { height:52px; display:flex; align-items:center; padding:0 16px; border-bottom:1px solid var(--border); background:var(--bg-container); gap:10px; flex-shrink:0; }
+.status-badge { height:22px; padding:0 6px; border:1px solid var(--text-3); border-radius:4px; font-size:11px; display:flex; align-items:center; color:var(--text-2); }
+.chat-header-title { font-size:14px; font-weight:500; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.skill-pill { height:22px; padding:0 8px; background:linear-gradient(135deg, #ede9fe, #e0e7ff); border-radius:11px; font-size:11px; font-weight:500; color:#5b21b6; display:flex; align-items:center; gap:4px; flex-shrink:0; }
+.header-btn { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; background:transparent; position:relative; }
+.header-btn:hover { background:var(--bg-hover); }
+.header-btn svg { width:16px; height:16px; color:var(--text-2); }
+.notif-dot { position:absolute; top:2px; right:2px; width:8px; height:8px; background:var(--error); border:1.5px solid white; border-radius:50%; }
+
+.chat-messages { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:20px; }
+
+/* Messages */
+.msg { display:flex; gap:8px; max-width:520px; }
+.msg-right { align-self:flex-end; flex-direction:row-reverse; }
+.msg-left { align-self:flex-start; }
+.msg-avatar { width:28px; height:28px; border-radius:50%; flex-shrink:0; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:white; }
+.msg-content { display:flex; flex-direction:column; gap:4px; }
+.msg-meta { font-size:11px; color:var(--text-3); display:flex; gap:6px; align-items:center; }
+.msg-right .msg-meta { justify-content:flex-end; }
+.msg-bubble { padding:10px 14px; border-radius:12px; font-size:13px; line-height:1.6; }
+.msg-right .msg-bubble { background:var(--bg-hover); border-top-right-radius:4px; }
+.msg-left .msg-bubble { background:var(--bg-container); border:1px solid var(--border); border-top-left-radius:4px; }
+
+/* Tool call card: auto-executed, compact */
+.tool-card { border-radius:10px; overflow:hidden; font-size:12px; max-width:420px; }
+.tool-call { background:var(--tool-bg); border:1px solid var(--tool-border); }
+.tool-result { background:var(--result-bg); border:1px solid var(--result-border); }
+.tool-card-header { padding:8px 12px; display:flex; align-items:center; gap:6px; font-weight:500; }
+.tool-card-header svg { width:14px; height:14px; flex-shrink:0; }
+.tool-card-header .tool-name { font-family:'SF Mono','Fira Code',monospace; }
+.tool-card-header .tool-status { margin-left:auto; font-weight:400; font-size:11px; }
+.tool-card-header .status-running { color:var(--primary); }
+.tool-card-header .status-done { color:var(--success); }
+.tool-card-body { padding:6px 12px 10px; }
+.tool-params { display:grid; grid-template-columns:auto 1fr; gap:2px 12px; font-family:'SF Mono','Fira Code',monospace; font-size:11px; }
+.tool-params .key { color:var(--text-2); }
+.tool-params .val { color:var(--text-1); }
+.tool-params .val.highlight { color:var(--primary); font-weight:500; }
+
+/* Chat input */
+.chat-input-wrap { padding:8px 20px 16px; flex-shrink:0; }
+.chat-input-box { display:flex; align-items:flex-end; gap:6px; background:var(--bg-container); border:1px solid var(--border); border-radius:16px; padding:8px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.chat-input-box input { flex:1; border:none; outline:none; font-size:13px; font-family:inherit; height:24px; }
+.chat-input-box input::placeholder { color:var(--text-3); }
+.input-btn { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; background:transparent; flex-shrink:0; }
+.input-btn:hover { background:var(--bg-hover); }
+.input-btn svg { width:16px; height:16px; color:var(--text-2); }
+.send-btn { width:30px; height:30px; border-radius:50%; background:var(--text-1); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.send-btn svg { width:14px; height:14px; color:white; transform:rotate(-90deg); }
+
+/* Right panel */
+.right-panel { width:280px; background:var(--bg-container); border-left:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
+.right-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; }
+.right-tab { flex:1; height:40px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; border:none; background:transparent; font-family:inherit; border-bottom:2px solid transparent; }
+.right-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+.right-body { flex:1; overflow-y:auto; }
+.right-section { padding:14px; }
+.right-section + .right-section { border-top:1px solid var(--border); }
+.section-label { font-size:11px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:0.3px; margin-bottom:8px; }
+
+/* Skill context in right panel */
+.skill-context-header { display:flex; align-items:center; gap:6px; margin-bottom:10px; }
+.skill-context-header .name { font-size:13px; font-weight:600; }
+.skill-context-header .ver { font-size:10px; color:var(--text-3); background:var(--bg-base); padding:1px 5px; border-radius:3px; }
+.active-dot { width:6px; height:6px; background:var(--success); border-radius:50%; }
+.ctx-item { font-size:12px; color:var(--text-2); line-height:1.5; padding:4px 0; }
+.ctx-item strong { color:var(--text-1); font-weight:500; }
+.ctx-steps { list-style:none; counter-reset:step; }
+.ctx-steps li { font-size:12px; color:var(--text-2); line-height:1.5; padding:2px 0; display:flex; gap:6px; }
+.ctx-steps li::before { counter-increment:step; content:counter(step); width:16px; height:16px; background:var(--bg-base); border-radius:50%; font-size:10px; font-weight:600; color:var(--text-3); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.ctx-tools { display:flex; flex-wrap:wrap; gap:4px; }
+.ctx-tool { height:22px; padding:0 7px; background:var(--bg-base); border:1px solid var(--border); border-radius:4px; font-size:11px; color:var(--text-2); display:flex; align-items:center; gap:3px; }
+.ctx-guardrail { font-size:11px; color:var(--text-2); line-height:1.5; padding:3px 0 3px 12px; position:relative; }
+.ctx-guardrail::before { content:''; position:absolute; left:0; top:9px; width:4px; height:4px; background:var(--error); border-radius:50%; }
+
+/* Knowledge items */
+.knowledge-item { padding:8px 10px; background:var(--bg-base); border-radius:6px; margin-bottom:6px; font-size:12px; line-height:1.5; }
+.knowledge-item .k-title { font-weight:500; color:var(--text-1); display:flex; align-items:center; gap:4px; margin-bottom:2px; }
+.knowledge-item .k-title svg { width:12px; height:12px; color:var(--primary); }
+.knowledge-item .k-text { color:var(--text-2); }
+.knowledge-item .k-why { font-size:11px; color:var(--text-3); font-style:italic; margin-top:3px; }
+
+/* User info */
+.info-row { display:flex; font-size:12px; padding:3px 0; }
+.info-row .label { width:70px; color:var(--text-3); flex-shrink:0; }
+.info-row .value { color:var(--text-1); flex:1; }
+.info-row .value.link { color:var(--primary); }
+.game-card { padding:10px; background:var(--bg-base); border-radius:6px; }
+.game-card .game-name { font-size:13px; font-weight:500; }
+.game-card .game-sub { font-size:11px; color:var(--text-2); margin-top:2px; font-family:'Noto Sans SC','Inter',sans-serif; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1c64f2"/><path d="M8 12h8M12 8v8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Doraemon</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-label">Expert Agent</div>
+      <div class="nav-item active"><div class="nav-dot" style="background:var(--primary)"></div>CS</div>
+      <div class="nav-item"><div class="nav-dot" style="background:var(--warning)"></div>i18n</div>
+      <div class="nav-label">Projects</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/></svg>Infra Upgrade</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/></svg>Product Launch</div>
+      <div class="nav-label">Management</div>
+      <div class="nav-item" onclick="window.open('cs-skill-management.html','_blank')" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456Z"/></svg>Skills</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>Knowledge</div>
+      <div class="nav-label">Today</div>
+      <div class="nav-item"><span style="font-size:13px">648 充值钻石未到账</span></div>
+      <div class="nav-item"><span style="font-size:13px">Data Analysis Help</span></div>
+    </div>
+    <div class="sidebar-user">
+      <div class="av"></div>
+      <div><div class="name">David chen</div><div class="role">CS Agent</div></div>
+    </div>
+  </nav>
+
+  <!-- Conversation list -->
+  <div class="conv-list">
+    <div class="conv-header">
+      <div class="conv-header-top">
+        <div class="conv-icon">CS</div>
+        <div class="conv-title">CS Expert</div>
+      </div>
+      <div class="conv-tabs">
+        <button class="conv-tab">All</button>
+        <button class="conv-tab active">VIP</button>
+        <button class="conv-tab">Non-VIP</button>
+      </div>
+    </div>
+    <div class="conv-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg>
+      <input placeholder="Search...">
+    </div>
+    <div class="conv-items">
+      <div class="conv-item active">
+        <div class="conv-item-row"><span class="r-badge">R15</span><span class="conv-item-title">648 充值钻石未到账</span><span class="conv-item-time">08:25</span></div>
+        <div class="conv-item-desc">VIP4 用户充值 648 未收到钻石</div>
+        <div class="conv-item-tags"><span class="tag-sm">vividarmy</span><span class="dot-unread"></span></div>
+      </div>
+      <div class="conv-item">
+        <div class="conv-item-row"><span class="r-badge">R11</span><span class="conv-item-title">Weekly login bonus not received</span><span class="conv-item-time">08:20</span></div>
+        <div class="conv-item-desc">VIP user did not receive login bonus</div>
+        <div class="conv-item-tags"><span class="tag-sm">yugioh</span><span class="dot-unread"></span></div>
+      </div>
+      <div class="conv-item">
+        <div class="conv-item-row"><span class="r-badge">R8</span><span class="conv-item-title">アカウントがロックされた</span><span class="conv-item-time">07:55</span></div>
+        <div class="conv-item-desc">Account locked after password attempts</div>
+        <div class="conv-item-tags"><span class="tag-sm">puzzles</span></div>
+      </div>
+      <div class="conv-item">
+        <div class="conv-item-row"><span class="r-badge">R14</span><span class="conv-item-title">购买月卡未生效</span><span class="conv-item-time">07:40</span></div>
+        <div class="conv-item-desc">Monthly pass purchase not activated</div>
+        <div class="conv-item-tags"><span class="tag-sm">vividarmy</span></div>
+      </div>
+      <div class="conv-item">
+        <div class="conv-item-row"><span class="r-badge">R6</span><span class="conv-item-title">Game crashes on startup</span><span class="conv-item-time">07:30</span></div>
+        <div class="conv-item-desc">iOS 17 crash after latest update</div>
+        <div class="conv-item-tags"><span class="tag-sm">puzzles</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat area -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <span class="status-badge">Pending</span>
+      <span class="chat-header-title">648 充值钻石未到账</span>
+      <span class="skill-pill">⚡ VIP 充值未到账处理 v3</span>
+      <button class="header-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg></button>
+      <button class="header-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+    </div>
+
+    <div class="chat-messages">
+      <!-- User message -->
+      <div class="msg msg-right">
+        <div class="msg-avatar" style="background:#ddd;"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgiIGhlaWdodD0iMjgiIHZpZXdCb3g9IjAgMCAyOCAyOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNCIgY3k9IjEwIiByPSI1IiBmaWxsPSIjOWNhM2FmIi8+PHBhdGggZD0iTTQgMjZjMC02LjA3NSA0LjkyNS0xMSAxMS0xMWg2YzYuMDc1IDAgMTEgNC45MjUgMTEgMTF2MUg0di0xWiIgZmlsbD0iIzljYTNhZiIvPjwvc3ZnPg==" width="28" height="28"></div>
+        <div class="msg-content">
+          <div class="msg-meta">2024-07-02 12:22 · David chen</div>
+          <div class="msg-bubble">我充了648但是钻石没到账，都过了一个小时了！能不能帮忙查一下？</div>
+        </div>
+      </div>
+
+      <!-- Bot message 1 -->
+      <div class="msg msg-left">
+        <div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">🤖</div>
+        <div class="msg-content">
+          <div class="msg-meta">Xiaobao · 12:22</div>
+          <div class="msg-bubble">非常抱歉让您遇到这个问题！我立即为您查询订单状态，请稍等。</div>
+        </div>
+      </div>
+
+      <!-- Tool call: auto-executed (running) → result -->
+      <div class="msg msg-left">
+        <div style="width:28px; flex-shrink:0;"></div>
+        <div class="msg-content">
+          <div class="tool-card tool-call">
+            <div class="tool-card-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.049.58.025 1.193-.14 1.743"/></svg>
+              <span class="tool-name">query_order</span>
+              <span class="tool-status status-done">✓ 已执行</span>
+            </div>
+            <div class="tool-card-body">
+              <div class="tool-params">
+                <span class="key">user_id</span><span class="val">"G25G55GXO"</span>
+                <span class="key">time_range</span><span class="val">2h</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tool-card tool-result" style="margin-top:4px;">
+            <div class="tool-card-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              <span>返回结果</span>
+            </div>
+            <div class="tool-card-body">
+              <div class="tool-params">
+                <span class="key">order_id</span><span class="val">"ORD-20240702-12345"</span>
+                <span class="key">amount</span><span class="val">¥648</span>
+                <span class="key">status</span><span class="val highlight">paid_not_delivered</span>
+                <span class="key">paid_at</span><span class="val">"2024-07-02 12:15:00"</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bot message 2: after tool result -->
+      <div class="msg msg-left">
+        <div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">🤖</div>
+        <div class="msg-content">
+          <div class="msg-meta">Xiaobao · 12:23</div>
+          <div class="msg-bubble">已查到您的订单 ORD-20240702-12345，648元于12:15支付成功，但系统未完成发货。我现在为您创建加急补发，预计 10 分钟内到账。</div>
+        </div>
+      </div>
+
+      <!-- Tool call 2: create_redelivery, auto-executed -->
+      <div class="msg msg-left">
+        <div style="width:28px; flex-shrink:0;"></div>
+        <div class="msg-content">
+          <div class="tool-card tool-call">
+            <div class="tool-card-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.049.58.025 1.193-.14 1.743"/></svg>
+              <span class="tool-name">create_redelivery</span>
+              <span class="tool-status status-done">✓ 已执行</span>
+            </div>
+            <div class="tool-card-body">
+              <div class="tool-params">
+                <span class="key">order_id</span><span class="val">"ORD-20240702-12345"</span>
+                <span class="key">priority</span><span class="val highlight">"high"</span>
+              </div>
+            </div>
+          </div>
+          <div class="tool-card tool-result" style="margin-top:4px;">
+            <div class="tool-card-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              <span>补发工单已创建</span>
+              <span class="tool-status status-done">TICKET-78901</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bot final message -->
+      <div class="msg msg-left">
+        <div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">🤖</div>
+        <div class="msg-content">
+          <div class="msg-meta">Xiaobao · 12:23</div>
+          <div class="msg-bubble">已为您创建加急补发工单（TICKET-78901），优先级为高。您的 648 钻石预计 10 分钟内到账，届时请重启游戏查看。如还有问题随时告诉我！</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-wrap">
+      <div class="chat-input-box">
+        <button class="input-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg></button>
+        <button class="input-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 1 0-2.636 6.364M16.5 12V8.25"/></svg></button>
+        <input type="text" placeholder="输入消息...">
+        <button class="send-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel: unified context -->
+  <div class="right-panel">
+    <div class="right-tabs">
+      <button class="right-tab active">Agent 上下文</button>
+      <button class="right-tab">用户信息</button>
+    </div>
+    <div class="right-body">
+      <!-- Tab 1: Agent Context (Skill + Knowledge unified) -->
+
+      <!-- Activated Skill -->
+      <div class="right-section">
+        <div class="section-label">激活 Skill</div>
+        <div class="skill-context-header">
+          <span class="active-dot"></span>
+          <span class="name">VIP 充值未到账处理</span>
+          <span class="ver">v3</span>
+        </div>
+        <div class="ctx-item"><strong>目标：</strong>快速定位充值未到账原因并解决</div>
+        <div class="ctx-item"><strong>语气：</strong>共情、专业、高优先级</div>
+        <div style="margin-top:8px;">
+          <div style="font-size:11px; font-weight:500; color:var(--text-1); margin-bottom:4px;">处理步骤</div>
+          <ol class="ctx-steps">
+            <li>安抚情绪，表达重视</li>
+            <li>调用 query_order 查询订单</li>
+            <li>根据状态走处理路径</li>
+            <li>给出明确时间预期</li>
+            <li>确认问题已解决</li>
+          </ol>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="font-size:11px; font-weight:500; color:var(--text-1); margin-bottom:6px;">可用工具</div>
+          <div class="ctx-tools">
+            <span class="ctx-tool">🔧 query_order</span>
+            <span class="ctx-tool">🔧 create_redelivery</span>
+            <span class="ctx-tool">🔧 transfer</span>
+            <span class="ctx-tool">🔧 tag_conversation</span>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="font-size:11px; font-weight:500; color:var(--text-1); margin-bottom:4px;">约束</div>
+          <div class="ctx-guardrail">未确认订单前不承诺补发</div>
+          <div class="ctx-guardrail">金额 ≥ 1000 必须转 VIP 组</div>
+          <div class="ctx-guardrail">不透露内部系统名称</div>
+        </div>
+      </div>
+
+      <!-- Knowledge: Skill refs (priority) -->
+      <div class="right-section">
+        <div class="section-label" style="display:flex; align-items:center; justify-content:space-between;">
+          <span>参考知识</span>
+          <span style="font-size:10px; font-weight:400; color:var(--primary); background:var(--primary-light); padding:1px 6px; border-radius:3px; text-transform:none; letter-spacing:0;">Skill 引用</span>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
+            充值到账时间说明
+          </div>
+          <div class="k-text">常规充值 5 分钟内到账；高峰期可能延迟至 30 分钟；超过 1 小时未到账视为异常。</div>
+          <div class="k-why">告知用户正常到账时间和异常判断标准</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
+            VIP 补偿政策
+          </div>
+          <div class="k-text">VIP4+ 用户充值问题优先处理，补发工单自动标记为 high priority。单笔 ≥1000 需转 VIP 专属组。</div>
+          <div class="k-why">确定补偿方案和处理优先级</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
+            支付渠道与订单格式
+          </div>
+          <div class="k-text">支持 Apple Pay、Google Pay、信用卡、PayPal，订单号前缀 ORD-。</div>
+          <div class="k-why">帮助用户定位订单信息和确认支付方式</div>
+        </div>
+      </div>
+
+      <!-- Knowledge: RAG supplement -->
+      <div class="right-section">
+        <div class="section-label" style="display:flex; align-items:center; justify-content:space-between;">
+          <span>补充知识</span>
+          <span style="font-size:10px; font-weight:400; color:#059669; background:var(--success-light); padding:1px 6px; border-radius:3px; text-transform:none; letter-spacing:0;">RAG 检索</span>
+        </div>
+        <div class="knowledge-item" style="border-left:2px solid var(--success-border); padding-left:10px;">
+          <div class="k-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+            充值异常处理时效要求
+          </div>
+          <div class="k-text">普通用户 48h 内处理，VIP 用户 2h 内处理。超时未处理自动升级。</div>
+          <div class="k-why" style="font-style:normal; color:var(--success);">相关度 85%</div>
+        </div>
+      </div>
+
+      <!-- Game + User info (tab 2 content, shown inline for prototype) -->
+      <div class="right-section" style="display:none;" id="user-info-section">
+        <div class="section-label">游戏信息</div>
+        <div class="game-card">
+          <div class="game-name">vividarmy</div>
+          <div class="game-sub">弱虫ペダルドリームレース</div>
+        </div>
+      </div>
+      <div class="right-section" style="display:none;" id="user-detail-section">
+        <div class="section-label">用户信息</div>
+        <div class="info-row"><span class="label">G123 ID</span><span class="value link">G25G55GXO</span></div>
+        <div class="info-row"><span class="label">Server ID</span><span class="value">S2342</span></div>
+        <div class="info-row"><span class="label">Game UID</span><span class="value">S2342</span></div>
+        <div class="info-row"><span class="label">Role ID</span><span class="value">845101009190</span></div>
+        <div class="info-row"><span class="label">Rank</span><span class="value">11（¥ 2,450,000）<span style="background:#fff1f0;border:1px solid #ffa39e;border-radius:4px;padding:0 4px;font-size:10px;color:#d32029;margin-left:4px;">VIP4</span></span></div>
+        <div class="info-row"><span class="label">Last Login</span><span class="value">2024-11-29 08:27</span></div>
+        <div class="info-row"><span class="label">Device</span><span class="value">macOS · Chrome 131</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.right-tab');
+const agentSections = document.querySelectorAll('.right-section:not([id])');
+const userSections = [document.getElementById('user-info-section'), document.getElementById('user-detail-section')];
+tabs.forEach((tab, i) => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    agentSections.forEach(s => s.style.display = i === 0 ? '' : 'none');
+    userSections.forEach(s => s.style.display = i === 1 ? '' : 'none');
+  });
+});
+</script>
+</body>
+</html>

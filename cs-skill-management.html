@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Management - Doraemon</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base: #f9fafb; --bg-container: #fff; --bg-hover: #f3f4f6; --bg-active: #eff6ff;
+  --border: #e5e7eb; --text-1: #131825; --text-2: #6b7280; --text-3: #9ca3af;
+  --primary: #1c64f2; --primary-light: #eff6ff; --success: #10b981; --success-light: #ecfdf5;
+  --warning: #f59e0b; --warning-light: #fffbeb; --error: #ef4444; --muted: #6b7280;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',system-ui,sans-serif; background:var(--bg-base); color:var(--text-1); height:100vh; overflow:hidden; }
+.app { display:flex; height:100vh; }
+
+/* Sidebar */
+.sidebar { width:240px; background:var(--bg-container); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
+.sidebar-logo { height:56px; display:flex; align-items:center; padding:0 20px; border-bottom:1px solid var(--border); gap:8px; }
+.sidebar-logo svg { width:22px; height:22px; }
+.sidebar-logo span { font-family:'Urbanist',sans-serif; font-weight:700; font-size:15px; }
+.sidebar-nav { flex:1; padding:12px; overflow-y:auto; }
+.nav-group-label { font-size:11px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:0.5px; padding:16px 8px 6px; }
+.nav-item { height:36px; display:flex; align-items:center; padding:0 8px; gap:8px; border-radius:8px; font-size:13px; color:var(--text-2); cursor:pointer; }
+.nav-item:hover { background:var(--bg-hover); }
+.nav-item.active { background:var(--bg-active); color:var(--primary); font-weight:500; }
+.nav-item svg { width:16px; height:16px; flex-shrink:0; }
+.nav-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+/* Main */
+.main { flex:1; display:flex; flex-direction:column; min-width:0; }
+.main-header { height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; border-bottom:1px solid var(--border); background:var(--bg-container); flex-shrink:0; }
+.main-header h1 { font-size:16px; font-weight:600; }
+
+/* Content: list + chat */
+.content { flex:1; display:flex; overflow:hidden; }
+
+/* Skill List */
+.skill-list-panel { width:420px; border-right:1px solid var(--border); display:flex; flex-direction:column; background:var(--bg-container); flex-shrink:0; }
+.list-toolbar { padding:12px 16px; display:flex; flex-direction:column; gap:10px; border-bottom:1px solid var(--border); }
+.list-tabs { display:flex; gap:2px; background:var(--bg-base); border-radius:8px; padding:2px; }
+.list-tab { flex:1; height:30px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:500; color:var(--text-2); border-radius:6px; cursor:pointer; border:none; background:transparent; font-family:inherit; gap:4px; }
+.list-tab.active { background:var(--bg-container); color:var(--text-1); box-shadow:0 1px 2px rgba(0,0,0,0.06); }
+.list-tab .count { font-size:11px; color:var(--text-3); font-weight:400; }
+.search-box { display:flex; align-items:center; gap:8px; height:34px; border:1px solid var(--border); border-radius:8px; padding:0 10px; background:var(--bg-container); }
+.search-box svg { width:15px; height:15px; color:var(--text-3); flex-shrink:0; }
+.search-box input { border:none; outline:none; font-size:13px; flex:1; font-family:inherit; color:var(--text-1); }
+.search-box input::placeholder { color:var(--text-3); }
+
+.skill-cards { flex:1; overflow-y:auto; padding:8px; }
+.skill-card { padding:14px; border-radius:10px; cursor:pointer; margin-bottom:4px; border:1.5px solid transparent; transition:all 0.15s; }
+.skill-card:hover { background:var(--bg-hover); }
+.skill-card.selected { background:var(--bg-active); border-color:var(--primary); }
+.skill-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.skill-card-name { font-size:14px; font-weight:500; line-height:1.4; flex:1; }
+.skill-card-desc { font-size:12px; color:var(--text-2); line-height:1.5; margin-top:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.skill-card-meta { display:flex; align-items:center; gap:6px; margin-top:10px; flex-wrap:wrap; }
+
+/* Badges */
+.badge { display:inline-flex; align-items:center; height:20px; padding:0 7px; border-radius:4px; font-size:11px; font-weight:500; gap:3px; white-space:nowrap; }
+.badge-active { background:var(--success-light); color:#059669; }
+.badge-draft { background:var(--warning-light); color:#d97706; }
+.badge-inactive { background:var(--bg-base); color:var(--text-3); }
+.badge-scene { background:var(--bg-base); color:var(--text-2); border:1px solid var(--border); }
+.badge-source { font-size:10px; height:18px; border-radius:3px; }
+.badge-ai { background:#f0f5ff; color:#4f46e5; }
+.badge-human { background:#fef3c7; color:#92400e; }
+.badge-version { background:var(--bg-base); color:var(--text-2); }
+.badge-tools { background:var(--bg-base); color:var(--text-2); }
+.badge-game { background:#fdf4ff; color:#9333ea; border:1px solid #e9d5ff; font-size:10px; height:18px; }
+.badge-game-all { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; font-size:10px; height:18px; }
+.game-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+.game-tag { display:inline-flex; align-items:center; height:24px; padding:0 8px; border-radius:5px; font-size:11px; font-weight:500; gap:4px; background:#fdf4ff; color:#9333ea; border:1px solid #e9d5ff; }
+.game-tag .remove { cursor:pointer; opacity:0.5; font-size:13px; line-height:1; margin-left:2px; }
+.game-tag .remove:hover { opacity:1; }
+.game-tag-add { display:inline-flex; align-items:center; height:24px; padding:0 8px; border-radius:5px; font-size:11px; color:var(--text-3); border:1px dashed var(--border); cursor:pointer; gap:3px; background:transparent; font-family:inherit; }
+.game-tag-add:hover { border-color:var(--primary); color:var(--primary); }
+
+/* Chat Panel (Create/Edit) */
+.chat-panel { flex:1; display:flex; flex-direction:column; background:var(--bg-base); min-width:0; }
+.chat-panel-header { height:48px; display:flex; align-items:center; padding:0 20px; gap:10px; border-bottom:1px solid var(--border); background:var(--bg-container); flex-shrink:0; }
+.chat-panel-header .title { font-size:14px; font-weight:500; }
+.chat-panel-header .subtitle { font-size:12px; color:var(--text-2); }
+
+.chat-messages { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+
+.chat-msg { display:flex; gap:10px; max-width:85%; }
+.chat-msg.bot { align-self:flex-start; }
+.chat-msg.user { align-self:flex-end; flex-direction:row-reverse; }
+.chat-avatar { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:white; }
+.chat-avatar.bot-av { background:linear-gradient(135deg, #6366f1, #8b5cf6); }
+.chat-avatar.user-av { background:var(--primary); }
+.chat-bubble { padding:10px 14px; border-radius:12px; font-size:13px; line-height:1.6; }
+.chat-msg.bot .chat-bubble { background:var(--bg-container); border:1px solid var(--border); border-top-left-radius:4px; }
+.chat-msg.user .chat-bubble { background:var(--primary); color:white; border-top-right-radius:4px; }
+
+/* Skill preview card inside chat */
+.skill-preview { background:var(--bg-container); border:1px solid var(--border); border-radius:10px; margin-top:8px; overflow:hidden; max-width:480px; }
+.skill-preview-header { padding:12px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.skill-preview-header .name { font-size:13px; font-weight:600; }
+.skill-preview-body { padding:12px 14px; font-size:12px; color:var(--text-2); line-height:1.6; }
+.skill-preview-body dt { font-weight:500; color:var(--text-1); margin-top:8px; }
+.skill-preview-body dt:first-child { margin-top:0; }
+.skill-preview-body dd { margin-left:0; margin-top:2px; }
+.skill-preview-body ul { margin:2px 0 0 16px; }
+.skill-preview-body li { margin-top:2px; }
+.skill-preview-actions { padding:10px 14px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; }
+
+.btn { height:30px; padding:0 14px; border-radius:6px; font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); background:var(--bg-container); color:var(--text-1); transition:all 0.15s; }
+.btn:hover { background:var(--bg-hover); }
+.btn-primary { background:var(--primary); color:white; border-color:var(--primary); }
+.btn-primary:hover { opacity:0.9; }
+.btn-success { background:var(--success); color:white; border-color:var(--success); }
+.btn-sm { height:26px; padding:0 10px; font-size:11px; }
+
+.chat-input-area { padding:12px 20px 20px; flex-shrink:0; }
+.chat-input-box { display:flex; align-items:flex-end; gap:8px; background:var(--bg-container); border:1px solid var(--border); border-radius:14px; padding:8px 12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.chat-input-box textarea { flex:1; border:none; outline:none; font-size:13px; font-family:inherit; resize:none; line-height:1.5; max-height:120px; color:var(--text-1); }
+.chat-input-box textarea::placeholder { color:var(--text-3); }
+.send-btn { width:32px; height:32px; border-radius:50%; background:var(--primary); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.send-btn svg { width:16px; height:16px; color:white; transform:rotate(-90deg); }
+
+/* Empty state */
+.empty-state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text-3); }
+.empty-state svg { width:48px; height:48px; }
+.empty-state p { font-size:13px; text-align:center; line-height:1.6; }
+
+/* Detail overlay on skill card click */
+.skill-detail { display:none; }
+.skill-detail.show { display:flex; flex-direction:column; }
+
+/* Quick action row on hover */
+.skill-card-actions { display:none; gap:4px; margin-top:8px; }
+.skill-card:hover .skill-card-actions { display:flex; }
+
+/* Overlay panels */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:100; align-items:center; justify-content:center; }
+.overlay.show { display:flex; }
+.overlay-panel { background:var(--bg-container); border-radius:12px; box-shadow:0 16px 48px rgba(0,0,0,0.15); max-height:80vh; display:flex; flex-direction:column; overflow:hidden; }
+.overlay-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.overlay-header h2 { font-size:15px; font-weight:600; }
+.overlay-close { width:28px; height:28px; border:none; background:transparent; cursor:pointer; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--text-3); }
+.overlay-close:hover { background:var(--bg-hover); color:var(--text-1); }
+.overlay-body { flex:1; overflow-y:auto; padding:16px 20px; }
+.overlay-footer { padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; flex-shrink:0; }
+
+/* Version list */
+.version-item { padding:12px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; display:flex; gap:12px; }
+.version-item:hover { border-color:var(--primary); background:var(--primary-light); }
+.version-item.selected { border-color:var(--primary); background:var(--primary-light); }
+.version-radio { width:16px; height:16px; border:2px solid var(--border); border-radius:50%; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; }
+.version-item.selected .version-radio { border-color:var(--primary); }
+.version-item.selected .version-radio::after { content:''; width:8px; height:8px; background:var(--primary); border-radius:50%; }
+.version-info { flex:1; }
+.version-info .ver-title { font-size:13px; font-weight:500; display:flex; align-items:center; gap:6px; }
+.version-info .ver-note { font-size:12px; color:var(--text-2); margin-top:2px; }
+.version-info .ver-meta { font-size:11px; color:var(--text-3); margin-top:4px; display:flex; gap:8px; }
+.ver-badge-current { font-size:10px; background:var(--success-light); color:#059669; padding:1px 5px; border-radius:3px; }
+.ver-badge-archived { font-size:10px; background:var(--bg-base); color:var(--text-3); padding:1px 5px; border-radius:3px; }
+
+/* Test panel */
+.test-area { display:flex; flex-direction:column; gap:12px; }
+.test-input-group { display:flex; flex-direction:column; gap:6px; }
+.test-input-group label { font-size:12px; font-weight:500; color:var(--text-2); }
+.test-input-group textarea { border:1px solid var(--border); border-radius:8px; padding:10px; font-size:13px; font-family:inherit; resize:none; line-height:1.5; color:var(--text-1); }
+.test-input-group textarea:focus { outline:none; border-color:var(--primary); }
+.test-input-group select { height:34px; border:1px solid var(--border); border-radius:8px; padding:0 10px; font-size:12px; font-family:inherit; color:var(--text-2); background:var(--bg-container); }
+.test-results { margin-top:8px; }
+.test-result-card { border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.test-result-header { padding:8px 12px; background:var(--bg-base); font-size:12px; font-weight:500; display:flex; align-items:center; gap:6px; border-bottom:1px solid var(--border); }
+.test-result-body { padding:12px; font-size:12px; line-height:1.6; color:var(--text-2); }
+.test-result-body .match-info { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+.test-tool-call { background:var(--primary-light); border:1px solid #bfdbfe; border-radius:6px; padding:8px 10px; margin-top:6px; font-size:11px; font-family:'SF Mono','Fira Code',monospace; }
+.test-score { display:inline-flex; align-items:center; gap:4px; }
+.test-score-bar { width:60px; height:4px; background:var(--bg-base); border-radius:2px; overflow:hidden; }
+.test-score-fill { height:100%; border-radius:2px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1c64f2"/><path d="M8 12h8M12 8v8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Doraemon</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-group-label">Expert Agent</div>
+      <div class="nav-item">
+        <div class="nav-dot" style="background:var(--primary)"></div>
+        CS
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802"/></svg>
+        i18n
+      </div>
+      <div class="nav-group-label">Management</div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/></svg>
+        Skills
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
+        Knowledge
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="main-header">
+      <h1>Skills</h1>
+    </header>
+
+    <div class="content">
+      <!-- Skill List -->
+      <div class="skill-list-panel">
+        <div class="list-toolbar">
+          <div class="list-tabs">
+            <button class="list-tab active">All <span class="count">12</span></button>
+            <button class="list-tab">Active <span class="count">8</span></button>
+            <button class="list-tab">Draft <span class="count">3</span></button>
+            <button class="list-tab">Inactive <span class="count">1</span></button>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <div class="search-box" style="flex:1;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg>
+              <input type="text" placeholder="Search skills...">
+            </div>
+            <select style="height:34px; border:1px solid var(--border); border-radius:8px; padding:0 8px; font-size:12px; font-family:inherit; color:var(--text-2); background:var(--bg-container); cursor:pointer; outline:none; min-width:120px;">
+              <option>🎮 所有游戏</option>
+              <option>vividarmy</option>
+              <option>yugioh</option>
+              <option>puzzles</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="skill-cards">
+          <!-- Card 1: AI created, selected -->
+          <div class="skill-card selected">
+            <div class="skill-card-top">
+              <div class="skill-card-name">VIP 充值未到账处理</div>
+              <span class="badge badge-active">Active</span>
+            </div>
+            <div class="skill-card-desc">处理 VIP 用户充值后未收到游戏币或道具，自动查单、补发、必要时升级</div>
+            <div class="skill-card-meta">
+              <span class="badge badge-source badge-ai">🤖 AI 学习</span>
+              <span class="badge badge-scene">payment</span>
+              <span class="badge badge-version">v3</span>
+              <span class="badge badge-tools">4 tools</span>
+              <span class="badge badge-tools">3 知识</span>
+              <span class="badge badge-game">🎮 vividarmy</span>
+              <span class="badge badge-game">🎮 puzzles</span>
+              <span style="font-size:11px; color:var(--text-3); margin-left:auto;">使用 156 次 · 78%</span>
+            </div>
+          </div>
+
+          <!-- Card 2: AI created -->
+          <div class="skill-card">
+            <div class="skill-card-top">
+              <div class="skill-card-name">账号封禁申诉处理</div>
+              <span class="badge badge-active">Active</span>
+            </div>
+            <div class="skill-card-desc">处理用户账号被封后的申诉流程，核实封禁原因并按规则处理</div>
+            <div class="skill-card-meta">
+              <span class="badge badge-source badge-ai">🤖 AI 学习</span>
+              <span class="badge badge-scene">account</span>
+              <span class="badge badge-version">v2</span>
+              <span class="badge badge-tools">3 tools</span>
+              <span class="badge badge-game-all">🎮 所有游戏</span>
+              <span style="font-size:11px; color:var(--text-3); margin-left:auto;">使用 89 次 · 82%</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Human created -->
+          <div class="skill-card">
+            <div class="skill-card-top">
+              <div class="skill-card-name">登录异常排查</div>
+              <span class="badge badge-active">Active</span>
+            </div>
+            <div class="skill-card-desc">排查用户无法登录的各类原因，包括设备、网络、账号状态等</div>
+            <div class="skill-card-meta">
+              <span class="badge badge-source badge-human">👤 手动创建</span>
+              <span class="badge badge-scene">account</span>
+              <span class="badge badge-version">v5</span>
+              <span class="badge badge-tools">2 tools</span>
+              <span class="badge badge-game-all">🎮 所有游戏</span>
+              <span style="font-size:11px; color:var(--text-3); margin-left:auto;">使用 234 次 · 71%</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Draft, AI created -->
+          <div class="skill-card">
+            <div class="skill-card-top">
+              <div class="skill-card-name">Bug 反馈收集与分类</div>
+              <span class="badge badge-draft">Draft</span>
+            </div>
+            <div class="skill-card-desc">收集用户反馈的游戏 Bug 信息，自动分类并创建 Bug 工单</div>
+            <div class="skill-card-meta">
+              <span class="badge badge-source badge-ai">🤖 AI 学习</span>
+              <span class="badge badge-scene">bug</span>
+              <span class="badge badge-version">v1</span>
+              <span class="badge badge-tools">1 tool</span>
+              <span class="badge badge-game">🎮 vividarmy</span>
+              <span style="font-size:11px; color:var(--warning); margin-left:auto;">待审核</span>
+            </div>
+          </div>
+
+          <!-- Card 5: Human created -->
+          <div class="skill-card">
+            <div class="skill-card-top">
+              <div class="skill-card-name">VIP 专属补偿方案</div>
+              <span class="badge badge-active">Active</span>
+            </div>
+            <div class="skill-card-desc">根据 VIP 等级和问题类型给出补偿方案，自动计算补偿额度</div>
+            <div class="skill-card-meta">
+              <span class="badge badge-source badge-human">👤 手动创建</span>
+              <span class="badge badge-scene">compensation</span>
+              <span class="badge badge-version">v2</span>
+              <span class="badge badge-tools">3 tools</span>
+              <span class="badge badge-game">🎮 vividarmy</span>
+              <span class="badge badge-game">🎮 yugioh</span>
+              <span class="badge badge-game">🎮 puzzles</span>
+              <span style="font-size:11px; color:var(--text-3); margin-left:auto;">使用 67 次 · 85%</span>
+            </div>
+          </div>
+
+          <!-- Card 6: Inactive -->
+          <div class="skill-card">
+            <div class="skill-card-top">
+              <div class="skill-card-name">游戏内购退款处理</div>
+              <span class="badge badge-inactive">Inactive</span>
+            </div>
+            <div class="skill-card-desc">处理游戏内购退款请求，已因成功率过低被自动停用</div>
+            <div class="skill-card-meta">
+              <span class="badge badge-source badge-ai">🤖 AI 学习</span>
+              <span class="badge badge-scene">payment</span>
+              <span class="badge badge-version">v4</span>
+              <span class="badge badge-tools">5 tools</span>
+              <span class="badge badge-game">🎮 yugioh</span>
+              <span style="font-size:11px; color:var(--error); margin-left:auto;">成功率 45%</span>
+            </div>
+          </div>
+
+          <!-- Card 7: Draft, AI -->
+          <div class="skill-card">
+            <div class="skill-card-top">
+              <div class="skill-card-name">活动奖励未发放</div>
+              <span class="badge badge-draft">Draft</span>
+            </div>
+            <div class="skill-card-desc">用户参与活动后未收到奖励的排查和补发处理</div>
+            <div class="skill-card-meta">
+              <span class="badge badge-source badge-ai">🤖 AI 学习</span>
+              <span class="badge badge-scene">reward</span>
+              <span class="badge badge-version">v1</span>
+              <span class="badge badge-tools">2 tools</span>
+              <span class="badge badge-game-all">🎮 所有游戏</span>
+              <span style="font-size:11px; color:var(--warning); margin-left:auto;">待审核</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Panel: Create & Edit Skills -->
+      <div class="chat-panel">
+        <div class="chat-panel-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+          <div>
+            <div class="title">VIP 充值未到账处理</div>
+            <div class="subtitle">查看和编辑此 Skill · v3 · Active</div>
+          </div>
+          <button class="btn btn-sm" style="margin-left:auto;" id="btn-test">测试</button>
+          <button class="btn btn-sm" id="btn-rollback">回退版本</button>
+        </div>
+
+        <div class="chat-messages">
+          <!-- System message -->
+          <div style="text-align:center; font-size:11px; color:var(--text-3); padding:4px 0;">
+            此 Skill 由 AI 从 3 个已解决工单中学习生成，经 admin_001 审核通过
+          </div>
+
+          <!-- Bot: shows current skill -->
+          <div class="chat-msg bot">
+            <div class="chat-avatar bot-av">AI</div>
+            <div>
+              <div class="chat-bubble">这是当前 Skill 的完整定义。你可以直接告诉我要修改什么，比如"加一条约束：大额订单必须转人工"或"把语气改成更正式的"。</div>
+              <div class="skill-preview">
+                <div class="skill-preview-header">
+                  <span class="name">VIP 充值未到账处理</span>
+                  <div style="display:flex; gap:4px;">
+                    <span class="badge badge-active">Active</span>
+                    <span class="badge badge-version">v3</span>
+                  </div>
+                </div>
+                <div class="skill-preview-body">
+                  <dt>触发条件</dt>
+                  <dd>玩家反馈充值后未收到游戏币或道具</dd>
+                  <dd style="margin-top:4px; display:flex; gap:4px; flex-wrap:wrap;">
+                    <span class="badge badge-scene">充值</span>
+                    <span class="badge badge-scene">没到账</span>
+                    <span class="badge badge-scene">没收到</span>
+                    <span class="badge badge-scene">扣款</span>
+                  </dd>
+
+                  <dt>适用游戏</dt>
+                  <dd style="display:flex; gap:4px; flex-wrap:wrap; margin-top:4px;">
+                    <span class="badge badge-game">🎮 vividarmy</span>
+                    <span class="badge badge-game">🎮 puzzles</span>
+                  </dd>
+
+                  <dt>处理目标</dt>
+                  <dd>快速定位充值未到账原因并解决，优先保障 VIP 用户体验</dd>
+
+                  <dt>语气</dt>
+                  <dd>共情、专业、高优先级</dd>
+
+                  <dt>处理步骤</dt>
+                  <dd>
+                    <ul>
+                      <li>安抚情绪，表达重视</li>
+                      <li>调用 query_order 主动查询订单状态</li>
+                      <li>根据订单状态走处理路径（引导刷新 / 补发 / 确认扣款 / 升级主管）</li>
+                      <li>给出明确处理时间预期</li>
+                      <li>确认用户问题已解决</li>
+                    </ul>
+                  </dd>
+
+                  <dt>可用工具</dt>
+                  <dd style="display:flex; gap:4px; flex-wrap:wrap; margin-top:4px;">
+                    <span class="badge badge-tools">🔧 query_order</span>
+                    <span class="badge badge-tools">🔧 create_redelivery</span>
+                    <span class="badge badge-tools">🔧 transfer</span>
+                    <span class="badge badge-tools">🔧 tag_conversation</span>
+                  </dd>
+
+                  <dt>引用知识 <span style="font-size:10px; font-weight:400; color:var(--primary); background:#f0f5ff; padding:0 4px; border-radius:3px; margin-left:4px;">knowledge_refs</span></dt>
+                  <dd>
+                    <ul>
+                      <li><span style="font-weight:500;">充值到账时间说明</span> <span style="color:var(--text-3); font-style:italic;">— 告知用户正常到账时间</span></li>
+                      <li><span style="font-weight:500;">VIP 补偿政策</span> <span style="color:var(--text-3); font-style:italic;">— 确定补偿方案和优先级</span></li>
+                      <li><span style="font-weight:500;">支付渠道与订单格式</span> <span style="color:var(--text-3); font-style:italic;">— 帮助定位订单信息</span></li>
+                    </ul>
+                  </dd>
+
+                  <dt>约束</dt>
+                  <dd>
+                    <ul>
+                      <li>未确认订单状态前，不承诺补发或退款</li>
+                      <li>金额 ≥ 1000 的补发必须转接 VIP 处理组</li>
+                      <li>不向用户透露内部系统名称</li>
+                    </ul>
+                  </dd>
+
+                  <dt>处理原则</dt>
+                  <dd>
+                    <ul>
+                      <li>先给方案再解释原因</li>
+                      <li>VIP 用户主动从系统拉取信息</li>
+                      <li>明确告知处理时间预期</li>
+                    </ul>
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- User edit request -->
+          <div class="chat-msg user">
+            <div class="chat-avatar user-av">D</div>
+            <div class="chat-bubble">加一条约束：充值金额超过 3000 的，直接转给 VIP 专属客服组，不走自动补发</div>
+          </div>
+
+          <!-- Bot: confirms change -->
+          <div class="chat-msg bot">
+            <div class="chat-avatar bot-av">AI</div>
+            <div>
+              <div class="chat-bubble">好的，我在约束中新增了这条规则。以下是变更内容：</div>
+              <div class="skill-preview" style="max-width:400px;">
+                <div class="skill-preview-header">
+                  <span class="name">约束变更 (v3 → v4)</span>
+                </div>
+                <div class="skill-preview-body">
+                  <dt style="color:var(--success);">+ 新增约束</dt>
+                  <dd>充值金额 ≥ 3000 的订单，直接转接 @vip_exclusive_team，不执行自动补发</dd>
+                </div>
+                <div class="skill-preview-actions">
+                  <button class="btn btn-sm">取消</button>
+                  <button class="btn btn-sm btn-primary">保存为 v4 (Draft)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <div class="chat-input-box">
+            <textarea rows="1" placeholder="描述你想创建或修改的 Skill..."></textarea>
+            <button class="send-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Version Rollback Overlay -->
+<div class="overlay" id="rollback-overlay">
+  <div class="overlay-panel" style="width:520px;">
+    <div class="overlay-header">
+      <h2>版本回退 — VIP 充值未到账处理</h2>
+      <button class="overlay-close" onclick="closeOverlay('rollback-overlay')">×</button>
+    </div>
+    <div class="overlay-body">
+      <p style="font-size:12px; color:var(--text-2); margin-bottom:12px;">选择要回退到的历史版本。回退后将生成一个新版本（v4），内容与所选版本相同。</p>
+
+      <div class="version-item" onclick="selectVersion(this)">
+        <div class="version-radio"></div>
+        <div class="version-info">
+          <div class="ver-title">v3 <span class="ver-badge-current">当前版本</span></div>
+          <div class="ver-note">增加 VIP 转接 action</div>
+          <div class="ver-meta">
+            <span>manual_edit</span>
+            <span>admin_002 审核</span>
+            <span>2026-03-27</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="version-item selected" onclick="selectVersion(this)">
+        <div class="version-radio"></div>
+        <div class="version-info">
+          <div class="ver-title">v2 <span class="ver-badge-archived">archived</span></div>
+          <div class="ver-note">ticket#12456 学习，新增处理路径：联系支付渠道</div>
+          <div class="ver-meta">
+            <span>evolved</span>
+            <span>admin_001 审核</span>
+            <span>2026-03-20</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="version-item" onclick="selectVersion(this)">
+        <div class="version-radio"></div>
+        <div class="version-info">
+          <div class="ver-title">v1 <span class="ver-badge-archived">archived</span></div>
+          <div class="ver-note">从 ticket#12345 学习创建</div>
+          <div class="ver-meta">
+            <span>created</span>
+            <span>admin_001 审核</span>
+            <span>2026-03-15</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="overlay-footer">
+      <button class="btn" onclick="closeOverlay('rollback-overlay')">取消</button>
+      <button class="btn btn-primary" onclick="confirmRollback()">回退到 v2</button>
+    </div>
+  </div>
+</div>
+
+<!-- Test Overlay -->
+<div class="overlay" id="test-overlay">
+  <div class="overlay-panel" style="width:600px; max-height:85vh;">
+    <div class="overlay-header">
+      <h2>沙盒测试 — VIP 充值未到账处理 v3</h2>
+      <button class="overlay-close" onclick="closeOverlay('test-overlay')">×</button>
+    </div>
+    <div class="overlay-body">
+      <div class="test-area">
+        <div class="test-input-group">
+          <label>模拟玩家消息</label>
+          <textarea rows="2" id="test-message" placeholder="输入模拟的玩家消息...">我充了648但是钻石没到账，都过了一个小时了</textarea>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <div class="test-input-group" style="flex:1;">
+            <label>用户类型</label>
+            <select>
+              <option selected>VIP4 用户</option>
+              <option>VIP1-3 用户</option>
+              <option>普通用户</option>
+            </select>
+          </div>
+          <div class="test-input-group" style="flex:1;">
+            <label>游戏</label>
+            <select>
+              <option selected>vividarmy</option>
+              <option>puzzles</option>
+              <option>yugioh</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="runTest()" style="align-self:flex-start;">运行测试</button>
+
+        <div class="test-results" id="test-results">
+          <div style="font-size:12px; font-weight:600; margin-bottom:8px;">测试结果</div>
+
+          <!-- Match result -->
+          <div class="test-result-card" style="margin-bottom:10px;">
+            <div class="test-result-header">
+              <span style="color:var(--success);">✓</span> 匹配测试
+            </div>
+            <div class="test-result-body">
+              <div class="match-info">
+                <span class="badge badge-active">命中</span>
+                <span class="test-score">
+                  intent 匹配度
+                  <span class="test-score-bar"><span class="test-score-fill" style="width:95%; background:var(--success);"></span></span>
+                  95%
+                </span>
+                <span class="test-score">
+                  keywords 命中
+                  <span class="test-score-bar"><span class="test-score-fill" style="width:100%; background:var(--success);"></span></span>
+                  3/5
+                </span>
+              </div>
+              <div style="font-size:11px; color:var(--text-3);">命中关键词：充值、没到账、道具没有</div>
+            </div>
+          </div>
+
+          <!-- Reply result -->
+          <div class="test-result-card" style="margin-bottom:10px;">
+            <div class="test-result-header">
+              <span style="color:var(--success);">✓</span> 回复测试
+            </div>
+            <div class="test-result-body">
+              <div style="background:var(--bg-base); border-radius:6px; padding:10px; margin-bottom:8px; font-size:12px; line-height:1.6;">
+                非常抱歉让您遇到这个问题！作为 VIP 用户，我立即为您查询订单状态。
+              </div>
+              <div class="match-info">
+                <span class="test-score">
+                  语气符合度
+                  <span class="test-score-bar"><span class="test-score-fill" style="width:92%; background:var(--success);"></span></span>
+                  92%
+                </span>
+                <span class="test-score">
+                  步骤遵循
+                  <span class="test-score-bar"><span class="test-score-fill" style="width:100%; background:var(--success);"></span></span>
+                  Step 1 ✓
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tool call result -->
+          <div class="test-result-card" style="margin-bottom:10px;">
+            <div class="test-result-header">
+              <span style="color:var(--success);">✓</span> Tool Call 测试
+            </div>
+            <div class="test-result-body">
+              <div class="test-tool-call">
+                <div style="font-weight:500; color:var(--primary); margin-bottom:4px;">query_order</div>
+                <div>{ "user_id": "G25G55GXO", "time_range_hours": 2 }</div>
+              </div>
+              <div class="match-info" style="margin-top:8px;">
+                <span class="badge badge-active">正确调用</span>
+                <span style="font-size:11px; color:var(--text-3);">参数正确 · 调用时机正确（Step 2）</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Guardrail check -->
+          <div class="test-result-card">
+            <div class="test-result-header">
+              <span style="color:var(--success);">✓</span> 约束检查
+            </div>
+            <div class="test-result-body">
+              <div style="font-size:11px; line-height:1.8;">
+                <div><span style="color:var(--success);">✓</span> 未在查询前承诺补发</div>
+                <div><span style="color:var(--success);">✓</span> 未透露内部系统名称</div>
+                <div><span style="color:var(--success);">✓</span> 通过 query_order 查询而非编造状态</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="overlay-footer">
+      <button class="btn" onclick="closeOverlay('test-overlay')">关闭</button>
+      <button class="btn btn-primary" onclick="runTest()">重新测试</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('btn-test').addEventListener('click', () => openOverlay('test-overlay'));
+document.getElementById('btn-rollback').addEventListener('click', () => openOverlay('rollback-overlay'));
+
+function openOverlay(id) { document.getElementById(id).classList.add('show'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('show'); }
+
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); });
+});
+
+function selectVersion(el) {
+  document.querySelectorAll('.version-item').forEach(v => v.classList.remove('selected'));
+  el.classList.add('selected');
+  const ver = el.querySelector('.ver-title').textContent.trim().split(' ')[0];
+  document.querySelector('#rollback-overlay .overlay-footer .btn-primary').textContent = '回退到 ' + ver;
+}
+
+function confirmRollback() {
+  const selected = document.querySelector('.version-item.selected .ver-title').textContent.trim().split(' ')[0];
+  closeOverlay('rollback-overlay');
+  const msgs = document.querySelector('.chat-messages');
+  const sysMsg = document.createElement('div');
+  sysMsg.style.cssText = 'text-align:center; font-size:11px; color:var(--text-3); padding:4px 0;';
+  sysMsg.textContent = '已回退到 ' + selected + '，生成新版本 v4 (Draft)，需审核后上线';
+  msgs.appendChild(sysMsg);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function runTest() {
+  const results = document.getElementById('test-results');
+  results.style.display = '';
+  results.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
