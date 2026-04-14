@@ -72,38 +72,34 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 > 作为财务专员，我希望打开任务管理页面就能看到今天所有待处理任务，以便快速了解工作量。
 
 - [ ] 页面加载后显示当前日期（MM/DD/YYYY 格式），问候语格式为 "Hi, here are your tasks today: X pending review, X pending payment."
-- [ ] 页面分为四个区域：📋 Pending Review、✅ Reviewed（本人）、💰 Pending Payment、✅ Payment Completed
+- [ ] 页面分为三个聚合卡片：📋 Pending Review、💰 Pending Payment、✅ Payment Completed
 - [ ] 卡片不显示状态标签
 
 ### Case2：查看待审核 Invoice
 
 > 作为财务专员，我希望看到所有待审核 Invoice，不限于分配给我的。
 
-- [ ] 显示 F Expert 中**所有** status=pending 的 Invoice（所有财务可见）
-- [ ] 每条 Invoice 一张卡片，标题为提交方名称（Account Name），描述为 "Review Amount ¥XX,XXX"
-- [ ] 点击卡片跳转至 F-Expert Review 界面
-- [ ] 审核完成后，该卡片从 Pending Review 区移除
+- [ ] 将 F Expert 中**所有** status=pending 的 Invoice 聚合展示为一张 "Pending Review" 卡片（所有财务可见）
+- [ ] 卡片显示待审核的数量，例如 "X invoice(s)"
+- [ ] 点击卡片整体跳转至 F Expert 对应的票据审核页面
 
-### Case3：查看已审核 Invoice
-
-> 作为财务专员，我希望看到我审核通过的 Invoice。
-
-- [ ] 仅显示**当前用户**审核通过的 Invoice
-- [ ] 卡片标题为提交方名称（Account Name），描述为 "Review Amount ¥XX,XXX"
-- [ ] 点击卡片跳转至 F-Expert 对应的票据审核页面
-
-### Case4：查看打款任务
+### Case3：查看打款任务
 
 > 作为财务专员，我希望看到我需要处理的打款 Invoice，以便了解打款工作量。
 
-- [ ] 以 Invoice 维度展示，每条一张卡片
-- [ ] 仅显示**当前用户审核通过**的 Invoice 中需要打款的（status=approved, je_id IS NULL）
-- [ ] 卡片标题为 **"{Account Name} Payment"**
-- [ ] 卡片描述为 **"Payment Amount ¥XX,XXX"**
-- [ ] 点击卡片跳转至 F System 的 Invoice 管理列表页
+- [ ] 将**当前用户审核通过的（已审核）**且**未关联 JE（待打款）**的 Invoice 聚合展示为一张 "Pending Payment" 卡片（因为审核完成后即进入待打款状态）
+- [ ] 卡片显示待打款的数量，例如 "X invoice(s)"
+- [ ] 点击卡片整体跳转至 F System 的 Invoice 管理列表页
 - [ ] 月中（15日早上起）未关联 JE 的卡片变为黄色边框，提示 "Remember to make payment"
 - [ ] 月末（最后一天早上起）未关联 JE 的卡片变为红色边框，提示 "Month-end approaching, please complete payment soon"
-- [ ] 系统查询该 Invoice 已关联 JE（`je_id IS NOT NULL`）→ 卡片自动移至 Payment Completed 区（点击同样跳转至 F System 的 Invoice 管理列表页）
+
+### Case4：查看已打款任务
+
+> 作为财务专员，我希望看到我已经完成打款的 Invoice 数量。
+
+- [ ] 将当前用户已关联 JE 的 Invoice 聚合展示为一张 "Payment Completed" 卡片
+- [ ] 卡片显示已完成打款的数量，例如 "X invoice(s)"
+- [ ] 点击卡片整体跳转至 F System 的 Invoice 管理列表页
 
 ### Case5：月中提醒
 
@@ -142,7 +138,7 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 
 | 区域 | 说明 |
 |------|------|
-| 主内容区 | 居中展示（max-width: 560px），glassmorphism 风格，包含用户信息、日期、问候语、四个分区卡片列表 |
+| 主内容区 | 居中展示（max-width: 560px），glassmorphism 风格，包含用户信息、日期、问候语、三个聚合卡片 |
 
 #### 用户信息区
 
@@ -157,35 +153,27 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 
 #### 任务卡片
 
-页面分为四个区域，卡片**不显示状态标签**：
+页面分为三个聚合卡片，不再单独展示每条 Invoice：
 
 **📋 Pending Review（所有财务可见）**
 
 | 元素 | 说明 |
 |------|------|
 | 图标 | 📋 |
-| 标题 | Account Name |
-| 描述 | "Review Amount ¥XX,XXX" |
-| 交互 | 点击跳转至 F Expert 对应的票据审核页面 |
-
-**✅ Reviewed（仅当前用户）**
-
-| 元素 | 说明 |
-|------|------|
-| 图标 | ✅ |
-| 标题 | Account Name |
-| 描述 | "Review Amount ¥XX,XXX" |
-| 交互 | 点击跳转至 F Expert 对应的票据审核页面 |
-| 样式 | 完成态（灰色半透明背景） |
+| 标题 | Pending Review |
+| 描述 | "X invoice(s)" |
+| 交互 | 点击卡片整体跳转至 F Expert 对应的票据审核页面 |
 
 **💰 Pending Payment（仅当前用户审核过的）**
+
+将已审核和待打款的 Invoice 聚合展示：
 
 | 元素 | 说明 |
 |------|------|
 | 图标 | 💰 |
-| 标题 | "{Account Name} Payment" |
-| 描述 | "Payment Amount ¥XX,XXX" |
-| 交互 | 点击跳转至 F System 的 Invoice 管理列表页 |
+| 标题 | Pending Payment |
+| 描述 | "X invoice(s)" |
+| 交互 | 点击卡片整体跳转至 F System 的 Invoice 管理列表页 |
 | 黄色边框 | 月中（15日早上起）：warning 状态，提示 "Remember to make payment" |
 | 红色边框 | 月末（最后一天早上起）：urgent 状态，提示 "Month-end approaching, please complete payment soon" |
 
@@ -194,9 +182,9 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 | 元素 | 说明 |
 |------|------|
 | 图标 | ✅ |
-| 标题 | "{Account Name} Payment" |
-| 描述 | "Payment Amount ¥XX,XXX · JE Linked" |
-| 交互 | 点击跳转至 F System 的 Invoice 管理列表页 |
+| 标题 | Payment Completed |
+| 描述 | "X invoice(s)" |
+| 交互 | 点击卡片整体跳转至 F System 的 Invoice 管理列表页 |
 | 样式 | 完成态（灰色半透明背景） |
 
 ### 5.2 打款完成判定
@@ -215,10 +203,9 @@ D 系统的定位调整为**决策层通过 Agent 下发目标，Agent 管理一
 | 数据 | 来源 | 查询方式 | 可见性 |
 |------|------|----------|--------|
 | 待审核 Invoice | F Expert | `status=pending`，当月 | **所有财务可见** |
-| 已审核 Invoice | F Expert | `status=approved`，当月，`reviewer={current_user}` | **仅当前用户** |
-| 待打款 Invoice | F 系统 | `status=approved AND je_id IS NULL AND reviewer={current_user}` | **仅当前用户** |
-| 打款完成 Invoice | F 系统 | `status=approved AND je_id IS NOT NULL AND reviewer={current_user}` | **仅当前用户** |
-| Invoice 审核详情 | F-PAP-PAYMENT-REVIEW | 跳转链接 | — |
+| 待打款 Invoice | F Expert & F 系统 | 聚合查询：当前用户审核通过的（`status=approved`）且未关联 JE（`je_id IS NULL`） | **仅当前用户** |
+| 打款完成 Invoice | F 系统 | 当前用户审核通过的（`status=approved`）且已关联 JE（`je_id IS NOT NULL`） | **仅当前用户** |
+| Invoice 审核详情 | F-PAP-PAYMENT-REVIEW | 点击卡片整体跳转链接 | — |
 
 > **重要说明**：`je_id IS NULL` 在月中不等于"未打款"，因为 JE 录入集中在月底。月底通过 JE 关联状态可获得最终完成情况。
 

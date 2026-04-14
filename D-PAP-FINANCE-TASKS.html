@@ -165,17 +165,6 @@
             line-height: 1.6;
         }
 
-        /* ── Section Label ── */
-        .section-label {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: rgba(0,0,0,0.3);
-            margin: 24px 0 8px;
-        }
-        .section-label:first-child { margin-top: 16px; }
-
         /* ── Task Cards Container ── */
         .task-list {
             display: flex;
@@ -565,14 +554,17 @@
     }
 
     // ── Greeting ──
-    function getGreetingText(isSettlement) {
+    function getGreetingText(isSettlement, pendingReviewCount, pendingPaymentCount) {
         if (isSettlement) return 'Hi, month-end settlement is done 🎉';
-        const unpaid = paymentInvoices.filter(p => !p.jeLinked).length;
-        return `Hi, here are your tasks today: ${pendingInvoices.length} pending review, ${unpaid} pending payment.`;
+        return `Hi, here are your tasks today: ${pendingReviewCount} pending review, ${pendingPaymentCount} pending payment.`;
     }
 
     typewrite(document.getElementById('greeting1'), 'Hi 👋', 200)
-        .then(() => typewrite(document.getElementById('greeting2'), getGreetingText(false), 100));
+        .then(() => {
+            let pendingReviewCount = pendingInvoices.length;
+            let pendingPaymentCount = approvedInvoices.filter(inv => inv.reviewer === currentUser).length + paymentInvoices.filter(p => !p.jeLinked).length;
+            typewrite(document.getElementById('greeting2'), getGreetingText(false, pendingReviewCount, pendingPaymentCount), 100);
+        });
 
     // ── Render ──
     // scenario: 'normal' | 'settlement' (month-end 18:00 settlement – all reviews done, partial payments)
@@ -584,132 +576,82 @@
         const isMonthEnd = simDay >= 28;
         const isSettlement = scenario === 'settlement';
 
-        let html = '';
+        // Base counts
+        let pendingReviewCount = pendingInvoices.length;
+        let pendingPaymentCount = approvedInvoices.filter(inv => inv.reviewer === currentUser).length + paymentInvoices.filter(p => !p.jeLinked).length;
+        let paymentCompletedCount = paymentInvoices.filter(p => p.jeLinked).length;
+
+        // Settlement mock modifications
+        if (isSettlement) {
+            pendingPaymentCount += pendingReviewCount; // all reviews done, move to pending payment
+            pendingReviewCount = 0;
+
+            // 1 payment completes
+            if (pendingPaymentCount > 0) {
+                pendingPaymentCount -= 1;
+                paymentCompletedCount += 1;
+            }
+        }
+
+        let html = '<div class="task-list">';
         let cardIdx = 0;
 
         // ── 1. Pending Review ──
-        if (!isSettlement && pendingInvoices.length > 0) {
-            html += `<div class="section-label">📋 Pending Review · ${pendingInvoices.length}</div>`;
-            html += '<div class="task-list">';
-            pendingInvoices.forEach(inv => {
-                html += `
-                <a class="task-card" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
-                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
-                    <span class="card-icon">📋</span>
-                    <div class="card-body">
-                        <div class="card-title">${inv.account}</div>
-                        <div class="card-desc">Review Amount ${inv.amount}</div>
-                    </div>
-                    <span class="card-chevron">›</span>
-                </a>`;
-                cardIdx++;
-            });
-            html += '</div>';
+        if (pendingReviewCount > 0) {
+            html += `
+            <a class="task-card" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
+               style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
+                <span class="card-icon">📋</span>
+                <div class="card-body">
+                    <div class="card-title">Pending Review</div>
+                    <div class="card-desc">${pendingReviewCount} invoice(s)</div>
+                </div>
+                <span class="card-chevron">›</span>
+            </a>`;
+            cardIdx++;
         }
 
-        // ── 2. Reviewed (current user) ──
-        const myApproved = approvedInvoices.filter(inv => inv.reviewer === currentUser);
-        const reviewedList = isSettlement
-            ? [...myApproved, ...pendingInvoices.map(inv => ({...inv, reviewer: currentUser}))]
-            : myApproved;
-        if (reviewedList.length > 0) {
-            html += `<div class="section-label">✅ Reviewed (${currentUser}) · ${reviewedList.length}</div>`;
-            html += '<div class="task-list">';
-            reviewedList.forEach(inv => {
-                html += `
-                <a class="task-card all-done" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
-                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s;">
-                    <span class="card-icon">✅</span>
-                    <div class="card-body">
-                        <div class="card-title">${inv.account}</div>
-                        <div class="card-desc">Review Amount ${inv.amount}</div>
-                    </div>
-                    <span class="card-chevron">›</span>
-                </a>`;
-                cardIdx++;
-            });
-            html += '</div>';
+        // ── 2. Pending Payment ──
+        if (pendingPaymentCount > 0) {
+            let cls = '';
+            let hint = '';
+            if (isMonthEnd && !isSettlement) {
+                cls = ' urgent';
+                hint = `<div class="card-hint"><span class="dot"></span>Month-end approaching, please complete payment soon</div>`;
+            } else if (isMidMonth && !isSettlement) {
+                cls = ' warning';
+                hint = `<div class="card-hint"><span class="dot"></span>Remember to make payment</div>`;
+            }
+            
+            html += `
+            <a class="task-card${cls}" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
+               style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
+                <span class="card-icon">💰</span>
+                <div class="card-body">
+                    <div class="card-title">Pending Payment</div>
+                    <div class="card-desc">${pendingPaymentCount} invoice(s)</div>
+                    ${hint}
+                </div>
+                <span class="card-chevron">›</span>
+            </a>`;
+            cardIdx++;
         }
 
-        // ── 3. Payment ──
-        const unpaidInvoices = paymentInvoices.filter(p => !p.jeLinked);
-        const paidInvoices = paymentInvoices.filter(p => p.jeLinked);
-
-        if (!isSettlement && unpaidInvoices.length > 0) {
-            html += `<div class="section-label">💰 Pending Payment · ${unpaidInvoices.length}</div>`;
-            html += '<div class="task-list">';
-            unpaidInvoices.forEach(inv => {
-                let cls = '';
-                let hint = '';
-                if (isMonthEnd) {
-                    cls = ' urgent';
-                    hint = `<div class="card-hint"><span class="dot"></span>Month-end approaching, please complete payment soon</div>`;
-                } else if (isMidMonth) {
-                    cls = ' warning';
-                    hint = `<div class="card-hint"><span class="dot"></span>Remember to make payment</div>`;
-                }
-                html += `
-                <a class="task-card${cls}" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
-                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
-                    <span class="card-icon">💰</span>
-                    <div class="card-body">
-                        <div class="card-title">${inv.account} Payment</div>
-                        <div class="card-desc">Payment Amount ${inv.amount}</div>
-                        ${hint}
-                    </div>
-                    <span class="card-chevron">›</span>
-                </a>`;
-                cardIdx++;
-            });
-            html += '</div>';
+        // ── 3. Payment Completed ──
+        if (paymentCompletedCount > 0 || isSettlement) {
+            html += `
+            <a class="task-card all-done" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
+               style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s;">
+                <span class="card-icon">✅</span>
+                <div class="card-body">
+                    <div class="card-title">Payment Completed</div>
+                    <div class="card-desc">${paymentCompletedCount} invoice(s)</div>
+                </div>
+            </a>`;
+            cardIdx++;
         }
 
-        // Settlement scenario: 1 of 2 unpaid invoices got JE linked at settlement
-        const settlementPaid = isSettlement
-            ? [...paidInvoices, { ...unpaidInvoices[0], jeLinked: true }]
-            : paidInvoices;
-        const settlementStillUnpaid = isSettlement
-            ? unpaidInvoices.slice(1)
-            : [];
-
-        if (settlementStillUnpaid.length > 0) {
-            html += `<div class="section-label">💰 Pending Payment · ${settlementStillUnpaid.length}</div>`;
-            html += '<div class="task-list">';
-            settlementStillUnpaid.forEach(inv => {
-                html += `
-                <a class="task-card" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
-                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
-                    <span class="card-icon">💰</span>
-                    <div class="card-body">
-                        <div class="card-title">${inv.account} Payment</div>
-                        <div class="card-desc">Payment Amount ${inv.amount}</div>
-                    </div>
-                    <span class="card-chevron">›</span>
-                </a>`;
-                cardIdx++;
-            });
-            html += '</div>';
-        }
-
-        if (settlementPaid.length > 0 || isSettlement) {
-            const doneList = isSettlement ? settlementPaid : paidInvoices;
-            html += `<div class="section-label">✅ Payment Completed · ${doneList.length}</div>`;
-            html += '<div class="task-list">';
-            doneList.forEach(inv => {
-                html += `
-                <a class="task-card all-done" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
-                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s;">
-                    <span class="card-icon">✅</span>
-                    <div class="card-body">
-                        <div class="card-title">${inv.account} Payment</div>
-                        <div class="card-desc">Payment Amount ${inv.amount} · JE Linked</div>
-                    </div>
-                </a>`;
-                cardIdx++;
-            });
-            html += '</div>';
-        }
-
+        html += '</div>';
         taskList.innerHTML = html;
 
         setTimeout(() => {
@@ -722,15 +664,13 @@
         const successBanner = document.getElementById('successBanner');
         successBanner.classList.remove('show');
         if (isSettlement) {
-            const settled = settlementPaid.length;
-            const remaining = settlementStillUnpaid.length;
             document.getElementById('successTitle').textContent = 'Month-end Settlement Completed';
             document.getElementById('successDesc').innerHTML =
-                `All invoices reviewed. ${settled} payment(s) completed, <span style="color:#dc2626;font-weight:600">${remaining} still pending</span>.`;
+                `All invoices reviewed. ${paymentCompletedCount} payment(s) completed, <span style="color:#dc2626;font-weight:600">${pendingPaymentCount} still pending</span>.`;
             successBanner.classList.add('show');
         }
 
-        document.getElementById('greeting2').textContent = getGreetingText(isSettlement);
+        document.getElementById('greeting2').textContent = getGreetingText(isSettlement, pendingReviewCount, pendingPaymentCount);
     }
 
     renderAll(dayOfMonth, 'normal');
