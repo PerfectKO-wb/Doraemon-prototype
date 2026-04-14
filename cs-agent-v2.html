@@ -66,9 +66,9 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg-base); colo
 .status-badge { height:22px; padding:0 6px; border:1px solid var(--text-3); border-radius:4px; font-size:11px; display:flex; align-items:center; color:var(--text-2); }
 .chat-header-title { font-size:14px; font-weight:500; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .skill-pill { height:22px; padding:0 8px; background:linear-gradient(135deg, #ede9fe, #e0e7ff); border-radius:11px; font-size:11px; font-weight:500; color:#5b21b6; display:flex; align-items:center; gap:4px; flex-shrink:0; }
-.header-btn { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; background:transparent; position:relative; }
+.header-btn { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; border:1px solid var(--border); background:var(--bg-container); position:relative; }
 .header-btn:hover { background:var(--bg-hover); }
-.header-btn svg { width:16px; height:16px; color:var(--text-2); }
+.header-btn svg { width:20px; height:20px; color:var(--text-2); }
 .notif-dot { position:absolute; top:2px; right:2px; width:8px; height:8px; background:var(--error); border:1.5px solid white; border-radius:50%; }
 
 .chat-messages { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:20px; }
@@ -166,12 +166,6 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg-base); colo
       <div class="nav-label">Expert Agent</div>
       <div class="nav-item active"><div class="nav-dot" style="background:var(--primary)"></div>CS</div>
       <div class="nav-item"><div class="nav-dot" style="background:var(--warning)"></div>i18n</div>
-      <div class="nav-label">Projects</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/></svg>Infra Upgrade</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/></svg>Product Launch</div>
-      <div class="nav-label">Management</div>
-      <div class="nav-item" onclick="window.open('cs-skill-management.html','_blank')" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456Z"/></svg>Skills</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>Knowledge</div>
       <div class="nav-label">Today</div>
       <div class="nav-item"><span style="font-size:13px">648 充值钻石未到账</span></div>
       <div class="nav-item"><span style="font-size:13px">Data Analysis Help</span></div>
@@ -188,6 +182,12 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg-base); colo
       <div class="conv-header-top">
         <div class="conv-icon">CS</div>
         <div class="conv-title">CS Expert</div>
+        <div style="display:flex; gap:4px; margin-left:auto;">
+          <button class="header-btn" title="Table"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-8.625 0V7.875c0-.621.504-1.125 1.125-1.125h6.375c.621 0 1.125.504 1.125 1.125m-8.625 10.5V11.25m0 0h8.625m-8.625 0V7.875m8.625 3.375V7.875m0 3.375h5.25m-5.25 0v7.5c0 .621.504 1.125 1.125 1.125h3c.621 0 1.125-.504 1.125-1.125v-7.5m-5.25 0h5.25m0 0h1.125c.621 0 1.125-.504 1.125-1.125V7.875c0-.621-.504-1.125-1.125-1.125h-5.25"/></svg></button>
+          <button class="header-btn" title="Evaluations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15a2.25 2.25 0 0 1 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0 1 18 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3 1.5 1.5 3-3.75"/></svg></button>
+          <button class="header-btn" title="Knowledge Management"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg></button>
+          <button class="header-btn" title="Skill Management" onclick="window.open('cs-skill-management.html','_blank')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456Z"/></svg></button>
+        </div>
       </div>
       <div class="conv-tabs">
         <button class="conv-tab">All</button>
