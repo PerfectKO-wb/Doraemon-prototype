@@ -290,7 +290,7 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
                     </div>
                     <div class="header-icon-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     </div>
                 </div>
             </div>
@@ -348,15 +348,15 @@
     const chatMessages = [
         {
             role: 'ai', time: '10:32 AM',
-            html: `<div class="msg-text">I've detected a bank transaction that needs your review before I can generate the JE. Here are the details:\n\nTransaction ID: TXN-2026-04-0312\nBank Name: Sumitomo Mitsui (SMBC)\nAmount: ¥33,000\nCounterparty: エムスリーキャリア株式会社\nDescription: 産業医委託費 2026年1月分\nTransaction Date: 2026-04-05\nCounterparty Bank: 三菱UFJ銀行 本店\nCounterparty Account: 2285736\n\nPlease review and let me know if any fields need to be corrected.</div>`
+            html: `<div class="msg-text">I've detected a bank transaction that needs your review before I can generate JE. Here are the details:\n\nTransaction ID: TXN-2026-04-0052\nBank Name: Sumitomo Mitsui Bank (SMBC)\nAmount: JPY ¥185,000\nCounterparty: 日本Microsoft株式会社\nDescription: Microsoft 365 Enterprise License\nTransaction Date: 2026-04-07\nCounterparty Bank: 三菱UFJ銀行 新宿ビル\nCounterparty Account: 7890123456\nTransaction Type: Corporate Payment\nMemo: MS365-INV-202604\n\nPlease review and let me know if any fields need to be corrected.</div>`
         },
         {
             role: 'user', time: '10:35 AM',
-            html: `<div class="msg-text">Bank Name needs to be changed to United Overseas Bank Limited.</div>`
+            html: `<div class="msg-text">Counterparty Account should be 7890123457 instead of 7890123456.</div>`
         },
         {
             role: 'ai', time: '10:35 AM',
-            html: `<div class="msg-text">Got it. Here is the updated summary:\n\nBank Name: Sumitomo Mitsui (SMBC) → United Overseas Bank Limited\n\nAll other fields remain unchanged. Please confirm to proceed with JE generation.</div>
+            html: `<div class="msg-text">Got it. Here is the updated summary:\n\nCounterparty Account: 7890123456 → 7890123457\n\nAll other fields remain unchanged. Please confirm to proceed with JE generation.</div>
                 <div class="msg-actions">
                     <button class="msg-action-btn primary" onclick="handleConfirm()">✓ Confirm</button>
                 </div>`
