@@ -715,9 +715,11 @@
 
 <script>
     const sidebarItems = [
-        { title: 'March Invoice Collection', sub: 'Submitted 26', dot: true, href: 'F-PAP-PAYMENT-REQUEST.html' },
-        { title: 'March Invoice Review', sub: 'Pending 18', dot: true, href: 'F-PAP-PAYMENT-REVIEW.html' },
+        { title: 'Invoice Collection', sub: 'Submitted 26', dot: true, href: 'F-PAP-PAYMENT-REQUEST.html' },
+        { title: 'Invoice Review', sub: 'Pending 18', dot: true, href: 'F-PAP-PAYMENT-REVIEW.html' },
+        { title: 'JE Details Review', sub: 'Pending 2', dot: true, href: 'F-JE-REVIEW-CHAT.html' },
     ];
+    const currentPage = 'F-PAP-PAYMENT-REVIEW.html';
 
     const summaryFields = [
         { label: 'Bank Code', value: '' },
@@ -737,7 +739,7 @@
     function renderSidebar() {
         const list = document.getElementById('sidebarList');
         list.innerHTML = sidebarItems.map((item, i) => `
-            <div class="list-item${i === 1 ? ' active' : ''}" onclick="if('${item.href}'){window.location.href='${item.href}'}else{selectSidebarItem(this)}">
+            <div class="list-item${item.href === currentPage ? ' active' : ''}" onclick="window.location.href='${item.href}'">
                 <div class="list-item-content">
                     <div class="list-item-title">${item.title}</div>
                     ${item.sub ? `<div class="list-item-desc" style="font-weight:500;">${item.sub}</div>` : ''}

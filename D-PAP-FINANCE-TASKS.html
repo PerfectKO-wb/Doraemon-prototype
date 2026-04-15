@@ -670,22 +670,34 @@
         let cardIdx = 0;
 
         // ── 1. Pending Review ──
+        html += `<div class="section-label">📋 Pending Review</div>`;
+        html += `<div class="task-list">`;
         if (pendingReviewCount > 0) {
-            html += `<div class="section-label">📋 Pending Review</div>`;
-            html += `<div class="task-list">`;
             html += `
             <a class="task-card" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
                style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
                 <span class="card-icon">📋</span>
                 <div class="card-body">
-                    <div class="card-title">Pending Review</div>
+                    <div class="card-title">Invoice Review</div>
                     <div class="card-desc">${pendingReviewCount} invoice(s)</div>
                 </div>
                 <span class="card-chevron">›</span>
             </a>`;
-            html += `</div>`;
             cardIdx++;
         }
+        const jeReviewCount = 2;
+        html += `
+        <a class="task-card" href="F-JE-REVIEW-CHAT.html" target="_blank"
+           style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
+            <span class="card-icon">📊</span>
+            <div class="card-body">
+                <div class="card-title">JE Review</div>
+                <div class="card-desc">${jeReviewCount} JE(s)</div>
+            </div>
+            <span class="card-chevron">›</span>
+        </a>`;
+        cardIdx++;
+        html += `</div>`;
 
         // ── 2. Pending Payment ──
         if (pendingPaymentsList.length > 0) {
