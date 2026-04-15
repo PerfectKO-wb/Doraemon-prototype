@@ -559,26 +559,29 @@
     const currentUser = '张明';
 
     // ── Mock Data ──
+    const currencySymbol = { JPY: '¥', SGD: 'S$', USD: '$' };
+    function fmtAmt(inv) { return `${inv.currency} ${currencySymbol[inv.currency] || ''}${inv.amount}`; }
+
     // 待审核：所有财务可见
     const pendingInvoices = [
-        { id: 'INV-2026-04-001', account: 'エムスリーキャリア株式会社', amount: '¥33,000' },
-        { id: 'INV-2026-04-002', account: '株式会社リクルート', amount: '¥128,700' },
-        { id: 'INV-2026-04-003', account: 'AWS Japan 合同会社', amount: '¥456,200' },
+        { id: 'INV-2026-04-001', account: 'エムスリーキャリア株式会社', amount: '33,000', currency: 'JPY' },
+        { id: 'INV-2026-04-002', account: '株式会社リクルート', amount: '128,700', currency: 'JPY' },
+        { id: 'INV-2026-04-003', account: 'AWS Japan 合同会社', amount: '456,200', currency: 'JPY' },
     ];
 
     // 已审核：仅显示当前用户审核通过的
     const approvedInvoices = [
-        { id: 'INV-2026-04-010', account: 'Google Cloud Japan', amount: '¥89,100', reviewer: '张明' },
-        { id: 'INV-2026-04-011', account: '株式会社マイナビ', amount: '¥55,000', reviewer: '张明' },
+        { id: 'INV-2026-04-010', account: 'Google Cloud Japan', amount: '89,100', currency: 'JPY', reviewer: '张明' },
+        { id: 'INV-2026-04-011', account: '株式会社マイナビ', amount: '55,000', currency: 'JPY', reviewer: '张明' },
     ];
 
     // 打款：当前用户审核过的 invoice，每条独立卡片，月底查 JE 判断是否完成
     const paymentInvoices = [
-        { id: 'INV-2026-03-045', account: 'Slack Technologies', amount: '¥220,000', jeLinked: false },
-        { id: 'INV-2026-03-046', account: 'Salesforce Japan', amount: '¥185,000', jeLinked: false },
-        { id: 'INV-2026-03-048', account: 'Microsoft Japan', amount: '¥110,000', jeLinked: false },
-        { id: 'INV-2026-03-049', account: 'Oracle Corporation', amount: '¥45,000', jeLinked: false },
-        { id: 'INV-2026-03-047', account: 'Adobe Systems', amount: '¥67,500', jeLinked: true },
+        { id: 'INV-2026-03-045', account: 'Slack Technologies', amount: '2,150.00', currency: 'USD', jeLinked: false },
+        { id: 'INV-2026-03-046', account: 'Salesforce Japan', amount: '185,000', currency: 'JPY', jeLinked: false },
+        { id: 'INV-2026-03-048', account: 'Microsoft Singapore', amount: '3,800.00', currency: 'SGD', jeLinked: false },
+        { id: 'INV-2026-03-049', account: 'Oracle Corporation', amount: '45,000', currency: 'JPY', jeLinked: false },
+        { id: 'INV-2026-03-047', account: 'Adobe Systems', amount: '67,500', currency: 'JPY', jeLinked: true },
     ];
 
     // ── Render Date ──
@@ -723,7 +726,7 @@
                     <span class="card-icon">💰</span>
                     <div class="card-body">
                         <div class="card-title">${inv.account} Payment</div>
-                        <div class="card-desc">Payment Amount ${inv.amount}</div>
+                        <div class="card-desc">Payment Amount ${fmtAmt(inv)}</div>
                         ${hint}
                     </div>
                     <span class="card-chevron">›</span>
