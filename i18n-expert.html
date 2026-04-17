@@ -150,6 +150,10 @@
       font-size: 14px; color: var(--text-default); cursor: pointer;
       display: flex; align-items: center; font-family: inherit;
     }
+    .filter-chip.active {
+      background: var(--button-default);
+      color: white;
+    }
 
     .search-bar {
       height: 36px; border-radius: 12px; border: 1px solid var(--border-divider);
@@ -466,6 +470,7 @@
 
         <div class="filter-row">
           <button class="filter-chip">Waiting</button>
+          <button class="filter-chip" id="filter-me">@me</button>
         </div>
         <div class="search-bar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -654,5 +659,34 @@
   <style>
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterMeBtn = document.getElementById('filter-me');
+      const convEntries = document.querySelectorAll('.conv-entry');
+      
+      // Simulate some entries belonging to "me"
+      if (convEntries.length > 0) convEntries[0].setAttribute('data-me', 'true');
+      if (convEntries.length > 1) convEntries[1].setAttribute('data-me', 'true');
+
+      let isFilterActive = false;
+
+      filterMeBtn.addEventListener('click', () => {
+        isFilterActive = !isFilterActive;
+        filterMeBtn.classList.toggle('active', isFilterActive);
+        
+        convEntries.forEach(entry => {
+          if (isFilterActive) {
+            if (entry.getAttribute('data-me') === 'true') {
+              entry.style.display = 'flex';
+            } else {
+              entry.style.display = 'none';
+            }
+          } else {
+            entry.style.display = 'flex';
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>
