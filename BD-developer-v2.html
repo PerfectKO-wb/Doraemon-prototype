@@ -168,11 +168,16 @@
             background: #181818;
             border-radius: 8px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, border-color 0.2s;
             position: relative;
+            border: 1px solid transparent;
         }
         .game-item:hover {
             background: #222;
+        }
+        .game-item.tab-active {
+            border-color: rgba(227, 255, 52, 0.4);
+            background: #1e1f16;
         }
         .game-icon {
             width: 48px;
@@ -257,6 +262,7 @@
         .game-item-wrapper {
             position: relative;
         }
+
 
         /* Progress Card */
         .progress-card {
@@ -381,52 +387,50 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 20px;
-            border: 1px dashed rgba(227, 255, 52, 0.45);
+            padding: 14px 16px;
+            background: #181818;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
-            background: transparent;
+            transition: background 0.2s, border-color 0.2s;
+            border: 1px solid transparent;
         }
         .add-game-card:hover {
-            background: rgba(227, 255, 52, 0.06);
-            border-color: rgba(227, 255, 52, 0.7);
+            background: #1e1e1e;
+        }
+        .add-game-card.active {
+            border-color: rgba(227, 255, 52, 0.4);
+            background: #1e1f16;
         }
         .add-game-card-text {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.6);
+            flex-direction: column;
+            gap: 2px;
         }
-        .add-game-card:hover .add-game-card-text {
-            color: #e3ff34;
+        .add-game-card-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.35);
         }
         .add-game-card-hint {
             font-size: 14px;
-            font-weight: 600;
-            color: #e3ff34;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.55);
+            transition: color 0.2s;
         }
-        .add-game-plus {
-            width: 28px;
-            height: 28px;
-            border: 1.5px solid rgba(227, 255, 52, 0.5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .add-game-card:hover .add-game-card-hint,
+        .add-game-card.active .add-game-card-hint {
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .add-game-chevron {
+            width: 18px;
+            height: 18px;
+            opacity: 0.3;
             flex-shrink: 0;
-            transition: all 0.2s;
+            transition: opacity 0.2s, transform 0.2s;
         }
-        .add-game-card:hover .add-game-plus {
-            border-color: #e3ff34;
-            background: rgba(227, 255, 52, 0.1);
-        }
-        .add-game-plus svg {
-            width: 14px;
-            height: 14px;
-            stroke: #e3ff34;
+        .add-game-card:hover .add-game-chevron,
+        .add-game-card.active .add-game-chevron {
+            opacity: 0.6;
+            transform: translateX(2px);
         }
 
         .chat-body {
@@ -726,20 +730,17 @@
                     <!-- Add new game entry -->
                     <div class="add-game-card" id="addGameCard">
                         <div class="add-game-card-text">
-                            没有找到你的游戏？
-                            <span class="add-game-card-hint">点击添加新游戏</span>
+                            <span class="add-game-card-label">没有找到你的游戏？</span>
+                            <span class="add-game-card-hint">马上添加新游戏</span>
                         </div>
-                        <div class="add-game-plus">
-                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                        </div>
+                        <svg class="add-game-chevron" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </div>
                 </div>
 
                 <!-- Progress Card -->
-                <div class="card progress-card">
+                <div class="card progress-card" id="progressCard">
                     <div class="progress-header">
                         <div class="progress-badge">
                             <svg viewBox="0 0 24 24" fill="none">
@@ -846,47 +847,48 @@
 
         const gameSelector = document.getElementById('gameSelector');
         const gameDropdown = document.getElementById('gameDropdown');
-        const dropdownItems = document.querySelectorAll('.game-dropdown-item');
         const chatTextarea = document.querySelector('.chat-textarea');
         const sendBtn = document.getElementById('sendBtn');
         const chatBody = document.getElementById('chatBody');
         const addGameCard = document.getElementById('addGameCard');
+        const progressCard = document.getElementById('progressCard');
 
         const botMessages = {
             integrate: {
-                welcome: [
-                    { bubble: '<p>合同已签署成功，接下来开始 Dragon Realm Tactics 的接入任务。</p><p>SDK 接入, 请点击下载并使用 G123 ID 登录L-Agent，按提示完成接入；如果过程中有任何疑问，直接在这里问我。</p>' }
-                ],
+                welcome: '<p>合同已签署成功，接下来开始 Dragon Realm Tactics 的接入任务。</p><p>SDK 接入, 请点击下载并使用 G123 ID 登录L-Agent，按提示完成接入；如果过程中有任何疑问，直接在这里问我。</p>',
                 fallback: '<p>收到！如果您在接入过程中遇到任何问题，请随时告诉我。</p>'
             },
             submit: {
-                welcome: [
-                    { bubble: '<p>提交新游戏，请提供以下信息：</p><p>• 游戏 URL（支持多款）<br>• 联系人<br>• 联系方式（必填：微信号和邮箱；电话选填）</p>' }
-                ],
+                welcome: '<p>欢迎来到 G123 开发者平台。👋</p><p>这里是 G123 商务团队。G123 作为全球领先的 H5 游戏平台，致力于帮助游戏开发者出海，触达 200+ 个国家和地区的玩家。</p><p>如需启动合作流程，请提供以下信息：</p><p>• 游戏 URL（支持多款）<br>• 联系人<br>• 联系方式（必填：微信号和邮箱；电话选填）</p>',
                 fallback: '<p>好的，信息已记录。我们的BD团队会在1-2个工作日内通过您填写的联系方式与您取得联系。</p>'
             }
         };
 
-        // Game selector
-        gameSelector.addEventListener('click', function(e) {
-            e.stopPropagation();
-            this.classList.toggle('open');
-            gameDropdown.classList.toggle('show');
-        });
-
-        dropdownItems.forEach(item => {
-            item.addEventListener('click', function(e) {
+        function bindDropdownItem(el) {
+            el.addEventListener('click', function(e) {
                 e.stopPropagation();
-                dropdownItems.forEach(i => i.classList.remove('selected'));
+                document.querySelectorAll('.game-dropdown-item').forEach(i => i.classList.remove('selected'));
                 this.classList.add('selected');
                 gameSelector.querySelector('.game-icon').textContent = this.dataset.game;
                 gameSelector.querySelector('.game-name').textContent = this.dataset.name;
                 gameSelector.querySelector('.game-id').textContent = this.dataset.id;
                 gameSelector.classList.remove('open');
                 gameDropdown.classList.remove('show');
-                // Switch back to integrate mode when selecting a game
                 switchMode('integrate');
             });
+        }
+
+        // Bind existing static dropdown items
+        document.querySelectorAll('.game-dropdown-item').forEach(bindDropdownItem);
+
+        // Default: game selector is active tab on load
+        gameSelector.classList.add('tab-active');
+
+        // ── Game selector toggle ───────────────────────────────────
+        gameSelector.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.classList.toggle('open');
+            gameDropdown.classList.toggle('show');
         });
 
         document.addEventListener('click', function(e) {
@@ -896,23 +898,26 @@
             }
         });
 
-        // Add game card click → switch to submit mode
+        // ── Add game card — tab click ──────────────────────────────
         addGameCard.addEventListener('click', function() {
+            // Just switch to submit mode; don't touch the game selector
             switchMode('submit');
-            // Scroll chat into view
-            document.querySelector('.chat-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
 
         function switchMode(mode) {
             currentMode = mode;
             chatBody.innerHTML = '';
-            botMessages[mode].welcome.forEach(msg => {
-                const msgEl = document.createElement('div');
-                msgEl.className = 'chat-msg';
-                msgEl.innerHTML = `<div class="chat-avatar">包</div><div class="chat-bubble bot-bubble">${msg.bubble}</div>`;
-                chatBody.appendChild(msgEl);
-            });
+            const msgEl = document.createElement('div');
+            msgEl.className = 'chat-msg';
+            msgEl.innerHTML = `<div class="chat-avatar">包</div><div class="chat-bubble bot-bubble">${botMessages[mode].welcome}</div>`;
+            chatBody.appendChild(msgEl);
             chatBody.scrollTop = chatBody.scrollHeight;
+
+            // Toggle progress card and tab active states
+            const isSubmit = mode === 'submit';
+            progressCard.style.display = isSubmit ? 'none' : '';
+            addGameCard.classList.toggle('active', isSubmit);
+            gameSelector.classList.toggle('tab-active', !isSubmit);
         }
 
         function sendMessage() {
