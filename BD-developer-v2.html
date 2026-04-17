@@ -373,39 +373,60 @@
 
         /* Quick Actions */
         .quick-actions {
-            display: flex;
-            gap: 12px;
-            padding: 16px;
-            border-bottom: 1px solid #222;
+            display: none;
         }
-        .quick-btn {
-            flex: 1;
+
+        /* Add Game Card */
+        .add-game-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border: 1px dashed rgba(227, 255, 52, 0.45);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+        }
+        .add-game-card:hover {
+            background: rgba(227, 255, 52, 0.06);
+            border-color: rgba(227, 255, 52, 0.7);
+        }
+        .add-game-card-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .add-game-card:hover .add-game-card-text {
+            color: #e3ff34;
+        }
+        .add-game-card-hint {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e3ff34;
+        }
+        .add-game-plus {
+            width: 28px;
+            height: 28px;
+            border: 1.5px solid rgba(227, 255, 52, 0.5);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
+            flex-shrink: 0;
             transition: all 0.2s;
         }
-        .quick-btn.active {
-            background: #e3ff34;
-            color: #181818;
+        .add-game-card:hover .add-game-plus {
+            border-color: #e3ff34;
+            background: rgba(227, 255, 52, 0.1);
         }
-        .quick-btn:not(.active) {
-            background: #2c2c2c;
-            color: #f1f1f1;
-            border: 1px solid #363636;
-        }
-        .quick-btn:not(.active):hover {
-            background: #333;
-        }
-        .quick-btn svg {
-            width: 18px;
-            height: 18px;
+        .add-game-plus svg {
+            width: 14px;
+            height: 14px;
+            stroke: #e3ff34;
         }
 
         .chat-body {
@@ -702,6 +723,19 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Add new game entry -->
+                    <div class="add-game-card" id="addGameCard">
+                        <div class="add-game-card-text">
+                            没有找到你的游戏？
+                            <span class="add-game-card-hint">点击添加新游戏</span>
+                        </div>
+                        <div class="add-game-plus">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Progress Card -->
@@ -719,52 +753,22 @@
                     <div class="progress-list">
                         <div class="progress-item">
                             <div class="progress-num">1</div>
-                            <div class="progress-label">
-                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg);">
-                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                SDK、登录支付接入
-                            </div>
+                            <div class="progress-label">接入SDK</div>
                         </div>
                         <div class="progress-line"></div>
                         <div class="progress-item">
                             <div class="progress-num">2</div>
-                            <div class="progress-label">
-                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg);">
-                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                i18n 接入
-                            </div>
+                            <div class="progress-label">publisher 接入</div>
                         </div>
                         <div class="progress-line"></div>
                         <div class="progress-item">
                             <div class="progress-num">3</div>
-                            <div class="progress-label">
-                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg);">
-                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                publisher 接入
-                            </div>
+                            <div class="progress-label">提交游戏信息</div>
                         </div>
                         <div class="progress-line"></div>
                         <div class="progress-item">
                             <div class="progress-num">4</div>
-                            <div class="progress-label">
-                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg);">
-                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                提交游戏信息
-                            </div>
-                        </div>
-                        <div class="progress-line"></div>
-                        <div class="progress-item">
-                            <div class="progress-num">5</div>
-                            <div class="progress-label">
-                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg); opacity: 0.3;">
-                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                接入完成
-                            </div>
+                            <div class="progress-label">接入完成</div>
                         </div>
                     </div>
                 </div>
@@ -786,20 +790,7 @@
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="quick-actions">
-                    <div class="quick-btn active" id="btnIntegrate">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
-                        接入游戏
-                    </div>
-                    <div class="quick-btn" id="btnSubmit">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14M5 12h14"/>
-                        </svg>
-                        提交新游戏
-                    </div>
-                </div>
+                <div class="quick-actions"></div>
 
                 <div class="chat-body" id="chatBody">
                     <div class="chat-msg">
@@ -851,7 +842,6 @@
     </footer>
 
     <script>
-        // Mode: 'integrate' or 'submit'
         let currentMode = 'integrate';
 
         const gameSelector = document.getElementById('gameSelector');
@@ -860,26 +850,20 @@
         const chatTextarea = document.querySelector('.chat-textarea');
         const sendBtn = document.getElementById('sendBtn');
         const chatBody = document.getElementById('chatBody');
-        const btnIntegrate = document.getElementById('btnIntegrate');
-        const btnSubmit = document.getElementById('btnSubmit');
+        const addGameCard = document.getElementById('addGameCard');
 
-        // Bot messages for different modes
         const botMessages = {
             integrate: {
                 welcome: [
-                    { avatar: '包', bubble: '<p>合同已签署成功，接下来开始 Dragon Realm Tactics 的接入任务。</p><p>SDK 接入, 请点击下载并使用 G123 ID 登录L-Agent，按提示完成接入；如果过程中有任何疑问，直接在这里问我。</p>' }
+                    { bubble: '<p>合同已签署成功，接下来开始 Dragon Realm Tactics 的接入任务。</p><p>SDK 接入, 请点击下载并使用 G123 ID 登录L-Agent，按提示完成接入；如果过程中有任何疑问，直接在这里问我。</p>' }
                 ],
-                fallback: [
-                    { avatar: '包', bubble: '<p>收到！如果您在接入过程中遇到任何问题，请随时告诉我。</p>' }
-                ]
+                fallback: '<p>收到！如果您在接入过程中遇到任何问题，请随时告诉我。</p>'
             },
             submit: {
                 welcome: [
-                    { avatar: '包', bubble: '<p>提交新游戏，请提供以下信息：</p><p>• 游戏 URL（支持多款）<br>• 联系人<br>• 联系方式（必填：微信号和邮箱；电话选填）</p>' }
+                    { bubble: '<p>提交新游戏，请提供以下信息：</p><p>• 游戏 URL（支持多款）<br>• 联系人<br>• 联系方式（必填：微信号和邮箱；电话选填）</p>' }
                 ],
-                fallback: [
-                    { avatar: '包', bubble: '<p>好的，信息已记录。我们的BD团队会在1-2个工作日内通过您填写的联系方式与您取得联系。</p><p>如果还有其他游戏要提交，或有接入方面的问题，随时告诉我。</p>' }
-                ]
+                fallback: '<p>好的，信息已记录。我们的BD团队会在1-2个工作日内通过您填写的联系方式与您取得联系。</p>'
             }
         };
 
@@ -895,14 +879,13 @@
                 e.stopPropagation();
                 dropdownItems.forEach(i => i.classList.remove('selected'));
                 this.classList.add('selected');
-                const gameIcon = gameSelector.querySelector('.game-icon');
-                const gameName = gameSelector.querySelector('.game-name');
-                const gameId = gameSelector.querySelector('.game-id');
-                gameIcon.textContent = this.dataset.game;
-                gameName.textContent = this.dataset.name;
-                gameId.textContent = this.dataset.id;
+                gameSelector.querySelector('.game-icon').textContent = this.dataset.game;
+                gameSelector.querySelector('.game-name').textContent = this.dataset.name;
+                gameSelector.querySelector('.game-id').textContent = this.dataset.id;
                 gameSelector.classList.remove('open');
                 gameDropdown.classList.remove('show');
+                // Switch back to integrate mode when selecting a game
+                switchMode('integrate');
             });
         });
 
@@ -913,45 +896,25 @@
             }
         });
 
-        // Quick action buttons
-        btnIntegrate.addEventListener('click', function() {
-            if (currentMode !== 'integrate') {
-                currentMode = 'integrate';
-                this.classList.add('active');
-                btnSubmit.classList.remove('active');
-                switchMode('integrate');
-            }
-        });
-
-        btnSubmit.addEventListener('click', function() {
-            if (currentMode !== 'submit') {
-                currentMode = 'submit';
-                this.classList.add('active');
-                btnIntegrate.classList.remove('active');
-                switchMode('submit');
-            }
+        // Add game card click → switch to submit mode
+        addGameCard.addEventListener('click', function() {
+            switchMode('submit');
+            // Scroll chat into view
+            document.querySelector('.chat-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
 
         function switchMode(mode) {
-            // Clear chat
+            currentMode = mode;
             chatBody.innerHTML = '';
-            
-            // Show welcome message
-            const messages = botMessages[mode].welcome;
-            messages.forEach(msg => {
+            botMessages[mode].welcome.forEach(msg => {
                 const msgEl = document.createElement('div');
                 msgEl.className = 'chat-msg';
-                msgEl.innerHTML = `
-                    <div class="chat-avatar">${msg.avatar}</div>
-                    <div class="chat-bubble bot-bubble">${msg.bubble}</div>
-                `;
+                msgEl.innerHTML = `<div class="chat-avatar">包</div><div class="chat-bubble bot-bubble">${msg.bubble}</div>`;
                 chatBody.appendChild(msgEl);
             });
-            
             chatBody.scrollTop = chatBody.scrollHeight;
         }
 
-        // Send message
         function sendMessage() {
             const message = chatTextarea.value.trim();
             if (!message) return;
@@ -959,9 +922,7 @@
             const userMsg = document.createElement('div');
             userMsg.className = 'chat-msg user-msg';
             userMsg.innerHTML = `
-                <div class="chat-bubble user-bubble">
-                    <p>${escapeHtml(message)}</p>
-                </div>
+                <div class="chat-bubble user-bubble"><p>${escapeHtml(message)}</p></div>
                 <div class="chat-avatar user-avatar"></div>
             `;
             chatBody.appendChild(userMsg);
@@ -969,20 +930,13 @@
             chatTextarea.value = '';
             chatTextarea.style.height = 'auto';
             sendBtn.classList.remove('enabled');
-
             chatBody.scrollTop = chatBody.scrollHeight;
 
             setTimeout(() => {
-                const messages = botMessages[currentMode].fallback;
-                messages.forEach(msg => {
-                    const botMsg = document.createElement('div');
-                    botMsg.className = 'chat-msg';
-                    botMsg.innerHTML = `
-                        <div class="chat-avatar">${msg.avatar}</div>
-                        <div class="chat-bubble bot-bubble">${msg.bubble}</div>
-                    `;
-                    chatBody.appendChild(botMsg);
-                });
+                const botMsg = document.createElement('div');
+                botMsg.className = 'chat-msg';
+                botMsg.innerHTML = `<div class="chat-avatar">包</div><div class="chat-bubble bot-bubble">${botMessages[currentMode].fallback}</div>`;
+                chatBody.appendChild(botMsg);
                 chatBody.scrollTop = chatBody.scrollHeight;
             }, 1000);
         }
@@ -996,25 +950,17 @@
         chatTextarea.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-            if (this.value.trim()) {
-                sendBtn.classList.add('enabled');
-            } else {
-                sendBtn.classList.remove('enabled');
-            }
+            sendBtn.classList.toggle('enabled', !!this.value.trim());
         });
 
         sendBtn.addEventListener('click', function() {
-            if (this.classList.contains('enabled')) {
-                sendMessage();
-            }
+            if (this.classList.contains('enabled')) sendMessage();
         });
 
         chatTextarea.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                if (sendBtn.classList.contains('enabled')) {
-                    sendMessage();
-                }
+                if (sendBtn.classList.contains('enabled')) sendMessage();
             }
         });
     </script>
