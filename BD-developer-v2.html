@@ -497,15 +497,18 @@
         .chat-input-box {
             background: #202020;
             border: 1px solid #363636;
-            border-radius: 20px;
+            border-radius: 999px;
             box-shadow: 0px -24px 32px 4px #181818, 0px 8px 24px 0px rgba(0,0,0,0.06);
-            overflow: hidden;
-        }
-        .chat-input-main {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid #363636;
+            padding: 8px 8px 8px 16px;
+            gap: 8px;
+        }
+        .chat-input-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            min-width: 0;
         }
         .chat-textarea {
             width: 100%;
@@ -514,10 +517,10 @@
             outline: none;
             color: #f1f1f1;
             font-family: 'Inter', 'Noto Sans JP', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-size: 16px;
-            line-height: 24px;
+            font-size: 15px;
+            line-height: 22px;
             resize: none;
-            min-height: 24px;
+            min-height: 22px;
             max-height: 120px;
         }
         .chat-textarea::placeholder {
@@ -526,8 +529,8 @@
         .chat-input-actions {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
+            gap: 4px;
+            flex-shrink: 0;
         }
         .chat-action-btn {
             width: 32px;
@@ -804,15 +807,15 @@
                 </div>
                 <div class="chat-input-area">
                     <div class="chat-input-box">
+                        <div class="chat-action-btn attachment" id="attachmentBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                            </svg>
+                        </div>
                         <div class="chat-input-main">
                             <textarea class="chat-textarea" placeholder="输入消息..." rows="1"></textarea>
                         </div>
                         <div class="chat-input-actions">
-                            <div class="chat-action-btn attachment">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5">
-                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-                                </svg>
-                            </div>
                             <div class="chat-action-btn send" id="sendBtn">
                                 <span class="send-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="#010101" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -852,6 +855,7 @@
         const chatBody = document.getElementById('chatBody');
         const addGameCard = document.getElementById('addGameCard');
         const progressCard = document.getElementById('progressCard');
+        const attachmentBtn = document.getElementById('attachmentBtn');
 
         const botMessages = {
             integrate: {
@@ -913,9 +917,10 @@
             chatBody.appendChild(msgEl);
             chatBody.scrollTop = chatBody.scrollHeight;
 
-            // Toggle progress card and tab active states
+            // Toggle progress card, attachment btn, and tab active states
             const isSubmit = mode === 'submit';
             progressCard.style.display = isSubmit ? 'none' : '';
+            attachmentBtn.style.display = isSubmit ? 'none' : '';
             addGameCard.classList.toggle('active', isSubmit);
             gameSelector.classList.toggle('tab-active', !isSubmit);
         }
