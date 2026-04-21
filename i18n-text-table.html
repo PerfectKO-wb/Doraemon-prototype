@@ -340,11 +340,11 @@
       60% { transform: scale(1) rotate(0deg); }
     }
     .megaphone-badge {
-      position: absolute; top: -3px; right: -3px;
-      width: 14px; height: 14px; border-radius: 50%;
+      position: absolute; top: -4px; right: -6px;
+      min-width: 18px; height: 16px; border-radius: 8px;
       background: var(--error); color: white;
-      font-size: 9px; font-weight: 700; line-height: 14px;
-      text-align: center;
+      font-size: 10px; font-weight: 600; line-height: 16px;
+      text-align: center; padding: 0 5px;
       border: 1.5px solid var(--bg-container);
       pointer-events: none;
     }
@@ -361,11 +361,6 @@
     .notify-popover.visible { display: flex; }
     .notify-field { display: flex; flex-direction: column; gap: 8px; }
     .notify-field label { font-size: 15px; font-weight: 500; color: var(--text-default); }
-    .notify-select {
-      height: 40px; border: 1px solid var(--border-divider); border-radius: 8px;
-      padding: 0 12px; display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer; background: var(--bg-container); font-size: 14px;
-    }
     .notify-hint {
       display: flex; align-items: flex-start; gap: 8px;
       padding: 10px 12px; border-radius: 8px;
@@ -374,6 +369,16 @@
     }
     .notify-hint svg { flex-shrink: 0; color: #ea580c; margin-top: 1px; }
     .notify-hint.hidden { display: none; }
+
+    /* Notify Popover */
+    .notify-popover.visible { display: flex; }
+    .notify-field { display: flex; flex-direction: column; gap: 8px; }
+    .notify-field label { font-size: 15px; font-weight: 500; color: var(--text-default); }
+    .notify-select {
+      height: 40px; border: 1px solid var(--border-divider); border-radius: 8px;
+      padding: 0 12px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; background: var(--bg-container); font-size: 14px;
+    }
     .notify-select svg { color: var(--text-disabled); }
     .notify-action { margin-top: 4px; }
     .notify-send-btn {
@@ -382,6 +387,38 @@
       font-size: 15px; font-weight: 500; color: white; font-family: inherit;
     }
     .notify-send-btn:hover { opacity: 0.85; }
+    .notify-send-btn:disabled { background: var(--bg-disabled); color: var(--text-disabled); cursor: not-allowed; }
+
+    /* Leave Warning Dialog */
+    .leave-dialog {
+      display: none; position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); width: 400px;
+      background: var(--bg-container); border-radius: 12px;
+      box-shadow: var(--shadow-popup); padding: 20px 16px 16px; z-index: 200;
+      flex-direction: column; gap: 10px;
+    }
+    .leave-dialog.visible { display: flex; }
+    .leave-dialog-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #fff7ed; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 2px;
+    }
+    .leave-dialog-icon svg { width: 20px; height: 20px; color: #ea580c; }
+    .leave-dialog-title { font-size: 16px; font-weight: 500; color: var(--text-default); line-height: 22px; }
+    .leave-dialog-body { font-size: 14px; color: var(--text-secondary); line-height: 20px; }
+    .leave-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .leave-btn {
+      height: 32px; padding: 0 16px; border-radius: 6px; font-size: 14px;
+      font-family: inherit; cursor: pointer;
+    }
+    .leave-btn.cancel {
+      border: 1px solid var(--border-divider); background: var(--bg-container); color: var(--text-default);
+    }
+    .leave-btn.cancel:hover { background: var(--bg-active); }
+    .leave-btn.notify {
+      border: none; background: var(--button-default); color: white;
+    }
+    .leave-btn.notify:hover { opacity: 0.85; }
 
     .toast {
       position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px);
@@ -517,7 +554,7 @@
         <div class="toolbar-right" style="position:relative;">
           <button class="toolbar-icon-btn megaphone-wrap" title="Send Notification" id="megaphoneBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg>
-            <span class="megaphone-badge" id="megaphoneBadge">!</span>
+            <span class="megaphone-badge" id="megaphoneBadge">6</span>
           </button>
           <button class="toolbar-icon-btn" title="Download">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -537,8 +574,8 @@
             </div>
             <div class="notify-field">
               <label>Game</label>
-              <div class="notify-select">
-                <span style="color:var(--text-default);">gamedemo</span>
+              <div class="notify-select" id="gameSelect">
+                <span id="gameSelectValue">gamedemo</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
             </div>
@@ -768,6 +805,19 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
+  <!-- LEAVE WARNING DIALOG -->
+  <div class="leave-dialog" id="leaveDialog">
+    <div class="leave-dialog-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    </div>
+    <div class="leave-dialog-title">You have modified Japanese translations.</div>
+    <div class="leave-dialog-body">Do you want to send notifications to translators?</div>
+    <div class="leave-dialog-actions">
+      <button class="leave-btn cancel" id="leaveCancelBtn">Exit</button>
+      <button class="leave-btn notify" id="leaveNotifyBtn">Send</button>
+    </div>
+  </div>
+
   <script>
     const deployTopBtn = document.getElementById('deployTopBtn');
     const deployOverlay = document.getElementById('deployOverlay');
@@ -787,7 +837,9 @@
     }
 
     function updateBadge() {
-      const hasChanges = countJaModified() > 0;
+      const count = countJaModified();
+      const hasChanges = count > 0;
+      megaphoneBadge.textContent = count;
       megaphoneBadge.classList.toggle('hidden', !hasChanges);
       megaphoneBtn.classList.toggle('has-changes', hasChanges);
       notifyHint.classList.toggle('hidden', !hasChanges);
@@ -821,6 +873,50 @@
       if (!notifyPopover.contains(e.target) && !megaphoneBtn.contains(e.target)) {
         notifyPopover.classList.remove('visible');
       }
+    });
+
+    // Leave Warning Dialog
+    const leaveDialog = document.getElementById('leaveDialog');
+    const leaveCancelBtn = document.getElementById('leaveCancelBtn');
+    const leaveNotifyBtn = document.getElementById('leaveNotifyBtn');
+    const backBtn = document.querySelector('.back-btn');
+    const pendingNavItems = document.querySelectorAll('.sidebar-nav-item, .sidebar-sub-link');
+
+    let isNavigating = false;
+
+    function checkAndWarn(e) {
+      if (countJaModified() > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        leaveDialog.classList.add('visible');
+        isNavigating = true;
+      }
+    }
+
+    backBtn.addEventListener('click', (e) => {
+      if (countJaModified() > 0) {
+        e.preventDefault();
+        leaveDialog.classList.add('visible');
+      }
+    });
+
+    pendingNavItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (countJaModified() > 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          leaveDialog.classList.add('visible');
+        }
+      });
+    });
+
+    leaveCancelBtn.addEventListener('click', () => {
+      leaveDialog.classList.remove('visible');
+    });
+
+    leaveNotifyBtn.addEventListener('click', () => {
+      leaveDialog.classList.remove('visible');
+      notifyPopover.classList.add('visible');
     });
   </script>
 </body>
