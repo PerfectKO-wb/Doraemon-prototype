@@ -150,6 +150,13 @@
       font-size: 14px; color: var(--text-default); cursor: pointer;
       display: flex; align-items: center; font-family: inherit;
     }
+    .filter-chip.active {
+      background: var(--button-default);
+      color: var(--white);
+      border-color: var(--button-default);
+    }
+    .filter-chip:hover:not(.active) { background: var(--bg-hover); }
+    .conv-entry.hidden { display: none !important; }
 
     .search-bar {
       height: 36px; border-radius: 12px; border: 1px solid var(--border-divider);
@@ -289,7 +296,13 @@
       border: none; cursor: pointer; font-family: inherit;
       margin-top: 12px;
     }
-    .mark-reviewed-btn:hover { opacity: 0.85; }
+    .mark-reviewed-btn:hover:not(:disabled) { opacity: 0.85; }
+    .mark-reviewed-btn:disabled {
+      cursor: not-allowed;
+      background: var(--bg-active);
+      color: var(--text-disabled);
+      opacity: 1;
+    }
 
     .msg-reactions {
       display: flex; align-items: center; gap: 4px;
@@ -465,7 +478,8 @@
         </div>
 
         <div class="filter-row">
-          <button class="filter-chip">Waiting</button>
+          <button type="button" class="filter-chip" id="filterWaitingBtn">Waiting</button>
+          <button type="button" class="filter-chip" id="filterAtMeBtn" title="Show conversations that @ you">@me</button>
         </div>
         <div class="search-bar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -475,7 +489,7 @@
 
       <div class="conv-list">
         <!-- Image Translation entry -->
-        <div class="conv-entry active">
+        <div class="conv-entry active" data-at-me="false">
           <div class="conv-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
           </div>
@@ -491,7 +505,7 @@
         </div>
 
         <!-- kumo conversations -->
-        <div class="conv-entry active">
+        <div class="conv-entry active" data-at-me="true">
           <div class="conv-content" style="padding-left:0;">
             <div class="conv-title-row">
               <span class="conv-title" style="font-weight:500;">jya - Text Translation Update</span>
@@ -503,7 +517,7 @@
             </div>
           </div>
         </div>
-        <div class="conv-entry">
+        <div class="conv-entry" data-at-me="false">
           <div class="conv-content" style="padding-left:0;">
             <div class="conv-title-row">
               <span class="conv-title" style="font-weight:500;">kumo - Text Translation</span>
@@ -515,19 +529,19 @@
             </div>
           </div>
         </div>
-        <div class="conv-entry">
+        <div class="conv-entry" data-at-me="true">
           <div class="conv-content" style="padding-left:0;">
             <div class="conv-title-row">
               <span class="conv-title" style="font-weight:500;">kumo - Text Translation</span>
               <span class="conv-time">08:25</span>
             </div>
             <div class="conv-desc-row">
-              <span class="conv-desc">kumo - Text Translation</span>
+              <span class="conv-desc">@you · kumo - Text Translation</span>
               <div class="unread-dot"></div>
             </div>
           </div>
         </div>
-        <div class="conv-entry">
+        <div class="conv-entry" data-at-me="false">
           <div class="conv-content" style="padding-left:0;">
             <div class="conv-title-row">
               <span class="conv-title" style="font-weight:500;">kumo - Text Translation</span>
@@ -608,7 +622,7 @@
                   日文翻译已修改 请完成从 ja 到 en 的翻译审核
                 </div>
 
-                <button class="mark-reviewed-btn">Mark as Reviewed</button>
+                <button type="button" class="mark-reviewed-btn" id="markReviewedBtn">Mark as Reviewed</button>
               </div>
             </div>
 
@@ -655,5 +669,47 @@
   <style>
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   </style>
+  <script>
+    (function () {
+      var btn = document.getElementById('markReviewedBtn');
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (btn.disabled) return;
+          btn.textContent = 'Deployment Successful';
+          btn.disabled = true;
+        });
+      }
+
+      var atMeBtn = document.getElementById('filterAtMeBtn');
+      var convList = document.querySelector('.conv-list');
+      if (!atMeBtn || !convList) return;
+
+      function applyAtMeFilter() {
+        var on = atMeBtn.classList.contains('active');
+        var entries = convList.querySelectorAll('.conv-entry');
+        var firstVisible = null;
+        entries.forEach(function (el) {
+          var mentionsMe = el.getAttribute('data-at-me') === 'true';
+          var hide = on && !mentionsMe;
+          el.classList.toggle('hidden', hide);
+          if (!hide) firstVisible = firstVisible || el;
+        });
+        if (!on) return;
+        var hasVisibleActive = false;
+        entries.forEach(function (el) {
+          if (el.classList.contains('active') && !el.classList.contains('hidden')) hasVisibleActive = true;
+        });
+        if (!hasVisibleActive && firstVisible) {
+          entries.forEach(function (el) { el.classList.remove('active'); });
+          firstVisible.classList.add('active');
+        }
+      }
+
+      atMeBtn.addEventListener('click', function () {
+        atMeBtn.classList.toggle('active');
+        applyAtMeFilter();
+      });
+    })();
+  </script>
 </body>
 </html>
