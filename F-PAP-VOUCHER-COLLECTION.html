@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F Expert · Invoice Collection</title>
+    <title>F Expert · Voucher Collection</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -414,6 +414,32 @@
         .btn-primary:hover { background: #000; }
         .btn-primary svg { width: 14px; height: 14px; }
 
+        /* Upload dropdown */
+        .upload-wrap { position: relative; }
+        .upload-menu {
+            position: absolute; top: calc(100% + 6px); right: 0;
+            width: 180px; padding: 4px;
+            background: #fff; border-radius: 10px;
+            border: 1px solid var(--border-divider);
+            box-shadow: var(--shadow-md);
+            z-index: 30;
+            display: none;
+        }
+        .upload-menu.open { display: block; }
+        .upload-menu-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px; color: var(--text-default);
+            cursor: pointer; border: none; background: none; width: 100%;
+            font-family: inherit;
+        }
+        .upload-menu-item:hover { background: var(--bg-hover); }
+        .upload-menu-item svg { width: 16px; height: 16px; color: var(--text-secondary); }
+        .upload-menu-item .item-desc {
+            font-size: 11px; color: var(--text-secondary); margin-top: 1px;
+        }
+
         /* Tabs */
         .tab-bar {
             display: flex; gap: 0;
@@ -678,32 +704,9 @@
             background: #f3f3f1;
             display: flex; align-items: flex-start; justify-content: center;
             padding: 24px;
-            position: relative;
         }
         .viewer-body::-webkit-scrollbar { width: 8px; height: 8px; }
         .viewer-body::-webkit-scrollbar-thumb { background: #cfcfcd; border-radius: 4px; }
-
-        .viewer-parsing {
-            position: absolute; inset: 0;
-            background: #f3f3f1;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 14px; z-index: 2;
-        }
-        .viewer-parsing .parsing-spinner {
-            width: 44px; height: 44px;
-            border: 3px solid var(--border-divider);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: viewer-spin 0.8s linear infinite;
-        }
-        .viewer-parsing .parsing-text {
-            font-size: 14px; font-weight: 500; color: var(--text-default);
-        }
-        .viewer-parsing .parsing-sub {
-            font-size: 12px; color: var(--text-secondary);
-        }
-        @keyframes viewer-spin { to { transform: rotate(360deg); } }
         .invoice-paper {
             width: 780px; max-width: 100%;
             min-height: 100%;
@@ -784,6 +787,157 @@
             transform: rotate(-8deg);
             text-align: center; line-height: 10px;
             padding: 2px;
+        }
+
+        /* Voucher drawer — wide split layout */
+        .voucher-drawer {
+            position: fixed; top: 0; right: 0; bottom: 0;
+            width: min(960px, 94vw);
+            background: #fff;
+            box-shadow: -12px 0 32px rgba(0,0,0,0.12);
+            z-index: 101;
+            display: flex; flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .voucher-drawer.open { transform: translateX(0); }
+        .voucher-top {
+            height: 52px; flex-shrink: 0;
+            border-bottom: 1px solid var(--border-divider);
+            display: flex; align-items: center; padding: 0 16px; gap: 12px;
+        }
+        .voucher-split {
+            flex: 1; display: flex; min-height: 0;
+        }
+        .voucher-preview {
+            flex: 1; min-width: 0;
+            background: #f3f3f1;
+            display: flex; align-items: flex-start; justify-content: center;
+            overflow: auto; padding: 20px;
+            position: relative;
+        }
+        .voucher-preview::-webkit-scrollbar { width: 6px; height: 6px; }
+        .voucher-preview::-webkit-scrollbar-thumb { background: #cfcfcd; border-radius: 3px; }
+        .voucher-preview iframe,
+        .voucher-preview object {
+            width: 100%; height: 100%;
+            border: none; border-radius: 6px;
+            background: #fff;
+        }
+        .voucher-preview-placeholder {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 12px; color: var(--text-disabled);
+            width: 100%; height: 100%;
+        }
+        .voucher-preview-placeholder svg { width: 48px; height: 48px; }
+
+        .voucher-form-panel {
+            width: 340px; flex-shrink: 0;
+            border-left: 1px solid var(--border-divider);
+            display: flex; flex-direction: column;
+            overflow-y: auto;
+        }
+        .voucher-form-panel::-webkit-scrollbar { width: 5px; }
+        .voucher-form-panel::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 3px; }
+
+        .parsing-placeholder {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 16px; padding: 60px 20px;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .parsing-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid var(--border-divider);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .parsing-placeholder .parsing-text {
+            font-size: 14px; font-weight: 500;
+        }
+        .parsing-placeholder .parsing-sub {
+            font-size: 12px; color: var(--text-disabled); text-align: center;
+        }
+
+        .voucher-form {
+            display: flex; flex-direction: column; gap: 0;
+            padding: 16px 20px 24px;
+        }
+        .voucher-form .form-section-title {
+            font-size: 13px; font-weight: 600; color: var(--text-default);
+            padding-bottom: 12px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .voucher-form .label-hint {
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--text-tertiary);
+            font-size: 11px;
+        }
+        .form-row {
+            display: flex; flex-direction: column; gap: 3px;
+            padding: 8px 0;
+        }
+        .form-row + .form-row { border-top: 1px solid #f3f4f6; }
+        .form-row label {
+            font-size: 11px; font-weight: 500; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .form-row input, .form-row select, .form-row textarea {
+            height: 34px; padding: 0 10px;
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            font-size: 13px; color: var(--text-default);
+            font-family: inherit;
+            background: var(--bg-container);
+            outline: none;
+        }
+        .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 2px rgba(28,100,242,0.12);
+        }
+        .form-row input[readonly] {
+            background: var(--bg-subtle); color: var(--text-secondary);
+            cursor: default; border-color: transparent;
+        }
+        .form-row input[readonly]:focus { border-color: transparent; box-shadow: none; }
+        .form-row select { cursor: pointer; appearance: auto; }
+        .form-row textarea {
+            height: 60px; padding: 8px 10px;
+            resize: vertical;
+        }
+        .form-actions {
+            display: flex; justify-content: flex-end; gap: 10px;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-divider);
+            flex-shrink: 0;
+        }
+        .btn-outline {
+            height: 36px; padding: 0 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-default);
+            background: #fff; color: var(--text-default);
+            font-size: 13px; font-weight: 500;
+            cursor: pointer; font-family: inherit;
+        }
+        .btn-outline:hover { background: var(--bg-hover); }
+        .btn-confirm-voucher {
+            height: 36px; padding: 0 20px;
+            border-radius: 8px;
+            border: none;
+            background: var(--button-default); color: #fff;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer; font-family: inherit;
+        }
+        .btn-confirm-voucher:hover { background: #000; }
+        .btn-confirm-voucher:disabled {
+            background: var(--bg-active); color: var(--text-disabled);
+            cursor: not-allowed;
         }
 
         /* Toast */
@@ -961,7 +1115,7 @@
     <!-- ========== Main content ========== -->
     <main class="main">
         <div class="main-header">
-            <span class="main-title" id="mainTitle">Invoice list</span>
+            <span class="main-title" id="mainTitle">Voucher list</span>
             <button class="bell-btn" title="Notifications">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                 <span class="bell-badge">23</span>
@@ -994,9 +1148,9 @@
                 <span class="toolbar-hint">JPG / PNG / PDF</span>
                 <button class="btn-primary" id="uploadBtn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Upload Invoice
+                    Upload Voucher
                 </button>
-                <input type="file" id="fileInput" class="hidden-input" multiple accept=".jpg,.jpeg,.png,.pdf">
+                <input type="file" id="voucherFileInput" class="hidden-input" multiple accept=".jpg,.jpeg,.png,.pdf">
             </div>
         </div>
 
@@ -1008,15 +1162,13 @@
                         <col class="col-title">
                         <col class="col-state">
                         <col class="col-time">
-                        <col class="col-ops">
                     </colgroup>
                     <thead>
                         <tr>
                             <th class="col-type">Type</th>
-                            <th class="col-title">Invoice Title</th>
+                            <th class="col-title">Voucher Title</th>
                             <th class="col-state">State</th>
                             <th class="col-time">Upload time</th>
-                            <th class="col-ops">Operation</th>
                         </tr>
                     </thead>
                     <tbody id="tbody"></tbody>
@@ -1025,102 +1177,99 @@
                     <div class="icon-box">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </div>
-                    <div class="zh-hint">当前无发票，请上传发票</div>
+                    <div class="zh-hint">No vouchers yet — upload one to get started</div>
                 </div>
             </div>
         </div>
     </main>
 </div>
 
-<!-- ========== Invoice viewer drawer (right side) ========== -->
-<div class="viewer-mask" id="viewerMask"></div>
-<aside class="viewer" id="viewerDrawer" role="dialog" aria-label="Invoice preview">
-    <div class="viewer-top">
-            <button class="viewer-close" id="viewerClose" title="Close">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <span class="viewer-filename" id="viewerName">202604091330-jmd.pdf</span>
-            <span class="tag pending" id="viewerTag">PENDING</span>
-            <div class="viewer-zoom">
-                <button id="zoomOut" title="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-                <span class="level" id="zoomLevel">100%</span>
-                <button id="zoomIn" title="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+<!-- ========== Voucher drawer (right side, split layout) ========== -->
+<div class="viewer-mask" id="voucherMask"></div>
+<aside class="voucher-drawer" id="voucherDrawer" role="dialog" aria-label="Voucher details">
+    <div class="voucher-top">
+        <button class="viewer-close" id="voucherClose" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <span class="viewer-filename" id="voucherName">voucher.pdf</span>
+        <span class="tag parsing" id="voucherTag">Parsing</span>
+    </div>
+    <div class="voucher-split">
+        <!-- Left: PDF preview -->
+        <div class="voucher-preview" id="voucherPreview">
+            <div class="voucher-preview-placeholder" id="previewPlaceholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span style="font-size:13px;">No preview available</span>
             </div>
         </div>
-        <div class="viewer-body">
-            <div class="viewer-parsing" id="viewerParsing" style="display:none;">
+        <!-- Right: form panel -->
+        <div class="voucher-form-panel" id="voucherFormPanel">
+            <!-- Parsing state (full-panel) -->
+            <div class="parsing-placeholder" id="parsingState">
                 <div class="parsing-spinner"></div>
-                <div class="parsing-text">AI is extracting fields from your invoice…</div>
-                <div class="parsing-sub">This usually takes a few seconds.</div>
+                <div class="parsing-text">Parsing voucher…</div>
+                <div class="parsing-sub">AI is extracting fields from your document.<br>This usually takes a few seconds.</div>
             </div>
-            <div class="invoice-paper" id="invoicePaper">
-                <div style="display:flex; justify-content:flex-end; font-size:12px; color:#333;">
-                    <div>発行日 : <span style="background:#fffbeb; padding:0 4px;">2026年1月30日</span></div>
+            <!-- Parsed form -->
+            <div class="voucher-form" id="voucherForm" style="display:none;">
+                <div class="form-section-title">Parsed Fields — Please verify</div>
+                <div class="form-row">
+                    <label>Region</label>
+                    <select id="rfRegion">
+                        <option value="CN">CN</option>
+                        <option value="TW" selected>TW</option>
+                    </select>
                 </div>
-                <div class="h1">請 求 書</div>
-
-                <div class="row">
-                    <div class="biller-col">
-                        <div style="font-size:15px;"><strong>CTW株式会社</strong>&nbsp; 御中</div>
-                        <div style="margin-top:18px; color:#333;">毎度ありがとうございます。下記の通りご請求申し上げます。</div>
-                    </div>
-                    <div class="meta-col">
-                        <div><span class="k">登録番号:</span>T4120001398652</div>
-                        <div style="margin-top:4px;">グリコチャネルクリエイト株式会社</div>
-                        <div>オフィスグリコ事業部</div>
-                        <div style="margin-top:4px;">虎ノ門</div>
-                        <div>住所：東京都港区虎ノ門3-7-20</div>
-                        <div>霞晴ビル・1F</div>
-                        <div>電話：03-3425-1888</div>
-                        <div>担当：岡辺 美穂</div>
-                        <div style="display:flex; justify-content:flex-end; margin-top:8px;">
-                            <div class="stamp">印印<br>日<br>印</div>
-                        </div>
-                    </div>
+                <div class="form-row">
+                    <label>Currency</label>
+                    <select id="rfCurrency">
+                        <option value="RMB">RMB</option>
+                        <option value="TWD" selected>TWD</option>
+                    </select>
                 </div>
-
-                <div class="row" style="margin-top:8px;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="font-size:13px; font-weight:600;">お支払い期限</div>
-                        <div style="background:#fffbeb; padding:4px 12px; border:1px solid #fde68a;">2026年2月27日</div>
-                    </div>
-                    <div class="amount-box" style="margin-top:0;">
-                        <div class="lbl">ご請求金額</div>
-                        <div class="val">¥512,300</div>
-                    </div>
+                <div class="form-row">
+                    <label>Payment Type</label>
+                    <select id="rfPaymentType">
+                        <option value="admin" selected>Administrative</option>
+                        <option value="business">Business</option>
+                        <option value="project">Project</option>
+                    </select>
                 </div>
-
-                <div class="breakdown">
-                    <div class="pair"><span class="k">内訳:</span><span></span><span></span></div>
-                    <div class="pair"><span>（軽減税率（8%）対象</span><span></span><span style="text-align:right;">¥474,352 ）</span></div>
-                    <div class="pair"><span>（軽減税率（8%）対象消費税</span><span></span><span style="text-align:right;">¥37,948 ）</span></div>
-                    <div class="pair"><span>（標準税率（10%）対象</span><span></span><span style="text-align:right;">¥0 ）</span></div>
-                    <div class="pair"><span>（標準税率（10%）対象消費税</span><span></span><span style="text-align:right;">¥0 ）</span></div>
+                <div class="form-row">
+                    <label>Payment Bank</label>
+                    <select id="rfPaymentBank">
+                        <option value="fubon">富邦銀行 (Taipei)</option>
+                        <option value="cmb">招商银行 (Shanghai)</option>
+                    </select>
                 </div>
-
-                <table class="inv-table2">
-                    <thead>
-                        <tr>
-                            <th>軽減税率（8%）対象</th>
-                            <th>取引日</th>
-                            <th>品&nbsp;&nbsp;名</th>
-                            <th>単価（税込）</th>
-                            <th>数量</th>
-                            <th>金額（税込）</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td></td><td>2026年1月</td><td>オフィスグリコ 菓子・飲料・食品</td><td class="num">100</td><td class="num">96</td><td class="num">9,600</td></tr>
-                        <tr><td></td><td></td><td></td><td class="num">110</td><td class="num">0</td><td class="num">0</td></tr>
-                        <tr><td></td><td></td><td></td><td class="num">150</td><td class="num">1,372</td><td class="num">205,800</td></tr>
-                        <tr><td></td><td></td><td></td><td class="num">200</td><td class="num">1,293</td><td class="num">258,600</td></tr>
-                        <tr><td></td><td></td><td></td><td class="num">300</td><td class="num">109</td><td class="num">32,700</td></tr>
-                        <tr><td></td><td></td><td></td><td class="num">400</td><td class="num">14</td><td class="num">5,600</td></tr>
-                        <tr><td></td><td></td><td></td><td class="num">450</td><td class="num">0</td><td class="num">0</td></tr>
-                        <tr><td></td><td></td><td></td><td class="num">500</td><td class="num">0</td><td class="num">0</td></tr>
-                        <tr><td></td><td></td><td></td><td class="num">850</td><td class="num">0</td><td class="num">0</td></tr>
-                    </tbody>
-                </table>
+                <div class="form-row">
+                    <label>Payee Name</label>
+                    <input type="text" id="rfPayee" placeholder="Payee name">
+                </div>
+                <div class="form-row">
+                    <label>Bank Name</label>
+                    <input type="text" id="rfBankName" placeholder="Bank name">
+                </div>
+                <div class="form-row">
+                    <label>Amount</label>
+                    <input type="text" id="rfAmount" placeholder="0.00">
+                </div>
+                <div class="form-row">
+                    <label>Purpose</label>
+                    <input type="text" id="rfPurpose" placeholder="Payment purpose">
+                </div>
+                <div class="form-row">
+                    <label>MEMO</label>
+                    <textarea id="rfMemo" placeholder="Additional notes..."></textarea>
+                </div>
+                <div class="form-row">
+                    <label>Applicant <span class="label-hint">· Uploader email (read-only)</span></label>
+                    <input type="email" id="rfApplicant" readonly inputmode="email" autocomplete="off" placeholder="name@ctw.inc" aria-readonly="true" title="Uploader email from your account; cannot be edited">
+                </div>
+            </div>
+            <div class="form-actions" id="voucherActions" style="display:none;">
+                <button class="btn-outline" id="voucherCancelBtn">Cancel</button>
+                <button class="btn-confirm-voucher" id="voucherConfirmBtn">Confirm &amp; Submit</button>
             </div>
         </div>
     </div>
@@ -1138,8 +1287,7 @@
             meta: 'Pending · 26 invoices',
             icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>',
             dot: true,
-            href: 'F-PAP-PAYMENT-REQUEST.html',
-            active: true
+            href: 'F-PAP-PAYMENT-REQUEST.html'
         },
         {
             key: 'review',
@@ -1157,26 +1305,30 @@
             meta: 'Parsing · 4 vouchers',
             icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>',
             dot: true,
-            href: 'F-PAP-VOUCHER-COLLECTION.html'
+            href: 'F-PAP-VOUCHER-COLLECTION.html',
+            active: true
         }
     ];
 
-    let invoiceFiles = [
-        { id: 1, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied', time: '2026-04-30 13:25', month: 3, year: 2026 },
-        { id: 2, name: 'zthd_zhidingshengxing_ban.png', type: 'img', state: 'checked', time: '2026-04-30 13:25', month: 3, year: 2026 },
-        { id: 3, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied', time: '2026-04-30 13:25', month: 3, year: 2026 },
-        { id: 4, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'checked', time: '2026-03-30 13:25', month: 3, year: 2026 },
-        { id: 5, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending', time: '2026-03-30 13:25', month: 3, year: 2026 },
-        { id: 6, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending', time: '2026-03-30 13:25', month: 3, year: 2026 },
-        { id: 7, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending', time: '2026-03-30 13:25', month: 3, year: 2026 },
-        { id: 8, name: '202604091330-jmd.pdf', type: 'pdf', state: 'pending', time: '2026-02-30 13:25', month: 2, year: 2026 }
+    let voucherFiles = [
+        { id: 101, name: '台北國稅局_薪資所得扣繳稅額202601_繳款書Voucher1.pdf', type: 'pdf', state: 'checked', time: '2026-04-10 09:15', month: 4, year: 2026,
+          file: '静态文件/台北國稅局_薪資所得扣繳稅額202601_繳款書Receipt1.pdf',
+          parsed: { region: 'TW', payee: '台北國稅局', bankName: '台灣銀行', amount: '35,720', currency: 'TWD', purpose: '薪資所得扣繳稅額', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '2026年01月薪資所得扣繳' } },
+        { id: 102, name: '台北健保費用_2026.01月薪資Voucher2.pdf', type: 'pdf', state: 'confirmed', time: '2026-04-15 14:30', month: 4, year: 2026,
+          file: '静态文件/台北健保費用_2026.01月薪資Receipt2.pdf',
+          parsed: { region: 'TW', payee: '衛生福利部中央健康保險署', bankName: '台灣銀行', amount: '28,460', currency: 'TWD', purpose: '健保費用 2026年01月', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '台北辦公室1月份健保費' } },
+        { id: 103, name: '上海李永亮费用报销单单据Voucher3.pdf', type: 'pdf', state: 'pending', time: '2026-04-18 11:00', month: 4, year: 2026,
+          file: '静态文件/上海李永亮费用报销单单据Receipt3.pdf',
+          parsed: { region: 'CN', payee: '李永亮', bankName: '中国银行', amount: '4,580.00', currency: 'RMB', purpose: '费用报销', paymentBank: 'cmb', paymentType: 'admin', applicant: 'yongliang.li@ctw.inc', memo: '上海办公室费用报销' } },
+        { id: 104, name: 'new_voucher_uploading.pdf', type: 'pdf', state: 'parsing', time: '2026-04-21 16:20', month: 4, year: 2026,
+          file: null,
+          parsed: null },
     ];
 
-    let nextId = 9;
+    let nextId = 200;
     let selectedMonth = null;
     let selectedYear = 2026;
     let viewerYear = selectedYear;
-    let zoom = 100;
 
     const monthsEN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -1216,11 +1368,8 @@
     }
 
     function filteredFiles() {
-        let list = [...invoiceFiles].sort((a, b) => b.time.localeCompare(a.time));
-        if (selectedMonth != null) {
-            list = list.filter(f => f.month === (selectedMonth + 1) && f.year === selectedYear);
-        }
-        return list;
+        if (selectedMonth == null) return voucherFiles;
+        return voucherFiles.filter(f => f.month === (selectedMonth + 1) && f.year === selectedYear);
     }
 
     // ========== Table rendering ==========
@@ -1236,13 +1385,6 @@
         }
         emptyEl.style.display = 'none';
 
-        const opsCell = (f) => `<td class="col-ops">
-                    <span class="ops-row">
-                        <button class="ops-btn" data-act="view" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                        ${f.state === 'pending' ? `<button class="ops-btn danger" data-act="delete" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
-                    </span>
-                </td>`;
-
         tbody.innerHTML = list.map(f => `
             <tr data-id="${f.id}">
                 <td class="col-type">${fileIcon(f.type)}</td>
@@ -1251,54 +1393,69 @@
                         <span class="fname">${f.name}</span>
                     </span>
                 </td>
-                <td class="col-state"><span class="tag ${f.state}">${STATE_LABELS[f.state] || f.state}</span></td>
+                <td class="col-state"><span class="tag ${f.state === 'parsing' ? 'pending' : f.state}">${f.state === 'parsing' ? 'Pending' : (STATE_LABELS[f.state] || f.state)}</span></td>
                 <td class="col-time">${f.time}</td>
-                ${opsCell(f)}
             </tr>
         `).join('');
 
         tbody.querySelectorAll('tr').forEach(tr => {
             const id = Number(tr.dataset.id);
-            tr.addEventListener('click', (e) => {
-                const act = e.target.closest('[data-act]')?.dataset.act;
-                if (act === 'delete') removeFile(id);
-                else openViewer(id);
-            });
+            tr.addEventListener('click', () => openVoucherDrawer(id));
         });
     }
 
-    function removeFile(id) {
-        invoiceFiles = invoiceFiles.filter(f => f.id !== id);
-        renderTable();
-        showToast('Invoice removed');
-    }
-
-    function addInvoiceFiles(list) {
+    function addVoucherFiles(list) {
         const stamp = nowStamp();
         const now = new Date();
         const blocked = [];
         let added = 0;
         Array.from(list).forEach(f => {
-            const approved = invoiceFiles.find(x => x.name === f.name && x.state === 'checked');
+            const approved = voucherFiles.find(x => x.name === f.name && x.state === 'checked');
             if (approved) { blocked.push(f.name); return; }
-            const deniedIdx = invoiceFiles.findIndex(x => x.name === f.name && x.state === 'denied');
-            if (deniedIdx !== -1) invoiceFiles.splice(deniedIdx, 1);
+            const deniedIdx = voucherFiles.findIndex(x => x.name === f.name && x.state === 'denied');
+            if (deniedIdx !== -1) voucherFiles.splice(deniedIdx, 1);
             const lower = f.name.toLowerCase();
             const type = (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg')) ? 'img' : 'pdf';
-            invoiceFiles.unshift({ id: nextId++, name: f.name, type, state: 'pending', time: stamp, month: now.getMonth() + 1, year: now.getFullYear() });
+            voucherFiles.unshift({ id: nextId++, name: f.name, type, state: 'parsing', time: stamp, month: now.getMonth() + 1, year: now.getFullYear(), file: null, parsed: null });
             added++;
         });
         renderTable();
         const msgs = [];
-        if (added) msgs.push(`${added} invoice${added === 1 ? '' : 's'} uploaded`);
+        if (added) msgs.push(`${added} voucher${added === 1 ? '' : 's'} uploaded — parsing started`);
         if (blocked.length) msgs.push(`${blocked.length} file${blocked.length === 1 ? '' : 's'} already approved — cannot re-upload`);
         if (msgs.length) showToast(msgs.join(' · '));
+        if (added) simulateParsing();
     }
 
     function nowStamp() {
         const now = new Date();
         const pad = n => String(n).padStart(2, '0');
         return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+
+    function simulateParsing() {
+        const parsingItems = voucherFiles.filter(f => f.state === 'parsing' && !f.parsed);
+        parsingItems.forEach(f => {
+            setTimeout(() => {
+                f.state = 'pending';
+                const regions = ['TWD', 'RMB'];
+                const cur = regions[Math.floor(Math.random() * 2)];
+                f.parsed = {
+                    region: cur === 'TWD' ? 'TW' : 'CN',
+                    payee: 'Sample Vendor Co.',
+                    bankName: cur === 'TWD' ? '台灣銀行' : '中国银行',
+                    amount: (Math.floor(Math.random() * 50000) + 1000).toLocaleString(),
+                    currency: cur,
+                    purpose: 'Office expense',
+                    paymentBank: cur === 'TWD' ? 'fubon' : 'cmb',
+                    paymentType: 'admin',
+                    applicant: 'uploader@ctw.inc',
+                    memo: ''
+                };
+                renderTable();
+                if (currentVoucherId === f.id) openVoucherDrawer(f.id);
+            }, 2500 + Math.random() * 2000);
+        });
     }
 
     // ========== Month picker ==========
@@ -1338,66 +1495,174 @@
         document.getElementById('monthPop').classList.remove('open');
     }
 
-    // ========== Invoice Viewer ==========
-    let activeRowId = null;
-    let parsingTimer = null;
-    function openViewer(id) {
-        const f = invoiceFiles.find(x => x.id === id);
+    // ========== Voucher Drawer ==========
+    let currentVoucherId = null;
+    let drawerParsingTimer = null;
+    function openVoucherDrawer(id) {
+        const f = voucherFiles.find(x => x.id === id);
         if (!f) return;
-        document.getElementById('viewerName').textContent = f.name;
-        const tag = document.getElementById('viewerTag');
-        tag.className = `tag ${f.state}`;
-        tag.textContent = STATE_LABELS[f.state] || f.state;
-        zoom = 100;
-        applyZoom();
-        document.getElementById('viewerMask').classList.add('open');
-        document.getElementById('viewerDrawer').classList.add('open');
-        activeRowId = id;
+        currentVoucherId = id;
+        if (drawerParsingTimer) { clearTimeout(drawerParsingTimer); drawerParsingTimer = null; }
+
+        document.getElementById('voucherName').textContent = f.name;
+        const tag = document.getElementById('voucherTag');
+        tag.className = `tag ${f.state === 'parsing' ? 'pending' : f.state}`;
+        tag.textContent = f.state === 'parsing' ? 'Pending' : (STATE_LABELS[f.state] || f.state);
+
+        const parsingEl = document.getElementById('parsingState');
+        const formEl = document.getElementById('voucherForm');
+        const actionsEl = document.getElementById('voucherActions');
+        const confirmBtn = document.getElementById('voucherConfirmBtn');
+        const previewEl = document.getElementById('voucherPreview');
+        const placeholder = document.getElementById('previewPlaceholder');
+
+        renderVoucherPreview(f, previewEl, placeholder);
+
+        if (f.state === 'parsing') {
+            parsingEl.style.display = 'flex';
+            formEl.style.display = 'none';
+            actionsEl.style.display = 'none';
+            drawerParsingTimer = setTimeout(() => {
+                if (currentVoucherId !== f.id) return;
+                f.state = 'pending';
+                if (!f.file) f.file = '静态文件/台北Voucher.pdf';
+                f.parsed = f.parsed || {
+                    region: 'TW',
+                    payee: 'Sample Vendor Co.',
+                    bankName: '台灣銀行',
+                    amount: '12,800',
+                    currency: 'TWD',
+                    purpose: 'Office expense',
+                    paymentBank: 'fubon',
+                    paymentType: 'admin',
+                    applicant: 'uploader@ctw.inc',
+                    memo: ''
+                };
+                renderTable();
+                openVoucherDrawer(f.id);
+                showToast('Voucher parsed successfully');
+                drawerParsingTimer = null;
+            }, 2000);
+        } else {
+            parsingEl.style.display = 'none';
+            formEl.style.display = 'flex';
+            populateVoucherForm(f);
+            const isLocked = f.state === 'confirmed' || f.state === 'checked';
+            actionsEl.style.display = isLocked ? 'none' : 'flex';
+            confirmBtn.disabled = isLocked;
+            confirmBtn.textContent = isLocked ? 'Confirmed' : 'Confirm & Submit';
+            setFormEditable(!isLocked);
+        }
+
+        document.getElementById('voucherMask').classList.add('open');
+        document.getElementById('voucherDrawer').classList.add('open');
         document.querySelectorAll('#tbody tr').forEach(tr => {
             tr.classList.toggle('active', Number(tr.dataset.id) === id);
         });
-        applyParsingState(f);
     }
 
-    function applyParsingState(f) {
-        const overlay = document.getElementById('viewerParsing');
-        const paper = document.getElementById('invoicePaper');
-        if (parsingTimer) { clearTimeout(parsingTimer); parsingTimer = null; }
-        if (f.state === 'parsing') {
-            overlay.style.display = 'flex';
-            paper.style.visibility = 'hidden';
-            parsingTimer = setTimeout(() => {
-                f.state = 'pending';
-                overlay.style.display = 'none';
-                paper.style.visibility = '';
-                const tag = document.getElementById('viewerTag');
-                tag.className = `tag ${f.state}`;
-                tag.textContent = STATE_LABELS[f.state] || f.state;
-                renderTable();
-                document.querySelectorAll('#tbody tr').forEach(tr => {
-                    tr.classList.toggle('active', Number(tr.dataset.id) === f.id);
-                });
-                showToast('Invoice parsed successfully');
-                parsingTimer = null;
-            }, 2000);
+    function renderVoucherPreview(f, container, placeholder) {
+        const existing = container.querySelector('iframe');
+        if (existing) existing.remove();
+
+        if (f.file) {
+            placeholder.style.display = 'none';
+            const iframe = document.createElement('iframe');
+            iframe.src = f.file;
+            iframe.title = f.name;
+            container.appendChild(iframe);
+        } else if (f.state === 'parsing') {
+            placeholder.innerHTML = `
+                <div class="parsing-spinner" style="width:36px;height:36px;border-width:3px;"></div>
+                <span style="font-size:13px;color:var(--text-secondary);">Uploading & parsing…</span>`;
+            placeholder.style.display = 'flex';
         } else {
-            overlay.style.display = 'none';
-            paper.style.visibility = '';
+            placeholder.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span style="font-size:13px;">No preview available</span>`;
+            placeholder.style.display = 'flex';
         }
     }
 
-    function closeViewer() {
-        document.getElementById('viewerMask').classList.remove('open');
-        document.getElementById('viewerDrawer').classList.remove('open');
-        activeRowId = null;
+    function closeVoucherDrawer() {
+        document.getElementById('voucherMask').classList.remove('open');
+        document.getElementById('voucherDrawer').classList.remove('open');
+        currentVoucherId = null;
+        if (drawerParsingTimer) { clearTimeout(drawerParsingTimer); drawerParsingTimer = null; }
         document.querySelectorAll('#tbody tr.active').forEach(tr => tr.classList.remove('active'));
-        if (parsingTimer) { clearTimeout(parsingTimer); parsingTimer = null; }
-        document.getElementById('viewerParsing').style.display = 'none';
-        document.getElementById('invoicePaper').style.visibility = '';
+        const iframe = document.querySelector('#voucherPreview iframe');
+        if (iframe) iframe.remove();
     }
-    function applyZoom() {
-        document.getElementById('zoomLevel').textContent = `${zoom}%`;
-        document.getElementById('invoicePaper').style.transform = `scale(${zoom / 100})`;
+
+    function inferRegionFromParsed(p) {
+        if (p.region === 'CN' || p.region === 'TW') return p.region;
+        if (p.currency === 'RMB') return 'CN';
+        return 'TW';
+    }
+
+    function populateVoucherForm(f) {
+        const p = f.parsed || {};
+        document.getElementById('rfRegion').value = inferRegionFromParsed(p);
+        document.getElementById('rfCurrency').value = p.currency || 'TWD';
+        document.getElementById('rfPaymentType').value = p.paymentType || 'admin';
+        document.getElementById('rfPaymentBank').value = p.paymentBank || 'fubon';
+        document.getElementById('rfPayee').value = p.payee || '';
+        document.getElementById('rfBankName').value = p.bankName || '';
+        document.getElementById('rfAmount').value = p.amount || '';
+        document.getElementById('rfPurpose').value = p.purpose || '';
+        document.getElementById('rfMemo').value = p.memo || '';
+        document.getElementById('rfApplicant').value = p.applicant || '';
+        syncBankWithCurrency();
+    }
+
+    function setFormEditable(editable) {
+        const form = document.getElementById('voucherForm');
+        form.querySelectorAll('input:not([readonly]), select, textarea').forEach(el => {
+            el.disabled = !editable;
+            el.style.opacity = editable ? '1' : '0.7';
+        });
+    }
+
+    function syncBankWithCurrency() {
+        const cur = document.getElementById('rfCurrency').value;
+        const bankSel = document.getElementById('rfPaymentBank');
+        bankSel.value = cur === 'RMB' ? 'cmb' : 'fubon';
+        const regionSel = document.getElementById('rfRegion');
+        regionSel.value = cur === 'RMB' ? 'CN' : 'TW';
+    }
+
+    function syncCurrencyAndBankFromRegion() {
+        const reg = document.getElementById('rfRegion').value;
+        const curSel = document.getElementById('rfCurrency');
+        curSel.value = reg === 'CN' ? 'RMB' : 'TWD';
+        syncBankWithCurrency();
+    }
+
+    function saveVoucherFormToData() {
+        const f = voucherFiles.find(x => x.id === currentVoucherId);
+        if (!f) return;
+        f.parsed = {
+            region: document.getElementById('rfRegion').value,
+            payee: document.getElementById('rfPayee').value,
+            bankName: document.getElementById('rfBankName').value,
+            amount: document.getElementById('rfAmount').value,
+            currency: document.getElementById('rfCurrency').value,
+            purpose: document.getElementById('rfPurpose').value,
+            paymentBank: document.getElementById('rfPaymentBank').value,
+            paymentType: document.getElementById('rfPaymentType').value,
+            applicant: document.getElementById('rfApplicant').value,
+            memo: document.getElementById('rfMemo').value,
+        };
+    }
+
+    function confirmVoucher() {
+        const f = voucherFiles.find(x => x.id === currentVoucherId);
+        if (!f || f.state === 'confirmed' || f.state === 'checked') return;
+        saveVoucherFormToData();
+        f.state = 'confirmed';
+        renderTable();
+        openVoucherDrawer(f.id);
+        showToast('Voucher confirmed — ready for finance review');
     }
 
     // ========== Toast ==========
@@ -1412,14 +1677,14 @@
 
     // ========== Wire events ==========
     document.getElementById('uploadBtn').addEventListener('click', () => {
-        document.getElementById('fileInput').click();
+        document.getElementById('voucherFileInput').click();
     });
-    document.getElementById('fileInput').addEventListener('change', (e) => {
-        if (e.target.files && e.target.files.length) addInvoiceFiles(e.target.files);
+    document.getElementById('voucherFileInput').addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length) addVoucherFiles(e.target.files);
         e.target.value = '';
     });
 
-    document.getElementById('dateSelect').addEventListener('click', (e) => {
+    document.getElementById('dateSelect').addEventListener('click', () => {
         const pop = document.getElementById('monthPop');
         if (pop.classList.contains('open')) closeMonthPop();
         else openMonthPop();
@@ -1433,14 +1698,16 @@
         if (!e.target.closest('#dateSelect')) closeMonthPop();
     });
 
-    document.getElementById('viewerClose').addEventListener('click', closeViewer);
-    document.getElementById('viewerMask').addEventListener('click', closeViewer);
-    document.getElementById('zoomIn').addEventListener('click', () => { zoom = Math.min(200, zoom + 10); applyZoom(); });
-    document.getElementById('zoomOut').addEventListener('click', () => { zoom = Math.max(50, zoom - 10); applyZoom(); });
+    document.getElementById('voucherClose').addEventListener('click', closeVoucherDrawer);
+    document.getElementById('voucherCancelBtn').addEventListener('click', closeVoucherDrawer);
+    document.getElementById('voucherMask').addEventListener('click', closeVoucherDrawer);
+    document.getElementById('voucherConfirmBtn').addEventListener('click', confirmVoucher);
+    document.getElementById('rfCurrency').addEventListener('change', syncBankWithCurrency);
+    document.getElementById('rfRegion').addEventListener('change', syncCurrencyAndBankFromRegion);
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            closeViewer();
+            closeVoucherDrawer();
             closeMonthPop();
         }
     });

@@ -441,6 +441,8 @@
             vertical-align: middle;
         }
         .inv-table .col-type { width: 80px; }
+        .inv-table .col-kind { width: 88px; }
+        .doc-kind-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
         .inv-table .col-state { width: 140px; }
         .inv-table .col-time { width: 200px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
@@ -467,39 +469,6 @@
         .tag.pending { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
         .tag.parsing { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
         .tag.confirmed { color: #0e7490; background: #ecfeff; border: 1px solid #a5f3fc; }
-
-        /* Tabs */
-        .tab-bar {
-            display: flex; gap: 0;
-            padding: 0 24px;
-            border-bottom: 1px solid var(--border-divider);
-            flex-shrink: 0;
-        }
-        .tab-item {
-            padding: 10px 16px;
-            font-size: 13px; font-weight: 500;
-            color: var(--text-secondary);
-            border: none; background: none;
-            cursor: pointer;
-            position: relative;
-            font-family: inherit;
-        }
-        .tab-item:hover { color: var(--text-default); }
-        .tab-item.active { color: var(--text-default); font-weight: 600; }
-        .tab-item.active::after {
-            content: "";
-            position: absolute; bottom: -1px; left: 12px; right: 12px;
-            height: 2px; background: var(--button-default); border-radius: 1px;
-        }
-        .tab-item .tab-count {
-            display: inline-flex; align-items: center; justify-content: center;
-            min-width: 18px; height: 16px; padding: 0 5px;
-            border-radius: 8px;
-            background: var(--bg-active);
-            font-size: 10px; font-weight: 600; color: var(--text-secondary);
-            margin-left: 6px;
-        }
-        .tab-item.active .tab-count { background: var(--button-default); color: #fff; }
 
         /* ============ Month picker popover ============ */
         .month-pop {
@@ -1274,15 +1243,12 @@
                 <option value="denied">Denied</option>
                 <option value="parsing">Parsing</option>
             </select>
-        </div>
-
-        <div class="tab-bar" id="tabBar">
-            <button type="button" class="tab-item active" data-tab="invoice">
-                Invoice <span class="tab-count" id="invoiceCount">0</span>
-            </button>
-            <button type="button" class="tab-item" data-tab="voucher">
-                Voucher <span class="tab-count" id="voucherCount">0</span>
-            </button>
+            <label class="visually-hidden" for="docTypeFilter">Document type</label>
+            <select id="docTypeFilter" class="state-filter" aria-label="Filter by Invoice or Voucher" title="Filter by document type">
+                <option value="all" selected>All</option>
+                <option value="invoice">Invoice</option>
+                <option value="voucher">Voucher</option>
+            </select>
         </div>
 
         <div class="table-wrap">
@@ -1290,7 +1256,8 @@
                 <thead>
                     <tr>
                         <th class="col-type">Type</th>
-                        <th id="titleColHead">Invoice Title</th>
+                        <th class="col-kind">Kind</th>
+                        <th id="titleColHead">Title</th>
                         <th class="col-state">State</th>
                         <th class="col-time">Upload time</th>
                     </tr>
@@ -1731,6 +1698,14 @@
             meta: 'Pending · 18 invoices',
             icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11.5" cy="14.5" r="2.5"/><line x1="15" y1="18" x2="13.5" y2="16.5"/></svg>',
             active: true
+        },
+        {
+            key: 'voucher',
+            title: 'Voucher Collection',
+            desc: 'Upload reimbursement vouchers',
+            meta: 'Parsing · 4 vouchers',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>',
+            href: 'F-PAP-VOUCHER-COLLECTION.html'
         }
     ];
 
@@ -1907,8 +1882,8 @@
 
     /** 'all' or a key of STATE_LABELS */
     let stateFilter = 'all';
-
-    let activeTab = 'invoice';  // 'invoice' | 'voucher'
+    /** 'all' | 'invoice' | 'voucher' — list filter (replaces tab switch) */
+    let docTypeFilter = 'all';
     let selectedMonth = 3; // April (0-based)
     let selectedYear = 2026;
     let viewerYear = selectedYear;
@@ -1966,38 +1941,33 @@
         return applyStateFilterTo(list);
     }
 
+    function mergedTableRows() {
+        const inv = filteredInvoices().map(f => ({ ...f, docType: 'invoice' }));
+        const vou = filteredVouchers().map(f => ({ ...f, docType: 'voucher' }));
+        let rows = inv.concat(vou).sort((a, b) => b.time.localeCompare(a.time));
+        if (docTypeFilter === 'invoice') rows = rows.filter(r => r.docType === 'invoice');
+        else if (docTypeFilter === 'voucher') rows = rows.filter(r => r.docType === 'voucher');
+        return rows;
+    }
+
     function renderTable() {
         const tbody = document.getElementById('tbody');
-        const titleHead = document.getElementById('titleColHead');
-        const list = activeTab === 'invoice' ? filteredInvoices() : filteredVouchers();
+        const list = mergedTableRows();
 
-        // Update counts
-        document.getElementById('invoiceCount').textContent = filteredInvoices().length;
-        document.getElementById('voucherCount').textContent = filteredVouchers().length;
-
-        // Update column head
-        titleHead.textContent = activeTab === 'invoice' ? 'Invoice Title' : 'Voucher Title';
+        document.getElementById('titleColHead').textContent = 'Title';
 
         tbody.innerHTML = list.map(f => `
-            <tr data-id="${f.id}">
+            <tr data-id="${f.id}" data-doc-type="${f.docType}">
                 <td class="col-type">${fileIcon(f.type)}</td>
+                <td class="col-kind"><span class="doc-kind-label">${f.docType === 'invoice' ? 'Invoice' : 'Voucher'}</span></td>
                 <td><span class="file-cell"><span class="fname">${f.name}</span></span></td>
                 <td class="col-state"><span class="tag ${f.state}">${STATE_LABELS[f.state] || f.state}</span></td>
                 <td class="col-time">${f.time}</td>
             </tr>
         `).join('');
         tbody.querySelectorAll('tr').forEach(tr => {
-            tr.addEventListener('click', () => openDetail(Number(tr.dataset.id)));
+            tr.addEventListener('click', () => openDetail(Number(tr.dataset.id), tr.dataset.docType));
         });
-    }
-
-    function switchTab(tab) {
-        if (activeTab === tab) return;
-        activeTab = tab;
-        document.querySelectorAll('.tab-item').forEach(el => {
-            el.classList.toggle('active', el.dataset.tab === tab);
-        });
-        renderTable();
     }
 
     // ========== Month picker ==========
@@ -2040,12 +2010,9 @@
         return vouchers.find(x => x.id === currentVoucherId);
     }
 
-    function openDetail(id) {
-        if (activeTab === 'invoice') {
-            openInvoiceDetail(id);
-        } else {
-            openVoucherDetail(id);
-        }
+    function openDetail(id, docType) {
+        if (docType === 'voucher') openVoucherDetail(id);
+        else openInvoiceDetail(id);
     }
 
     function openInvoiceDetail(id) {
@@ -2271,12 +2238,12 @@
             // Form locked in view mode for final states
             setFormEditable(false);
         } else {
-            // Pending (or confirmed for vouchers) → Approve/Reject, form editable for invoices, readonly for vouchers
+            // Pending (invoice) / Confirmed (voucher) → Approve/Reject with editable fields
             banner.style.display = 'none';
             actionsPending.style.display = 'flex';
             actionsFinal.style.display = 'none';
             if (type === 'invoice') setInvoiceFormEditable(true);
-            else setVoucherFormEditable(false);
+            else setVoucherFormEditable(true);
         }
     }
 
@@ -2426,7 +2393,29 @@
 
     function finishAction(action) {
         const rec = currentRecord();
-        if (rec) rec.state = (action === 'approve') ? 'checked' : 'denied';
+        if (rec) {
+            if (action === 'approve') {
+                if (currentType === 'voucher') {
+                    rec.parsed = rec.parsed || {};
+                    rec.parsed.payeeName = document.getElementById('rsPayeeName').value.trim();
+                    rec.parsed.bankName = document.getElementById('rsBankName').value.trim();
+                    rec.parsed.amount = document.getElementById('rsAmount').value.trim();
+                    rec.parsed.currency = document.getElementById('rsCurrency').value;
+                    rec.parsed.purpose = document.getElementById('rsPurpose').value.trim();
+                    rec.parsed.payBank = document.getElementById('rsPayBank').value.trim();
+                    rec.parsed.payType = document.getElementById('rsPayType').value;
+                    rec.parsed.memo = document.getElementById('rsMemo').value.trim();
+                } else {
+                    const collected = collectInvoiceFields();
+                    rec.fields = Object.assign({}, rec.fields, collected, {
+                        applicant: rec.fields?.applicant,
+                        applicationDate: rec.fields?.applicationDate
+                    });
+                    rec.region = collected.region;
+                }
+            }
+            rec.state = (action === 'approve') ? 'checked' : 'denied';
+        }
         closeConfirmPops();
         const noun = currentType === 'invoice' ? 'Invoice' : 'Voucher';
         closeDetail();
@@ -2482,15 +2471,12 @@
         }
     });
 
-    // Tab bar
-    document.getElementById('tabBar').addEventListener('click', (e) => {
-        const btn = e.target.closest('.tab-item');
-        if (!btn) return;
-        switchTab(btn.dataset.tab);
-    });
-
     document.getElementById('stateFilter').addEventListener('change', (e) => {
         stateFilter = e.target.value;
+        renderTable();
+    });
+    document.getElementById('docTypeFilter').addEventListener('change', (e) => {
+        docTypeFilter = e.target.value;
         renderTable();
     });
 
