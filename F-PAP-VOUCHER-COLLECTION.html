@@ -558,9 +558,9 @@
         }
         .tag.denied { color: var(--error); background: var(--error-bg); border: 1px solid var(--error-border); }
         .tag.checked { color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
-        .tag.pending { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
+        .tag.unconfirmed { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
         .tag.parsing { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
-        .tag.confirmed { color: #0e7490; background: #ecfeff; border: 1px solid #a5f3fc; }
+        .tag.pending { color: #0e7490; background: #ecfeff; border: 1px solid #a5f3fc; }
 
         .ops-row { display: inline-flex; align-items: center; gap: 2px; }
         .ops-btn {
@@ -1314,10 +1314,10 @@
         { id: 101, name: '台北國稅局_薪資所得扣繳稅額202601_繳款書Voucher1.pdf', type: 'pdf', state: 'checked', time: '2026-04-10 09:15', month: 4, year: 2026,
           file: '静态文件/台北國稅局_薪資所得扣繳稅額202601_繳款書Receipt1.pdf',
           parsed: { region: 'TW', payee: '台北國稅局', bankName: '台灣銀行', amount: '35,720', currency: 'TWD', purpose: '薪資所得扣繳稅額', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '2026年01月薪資所得扣繳' } },
-        { id: 102, name: '台北健保費用_2026.01月薪資Voucher2.pdf', type: 'pdf', state: 'confirmed', time: '2026-04-15 14:30', month: 4, year: 2026,
+        { id: 102, name: '台北健保費用_2026.01月薪資Voucher2.pdf', type: 'pdf', state: 'pending', time: '2026-04-15 14:30', month: 4, year: 2026,
           file: '静态文件/台北健保費用_2026.01月薪資Receipt2.pdf',
           parsed: { region: 'TW', payee: '衛生福利部中央健康保險署', bankName: '台灣銀行', amount: '28,460', currency: 'TWD', purpose: '健保費用 2026年01月', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '台北辦公室1月份健保費' } },
-        { id: 103, name: '上海李永亮费用报销单单据Voucher3.pdf', type: 'pdf', state: 'pending', time: '2026-04-18 11:00', month: 4, year: 2026,
+        { id: 103, name: '上海李永亮费用报销单单据Voucher3.pdf', type: 'pdf', state: 'unconfirmed', time: '2026-04-18 11:00', month: 4, year: 2026,
           file: '静态文件/上海李永亮费用报销单单据Receipt3.pdf',
           parsed: { region: 'CN', payee: '李永亮', bankName: '中国银行', amount: '4,580.00', currency: 'RMB', purpose: '费用报销', paymentBank: 'cmb', paymentType: 'admin', applicant: 'yongliang.li@ctw.inc', memo: '上海办公室费用报销' } },
         { id: 104, name: 'new_voucher_uploading.pdf', type: 'pdf', state: 'parsing', time: '2026-04-21 16:20', month: 4, year: 2026,
@@ -1333,8 +1333,8 @@
     const monthsEN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
     const STATE_LABELS = {
-        pending: 'Pending', denied: 'Denied', checked: 'Checked',
-        parsing: 'Parsing', confirmed: 'Confirmed'
+        unconfirmed: 'Unconfirmed', denied: 'Denied', checked: 'Checked',
+        parsing: 'Parsing', pending: 'Pending'
     };
 
     // ========== Render helpers ==========
@@ -1393,7 +1393,7 @@
                         <span class="fname">${f.name}</span>
                     </span>
                 </td>
-                <td class="col-state"><span class="tag ${f.state === 'parsing' ? 'pending' : f.state}">${f.state === 'parsing' ? 'Pending' : (STATE_LABELS[f.state] || f.state)}</span></td>
+                <td class="col-state"><span class="tag ${f.state === 'parsing' ? 'unconfirmed' : f.state}">${f.state === 'parsing' ? 'Unconfirmed' : (STATE_LABELS[f.state] || f.state)}</span></td>
                 <td class="col-time">${f.time}</td>
             </tr>
         `).join('');
@@ -1437,7 +1437,7 @@
         const parsingItems = voucherFiles.filter(f => f.state === 'parsing' && !f.parsed);
         parsingItems.forEach(f => {
             setTimeout(() => {
-                f.state = 'pending';
+                f.state = 'unconfirmed';
                 const regions = ['TWD', 'RMB'];
                 const cur = regions[Math.floor(Math.random() * 2)];
                 f.parsed = {
@@ -1506,8 +1506,8 @@
 
         document.getElementById('voucherName').textContent = f.name;
         const tag = document.getElementById('voucherTag');
-        tag.className = `tag ${f.state === 'parsing' ? 'pending' : f.state}`;
-        tag.textContent = f.state === 'parsing' ? 'Pending' : (STATE_LABELS[f.state] || f.state);
+        tag.className = `tag ${f.state === 'parsing' ? 'unconfirmed' : f.state}`;
+        tag.textContent = f.state === 'parsing' ? 'Unconfirmed' : (STATE_LABELS[f.state] || f.state);
 
         const parsingEl = document.getElementById('parsingState');
         const formEl = document.getElementById('voucherForm');
@@ -1524,7 +1524,7 @@
             actionsEl.style.display = 'none';
             drawerParsingTimer = setTimeout(() => {
                 if (currentVoucherId !== f.id) return;
-                f.state = 'pending';
+                f.state = 'unconfirmed';
                 if (!f.file) f.file = '静态文件/台北Voucher.pdf';
                 f.parsed = f.parsed || {
                     region: 'TW',
@@ -1547,10 +1547,10 @@
             parsingEl.style.display = 'none';
             formEl.style.display = 'flex';
             populateVoucherForm(f);
-            const isLocked = f.state === 'confirmed' || f.state === 'checked';
+            const isLocked = f.state === 'pending' || f.state === 'checked';
             actionsEl.style.display = isLocked ? 'none' : 'flex';
             confirmBtn.disabled = isLocked;
-            confirmBtn.textContent = isLocked ? 'Confirmed' : 'Confirm & Submit';
+            confirmBtn.textContent = isLocked ? 'Pending' : 'Confirm & Submit';
             setFormEditable(!isLocked);
         }
 
@@ -1657,12 +1657,12 @@
 
     function confirmVoucher() {
         const f = voucherFiles.find(x => x.id === currentVoucherId);
-        if (!f || f.state === 'confirmed' || f.state === 'checked') return;
+        if (!f || f.state === 'pending' || f.state === 'checked') return;
         saveVoucherFormToData();
-        f.state = 'confirmed';
+        f.state = 'pending';
         renderTable();
         openVoucherDrawer(f.id);
-        showToast('Voucher confirmed — ready for finance review');
+        showToast('Voucher submitted — ready for finance review');
     }
 
     // ========== Toast ==========

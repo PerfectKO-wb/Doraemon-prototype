@@ -1238,7 +1238,6 @@
             <select id="stateFilter" class="state-filter" aria-label="Filter by state" title="Filter list by status">
                 <option value="all" selected>All states</option>
                 <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
                 <option value="checked">Checked</option>
                 <option value="denied">Denied</option>
                 <option value="parsing">Parsing</option>
@@ -1806,11 +1805,11 @@
     ];
 
     // Vouchers submitted by users (already AI-parsed + user-confirmed) waiting for finance review
-    // States shown to finance: 'confirmed' (awaiting review), 'checked' (approved), 'denied' (rejected)
+    // States shown to finance: 'pending' (awaiting review), 'checked' (approved), 'denied' (rejected)
     let vouchers = [
         {
             id: 201, name: '台北國稅局_薪資所得扣繳稅額202601_繳款書Voucher1.pdf', type: 'pdf',
-            state: 'confirmed', time: '2026-04-10 09:15', month: 4, year: 2026,
+            state: 'pending', time: '2026-04-10 09:15', month: 4, year: 2026,
             file: '静态文件/台北國稅局_薪資所得扣繳稅額202601_繳款書Receipt1.pdf',
             parsed: {
                 applyDate: '2026-04-10 09:15',
@@ -1861,7 +1860,7 @@
         },
         {
             id: 204, name: '台北國稅局_薪資所得扣繳稅額202601_繳款書Voucher1.pdf', type: 'pdf',
-            state: 'confirmed', time: '2026-04-20 10:45', month: 4, year: 2026,
+            state: 'pending', time: '2026-04-20 10:45', month: 4, year: 2026,
             file: '静态文件/台北國稅局_薪資所得扣繳稅額202601_繳款書Receipt1.pdf',
             parsed: {
                 applyDate: '2026-04-20 10:45',
@@ -1878,7 +1877,7 @@
         }
     ];
 
-    const STATE_LABELS = { pending: 'Pending', denied: 'Denied', checked: 'Checked', confirmed: 'Confirmed', parsing: 'Parsing' };
+    const STATE_LABELS = { pending: 'Pending', denied: 'Denied', checked: 'Checked', parsing: 'Parsing' };
 
     /** 'all' or a key of STATE_LABELS */
     let stateFilter = 'all';
