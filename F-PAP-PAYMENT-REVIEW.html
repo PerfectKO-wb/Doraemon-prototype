@@ -1237,7 +1237,7 @@
             <label class="visually-hidden" for="stateFilter">State</label>
             <select id="stateFilter" class="state-filter" aria-label="Filter by state" title="Filter list by status">
                 <option value="all" selected>All states</option>
-                <option value="pending">Pending</option>
+                <option value="pending">Pending Approval</option>
                 <option value="checked">Checked</option>
                 <option value="denied">Denied</option>
                 <option value="parsing">Parsing</option>
@@ -1877,7 +1877,7 @@
         }
     ];
 
-    const STATE_LABELS = { pending: 'Pending', denied: 'Denied', checked: 'Checked', parsing: 'Parsing' };
+    const STATE_LABELS = { pending: 'Pending Approval', denied: 'Denied', checked: 'Checked', parsing: 'Parsing' };
 
     /** 'all' or a key of STATE_LABELS */
     let stateFilter = 'all';
