@@ -53,7 +53,7 @@
 
 `upload → parsing → unconfirmed ──(user confirm)──► pending ──(F approve)──► checked                                                          ──(F reject) ──► denied checked / denied ──(F edit)──► checked            （仅 checked） checked / denied ──(F delete)──► 记录移除`
 
-> 展示说明：`parsing` 为系统中间态，列表页一律以 `Pending Confirmation` 显示；详情抽屉在解析未完成时展示加载/空状态，解析完成后以 `Pending Confirmation` 呈现可编辑表单。
+> 展示说明：`parsing` 为系统中间态，列表页一律以 `Unconfirmed` 显示；详情抽屉在解析未完成时展示加载/空状态，解析完成后以 `Unconfirmed` 呈现可编辑表单。
 
 ### 重复上传规则（Invoice 与 Voucher 通用）
 
@@ -116,11 +116,11 @@
 | 按钮 / 动作                                | 行为                                                                         |
 | -------------------------------------- | -------------------------------------------------------------------------- |
 | `Confirm & Submit`                     | 保存字段并置状态为 `Pending`，抽屉关闭，Toast 提示 `Receipt submitted for finance review` |
-| `Cancel` / `×` / `Esc` / 点击遮罩 / 跳转其他页面 | **自动保存当前字段为草稿并关闭抽屉，状态保持 `Pending Confirmation` 不变**；下次打开时按已保存的值回显；不触发 Toast             |
+| `Cancel` / `×` / `Esc` / 点击遮罩 / 跳转其他页面 | **自动保存当前字段为草稿并关闭抽屉，状态保持 `Unconfirmed` 不变**；下次打开时按已保存的值回显；不触发 Toast             |
 | 已 `Pending` 或 `Checked` 的记录再次打开      | 表单所有字段只读，按钮隐藏 `Confirm & Submit`，改为只读态浏览                                   |
 
 
-> 自动保存仅持久化字段值，不推进状态；只有点击 `Confirm & Submit` 才会将 `Pending Confirmation` 推进至 `Pending Approval` 进入财务审核队列。
+> 自动保存仅持久化字段值，不推进状态；只有点击 `Confirm & Submit` 才会将 `Unconfirmed` 推进至 `Pending` 进入财务审核队列。
 
 
 
@@ -145,7 +145,7 @@
 
 | 场景                                                    | 关闭行为（`×` / `Esc` / 点击遮罩 / 跳转其他页面）                   |
 | ----------------------------------------------------- | --------------------------------------------------- |
-| Voucher Collection · `Pending Confirmation`（含解析完成待确认）              | 自动保存字段为草稿，状态保持 `Pending Confirmation`，**不**触发 `Confirm & Submit` |
+| Voucher Collection · `Unconfirmed`（含解析完成待确认）              | 自动保存字段为草稿，状态保持 `Unconfirmed`，**不**触发 `Confirm & Submit` |
 | Review · Invoice `Pending` / Voucher `Pending`（待审核） | 自动保存字段，状态保持不变，**不**触发 `Approve / Reject`            |
 | Review · `Checked` 的编辑态                               | 自动以 `Save & Re-Approve` 保存字段，状态保持 `Checked`         |
 | 只读态（`Pending` / `Checked` 非编辑 / `Denied`）           | 直接关闭，无保存动作                                          |

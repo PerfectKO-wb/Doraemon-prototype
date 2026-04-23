@@ -1333,8 +1333,8 @@
     const monthsEN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
     const STATE_LABELS = {
-        unconfirmed: 'Pending Confirmation', denied: 'Denied', checked: 'Checked',
-        parsing: 'Parsing', pending: 'Pending Approval'
+        unconfirmed: 'Unconfirmed', denied: 'Denied', checked: 'Checked',
+        parsing: 'Parsing', pending: 'Pending'
     };
 
     // ========== Render helpers ==========
@@ -1393,7 +1393,7 @@
                         <span class="fname">${f.name}</span>
                     </span>
                 </td>
-                <td class="col-state"><span class="tag ${f.state === 'parsing' ? 'unconfirmed' : f.state}">${f.state === 'parsing' ? 'Pending Confirmation' : (STATE_LABELS[f.state] || f.state)}</span></td>
+                <td class="col-state"><span class="tag ${f.state === 'parsing' ? 'unconfirmed' : f.state}">${f.state === 'parsing' ? 'Unconfirmed' : (STATE_LABELS[f.state] || f.state)}</span></td>
                 <td class="col-time">${f.time}</td>
             </tr>
         `).join('');
@@ -1507,7 +1507,7 @@
         document.getElementById('voucherName').textContent = f.name;
         const tag = document.getElementById('voucherTag');
         tag.className = `tag ${f.state === 'parsing' ? 'unconfirmed' : f.state}`;
-        tag.textContent = f.state === 'parsing' ? 'Pending Confirmation' : (STATE_LABELS[f.state] || f.state);
+        tag.textContent = f.state === 'parsing' ? 'Unconfirmed' : (STATE_LABELS[f.state] || f.state);
 
         const parsingEl = document.getElementById('parsingState');
         const formEl = document.getElementById('voucherForm');
@@ -1550,7 +1550,7 @@
             const isLocked = f.state === 'pending' || f.state === 'checked';
             actionsEl.style.display = isLocked ? 'none' : 'flex';
             confirmBtn.disabled = isLocked;
-            confirmBtn.textContent = isLocked ? 'Pending Approval' : 'Confirm & Submit';
+            confirmBtn.textContent = isLocked ? 'Pending' : 'Confirm & Submit';
             setFormEditable(!isLocked);
         }
 
