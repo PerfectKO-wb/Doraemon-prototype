@@ -334,9 +334,9 @@
     }
     @keyframes megaphone-pulse {
       0%, 100% { transform: scale(1); }
-      15% { transform: scale(1.28) rotate(-8deg); }
-      30% { transform: scale(1) rotate(6deg); }
-      45% { transform: scale(1.18) rotate(-4deg); }
+      15% { transform: scale(1.1) rotate(-4deg); }
+      30% { transform: scale(1) rotate(3deg); }
+      45% { transform: scale(1.05) rotate(-2deg); }
       60% { transform: scale(1) rotate(0deg); }
     }
     .megaphone-badge {
@@ -358,19 +358,6 @@
       box-shadow: var(--shadow-popup); padding: 16px;
       z-index: 50; flex-direction: column; gap: 16px;
     }
-    .notify-popover.visible { display: flex; }
-    .notify-field { display: flex; flex-direction: column; gap: 8px; }
-    .notify-field label { font-size: 15px; font-weight: 500; color: var(--text-default); }
-    .notify-hint {
-      display: flex; align-items: flex-start; gap: 8px;
-      padding: 10px 12px; border-radius: 8px;
-      background: #fff7ed; border: 1px solid #fed7aa;
-      font-size: 13px; line-height: 18px; color: #9a3412;
-    }
-    .notify-hint svg { flex-shrink: 0; color: #ea580c; margin-top: 1px; }
-    .notify-hint.hidden { display: none; }
-
-    /* Notify Popover */
     .notify-popover.visible { display: flex; }
     .notify-field { display: flex; flex-direction: column; gap: 8px; }
     .notify-field label { font-size: 15px; font-weight: 500; color: var(--text-default); }
@@ -520,8 +507,8 @@
         <div class="title-left">
           <button class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
           <span class="title-name">i18n text table</span>
-          <span class="title-tag game">gamedemo <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
-          <span class="title-tag lang">All languages <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+          <span class="title-tag game" id="titleGameTag">gamedemo <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+          <span class="title-tag lang" id="titleLangTag">ZH -> JA <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
         </div>
         <div class="title-right">
           <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></button>
@@ -534,8 +521,8 @@
 
       <div class="toolbar">
         <div class="toolbar-left">
-          <button class="toolbar-btn">
-            All submissions
+          <button class="toolbar-btn" id="allSubmissionsBtn">
+            <span id="submissionBtnText">All submissions</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <button class="toolbar-btn">
@@ -552,10 +539,6 @@
           </button>
         </div>
         <div class="toolbar-right" style="position:relative;">
-          <button class="toolbar-icon-btn megaphone-wrap" title="Send Notification" id="megaphoneBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg>
-            <span class="megaphone-badge" id="megaphoneBadge">6</span>
-          </button>
           <button class="toolbar-icon-btn" title="Download">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </button>
@@ -566,23 +549,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             Deploy
           </button>
-          <!-- Send Notification Popover -->
-          <div class="notify-popover" id="notifyPopover">
-            <div class="notify-hint" id="notifyHint">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span>Japanese translations have been updated</span>
-            </div>
-            <div class="notify-field">
-              <label>Game</label>
-              <div class="notify-select" id="gameSelect">
-                <span id="gameSelectValue">gamedemo</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
-            </div>
-            <div class="notify-action">
-              <button class="notify-send-btn" id="sendNotifyBtn">Send Notification</button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -796,9 +762,13 @@
   <div class="deploy-overlay" id="deployOverlay">
     <div class="backdrop" id="deployBackdrop"></div>
     <div class="deploy-modal">
-      <div class="deploy-field"><label>Game</label><div class="deploy-select"><span>Select</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div>
-      <div class="deploy-field"><label>Language</label><div class="deploy-select"><span>Select</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div>
-      <div class="deploy-action"><button class="deploy-btn">Deploy to Production</button></div>
+      <div class="deploy-field"><label>Game</label><div class="deploy-select"><span id="deployGameValue">gamedemo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="deploy-field"><label>Language</label><div class="deploy-select"><span id="deployLangValue">JA</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="deploy-field" id="deploySubmissionField" style="display: none;">
+        <label>Submission ID</label>
+        <div class="deploy-select"><span id="deploySubmissionValue"></span></div>
+      </div>
+      <div class="deploy-action"><button class="deploy-btn" id="sendNotifyBtn" style="background: var(--button-default); color: white; cursor: pointer;">Deploy & Notify</button></div>
     </div>
   </div>
 
@@ -822,15 +792,23 @@
     const deployTopBtn = document.getElementById('deployTopBtn');
     const deployOverlay = document.getElementById('deployOverlay');
     const deployBackdrop = document.getElementById('deployBackdrop');
-    const megaphoneBtn = document.getElementById('megaphoneBtn');
-    const notifyPopover = document.getElementById('notifyPopover');
     const sendNotifyBtn = document.getElementById('sendNotifyBtn');
+    const deploySubmissionField = document.getElementById('deploySubmissionField');
+    const deploySubmissionValue = document.getElementById('deploySubmissionValue');
+    const submissionBtnText = document.getElementById('submissionBtnText');
 
-    deployTopBtn.addEventListener('click', () => deployOverlay.classList.toggle('visible'));
+    let selectedSubmissionId = null;
+
+    deployTopBtn.addEventListener('click', () => {
+      deployOverlay.classList.toggle('visible');
+      if (selectedSubmissionId) {
+        deploySubmissionField.style.display = 'flex';
+        deploySubmissionValue.textContent = selectedSubmissionId;
+      } else {
+        deploySubmissionField.style.display = 'none';
+      }
+    });
     deployBackdrop.addEventListener('click', () => deployOverlay.classList.remove('visible'));
-
-    const megaphoneBadge = document.getElementById('megaphoneBadge');
-    const notifyHint = document.getElementById('notifyHint');
 
     function countJaModified() {
       return document.querySelectorAll('.ja-cell').length;
@@ -839,18 +817,15 @@
     function updateBadge() {
       const count = countJaModified();
       const hasChanges = count > 0;
-      megaphoneBadge.textContent = count;
-      megaphoneBadge.classList.toggle('hidden', !hasChanges);
-      megaphoneBtn.classList.toggle('has-changes', hasChanges);
-      notifyHint.classList.toggle('hidden', !hasChanges);
+      
+      if (hasChanges) {
+        sendNotifyBtn.textContent = 'Deploy & Notify';
+      } else {
+        sendNotifyBtn.textContent = 'Deploy to Production';
+      }
     }
 
     updateBadge();
-
-    megaphoneBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      notifyPopover.classList.toggle('visible');
-    });
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
@@ -860,19 +835,13 @@
     }
 
     sendNotifyBtn.addEventListener('click', () => {
-      notifyPopover.classList.remove('visible');
+      deployOverlay.classList.remove('visible');
       document.querySelectorAll('.ja-cell').forEach(cell => {
         const text = cell.querySelector('.ja-new .ja-text')?.textContent || '';
         cell.parentElement.innerHTML = '<span class="cell-text">' + text + '</span>';
       });
       updateBadge();
-      showToast('Notification sent successfully');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!notifyPopover.contains(e.target) && !megaphoneBtn.contains(e.target)) {
-        notifyPopover.classList.remove('visible');
-      }
+      showToast('Deployed and notification sent successfully');
     });
 
     // Leave Warning Dialog
@@ -916,7 +885,7 @@
 
     leaveNotifyBtn.addEventListener('click', () => {
       leaveDialog.classList.remove('visible');
-      notifyPopover.classList.add('visible');
+      deployOverlay.classList.add('visible');
     });
   </script>
 </body>
