@@ -327,6 +327,8 @@
             flex-shrink: 0;
         }
         .main-title { font-size: 15px; font-weight: 600; }
+        .main-header-actions { display: flex; align-items: center; gap: 10px; }
+
         .bell-btn {
             width: 32px; height: 32px; border: none; background: none;
             border-radius: 8px; display: grid; place-items: center;
@@ -348,34 +350,35 @@
         .main-toolbar {
             padding: 14px 24px;
             display: flex; align-items: center;
-            gap: 12px;
+            gap: 8px;
             flex-shrink: 0;
+            flex-wrap: wrap;
         }
         .date-select {
             position: relative;
-            height: 32px; min-width: 260px;
+            height: 32px; min-width: 140px;
             padding: 0 10px;
             border: 1px solid var(--border-default);
             border-radius: 8px;
-            display: inline-flex; align-items: center; gap: 8px;
+            display: inline-flex; align-items: center; gap: 6px;
             background: var(--bg-container);
-            font-size: 13px; color: var(--text-default);
+            font-size: 12px; color: var(--text-default);
             cursor: pointer;
         }
-        .date-select .ph { color: var(--text-default); flex: 1; }
+        .date-select .ph { color: var(--text-default); flex: 1; white-space: nowrap; }
         .date-select .cal-icon { width: 14px; height: 14px; color: var(--text-secondary); }
         .date-select:hover { border-color: var(--border-strong); }
 
         .state-filter {
             height: 32px;
-            min-width: 148px;
-            max-width: 220px;
-            padding: 0 10px;
+            min-width: 96px;
+            max-width: 160px;
+            padding: 0 8px;
             border: 1px solid var(--border-default);
             border-radius: 8px;
             background: var(--bg-container);
             font: inherit;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-default);
             cursor: pointer;
             outline: none;
@@ -799,8 +802,8 @@
         .btn-reject:hover { background: #d4262c; }
         .btn-approve svg, .btn-reject svg { width: 16px; height: 16px; }
 
-        /* Neutral outline button (Edit / Cancel) + danger Delete button */
-        .btn-revoke, .btn-delete {
+        /* Neutral outline button (Edit / Cancel) */
+        .btn-revoke {
             flex: 1;
             height: 40px;
             border-radius: 8px;
@@ -809,18 +812,11 @@
             display: inline-flex; align-items: center; justify-content: center;
             gap: 8px;
             font-family: inherit;
-        }
-        .btn-revoke {
             border: 1px solid var(--border-default);
             background: #fff; color: var(--text-default);
         }
         .btn-revoke:hover { background: var(--bg-hover); border-color: var(--border-strong); }
-        .btn-delete {
-            border: 1px solid var(--error-border);
-            background: #fff; color: var(--error);
-        }
-        .btn-delete:hover { background: var(--error-bg); }
-        .btn-revoke svg, .btn-delete svg { width: 16px; height: 16px; }
+        .btn-revoke svg { width: 16px; height: 16px; }
 
         /* Status banner shown inside summary when state is final */
         .status-banner {
@@ -995,12 +991,6 @@
         /* Save & Re-Approve popover (re-uses approve position) */
         .confirm-pop.for-save { bottom: 62px; right: 24px; }
         .confirm-pop.for-save::after { right: 40px; }
-        .confirm-pop.for-delete { bottom: 62px; right: 24px; }
-        .confirm-pop.for-delete::after { right: 40px; }
-        .confirm-btn.danger {
-            background: var(--error); color: #fff; border-color: var(--error);
-        }
-        .confirm-btn.danger:hover { background: #d4262c; }
 
         /* Confirm popover */
         .confirm-pop {
@@ -1209,10 +1199,12 @@
     <main class="main list-view" id="listView">
         <div class="main-header">
             <span class="main-title">Invoice list</span>
-            <button class="bell-btn" title="Notifications">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <span class="bell-badge">23</span>
-            </button>
+            <div class="main-header-actions">
+                <button class="bell-btn" title="Notifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="bell-badge">23</span>
+                </button>
+            </div>
         </div>
 
         <div class="main-toolbar">
@@ -1236,7 +1228,7 @@
             </div>
             <label class="visually-hidden" for="stateFilter">State</label>
             <select id="stateFilter" class="state-filter" aria-label="Filter by state" title="Filter list by status">
-                <option value="all" selected>All states</option>
+                <option value="all" selected>State</option>
                 <option value="pending">Pending</option>
                 <option value="checked">Checked</option>
                 <option value="denied">Denied</option>
@@ -1244,7 +1236,7 @@
             </select>
             <label class="visually-hidden" for="docTypeFilter">Document type</label>
             <select id="docTypeFilter" class="state-filter" aria-label="Filter by Invoice or Voucher" title="Filter by document type">
-                <option value="all" selected>All</option>
+                <option value="all" selected>Type</option>
                 <option value="invoice">Invoice</option>
                 <option value="voucher">Voucher</option>
             </select>
@@ -1268,6 +1260,7 @@
                 </table>
             </div>
         </div>
+
     </main>
 
     <!-- ========== Main: Detail view ========== -->
@@ -1409,6 +1402,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
                         <span>Editing — make your changes below, then click <strong>Save &amp; Re-Approve</strong>.</span>
                     </div>
+
                     <div class="invoice-summary" id="invoiceSummary">
                         <!-- Common: always visible -->
                         <div class="form-row" data-region="all">
@@ -1608,15 +1602,11 @@
                         </button>
                     </div>
 
-                    <!-- Final state: Edit / Delete (Edit hidden when Denied) -->
+                    <!-- Final state: Edit only (Edit hidden when Denied) -->
                     <div class="actions-final" id="actionsFinal" style="display:none; gap:12px; flex:1;">
                         <button class="btn-revoke" id="editBtn">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
                             Edit
-                        </button>
-                        <button class="btn-delete" id="deleteBtn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
-                            Delete
                         </button>
                     </div>
 
@@ -1659,18 +1649,6 @@
                         </div>
                     </div>
 
-                    <div class="confirm-pop for-delete" id="deletePop">
-                        <div class="confirm-row">
-                            <div class="confirm-icon">
-                                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="#f87171"/><rect x="11" y="7" width="2" height="7" fill="#fff"/><rect x="11" y="15" width="2" height="2" fill="#fff"/></svg>
-                            </div>
-                            <div class="confirm-text">Permanently delete this record? This action cannot be undone.</div>
-                        </div>
-                        <div class="confirm-actions">
-                            <button class="confirm-btn" data-act="cancel-delete">No</button>
-                            <button class="confirm-btn danger" data-act="confirm-delete">Delete</button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1794,9 +1772,9 @@
         { id: 3, name: 'jp_invoice_office_rent.pdf', type: 'pdf', state: 'checked', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'JP', fields: jpFields({ payeeName: '東京不動産株式会社', amount: '480,000', purpose: 'オフィス家賃 4月分' }) },
         { id: 4, name: 'sg_invoice_utilities_apr.pdf', type: 'pdf', state: 'checked', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'SG', fields: sgFields() },
         { id: 5, name: 'us_invoice_legal_advisory.pdf', type: 'pdf', state: 'checked', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'US', fields: usFields({ payeeName: 'Baker & Co. Attorneys', amount: '8,750.00', purpose: 'Legal advisory · March' }) },
-        { id: 6, name: 'jp_invoice_cloud_infra.pdf', type: 'pdf', state: 'pending', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'JP', fields: jpFields({ payeeName: 'クラウドワークス株式会社', amount: '128,500', purpose: 'クラウドインフラ利用料' }) },
-        { id: 7, name: 'sg_invoice_courier_apr.pdf', type: 'pdf', state: 'pending', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'SG', fields: sgFields({ payeeName: 'Speedy Courier Pte Ltd', amount: '620.50', purpose: 'Courier services · Apr' }) },
-        { id: 8, name: 'jp_invoice_consulting.pdf', type: 'pdf', state: 'pending', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'JP', fields: jpFields({ payeeName: '戦略コンサル合同会社', amount: '320,000', purpose: '戦略コンサルティング費用' }) },
+        { id: 6, name: 'jp_invoice_cloud_infra.pdf', type: 'pdf', state: 'checked', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'JP', fields: jpFields({ payeeName: 'クラウドワークス株式会社', amount: '128,500', purpose: 'クラウドインフラ利用料' }) },
+        { id: 7, name: 'sg_invoice_courier_apr.pdf', type: 'pdf', state: 'checked', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'SG', fields: sgFields({ payeeName: 'Speedy Courier Pte Ltd', amount: '620.50', purpose: 'Courier services · Apr', payoutRequired: 'yes' }) },
+        { id: 8, name: 'jp_invoice_consulting.pdf', type: 'pdf', state: 'checked', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'JP', fields: jpFields({ payeeName: '戦略コンサル合同会社', amount: '320,000', purpose: '戦略コンサルティング費用' }) },
         { id: 9, name: 'us_invoice_ads_campaign.pdf', type: 'pdf', state: 'pending', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'US', fields: usFields({ payeeName: 'Meta Platforms Inc.', amount: '45,800.00', purpose: 'Ads campaign · Mar' }) },
         { id: 10, name: 'sg_invoice_hosting.pdf', type: 'pdf', state: 'pending', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'SG', fields: sgFields({ payeeName: 'AWS Singapore', amount: '15,430.00', purpose: 'AWS hosting · Apr', paymentBank: 'OCBC', bankName: 'OCBC Bank', bankCode: '7339' }) },
         { id: 11, name: 'jp_invoice_saas_tools.pdf', type: 'pdf', state: 'pending', time: '2026-04-30 13:25', month: 4, year: 2026, region: 'JP', fields: jpFields({ payeeName: 'サブスクリプションサービス株式会社', amount: '98,000', purpose: 'SaaSツール利用料' }) },
@@ -1955,17 +1933,22 @@
 
         document.getElementById('titleColHead').textContent = 'Title';
 
-        tbody.innerHTML = list.map(f => `
+        tbody.innerHTML = list.map(f => {
+            const isInv = f.docType === 'invoice';
+            return `
             <tr data-id="${f.id}" data-doc-type="${f.docType}">
                 <td class="col-type">${fileIcon(f.type)}</td>
-                <td class="col-kind"><span class="doc-kind-label">${f.docType === 'invoice' ? 'Invoice' : 'Voucher'}</span></td>
+                <td class="col-kind"><span class="doc-kind-label">${isInv ? 'Invoice' : 'Voucher'}</span></td>
                 <td><span class="file-cell"><span class="fname">${f.name}</span></span></td>
                 <td class="col-state"><span class="tag ${f.state}">${STATE_LABELS[f.state] || f.state}</span></td>
                 <td class="col-time">${f.time}</td>
             </tr>
-        `).join('');
+        `;
+        }).join('');
         tbody.querySelectorAll('tr').forEach(tr => {
-            tr.addEventListener('click', () => openDetail(Number(tr.dataset.id), tr.dataset.docType));
+            tr.addEventListener('click', () => {
+                openDetail(Number(tr.dataset.id), tr.dataset.docType);
+            });
         });
     }
 
@@ -2221,13 +2204,13 @@
                 banner.classList.add('approved');
                 banner.innerHTML = `
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    <div class="status-text"><strong>Approved</strong><small>This ${noun} has been approved. You can edit the record and re-approve, or delete it.</small></div>
+                    <div class="status-text"><strong>Approved</strong><small>This ${noun} has been approved. You can edit the record and re-approve.</small></div>
                 `;
             } else {
                 banner.classList.add('rejected');
                 banner.innerHTML = `
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    <div class="status-text"><strong>Rejected</strong><small>This ${noun} has been rejected. You can delete the record if it was rejected by mistake.</small></div>
+                    <div class="status-text"><strong>Rejected</strong><small>This ${noun} has been rejected.</small></div>
                 `;
             }
             // Edit only available for approved items
@@ -2384,7 +2367,7 @@
     }
 
     function closeConfirmPops() {
-        ['approvePop', 'rejectPop', 'deletePop'].forEach(id => {
+        ['approvePop', 'rejectPop'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.remove('open');
         });
@@ -2422,21 +2405,6 @@
         showToast(action === 'approve' ? `${noun} approved` : `${noun} rejected`);
     }
 
-    function deleteCurrent() {
-        const rec = currentRecord();
-        if (!rec) return;
-        if (currentType === 'invoice') {
-            invoices = invoices.filter(x => x.id !== rec.id);
-        } else {
-            vouchers = vouchers.filter(x => x.id !== rec.id);
-        }
-        closeConfirmPops();
-        const noun = currentType === 'invoice' ? 'Invoice' : 'Voucher';
-        closeDetail();
-        renderTable();
-        showToast(`${noun} deleted`);
-    }
-
     // ========== Toast ==========
     let toastTimer = null;
     function showToast(msg) {
@@ -2464,9 +2432,6 @@
         }
         if (!e.target.closest('#rejectBtn') && !e.target.closest('#rejectPop')) {
             document.getElementById('rejectPop').classList.remove('open');
-        }
-        if (!e.target.closest('#deleteBtn') && !e.target.closest('#deletePop')) {
-            document.getElementById('deletePop').classList.remove('open');
         }
     });
 
@@ -2521,19 +2486,13 @@
         closeConfirmPops();
         saveEditAndApprove();
     });
-    document.getElementById('deleteBtn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeConfirmPops();
-        document.getElementById('deletePop').classList.add('open');
-    });
     document.querySelectorAll('[data-act]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const act = btn.dataset.act;
-            if (act === 'cancel-approve' || act === 'cancel-reject' || act === 'cancel-delete') closeConfirmPops();
+            if (act === 'cancel-approve' || act === 'cancel-reject') closeConfirmPops();
             else if (act === 'confirm-approve') finishAction('approve');
             else if (act === 'confirm-reject') finishAction('reject');
-            else if (act === 'confirm-delete') deleteCurrent();
         });
     });
 
