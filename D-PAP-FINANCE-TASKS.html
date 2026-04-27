@@ -382,6 +382,41 @@
             line-height: 1.6;
         }
 
+        /* ── Empty Review State ── */
+        .empty-review-card {
+            background: rgba(240,253,244,0.55);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(16,185,129,0.22);
+            box-shadow: 0 8px 32px rgba(16,185,129,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .empty-review-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .empty-review-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            line-height: 1;
+        }
+        .empty-review-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: rgba(5,150,105,0.9);
+            margin-bottom: 6px;
+        }
+        .empty-review-desc {
+            font-size: 13px;
+            color: rgba(6,95,70,0.55);
+            line-height: 1.7;
+        }
+
         /* Card in all-done state */
         .task-card.all-done {
             border-color: rgba(16,185,129,0.3);
@@ -544,6 +579,7 @@
             <button class="test-btn" onclick="simulateDate('mid')">⚠️ Mid-month (15th Morning)</button>
             <button class="test-btn" onclick="simulateDate('end')">🔴 Month-end (Last Day Morning)</button>
             <button class="test-btn" onclick="simulateDate('done')">🎉 Month-end Settlement</button>
+            <button class="test-btn" onclick="simulateDate('empty')">✨ No Review Tasks (All Cleared)</button>
         </div>
         <button onclick="toggleTestPanel()">🧪 Test Case</button>
     </div>
@@ -611,8 +647,9 @@
     }
 
     // ── Greeting ──
-    function getGreetingText(isSettlement, pendingReviewCount, pendingPaymentCount) {
+    function getGreetingText(isSettlement, pendingReviewCount, pendingPaymentCount, scenario) {
         if (isSettlement) return 'Hi, month-end settlement is done 🎉';
+        if (scenario === 'empty') return '今日审核任务已全部清零，继续保持好节奏 😊';
         return `Hi, here are your tasks today: ${pendingReviewCount} pending review, ${pendingPaymentCount} pending payment.`;
     }
 
@@ -673,34 +710,47 @@
         let cardIdx = 0;
 
         // ── 1. Pending Review ──
+        const jeReviewCount = (scenario === 'empty') ? 0 : 2;
+        const hasReviewTasks = pendingReviewCount > 0 || jeReviewCount > 0;
+
         html += `<div class="section-label">📋 Pending Review</div>`;
-        html += `<div class="task-list">`;
-        if (pendingReviewCount > 0) {
+        if (!hasReviewTasks) {
             html += `
-            <a class="task-card" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
+            <div class="empty-review-card" id="emptyReviewCard"
+                 style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms;">
+                <div class="empty-review-icon">🎉</div>
+                <div class="empty-review-title">今日 Invoice、JE 审核任务已清零</div>
+                <div class="empty-review-desc">工作进度正常，期待今日继续保持 ✨</div>
+            </div>`;
+            cardIdx++;
+        } else {
+            html += `<div class="task-list">`;
+            if (pendingReviewCount > 0) {
+                html += `
+                <a class="task-card" href="F-PAP-PAYMENT-REVIEW.html" target="_blank"
+                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
+                    <span class="card-icon">📋</span>
+                    <div class="card-body">
+                        <div class="card-title">Invoice Review</div>
+                        <div class="card-desc">${pendingReviewCount} invoice(s)</div>
+                    </div>
+                    <span class="card-chevron">›</span>
+                </a>`;
+                cardIdx++;
+            }
+            html += `
+            <a class="task-card" href="F-JE-REVIEW-CHAT.html" target="_blank"
                style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
-                <span class="card-icon">📋</span>
+                <span class="card-icon">📊</span>
                 <div class="card-body">
-                    <div class="card-title">Invoice Review</div>
-                    <div class="card-desc">${pendingReviewCount} invoice(s)</div>
+                    <div class="card-title">JE Review</div>
+                    <div class="card-desc">${jeReviewCount} JE(s)</div>
                 </div>
                 <span class="card-chevron">›</span>
             </a>`;
             cardIdx++;
+            html += `</div>`;
         }
-        const jeReviewCount = 2;
-        html += `
-        <a class="task-card" href="F-JE-REVIEW-CHAT.html" target="_blank"
-           style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s;">
-            <span class="card-icon">📊</span>
-            <div class="card-body">
-                <div class="card-title">JE Review</div>
-                <div class="card-desc">${jeReviewCount} JE(s)</div>
-            </div>
-            <span class="card-chevron">›</span>
-        </a>`;
-        cardIdx++;
-        html += `</div>`;
 
         // ── 2. Pending Payment ──
         if (pendingPaymentsList.length > 0) {
@@ -765,6 +815,8 @@
             taskList.querySelectorAll('.task-card').forEach((card, i) => {
                 setTimeout(() => card.classList.add('visible'), i * 80);
             });
+            const emptyCard = document.getElementById('emptyReviewCard');
+            if (emptyCard) setTimeout(() => emptyCard.classList.add('visible'), 80);
         }, 100);
 
         // Success banner
@@ -777,7 +829,7 @@
             successBanner.classList.add('show');
         }
 
-        document.getElementById('greeting2').textContent = getGreetingText(isSettlement, pendingReviewCount, pendingPaymentCount);
+        document.getElementById('greeting2').textContent = getGreetingText(isSettlement, pendingReviewCount, pendingPaymentCount, scenario);
     }
 
     renderAll(dayOfMonth, 'normal');
@@ -808,6 +860,11 @@
                 simDay = 31; scn = 'settlement';
                 dateLabel = `${monthNames[month]}/28/${year}`;
                 document.getElementById('dateSub').textContent = 'Simulate: Settlement (18:00)';
+                break;
+            case 'empty':
+                simDay = dayOfMonth; scn = 'empty';
+                dateLabel = `${monthNames[month]}/${String(dayOfMonth).padStart(2,'0')}/${year}`;
+                document.getElementById('dateSub').textContent = weekDays[today.getDay()];
                 break;
             default:
                 simDay = dayOfMonth;
