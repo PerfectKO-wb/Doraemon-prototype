@@ -649,7 +649,7 @@
     // ── Greeting ──
     function getGreetingText(isSettlement, pendingReviewCount, pendingPaymentCount, scenario) {
         if (isSettlement) return 'Hi, month-end settlement is done 🎉';
-        if (scenario === 'empty') return '今日审核任务已全部清零，继续保持好节奏 😊';
+        if (scenario === 'empty') return 'No pending tasks right now. Feel free to focus on your other work.';
         return `Hi, here are your tasks today: ${pendingReviewCount} pending review, ${pendingPaymentCount} pending payment.`;
     }
 
