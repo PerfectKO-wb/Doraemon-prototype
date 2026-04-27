@@ -691,6 +691,11 @@
         
         let paymentCompletedCount = paymentInvoices.filter(p => p.jeLinked).length;
 
+        // Empty scenario: no review tasks at all
+        if (scenario === 'empty') {
+            pendingReviewCount = 0;
+        }
+
         // Settlement mock modifications
         if (isSettlement) {
             let newApproved = pendingInvoices.map(inv => ({...inv, reviewer: currentUser}));
