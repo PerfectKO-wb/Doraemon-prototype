@@ -713,7 +713,6 @@
         const jeReviewCount = (scenario === 'empty') ? 0 : 2;
         const hasReviewTasks = pendingReviewCount > 0 || jeReviewCount > 0;
 
-        html += `<div class="section-label">📋 Pending Review</div>`;
         if (!hasReviewTasks) {
             html += `
             <div class="empty-review-card" id="emptyReviewCard"
@@ -724,6 +723,7 @@
             </div>`;
             cardIdx++;
         } else {
+            html += `<div class="section-label">📋 Pending Review</div>`;
             html += `<div class="task-list">`;
             if (pendingReviewCount > 0) {
                 html += `
