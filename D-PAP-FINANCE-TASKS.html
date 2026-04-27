@@ -753,7 +753,7 @@
         }
 
         // ── 2. Pending Payment ──
-        if (pendingPaymentsList.length > 0) {
+        if (scenario !== 'empty' && pendingPaymentsList.length > 0) {
             html += `<div class="section-label">💰 Pending Payment</div>`;
             html += `<div class="task-list">`;
             
@@ -792,7 +792,7 @@
         }
 
         // ── 3. Payment Completed ──
-        if (paymentCompletedCount > 0 || isSettlement) {
+        if (scenario !== 'empty' && (paymentCompletedCount > 0 || isSettlement)) {
             html += `<div class="section-label">✅ Payment Completed</div>`;
             html += `<div class="task-list">`;
             html += `
