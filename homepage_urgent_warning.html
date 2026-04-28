@@ -1189,9 +1189,9 @@ Q2の提携プランのお見積りをお送りいたします。
       0px 3px 6px rgba(0, 0, 0, 0.12),
       0px 6px 16px rgba(0, 0, 0, 0.08);
     pointer-events: all;
-    cursor: pointer;
+    cursor: default;
     transition: opacity 0.2s, transform 0.2s;
-    margin-top: 9px; /* space for the top-protruding tag */
+    margin-top: 9px;
   }
 
   .urgent-alert-card:hover {
@@ -1255,11 +1255,11 @@ Q2の提携プランのお見積りをお送りいたします。
 
   .urgent-alert-desc {
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 400;
-    line-height: 18px;
-    color: #f5222d;
-    opacity: 0.85;
+    line-height: 19px;
+    color: #c0392b;
+    opacity: 1;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -1405,10 +1405,6 @@ Q2の提携プランのお見積りをお送りいたします。
     card.className = 'urgent-alert-card';
     card.dataset.id = item.id;
 
-    var systemLabel = item.source_from ? '<span class="urgent-alert-system">' + esc(item.source_from) + '</span>' : '';
-    var timeLabel   = item.time        ? '<span class="urgent-alert-time">' + esc(item.time) + '</span>' : '';
-    var descHTML    = item.description ? '<div class="urgent-alert-desc">' + esc(item.description) + '</div>' : '';
-
     card.innerHTML = [
       '<div class="urgent-alert-tag">Urgent</div>',
       '<button class="urgent-alert-close" title="Dismiss">',
@@ -1416,29 +1412,12 @@ Q2の提携プランのお見積りをお送りいたします。
       '    <path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="#f5222d" stroke-width="1.5" stroke-linecap="round"/>',
       '  </svg>',
       '</button>',
-      '<div class="urgent-alert-title">' + esc(item.title) + '</div>',
-      descHTML,
-      '<div class="urgent-alert-footer">',
-      '  <div class="urgent-alert-meta">',
-      '    ' + systemLabel,
-      '    ' + timeLabel,
-      '  </div>',
-      '  <span class="urgent-alert-cta">打开 Agent 会话',
-      '    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">',
-      '      <path d="M2.5 5h5M5.5 2.5L8 5l-2.5 2.5" stroke="#f5222d" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>',
-      '    </svg>',
-      '  </span>',
-      '</div>'
+      '<div class="urgent-alert-desc" style="padding-right:20px;">' + esc(item.description) + '</div>'
     ].join('');
 
     card.querySelector('.urgent-alert-close').addEventListener('click', function (e) {
       e.stopPropagation();
       dismissCard(card, item);
-    });
-
-    card.addEventListener('click', function (e) {
-      if (e.target.closest('.urgent-alert-close')) return;
-      console.log('Open alert session:', item.agent_id || item.source_from, item);
     });
 
     return card;
