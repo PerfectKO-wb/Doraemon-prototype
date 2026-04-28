@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAP — AI 智能体指挥中心</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── DS3 DESIGN TOKENS (from source) ── */
+:root{
+  --ds3-bg:#f0f4f8;
+  --ds3-text-primary:#000000d9;
+  --ds3-text-secondary:#0000008c;
+  --ds3-text-tertiary:#00000059;
+  --ds3-accent-blue:#007aff;
+  --ds3-accent-purple:#af52de;
+  --ds3-glass-bg:#ffffff73;
+  --ds3-glass-card:#ffffff59;
+  --ds3-glass-border:#ffffffb3;
+  --ds3-glass-border-hover:#ffffffe6;
+  --ds3-glass-panel:#fff9;
+  --ds3-success:#34c759;
+  --ds3-warning:#ff9f0a;
+  --ds3-error:#ff3b30;
+  --ds3-glass-shadow:0 8px 32px #1f26871f;
+  --ds3-glass-inset:inset 0 1px 0 #fff9;
+}
+
+html,body{width:100%;height:100%;overflow:hidden;}
+
+/* ── ROOT ── */
+.ds3-root{
+  width:100vw;height:100vh;
+  color:var(--ds3-text-primary);
+  background:linear-gradient(160deg,#f0f4f8 0%,#e8edf5 50%,#f5f0fa 100%);
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;
+  position:relative;overflow:hidden;
+}
+
+/* ── NEBULA CANVAS ── */
+.ds3-nebula-canvas{
+  z-index:0;pointer-events:none;
+  width:100%;height:100%;
+  position:fixed;top:0;left:0;
+}
+
+/* ── UI LAYER ── */
+.ds3-ui-layer{
+  z-index:1;width:100%;height:100%;
+  display:flex;flex-direction:column;position:relative;
+}
+
+/* ── SCROLLABLE CONTENT ── */
+.ds3-scrollbar{
+  width:100%;height:100%;overflow-y:auto;
+  padding:40px 40px 100px;
+}
+.ds3-scrollbar::-webkit-scrollbar{width:4px;height:4px;}
+.ds3-scrollbar::-webkit-scrollbar-track{background:transparent;}
+.ds3-scrollbar::-webkit-scrollbar-thumb{background:#0000001a;border-radius:2px;}
+.ds3-scrollbar::-webkit-scrollbar-thumb:hover{background:#0003;}
+.ds3-content{max-width:560px;margin:0 auto;}
+
+/* ── LIQUID GLASS (base class) ── */
+.lg{
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  isolation:isolate;
+  background:#ffffff40;
+  border:1px solid #ffffff80;
+  border-radius:20px;
+  position:relative;
+  box-shadow:0 8px 32px #1f26871a, inset 0 1px #ffffff80;
+}
+.lg::before{
+  content:"";z-index:0;border-radius:inherit;pointer-events:none;
+  background:#ffffff0d;position:absolute;inset:0;
+  box-shadow:inset 0 0 20px -5px #fff6;
+}
+.lg-hover:hover{
+  background:#ffffff59;border-color:#ffffffa6;
+  box-shadow:0 12px 40px #1f268726, inset 0 1px #fff9;
+}
+.lg-active{
+  border-color:#007aff40;
+  box-shadow:0 12px 48px #007aff1f, 0 8px 32px #1f26871a, inset 0 1px #fff9;
+}
+
+/* ── ROLE BADGE (user switcher) ── */
+.ds3-role-badge{
+  position:absolute;top:16px;left:16px;z-index:100;
+}
+.ds3-role-badge summary{
+  list-style:none;display:flex;align-items:center;gap:8px;
+  padding:6px 14px 6px 6px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.5);
+  background:rgba(255,255,255,.3);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:0 4px 16px rgba(31,38,135,.06), inset 0 1px 0 rgba(255,255,255,.5);
+  color:rgba(0,0,0,.8);cursor:pointer;
+  font-size:13px;font-weight:500;
+  touch-action:manipulation;
+  transition:all .2s;
+}
+.ds3-role-badge summary::-webkit-details-marker{display:none;}
+.ds3-role-badge summary:hover{
+  background:rgba(255,255,255,.45);
+  border-color:rgba(255,255,255,.7);
+}
+.ds3-role-badge[open] summary{
+  background:rgba(255,255,255,.5);
+}
+.badge-avatar{
+  width:28px;height:28px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+}
+.badge-info{display:flex;flex-direction:column;line-height:1.3;}
+.badge-name{font-size:13px;font-weight:500;}
+.badge-role{font-size:10px;opacity:.45;font-weight:400;}
+.badge-arrow{font-size:10px;opacity:.4;}
+
+/* Dropdown */
+.ds3-role-dropdown{
+  position:absolute;top:44px;left:0;
+  padding:4px;border-radius:16px;
+  background:rgba(255,255,255,.65);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:0 8px 32px rgba(31,38,135,.1), inset 0 1px 0 rgba(255,255,255,.5);
+  min-width:220px;z-index:1;
+}
+.drop-link{
+  display:flex;align-items:center;gap:8px;width:100%;
+  padding:8px 12px;border:none;border-radius:10px;
+  background:transparent;color:rgba(0,0,0,.7);
+  cursor:pointer;font-size:13px;text-align:left;font-weight:500;
+  text-decoration:none;box-sizing:border-box;
+  transition:background .12s;
+}
+.drop-link:hover{background:rgba(0,0,0,.05);}
+.drop-link.active{background:#ff2d5512;color:#ff2d55;}
+.drop-av{
+  width:24px;height:24px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;flex-shrink:0;
+}
+.drop-meta{flex:1;}
+.drop-meta-name{font-weight:600;font-size:13px;}
+.drop-meta-role{font-size:11px;opacity:.45;}
+.drop-uid{font-size:10px;color:rgba(0,0,0,.25);font-weight:500;}
+
+/* ── DATE HERO ── */
+.date-block{margin-bottom:22px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;}
+.date-main{font-size:32px;font-weight:800;color:rgba(0,0,0,.85);line-height:1.2;}
+.date-day{font-size:14px;font-weight:500;color:rgba(0,0,0,.35);margin-top:4px;}
+
+/* ── SECTION LABEL ── */
+.sec-label{
+  font-size:11px;font-weight:700;
+  color:rgba(0,0,0,.35);
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:10px;padding-left:2px;
+}
+
+/* ── QUICK PICK COLLAPSED CARD ── */
+.qp-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:18px;
+  padding:14px 18px;
+  cursor:pointer;
+  transition:all .2s ease;
+  box-shadow:0 8px 32px rgba(31,38,135,.08), inset 0 1px 0 rgba(255,255,255,.5);
+  margin-bottom:8px;
+}
+.qp-card:hover{
+  background:rgba(255,255,255,.7);
+  box-shadow:0 12px 40px rgba(31,38,135,.12), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.qp-row{display:flex;align-items:center;gap:10px;}
+.qp-left{flex:1;min-width:0;}
+.qp-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:700;color:rgba(0,0,0,.85);line-height:1.4;
+}
+.qp-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:20px;padding:0 7px;
+  border-radius:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;
+  background:rgba(0,122,255,.14);color:#005ec4;border:1px solid rgba(0,122,255,.25);
+}
+.qp-sub{margin-top:4px;font-size:11.5px;color:rgba(0,0,0,.5);line-height:1.5;}
+.qp-chevron{
+  width:26px;height:26px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(0,0,0,.45);transition:transform .22s ease;flex-shrink:0;
+}
+.qp-chevron.open{transform:rotate(180deg);}
+
+/* Expanded Quick Pick — all pairs shown at once */
+.qp-expanded{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:18px;
+  padding:16px 16px 20px;
+  box-shadow:0 8px 32px rgba(31,38,135,.08), inset 0 1px 0 rgba(255,255,255,.5);
+  margin-bottom:8px;display:none;
+}
+.qp-expanded.show{display:block;}
+
+.qp-pairs-list{display:flex;flex-direction:column;gap:20px;}
+
+/* Per-pair block */
+.qp-pair{}
+.qp-pair-q{
+  font-size:13px;font-weight:500;color:rgba(0,0,0,.65);
+  margin-bottom:10px;padding-left:2px;
+}
+
+/* Image option row */
+.qp-img-opts{display:flex;gap:10px;}
+.qp-img-card{
+  flex:1;cursor:pointer;
+  border-radius:12px;overflow:hidden;
+  border:2px solid transparent;
+  transition:border-color .18s, transform .15s, box-shadow .18s;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.qp-img-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,0,0,.14);
+}
+.qp-img-card.selected{
+  border-color:#007aff;
+  box-shadow:0 4px 16px rgba(0,122,255,.25);
+}
+.qp-img-card.dimmed{opacity:.45;}
+
+/* Thumbnail */
+.qp-img-thumb{
+  width:100%;aspect-ratio:3/2;
+  border-radius:10px 10px 0 0;
+  overflow:hidden;position:relative;
+}
+.qp-img-thumb img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  border-radius:10px 10px 0 0;
+}
+/* Fallback gradient (CSS only) */
+.qp-img-thumb.g1a{background:linear-gradient(135deg,#ff6b9d 0%,#c94b4b 40%,#4b1248 100%);}
+.qp-img-thumb.g1b{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);}
+.qp-img-thumb.g2a{background:linear-gradient(135deg,#1c0a00 0%,#3d1a00 40%,#c68642 100%);}
+.qp-img-thumb.g2b{background:linear-gradient(135deg,#0a0a2e 0%,#1a1a6e 40%,#00d4ff 100%);}
+.qp-img-thumb.g3a{background:linear-gradient(135deg,#1a0030 0%,#3d0060 50%,#6b00a8 100%);}
+.qp-img-thumb.g3b{background:linear-gradient(135deg,#1a3d1a 0%,#2d6b2d 50%,#4caf50 100%);}
+.qp-img-thumb.g4a{background:linear-gradient(135deg,#05001a 0%,#0a0535 40%,#1a0a5e 100%);}
+.qp-img-thumb.g4b{background:linear-gradient(135deg,#ffe4f0 0%,#ffd6e7 40%,#c8f0c8 100%);}
+
+/* Thumb overlay content (simulated) */
+.qp-thumb-inner{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:10px;
+}
+.qp-thumb-title{
+  font-size:13px;font-weight:800;color:#fff;
+  text-align:center;line-height:1.3;
+  text-shadow:0 1px 4px rgba(0,0,0,.6);
+}
+.qp-thumb-title.dark{color:rgba(255,255,255,.9);}
+.qp-thumb-title.kawaii{color:#5a3a6e;font-size:12px;}
+
+/* A / B label */
+.qp-img-lbl{
+  text-align:center;padding:7px 0 8px;
+  font-size:12px;font-weight:600;color:rgba(0,0,0,.4);
+  background:#fff;
+  transition:color .15s;
+}
+.qp-img-card.selected .qp-img-lbl{color:#007aff;}
+
+.qp-done{text-align:center;padding:20px 0 8px;}
+.qp-done-icon{font-size:32px;margin-bottom:8px;}
+.qp-done-title{font-size:16px;font-weight:700;color:rgba(0,0,0,.8);margin-bottom:4px;}
+.qp-done-sub{font-size:12px;color:rgba(0,0,0,.4);}
+
+/* ── SECTION ── */
+.section{margin-bottom:16px;}
+
+/* ── GENERIC GLASS CARD ── */
+.g-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:16px;padding:14px 16px;
+  box-shadow:0 4px 16px rgba(31,38,135,.07), inset 0 1px 0 rgba(255,255,255,.5);
+  margin-bottom:8px;
+  cursor:pointer;transition:all .18s;
+}
+.g-card:hover{
+  background:rgba(255,255,255,.7);
+  box-shadow:0 8px 28px rgba(31,38,135,.1), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.g-card.doing{
+  background:rgba(255,59,48,.06);
+  border-color:rgba(255,59,48,.2);
+  box-shadow:0 4px 16px rgba(255,59,48,.08), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.g-card.overdue{
+  border-left:2.5px solid rgba(255,59,48,.6);
+}
+
+/* ── TASK ELEMENTS ── */
+.card-title{font-size:14px;font-weight:600;color:rgba(0,0,0,.85);margin-bottom:6px;line-height:1.4;}
+.card-desc{font-size:12px;color:rgba(0,0,0,.5);line-height:1.5;}
+.ddl-row{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;color:#ff3b30;
+  margin-bottom:8px;
+}
+.ddl-dot{width:5px;height:5px;border-radius:50%;background:#ff3b30;flex-shrink:0;}
+
+/* ── DOING CARD (part 1: compact task card only) ── */
+.doing-card-desc{
+  font-size:13px;color:rgba(0,0,0,.55);line-height:1.6;margin-top:6px;
+}
+
+/* ── DOING BODY TEXT (part 2: plain text outside card) ── */
+.doing-body{
+  padding:14px 2px 10px;
+  font-size:14px;color:rgba(0,0,0,.75);line-height:1.75;
+}
+.doing-body p{margin-bottom:10px;}
+.doing-body p:last-child{margin-bottom:0;}
+.doing-body .doing-warn{
+  display:flex;align-items:flex-start;gap:6px;
+  color:rgba(0,0,0,.6);font-size:13.5px;
+}
+.doing-body .doing-warn-icon{flex-shrink:0;margin-top:1px;}
+.doing-body ol{
+  margin:8px 0 8px 18px;display:flex;flex-direction:column;gap:5px;
+}
+.doing-body ol li{font-size:13.5px;color:rgba(0,0,0,.7);line-height:1.65;}
+.doing-body .doing-cta{
+  font-size:13.5px;color:rgba(0,0,0,.5);margin-top:10px;
+}
+
+/* ── DOING INPUT (part 3: standalone input bar) ── */
+.doing-input{
+  background:rgba(255,255,255,.62);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:14px;padding:11px 14px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 4px 16px rgba(31,38,135,.07), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.doing-input input{
+  flex:1;border:none;outline:none;background:transparent;
+  font-size:13px;color:rgba(0,0,0,.7);font-family:inherit;
+}
+.doing-input input::placeholder{color:rgba(0,0,0,.28);}
+.doing-input-icon{color:rgba(0,0,0,.3);flex-shrink:0;display:flex;align-items:center;}
+.doing-input-clear{
+  font-size:15px;color:rgba(0,0,0,.25);flex-shrink:0;
+  cursor:pointer;transition:color .15s;line-height:1;
+  border:none;background:transparent;padding:0;font-family:inherit;
+}
+.doing-input-clear:hover{color:rgba(0,0,0,.5);}
+.doing-input-send{
+  width:28px;height:28px;border-radius:8px;border:none;
+  background:rgba(0,0,0,.08);color:rgba(0,0,0,.45);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .15s;
+}
+.doing-input-send:hover{background:rgba(0,122,255,.15);color:#007aff;}
+.doing-input-send.ready{background:#007aff;color:#fff;}
+
+/* ── TODO HEADER ── */
+.todo-hdr{
+  display:flex;align-items:center;gap:6px;
+  margin-bottom:8px;
+}
+.todo-count{font-size:11px;font-weight:700;color:rgba(0,0,0,.35);letter-spacing:.5px;}
+.todo-overdue{font-size:11px;font-weight:700;color:#ff3b30;letter-spacing:.5px;}
+
+/* ── TODO CARD HOVER BUTTON ── */
+.g-card.todo-card{position:relative;}
+.todo-start-btn{
+  position:absolute;top:12px;right:12px;
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(0,0,0,.07);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:scale(.85);
+  transition:opacity .15s, transform .15s, background .15s;
+  color:rgba(0,0,0,.55);flex-shrink:0;
+}
+.g-card.todo-card:hover .todo-start-btn{
+  opacity:1;transform:scale(1);
+}
+.todo-start-btn:hover{
+  background:rgba(0,122,255,.15) !important;
+  color:#007aff !important;
+}
+.g-card.todo-card.just-added{
+  animation:todoAdded .35s ease both;
+}
+@keyframes todoAdded{
+  from{opacity:0;transform:translateY(-8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.g-card.doing-card-anim{
+  animation:doingSwap .3s ease both;
+}
+@keyframes doingSwap{
+  from{opacity:0;transform:scale(.97);}
+  to{opacity:1;transform:scale(1);}
+}
+
+/* ── TASK ROW (ai-trainer) ── */
+.task-row{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:14px;padding:12px 16px;
+  margin-bottom:8px;text-decoration:none;color:inherit;
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 3px 12px rgba(31,38,135,.06), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.task-row:hover{
+  background:rgba(255,255,255,.72);
+  box-shadow:0 6px 20px rgba(31,38,135,.1), inset 0 1px 0 rgba(255,255,255,.6);
+  transform:translateY(-1px);
+}
+.task-icon{font-size:20px;flex-shrink:0;}
+.task-body{flex:1;min-width:0;}
+.task-title{font-size:14px;font-weight:600;color:rgba(0,0,0,.85);margin-bottom:2px;}
+.task-desc{font-size:12px;color:rgba(0,0,0,.45);line-height:1.4;}
+.task-badge{
+  font-size:11px;font-weight:700;
+  padding:3px 10px;border-radius:20px;flex-shrink:0;
+}
+.badge-red   {background:rgba(255,59,48,.12);color:#ff3b30;border:1px solid rgba(255,59,48,.2);}
+.badge-orange{background:rgba(255,159,10,.12);color:#c47f00;border:1px solid rgba(255,159,10,.2);}
+.badge-blue  {background:rgba(0,122,255,.12);color:#005ec4;border:1px solid rgba(0,122,255,.2);}
+
+/* ── MANAGER ── */
+.mgr-block{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:14px;padding:12px 16px;margin-bottom:4px;
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 3px 12px rgba(31,38,135,.06), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.mgr-block:hover{background:rgba(255,255,255,.72);box-shadow:0 6px 20px rgba(31,38,135,.1), inset 0 1px 0 rgba(255,255,255,.6);}
+.mgr-type{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  padding:2px 7px;border-radius:5px;flex-shrink:0;
+}
+.type-interview{background:rgba(0,122,255,.1);color:#007aff;}
+.type-task{background:rgba(52,199,89,.1);color:#1a9e3f;}
+.mgr-title{flex:1;font-size:14px;font-weight:600;color:rgba(0,0,0,.8);}
+.mgr-right{font-size:13px;color:rgba(0,0,0,.35);}
+.mgr-sub{font-size:11px;color:rgba(0,0,0,.3);padding:2px 16px 8px;}
+
+.stat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.stat-chip{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.6);border-radius:10px;
+  padding:7px 14px;font-size:12px;color:rgba(0,0,0,.5);
+  cursor:pointer;transition:all .15s;
+  box-shadow:0 2px 8px rgba(31,38,135,.05);
+}
+.stat-chip:hover{background:rgba(255,255,255,.75);border-color:rgba(0,122,255,.3);}
+.stat-num{font-size:15px;font-weight:700;color:rgba(0,0,0,.8);}
+
+.goal-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:16px;padding:14px 16px;margin-bottom:8px;
+  box-shadow:0 4px 16px rgba(31,38,135,.07), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.goal-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
+.goal-title{font-size:14px;font-weight:600;color:rgba(0,0,0,.85);flex:1;line-height:1.45;}
+.goal-pts{font-size:13px;font-weight:700;color:#34c759;flex-shrink:0;margin-left:10px;}
+.goal-sub{font-size:12px;color:rgba(0,0,0,.45);margin-bottom:10px;line-height:1.4;}
+.ds3-progress-bar{background:#0000000f;border-radius:2px;height:4px;overflow:hidden;margin-bottom:10px;}
+.ds3-progress-fill{border-radius:2px;height:100%;transition:width .6s cubic-bezier(.4,0,.2,1);background:rgba(0,0,0,.7);}
+.goal-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.goal-chip{
+  font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px;
+  display:flex;align-items:center;gap:3px;
+}
+.chip-ai   {background:rgba(0,122,255,.1);color:#007aff;}
+.chip-human{background:rgba(255,159,10,.1);color:#c47f00;}
+.chip-done {background:rgba(52,199,89,.1);color:#1a9e3f;}
+
+/* ── ARTIST ── */
+.test-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:16px;padding:14px 16px;margin-bottom:8px;
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 4px 16px rgba(31,38,135,.07), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.test-card:hover{background:rgba(255,255,255,.72);box-shadow:0 8px 28px rgba(31,38,135,.1);}
+.test-type{
+  display:inline-block;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:5px;margin-bottom:8px;
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.type-ab   {background:rgba(175,82,222,.1);color:#af52de;}
+.type-rate {background:rgba(50,173,230,.1);color:#0096b8;}
+.test-title{font-size:14px;font-weight:600;color:rgba(0,0,0,.85);margin-bottom:4px;}
+.test-desc{font-size:12px;color:rgba(0,0,0,.45);line-height:1.4;margin-bottom:10px;}
+.test-footer{display:flex;align-items:center;justify-content:space-between;}
+.test-count{font-size:11px;color:rgba(0,0,0,.3);}
+.test-btn{
+  font-size:12px;font-weight:600;
+  padding:5px 14px;border-radius:20px;
+  border:1px solid rgba(0,0,0,.12);
+  background:rgba(255,255,255,.7);
+  color:rgba(0,0,0,.65);
+  cursor:pointer;transition:all .15s;
+}
+.test-btn:hover{border-color:rgba(0,122,255,.4);color:#007aff;background:rgba(0,122,255,.06);}
+
+/* ── CASE LIST ── */
+.case-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:8px;
+  cursor:pointer;transition:background .12s;
+}
+.case-row:hover{background:rgba(0,0,0,.04);}
+.case-id{font-size:10px;font-weight:700;color:#007aff;min-width:80px;flex-shrink:0;}
+.case-text{flex:1;font-size:12px;color:rgba(0,0,0,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.case-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.cs-done   {background:rgba(52,199,89,.12);color:#1a9e3f;}
+.cs-pending{background:rgba(255,159,10,.12);color:#c47f00;}
+.cs-review {background:rgba(0,122,255,.12);color:#007aff;}
+
+/* ── CASES DOCK ── */
+.ds3-case-dock{
+  z-index:40;pointer-events:auto;
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  position:fixed;bottom:20px;right:20px;
+}
+.ds3-case-trigger{
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:rgba(0,0,0,.55);letter-spacing:.2px;cursor:pointer;
+  background:#ffffffb3;border:1px solid rgba(0,0,0,.1);
+  border-radius:999px;align-items:center;gap:8px;
+  min-height:30px;padding:0 12px 0 10px;
+  font-size:11px;font-weight:700;line-height:16px;
+  transition:color .15s,border-color .15s,background .15s,box-shadow .15s;
+  display:inline-flex;box-shadow:0 1px 2px rgba(0,0,0,.06);
+  font-family:inherit;
+}
+.ds3-case-trigger:hover{
+  color:rgba(0,0,0,.82);background:#fffffff2;
+  border-color:rgba(0,0,0,.25);box-shadow:0 2px 6px rgba(0,0,0,.09);
+}
+.ds3-case-trigger.is-open{color:rgba(0,0,0,.9);background:#fffffffa;border-color:rgba(0,0,0,.55);}
+.ds3-case-trigger-dot{background:rgba(0,0,0,.28);border-radius:999px;width:6px;height:6px;transition:background .15s;}
+.ds3-case-chevron{opacity:.6;font-size:10px;line-height:1;transition:transform .18s,opacity .15s;transform:rotate(180deg);}
+.ds3-case-chevron.is-open{opacity:.9;transform:rotate(0);}
+.ds3-case-menu{
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  transform-origin:100% 100%;
+  background:#fffffff5;border:1px solid rgba(0,0,0,.08);
+  border-radius:14px;flex-direction:column;gap:2px;
+  min-width:260px;padding:6px;
+  animation:.16s ease-out both ds3-case-menu-in;
+  display:flex;box-shadow:0 8px 24px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.06);
+}
+.ds3-case-option{
+  text-align:left;cursor:pointer;background:transparent;
+  border:none;border-radius:10px;flex-direction:column;
+  align-items:flex-start;gap:2px;padding:8px 12px;
+  transition:background .12s;display:flex;width:100%;font-family:inherit;
+}
+.ds3-case-option:hover{background:rgba(0,0,0,.06);}
+.ds3-case-option.is-active{background:rgba(0,0,0,.08);}
+.ds3-case-option-label{color:rgba(0,0,0,.85);letter-spacing:.2px;font-size:12px;font-weight:700;}
+.ds3-case-option.is-active .ds3-case-option-label::before{content:"• ";color:rgba(0,0,0,.85);}
+.ds3-case-option-title{color:rgba(0,0,0,.5);font-size:11px;line-height:1.4;}
+
+/* ── GREETING ── */
+.greeting{font-size:17px;font-weight:700;color:rgba(0,0,0,.85);margin-bottom:4px;}
+.greeting-sub{font-size:13px;color:rgba(0,0,0,.45);margin-bottom:20px;}
+
+/* ── VIEWS ── */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ── ANIMATIONS ── */
+@keyframes ds3-case-menu-in{
+  0%{opacity:0;transform:translateY(4px) scale(.98);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+@keyframes ds3-card-appear{
+  0%{opacity:0;transform:translateY(8px) scale(.98);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.ds3-card-appear{opacity:0;animation:.32s cubic-bezier(.22,1,.36,1) forwards ds3-card-appear;}
+@keyframes ds3-task-appear{
+  0%{opacity:0;transform:translateY(12px) scale(.97);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.ds3-task-appear{opacity:0;animation:.5s cubic-bezier(.34,1.56,.64,1) forwards ds3-task-appear;}
+</style>
+</head>
+<body>
+<div class="ds3-root">
+  <!-- NEBULA CANVAS -->
+  <canvas class="ds3-nebula-canvas" id="nebulaCanvas"></canvas>
+
+  <div class="ds3-ui-layer">
+
+    <!-- ROLE BADGE -->
+    <details class="ds3-role-badge" id="roleBadge">
+      <summary>
+        <span class="badge-avatar" id="badgeAvatar" style="background:rgba(255,45,85,.12);color:#ff2d55;">CX</span>
+        <div class="badge-info">
+          <span class="badge-name" id="badgeName">林晨曦</span>
+          <span class="badge-role" id="badgeRole">产品经理</span>
+        </div>
+        <span class="badge-arrow">▾</span>
+      </summary>
+      <div class="ds3-role-dropdown">
+        <a class="drop-link" href="?role=ai-trainer&user=u1">
+          <span class="drop-av" style="background:rgba(0,122,255,.12);color:#007aff;">LW</span>
+          <div class="drop-meta"><div class="drop-meta-name">王丽莎</div><div class="drop-meta-role">AI 训练师</div></div>
+          <span class="drop-uid">u1</span>
+        </a>
+        <a class="drop-link" href="?role=manager&user=u2">
+          <span class="drop-av" style="background:rgba(175,82,222,.12);color:#af52de;">SK</span>
+          <div class="drop-meta"><div class="drop-meta-name">金莎拉</div><div class="drop-meta-role">运营总监</div></div>
+          <span class="drop-uid">u2</span>
+        </a>
+        <a class="drop-link" href="?role=artist&user=u3">
+          <span class="drop-av" style="background:rgba(255,159,10,.12);color:#ff9f0a;">SY</span>
+          <div class="drop-meta"><div class="drop-meta-name">陈思远</div><div class="drop-meta-role">高级游戏美术师</div></div>
+          <span class="drop-uid">u3</span>
+        </a>
+        <a class="drop-link" href="?role=pdm&user=u5">
+          <span class="drop-av" style="background:rgba(255,45,85,.12);color:#ff2d55;">CX</span>
+          <div class="drop-meta"><div class="drop-meta-name">林晨曦</div><div class="drop-meta-role">产品经理</div></div>
+          <span class="drop-uid">u5</span>
+        </a>
+      </div>
+    </details>
+
+    <!-- SCROLLABLE MAIN -->
+    <div class="ds3-scrollbar">
+      <div class="ds3-content">
+
+        <!-- DATE -->
+        <div class="date-block">
+          <div>
+            <div class="date-main" id="heroDate">2026-04-28</div>
+            <div class="date-day" id="heroDay">Tue</div>
+          </div>
+        </div>
+
+        <!-- ══ PDM ══ -->
+        <div class="view" id="view-pdm">
+          <div class="section">
+            <div class="sec-label">Quick pick</div>
+            <!-- Collapsed row -->
+            <div class="qp-card" id="qpToggle" onclick="toggleQP()">
+              <div class="qp-row">
+                <div class="qp-left">
+                  <div class="qp-title">
+                    Choose you like
+                    <span class="qp-count" id="qpBadge">4</span>
+                  </div>
+                  <div class="qp-sub"><span id="qpLeftText">4</span> A/B pairs left · 1 sec each</div>
+                </div>
+                <div class="qp-chevron" id="qpChevron">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+              </div>
+            </div>
+            <!-- Expanded -->
+            <div class="qp-expanded" id="qpExpanded">
+              <div class="qp-pairs-list" id="qpPairsList"></div>
+              <div class="qp-done" id="qpDone" style="display:none;">
+                <div class="qp-done-icon">🎉</div>
+                <div class="qp-done-title">全部完成</div>
+                <div class="qp-done-sub">今日偏好已收集，感谢反馈。</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DOING -->
+          <div class="section">
+            <div class="sec-label">Doing</div>
+
+            <!-- Part 1: Task card (JS-rendered) -->
+            <div id="pdmDoingCard"></div>
+
+            <!-- Part 2: Plain text description -->
+            <div class="doing-body">
+              <p>△ To do 里已有 4 项逾期（最紧：「Q2 客服 AI 上线评审 deck」逾期 6 day）。腾出手就先清这批，避免继续堆积。</p>
+              <div class="doing-warn">
+                <span class="doing-warn-icon">❗</span>
+                <span id="pdmDoingBodyRef">「智能客服周会纪要 + Action 同步」</span>已逾期 6 day —— 评审窗口随时会被取消，立刻把当前 output 先交出来止血，哪怕 80% 版本也先给我；剩下两条动作并行收口：
+              </div>
+              <ol>
+                <li>Action 项格式统一为「[owner] @[ddl] — 具体动作」，便于自动跟进</li>
+                <li>只摘录决策与 Action，会上讨论过程不展开，控制阅读时长 ≤ 3 分钟</li>
+              </ol>
+              <p class="doing-cta">做完后点右边的 ➤ 把 output 抓紧交我，自动接下一个任务。</p>
+            </div>
+
+            <!-- Part 3: Input box -->
+            <div class="doing-input">
+              <div class="doing-input-icon">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M14 10v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2M8 2v8M5 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <input type="text" id="doingInput" placeholder="描述这次交付的产出物，可附图片/视频…（⌘+Enter 发送）" oninput="onDoingInput(this)"/>
+              <button class="doing-input-clear" id="doingClear" onclick="clearDoingInput()" style="display:none;">×</button>
+              <button class="doing-input-send" id="doingSend">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4M11 1v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- TO DO (JS-rendered) -->
+          <div class="section" id="pdmTodoSection">
+            <div class="todo-hdr">
+              <span class="sec-label" style="margin:0;">To Do</span>
+              <span class="todo-count" id="pdmTodoCount">4 ·</span>
+              <span class="todo-overdue" id="pdmTodoOverdue">4 OVERDUE</span>
+            </div>
+            <div id="pdmTodoList"></div>
+          </div>
+        </div><!-- /pdm -->
+
+        <!-- ══ AI TRAINER ══ -->
+        <div class="view" id="view-ai-trainer">
+          <div class="greeting" id="trainerGreeting">夜深了，还在工作呢 🌙</div>
+          <div class="greeting-sub">这是你今天的任务，共 3 项。</div>
+          <a class="task-row ds3-task-appear" href="#" style="animation-delay:.05s;">
+            <span class="task-icon">🎫</span>
+            <div class="task-body"><div class="task-title">客服工单处理</div><div class="task-desc">处理用户转交的工单，解答疑问并跟进直至关闭。</div></div>
+            <span class="task-badge badge-red">12 待处理</span>
+          </a>
+          <a class="task-row ds3-task-appear" href="#" style="animation-delay:.12s;">
+            <span class="task-icon">📚</span>
+            <div class="task-body"><div class="task-title">知识库维护</div><div class="task-desc">审核和更新知识库条目，确保回答准确性和时效性。</div></div>
+            <span class="task-badge badge-orange">5 待处理</span>
+          </a>
+          <a class="task-row ds3-task-appear" href="#" style="animation-delay:.19s;">
+            <span class="task-icon">✅</span>
+            <div class="task-body"><div class="task-title">服务评估</div><div class="task-desc">评估客服对话质量，标注改进点并提交评分报告。</div></div>
+            <span class="task-badge badge-blue">8 待处理</span>
+          </a>
+          <div class="sec-label" style="margin-top:20px;">🧪 Case List</div>
+          <div class="case-row"><span class="case-id">EC-2023-009</span><span class="case-text">用户投诉游戏内购退款流程繁琐</span><span class="case-status cs-pending">待处理</span></div>
+          <div class="case-row"><span class="case-id">EC-2023-007</span><span class="case-text">账号异常封禁申诉</span><span class="case-status cs-review">处理中</span></div>
+          <div class="case-row"><span class="case-id">EC-2023-005</span><span class="case-text">VIP 会员权益未到账</span><span class="case-status cs-done">已完成</span></div>
+        </div>
+
+        <!-- ══ MANAGER ══ -->
+        <div class="view" id="view-manager">
+          <div class="sec-label">Todo <span style="font-size:13px;font-weight:700;color:rgba(0,0,0,.7);letter-spacing:0;text-transform:none;">9</span></div>
+          <div class="mgr-block ds3-task-appear" style="animation-delay:.05s;">
+            <span class="mgr-type type-interview">Interview</span>
+            <span class="mgr-title">高级客服主管 — 终面</span>
+            <span class="mgr-right">3 →</span>
+          </div>
+          <div class="mgr-sub">2h · 森健二</div>
+          <div class="mgr-block ds3-task-appear" style="animation-delay:.1s;">
+            <span class="mgr-type type-task">Task</span>
+            <span class="mgr-title">Q2 客服 AI 上线评审</span>
+            <span class="mgr-right">6 →</span>
+          </div>
+          <div class="mgr-sub">DDL · 2026-03-19</div>
+          <div class="stat-row" style="margin-top:16px;">
+            <div class="stat-chip">Goal <span class="stat-num">2</span></div>
+            <div class="stat-chip">Dashboard <span class="stat-num">3</span></div>
+            <div class="stat-chip">Brain <span class="stat-num">0</span></div>
+          </div>
+          <div class="goal-card ds3-card-appear">
+            <div class="goal-top"><div class="goal-title">维持客服质量评分 ≥ 92%</div><div class="goal-pts">+72</div></div>
+            <div class="goal-sub">AI 处理常规咨询，人类专注复杂案例和质量保障</div>
+            <div class="ds3-progress-bar"><div class="ds3-progress-fill" style="width:74%;"></div></div>
+            <div class="goal-chips">
+              <span class="goal-chip chip-ai">🤖 11 AI</span>
+              <span class="goal-chip chip-human">👤 9 Human</span>
+              <span class="goal-chip chip-done">✓ 8 Done</span>
+            </div>
+          </div>
+          <div class="goal-card ds3-card-appear" style="animation-delay:.1s;">
+            <div class="goal-top"><div class="goal-title">将 PWA 安装率提升至 35%</div><div class="goal-pts">+48</div></div>
+            <div class="goal-sub">通过智能提示、优化安装流程和基于互动的触发机制，推动移动端用户安装 PWA</div>
+            <div class="ds3-progress-bar"><div class="ds3-progress-fill" style="width:55%;"></div></div>
+            <div class="goal-chips">
+              <span class="goal-chip chip-ai">🤖 9 AI</span>
+              <span class="goal-chip chip-human">👤 7 Human</span>
+              <span class="goal-chip chip-done">✓ 5 Done</span>
+            </div>
+          </div>
+          <div class="mgr-block" style="justify-content:space-between;">
+            <span style="font-size:14px;font-weight:600;">Msg</span>
+            <span style="font-size:13px;color:rgba(0,0,0,.35);">Send →</span>
+          </div>
+        </div>
+
+        <!-- ══ ARTIST ══ -->
+        <div class="view" id="view-artist">
+          <div class="sec-label">🧪 Test List</div>
+          <div class="test-card ds3-task-appear" style="animation-delay:.05s;"><span class="test-type type-ab">A/B 对比</span><div class="test-title">角色立绘风格偏好测试</div><div class="test-desc">比较写实风与卡通风两组角色立绘，收集用户审美偏好数据。</div><div class="test-footer"><span class="test-count">12 条待评分</span><button class="test-btn">开始评分</button></div></div>
+          <div class="test-card ds3-task-appear" style="animation-delay:.1s;"><span class="test-type type-rate">评分</span><div class="test-title">UI 配色方案满意度评估</div><div class="test-desc">对 3 套游戏主界面配色方案进行 1-5 分评分。</div><div class="test-footer"><span class="test-count">6 条待评分</span><button class="test-btn">开始评分</button></div></div>
+          <div class="test-card ds3-task-appear" style="animation-delay:.15s;"><span class="test-type type-ab">A/B 对比</span><div class="test-title">场景背景图光影处理对比</div><div class="test-desc">AI 生成的两版场景背景，评估光影效果自然度。</div><div class="test-footer"><span class="test-count">8 条待评分</span><button class="test-btn">开始评分</button></div></div>
+          <div class="test-card ds3-task-appear" style="animation-delay:.2s;"><span class="test-type type-rate">评分</span><div class="test-title">动态特效流畅度体验测试</div><div class="test-desc">评估技能释放特效在不同设备上的视觉体验。</div><div class="test-footer"><span class="test-count">4 条待评分</span><button class="test-btn">开始评分</button></div></div>
+        </div>
+
+      </div><!-- /ds3-content -->
+    </div><!-- /ds3-scrollbar -->
+
+    <!-- CASES DOCK -->
+    <div class="ds3-case-dock">
+      <div id="casesMenu" class="ds3-case-menu" style="display:none;">
+        <button class="ds3-case-option is-active" type="button">
+          <span class="ds3-case-option-label">AB-2026-041</span>
+          <span class="ds3-case-option-title">首页推荐文案 A/B 测试 — 游戏活动版</span>
+        </button>
+        <button class="ds3-case-option" type="button">
+          <span class="ds3-case-option-label">AB-2026-038</span>
+          <span class="ds3-case-option-title">Push 通知点击率优化实验</span>
+        </button>
+        <button class="ds3-case-option" type="button">
+          <span class="ds3-case-option-label">AB-2026-035</span>
+          <span class="ds3-case-option-title">新用户引导页文案对比</span>
+        </button>
+        <button class="ds3-case-option" type="button">
+          <span class="ds3-case-option-label">AB-2026-032</span>
+          <span class="ds3-case-option-title">商城促销 Banner 点击偏好</span>
+        </button>
+        <button class="ds3-case-option" type="button">
+          <span class="ds3-case-option-label">AB-2026-029</span>
+          <span class="ds3-case-option-title">客服快捷回复语气测试</span>
+        </button>
+      </div>
+      <button class="ds3-case-trigger" type="button" id="casesTrigger" onclick="toggleCases()">
+        <span class="ds3-case-trigger-dot"></span>
+        <span>Cases</span>
+        <span class="ds3-case-chevron" id="casesChev">⌃</span>
+      </button>
+    </div>
+
+  </div><!-- /ds3-ui-layer -->
+</div><!-- /ds3-root -->
+
+<script>
+/* ── NEBULA CANVAS ── */
+(function(){
+  const canvas = document.getElementById('nebulaCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, orbs = [];
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function makeOrb(){
+    const hues = [210, 260, 190, 230, 280];
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 120 + Math.random() * 200,
+      hue: hues[Math.floor(Math.random() * hues.length)],
+      a: 0.03 + Math.random() * 0.05,
+      vx: (Math.random() - .5) * .18,
+      vy: (Math.random() - .5) * .18,
+    };
+  }
+
+  function init(){
+    resize();
+    orbs = Array.from({length:7}, makeOrb);
+  }
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+    for(const o of orbs){
+      const grad = ctx.createRadialGradient(o.x,o.y,0, o.x,o.y,o.r);
+      grad.addColorStop(0,  `hsla(${o.hue},70%,72%,${o.a})`);
+      grad.addColorStop(.5, `hsla(${o.hue},60%,78%,${o.a*.4})`);
+      grad.addColorStop(1,  `hsla(${o.hue},50%,85%,0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(o.x, o.y, o.r, 0, Math.PI*2);
+      ctx.fill();
+      o.x += o.vx; o.y += o.vy;
+      if(o.x < -o.r || o.x > W+o.r) o.vx *= -1;
+      if(o.y < -o.r || o.y > H+o.r) o.vy *= -1;
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  init(); draw();
+})();
+
+/* ── USERS ── */
+const USERS={
+  u1:{initials:'LW',name:'王丽莎', role:'AI 训练师',   avBg:'rgba(0,122,255,.12)',avColor:'#007aff', view:'ai-trainer'},
+  u2:{initials:'SK',name:'金莎拉', role:'运营总监',     avBg:'rgba(175,82,222,.12)',avColor:'#af52de',view:'manager'},
+  u3:{initials:'SY',name:'陈思远', role:'高级游戏美术师',avBg:'rgba(255,159,10,.12)',avColor:'#ff9f0a',view:'artist'},
+  u5:{initials:'CX',name:'林晨曦', role:'产品经理',     avBg:'rgba(255,45,85,.12)', avColor:'#ff2d55',view:'pdm'},
+};
+
+const params = new URLSearchParams(location.search);
+const userId = params.get('user')||'u5';
+const user   = USERS[userId]||USERS.u5;
+
+/* Date */
+const now  = new Date();
+const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+document.getElementById('heroDate').textContent =
+  now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+document.getElementById('heroDay').textContent = days[now.getDay()];
+
+/* Badge */
+const av = document.getElementById('badgeAvatar');
+av.textContent           = user.initials;
+av.style.background      = user.avBg;
+av.style.color           = user.avColor;
+document.getElementById('badgeName').textContent = user.name;
+document.getElementById('badgeRole').textContent = user.role;
+
+/* Active drop link */
+document.querySelectorAll('.drop-link').forEach(el=>{
+  if((el.getAttribute('href')||'').includes('user='+userId)) el.classList.add('active');
+});
+
+/* Show view */
+document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+const vEl = document.getElementById('view-'+user.view);
+if(vEl) vEl.classList.add('active');
+
+/* Greeting */
+const grEl = document.getElementById('trainerGreeting');
+if(grEl){
+  const h = now.getHours();
+  grEl.textContent = h<6 ? '夜深了，还在工作呢 🌙'
+                   : h<12? '早上好，新的一天开始了 ☀️'
+                   : h<18? '下午好，保持专注 💪'
+                   :       '晚上好，辛苦了 🌙';
+}
+
+/* Close badge when clicking outside */
+document.addEventListener('click', e=>{
+  const bd = document.getElementById('roleBadge');
+  if(!bd.contains(e.target)) bd.removeAttribute('open');
+});
+
+/* ── CASES ── */
+let casesOpen = false;
+function toggleCases(){
+  casesOpen = !casesOpen;
+  const menu = document.getElementById('casesMenu');
+  const btn  = document.getElementById('casesTrigger');
+  const chev = document.getElementById('casesChev');
+  menu.style.display = casesOpen ? 'flex' : 'none';
+  btn.classList.toggle('is-open', casesOpen);
+  chev.classList.toggle('is-open', casesOpen);
+}
+
+/* ── QUICK PICK ── */
+const PAIRS=[
+  {
+    q:'Vibes-only — which one?',
+    a:{g:'g1a', title:'情だはなる'},
+    b:{g:'g1b', title:'贝世物じゃねと\n英勇者の戦いは', dark:true}
+  },
+  {
+    q:'Which one would you ship?',
+    a:{g:'g2a', title:'トーナメントを制せよ 頂点を摑め！'},
+    b:{g:'g2b', title:'傾付は、また佳らない！\nレベルアップ'}
+  },
+  {
+    q:'Which thumbnail would you tap first?',
+    a:{g:'g3a', title:'⚜ QB', large:true},
+    b:{g:'g3b', title:'SEIREI\nSPIRIT', dark:true}
+  },
+  {
+    q:'Pick the more clickable one.',
+    a:{g:'g4a', title:'記号\n陳家名章 城曲指揮'},
+    b:{g:'g4b', title:'弾łく\n挑よう\nTUTORIAL 🎀', kawaii:true}
+  },
+];
+
+let qpOpen=false;
+const qpPicks={};  // {pairIdx: 'A'|'B'}
+
+function renderAllPairs(){
+  const list = document.getElementById('qpPairsList');
+  list.innerHTML = PAIRS.map((p,i)=>`
+    <div class="qp-pair">
+      <div class="qp-pair-q">${p.q}</div>
+      <div class="qp-img-opts">
+        <div class="qp-img-card${qpPicks[i]==='A'?' selected':qpPicks[i]==='B'?' dimmed':''}"
+             id="qpP${i}A" onclick="pickImg(${i},'A')">
+          <div class="qp-img-thumb ${p.a.g}">
+            <div class="qp-thumb-inner">
+              <div class="qp-thumb-title${p.a.kawaii?' kawaii':''}">${p.a.title.replace(/\n/g,'<br>')}</div>
+            </div>
+          </div>
+          <div class="qp-img-lbl">A</div>
+        </div>
+        <div class="qp-img-card${qpPicks[i]==='B'?' selected':qpPicks[i]==='A'?' dimmed':''}"
+             id="qpP${i}B" onclick="pickImg(${i},'B')">
+          <div class="qp-img-thumb ${p.b.g}">
+            <div class="qp-thumb-inner">
+              <div class="qp-thumb-title${p.b.kawaii?' kawaii':''}">${p.b.title.replace(/\n/g,'<br>')}</div>
+            </div>
+          </div>
+          <div class="qp-img-lbl">B</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function pickImg(pairIdx, choice){
+  if(qpPicks[pairIdx]) return;
+  qpPicks[pairIdx] = choice;
+  renderAllPairs();
+  const remaining = PAIRS.length - Object.keys(qpPicks).length;
+  document.getElementById('qpBadge').textContent = remaining;
+  document.getElementById('qpLeftText').textContent = remaining;
+  if(remaining === 0){
+    setTimeout(()=>{
+      document.getElementById('qpPairsList').style.display='none';
+      document.getElementById('qpDone').style.display='block';
+      document.getElementById('qpBadge').textContent='0';
+    }, 500);
+  }
+}
+
+function toggleQP(){
+  qpOpen=!qpOpen;
+  document.getElementById('qpExpanded').classList.toggle('show',qpOpen);
+  document.getElementById('qpChevron').classList.toggle('open',qpOpen);
+  if(qpOpen) renderAllPairs();
+}
+
+if(user.view==='pdm'){/* no-op: pairs render on expand */}
+
+/* ── PDM TASKS ── */
+const pdmTasks = [
+  {
+    title: '智能客服周会纪要 + Action 同步',
+    ddlLabel: 'DDL 2026-04-22 · 已逾期', overdue: true,
+    desc: '会后 2 小时内同步纪要到 Notion，并把 Action 项录入 Linear；@ 相关人确认 owner。'
+  },
+  {
+    title: 'Q2 客服 AI 上线评审 deck',
+    ddlLabel: 'DDL 2026-04-22 · 已逾期', overdue: true,
+    desc: '汇总三条管线灰度数据 + 各业务线 checklist + P0/P1 降级预案，准备运营 VP 评审 deck（≤ 8 页）。'
+  },
+  {
+    title: 'Q2 留存项目 PRD v0.3',
+    ddlLabel: 'DDL 2026-04-24 · 已逾期', overdue: true,
+    desc: '在 v0.2 基础上补充：召回推送频控规则、跨语言文案降级方案，以及与游戏内活动的冲突避让逻辑。'
+  },
+  {
+    title: '日本市场用户访谈纪要',
+    ddlLabel: 'DDL 2026-04-25 · 已逾期', overdue: true,
+    desc: '整理本周与 6 位日本玩家的访谈录音，输出主题归类的洞察清单（建议 ≤ 8 条核心洞察）。'
+  },
+  {
+    title: 'PWA 安装率数据复盘',
+    ddlLabel: 'DDL 2026-04-26 · 已逾期', overdue: true,
+    desc: '近 30 天 PWA 安装率从 28% → 32%，但 7 日留存掉了 2pp，需要拆分原因并给出下一阶段的实验方案。'
+  }
+];
+let pdmDoingIdx = -1; // -1 = A-ticket is Doing by default
+
+function renderPdmDoing(){
+  if(pdmDoingIdx < 0) return; // A-ticket doing is handled separately
+  const t = pdmTasks[pdmDoingIdx];
+  document.getElementById('pdmDoingCard').innerHTML = `
+    <div class="g-card doing ds3-card-appear doing-card-anim">
+      <div class="card-title">${t.title}</div>
+      <div class="ddl-row"><span class="ddl-dot"></span>${t.ddlLabel}</div>
+      <div class="doing-card-desc">${t.desc}</div>
+    </div>`;
+  const ref = document.getElementById('pdmDoingBodyRef');
+  if(ref) ref.textContent = `「${t.title}」`;
+}
+
+function renderPdmTodo(){
+  // when pdmDoingIdx === -1 (A-ticket is doing), show all pdm tasks in todo
+  const todos = pdmTasks.filter((_,i)=> pdmDoingIdx < 0 || i !== pdmDoingIdx);
+  const showATicket = pdmDoingIdx >= 0; // show A-ticket in list unless it's currently Doing
+  const totalCount = todos.length + (showATicket ? 1 : 0);
+  const overdueCount = todos.filter(t=>t.overdue).length + (showATicket ? 1 : 0);
+  document.getElementById('pdmTodoCount').textContent = totalCount + ' ·';
+  document.getElementById('pdmTodoOverdue').textContent = overdueCount + ' OVERDUE';
+
+  const aTicketCard = showATicket ? `
+    <div class="g-card todo-card overdue ds3-task-appear" style="animation-delay:0s;">
+      <div class="card-title" style="padding-right:36px;">
+        ${aTicket.title}
+        <span style="display:inline-flex;align-items:center;gap:3px;margin-left:6px;
+          font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+          padding:2px 7px;border-radius:6px;vertical-align:middle;
+          background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">
+          ⚠ Urgent
+        </span>
+      </div>
+      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${aTicket.ddl} · 今日必处理</div>
+      <div class="card-desc">
+        ${aTicket.sessions.map(s=>`
+          <div style="color:rgba(0,0,0,.6);margin-bottom:3px;font-size:12px;line-height:1.5;">${s.label}</div>
+        `).join('')}
+      </div>
+      <button class="todo-start-btn" onclick="event.stopPropagation();window.switchToDoing(-1)" title="切换为 Doing">
+        <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6-10 6V0z"/></svg>
+      </button>
+    </div>` : '';
+
+  document.getElementById('pdmTodoList').innerHTML = aTicketCard + todos.map((t, listIdx)=>{
+    const realIdx = pdmTasks.indexOf(t);
+    return `
+      <div class="g-card todo-card ${t.overdue?'overdue':''} ds3-task-appear" style="animation-delay:${(listIdx+(showATicket?1:0))*0.07}s;">
+        <div class="card-title">${t.title}</div>
+        <div class="ddl-row"><span class="ddl-dot"></span>${t.ddlLabel}</div>
+        <div class="card-desc">${t.desc}</div>
+        <button class="todo-start-btn" onclick="switchToDoing(${realIdx})" title="切换为 Doing">
+          <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6-10 6V0z"/></svg>
+        </button>
+      </div>`;
+  }).join('');
+}
+
+function switchToDoing(newDoingIdx){
+  pdmDoingIdx = newDoingIdx;
+  renderPdmDoing();
+  renderPdmTodo();
+  // Scroll doing card into view smoothly
+  const card = document.getElementById('pdmDoingCard');
+  if(card) card.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* ── ALERT A-TICKET ── */
+const aTicket = {
+  system: 'Publisher',
+  title: '[Publisher系统] 线上问题处理',
+  severity: 'Urgent',
+  owner: '王彬-Wang Bin',
+  ddl: '2026-04-28',
+  type: 'bug',
+  dept: 'Tech',
+  sessions: [
+    {
+      id: 'S-001',
+      label: '[WARNING] publisher — npm install timeout 导致部署失败',
+      time: '09:42',
+      url: 'chat_urgent_warning.html?scene=publisher-alert'
+    },
+    {
+      id: 'S-002',
+      label: '[WARNING] publisher — vividarmy-game-server 内存超限重启',
+      time: '11:15',
+      url: 'chat_urgent_warning.html?scene=publisher-alert'
+    },
+    {
+      id: 'S-003',
+      label: '[WARNING] publisher — production 回滚验证超时',
+      time: '13:07',
+      url: 'chat_urgent_warning.html?scene=publisher-alert'
+    }
+  ]
+};
+
+/* Override switchToDoing to handle A-ticket (idx = -1) */
+const _origSwitchToDoing = switchToDoing;
+window.switchToDoing = function(newDoingIdx){
+  if(newDoingIdx === -1){
+    pdmDoingIdx = -1;
+    document.getElementById('pdmDoingCard').innerHTML = `
+      <div class="g-card doing ds3-card-appear doing-card-anim" style="cursor:pointer;" onclick="window.location.href='homepage_urgent_warning.html'">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+          <span style="font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+            padding:2px 7px;border-radius:6px;
+            background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">⚠ Urgent</span>
+          <span style="font-size:10px;color:rgba(0,0,0,.4);">bug · Tech · ${aTicket.owner}</span>
+        </div>
+        <div class="card-title">${aTicket.title}</div>
+        <div class="ddl-row"><span class="ddl-dot" style="background:#ff3b30;"></span>DDL ${aTicket.ddl} · 今日必处理</div>
+        <div class="doing-card-desc" style="margin-top:8px;">
+          ${aTicket.sessions.map(s=>`
+            <div style="color:rgba(0,0,0,.65);margin-bottom:4px;font-size:12px;line-height:1.5;">${s.label}</div>
+          `).join('')}
+        </div>
+      </div>`;
+    const ref = document.getElementById('pdmDoingBodyRef');
+    if(ref) ref.textContent = `「${aTicket.title}」`;
+    renderPdmTodo();
+    document.getElementById('pdmDoingCard').scrollIntoView({behavior:'smooth', block:'nearest'});
+  } else {
+    if(pdmDoingIdx === -1) pdmDoingIdx = 0; // reset sentinel before original logic
+    _origSwitchToDoing(newDoingIdx);
+  }
+};
+
+if(user.view==='pdm'){
+  window.switchToDoing(-1);
+}
+
+/* ── DOING INPUT ── */
+function onDoingInput(el){
+  const hasVal = el.value.length > 0;
+  document.getElementById('doingClear').style.display = hasVal ? 'block' : 'none';
+  document.getElementById('doingSend').classList.toggle('ready', hasVal);
+}
+function clearDoingInput(){
+  const el = document.getElementById('doingInput');
+  el.value = ''; el.focus(); onDoingInput(el);
+}
+</script>
+</body>
+</html>
