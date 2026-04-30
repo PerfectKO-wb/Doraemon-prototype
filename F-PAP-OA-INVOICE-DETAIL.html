@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OA Invoice Review</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f9fafb;
+            --bg-container: #ffffff;
+            --bg-hover: #f5f5f4;
+            --bg-subtle: #f5f6f7;
+
+            --text-default: #131825;
+            --text-secondary: #73726e;
+            --text-tertiary: #9a9a98;
+            --text-disabled: #ababa9;
+
+            --border-divider: #e5e7eb;
+            --border-default: #d9d9d9;
+            --border-strong: #c7c7c4;
+
+            --button-default: #131825;
+            --primary: #1C64F2;
+
+            --error: #f5222d;
+            --error-bg: #fff1f0;
+            --error-border: #ffa39e;
+
+            --success: #15803d;
+            --success-bg: #ecfdf5;
+            --success-border: #a7f3d0;
+
+            --warn: #d97706;
+            --warn-bg: #fffbeb;
+            --warn-border: #fde68a;
+
+            --shadow-md: 0 6px 16px rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+            color: var(--text-default);
+            background: var(--bg-base);
+            height: 100vh;
+            display: flex; flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        .page-header {
+            background: #fff;
+            border-bottom: 1px solid var(--border-divider);
+            padding: 18px 28px;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 20px;
+        }
+        .page-title-wrap { min-width: 0; }
+        .page-title {
+            font-size: 18px; font-weight: 700;
+            display: flex; align-items: center; gap: 10px;
+            color: var(--text-default);
+        }
+        .page-title svg { width: 20px; height: 20px; color: var(--primary); }
+        .page-sub {
+            margin-top: 4px;
+            font-size: 12px; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 10px;
+            flex-wrap: wrap;
+        }
+        .page-sub code {
+            background: var(--bg-subtle);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: var(--text-default);
+            font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+            font-size: 11px;
+        }
+        .page-sub .count-chip {
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 11px; font-weight: 600;
+            border: 1px solid #bfdbfe;
+        }
+        .page-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .btn-ghost {
+            height: 34px; padding: 0 14px;
+            background: #fff; color: var(--text-default);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: inherit;
+            text-decoration: none;
+        }
+        .btn-ghost:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+        .btn-ghost svg { width: 14px; height: 14px; }
+
+        /* Content */
+        .page-body {
+            flex: 1;
+            padding: 20px 28px 28px;
+            overflow: auto;
+            display: flex; flex-direction: column;
+            min-height: 0;
+        }
+
+        .empty {
+            margin: auto;
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 60px 20px;
+        }
+        .empty svg { width: 48px; height: 48px; color: var(--text-disabled); margin-bottom: 12px; }
+        .empty .empty-title { font-size: 15px; font-weight: 600; color: var(--text-default); margin-bottom: 6px; }
+        .empty .empty-desc { font-size: 13px; }
+
+        .table-wrap {
+            background: #fff;
+            border: 1px solid var(--border-divider);
+            border-radius: 12px;
+            overflow: auto;
+            flex: 1;
+            min-height: 0;
+        }
+        .table-wrap::-webkit-scrollbar { height: 10px; width: 10px; }
+        .table-wrap::-webkit-scrollbar-thumb { background: #d9d9d6; border-radius: 5px; }
+        .table-wrap::-webkit-scrollbar-thumb:hover { background: #bfbfbc; }
+        .table-wrap::-webkit-scrollbar-track { background: #f3f3f1; }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: max-content;
+            min-width: 100%;
+            font-size: 13px;
+        }
+        thead th {
+            position: sticky; top: 0;
+            background: var(--bg-subtle);
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary);
+            text-align: left;
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border-divider);
+            white-space: nowrap;
+            z-index: 2;
+        }
+        thead th:not(:last-child) {
+            border-right: 1px solid var(--border-divider);
+        }
+        thead th.sticky-left {
+            position: sticky; left: 0; z-index: 3;
+            box-shadow: 1px 0 0 var(--border-divider);
+        }
+        tbody td {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border-divider);
+            vertical-align: middle;
+            white-space: nowrap;
+            color: var(--text-default);
+            max-width: 320px;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        tbody td:not(:last-child) {
+            border-right: 1px solid var(--border-divider);
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: var(--bg-hover); }
+        tbody tr:hover td.sticky-left { background: var(--bg-hover); }
+        tbody td.sticky-left {
+            position: sticky; left: 0;
+            background: #fff;
+            box-shadow: 1px 0 0 var(--border-divider);
+            z-index: 1;
+        }
+        tbody td.file-cell {
+            display: flex; align-items: center; gap: 10px;
+            min-width: 260px;
+        }
+        .file-ico {
+            width: 28px; height: 28px; border-radius: 6px;
+            background: #ffeded; color: #dc2626;
+            display: grid; place-items: center;
+            font-size: 9px; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .file-info { min-width: 0; }
+        .file-name {
+            font-weight: 500;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .file-sub {
+            font-size: 11px; color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        td.amount-cell { text-align: right; font-variant-numeric: tabular-nums; }
+        td.muted { color: var(--text-disabled); }
+
+        .tag {
+            display: inline-flex; align-items: center;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 12px; font-weight: 500;
+            line-height: 18px;
+            white-space: nowrap;
+        }
+        .tag.denied   { color: var(--error);         background: var(--error-bg);   border: 1px solid var(--error-border); }
+        .tag.checked  { color: var(--success);       background: var(--success-bg); border: 1px solid var(--success-border); }
+        .tag.pending  { color: var(--text-secondary);background: var(--bg-active, #efefef);border: 1px solid var(--border-default); }
+        .tag.payout-yes { color: #b45309; background: #fffbeb; border: 1px solid #fde68a; }
+        .tag.payout-no  { color: var(--text-secondary); background: #efefef; border: 1px solid var(--border-default); }
+
+        .toast {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            padding: 10px 18px;
+            background: var(--button-default); color: #fff;
+            border-radius: 10px;
+            font-size: 13px; font-weight: 500;
+            box-shadow: var(--shadow-md);
+            opacity: 0; pointer-events: none;
+            transition: all 0.25s ease;
+            z-index: 200;
+        }
+        .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .meta-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px 28px;
+            background: #fff;
+            border: 1px solid var(--border-divider);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 18px;
+        }
+        .meta-cell .meta-label {
+            font-size: 11px; font-weight: 500;
+            color: var(--text-disabled);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
+        }
+        .meta-cell .meta-value {
+            font-size: 13px; font-weight: 500;
+            color: var(--text-default);
+        }
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <div class="page-title-wrap">
+            <div class="page-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>
+                OA Invoice Review
+            </div>
+            <div class="page-sub" id="pageSub"></div>
+        </div>
+        <div class="page-actions">
+            <button type="button" class="btn-ghost" id="copyUrlBtn" title="Copy this page URL">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy link
+            </button>
+            <button type="button" class="btn-ghost" id="printBtn" title="Print this page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Print
+            </button>
+        </div>
+    </header>
+
+    <main class="page-body">
+        <div id="metaRow"></div>
+        <div id="tableHost"></div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+<script>
+    // ===== Seed data (fallback when sessionStorage is not available) =====
+    function jp(overrides = {}) {
+        return Object.assign({
+            company: 'CTW株式会社', region: 'JP', currency: 'JPY',
+            paymentType: 'Non-Administrative', paymentBank: '三井住友銀行',
+            smbc: 'SMBC-0012',
+            paymentAccountName: 'CTW株式会社',
+            payeeName: '株式会社サンプル',
+            accountHolderKana: 'カブシキガイシャサンプル',
+            bankName: '三井住友銀行', bankNameKana: 'ミツイスミトモギンコウ',
+            bankCode: '0009',
+            branchNameKana: 'トウキョウ',
+            branchCode: '001',
+            accountType: 'Normal',
+            accountNo: '1234567',
+            swiftCode: '', achRouting: '', wireRouting: '', payNowUen: '',
+            amount: '250,000', purpose: 'マーケティング費用 4月分',
+            memo: '',
+            applicant: 'tanaka@g123.jp', applicationDate: '2026-04-02 18:00',
+            payoutRequired: 'yes'
+        }, overrides);
+    }
+    function us(overrides = {}) {
+        return Object.assign({
+            company: 'CTW USA Inc.', region: 'US', currency: 'USD',
+            paymentType: 'Non-Administrative', paymentBank: 'JPMorgan Chase',
+            smbc: '',
+            paymentAccountName: 'CTW USA Inc.',
+            payeeName: 'Acme Services LLC',
+            accountHolderKana: '',
+            bankName: 'Wells Fargo Bank', bankNameKana: '',
+            bankCode: '',
+            branchNameKana: '',
+            branchCode: '',
+            accountType: '',
+            accountNo: '8881234567',
+            swiftCode: 'WFBIUS6S', achRouting: '121000248', wireRouting: '121000248', payNowUen: '',
+            amount: '12,450.00', purpose: 'Q2 SaaS subscription',
+            memo: 'Quarterly renewal',
+            applicant: 'olivia@g123.us', applicationDate: '2026-04-05 10:30',
+            payoutRequired: 'yes'
+        }, overrides);
+    }
+    function sg(overrides = {}) {
+        return Object.assign({
+            company: 'CTW Singapore Pte. Ltd.', region: 'SG', currency: 'SGD',
+            paymentType: 'Administrative', paymentBank: 'DBS Bank',
+            smbc: '',
+            paymentAccountName: 'CTW Singapore Pte. Ltd.',
+            payeeName: 'Lion Vendor Pte Ltd',
+            accountHolderKana: '',
+            bankName: 'DBS Bank Ltd', bankNameKana: '',
+            bankCode: '7171',
+            branchNameKana: '',
+            branchCode: '001',
+            accountType: '',
+            accountNo: '0123456789',
+            swiftCode: 'DBSSSGSG', achRouting: '', wireRouting: '', payNowUen: '201234567G',
+            amount: '4,820.00', purpose: 'Office utilities · Apr',
+            memo: '',
+            applicant: 'kevin@g123.sg', applicationDate: '2026-04-08 15:10',
+            payoutRequired: 'no'
+        }, overrides);
+    }
+
+    const SEED_INVOICES = [
+        { id: 3, name: 'jp_invoice_office_rent.pdf', state: 'checked', region: 'JP', fields: jp({ payeeName: '東京不動産株式会社', amount: '480,000', purpose: 'オフィス家賃 4月分', accountHolderKana: 'トウキョウフドウサンカブシキガイシャ' }) },
+        { id: 4, name: 'sg_invoice_utilities_apr.pdf', state: 'checked', region: 'SG', fields: sg() },
+        { id: 5, name: 'us_invoice_legal_advisory.pdf', state: 'checked', region: 'US', fields: us({ payeeName: 'Baker & Co. Attorneys', amount: '8,750.00', purpose: 'Legal advisory · March', memo: 'External legal counsel, Q1' }) },
+        { id: 6, name: 'jp_invoice_cloud_infra.pdf', state: 'checked', region: 'JP', fields: jp({ payeeName: 'クラウドワークス株式会社', amount: '128,500', purpose: 'クラウドインフラ利用料', accountHolderKana: 'クラウドワークスカブシキガイシャ' }) },
+        { id: 7, name: 'sg_invoice_courier_apr.pdf', state: 'checked', region: 'SG', fields: sg({ payeeName: 'Speedy Courier Pte Ltd', amount: '620.50', purpose: 'Courier services · Apr', payoutRequired: 'yes' }) },
+        { id: 8, name: 'jp_invoice_consulting.pdf', state: 'checked', region: 'JP', fields: jp({ payeeName: '戦略コンサル合同会社', amount: '320,000', purpose: '戦略コンサルティング費用' }) },
+        { id: 9, name: 'jp_invoice_translation.pdf', state: 'checked', region: 'JP', fields: jp({ payeeName: 'ローカライズ株式会社', amount: '86,000', purpose: '翻訳・ローカライズ費' }) },
+        { id: 10, name: 'us_invoice_marketing_ads.pdf', state: 'checked', region: 'US', fields: us({ payeeName: 'Omnichannel Ads Inc.', amount: '4,250.00', purpose: 'Paid ads · April' }) }
+    ];
+
+    const STATE_LABELS = { checked: 'Checked', denied: 'Denied', pending: 'Pending' };
+
+    // ===== Columns: match the Invoice detail page (union of all regions) =====
+    const COLUMNS = [
+        { key: 'file',                 label: 'Invoice',              sticky: true },
+        { key: 'state',                label: 'State',                render: renderStateTag },
+        { key: 'region',               label: 'Region' },
+        { key: 'company',              label: 'Company' },
+        { key: 'currency',             label: 'Currency' },
+        { key: 'paymentType',          label: 'Payment Type' },
+        { key: 'paymentBank',          label: 'Payment Bank' },
+        { key: 'smbc',                 label: 'SMBC',                 hint: 'JP only' },
+        { key: 'paymentAccountName',   label: 'Payment Account Name' },
+        { key: 'payeeName',            label: 'Payee Name' },
+        { key: 'accountHolderKana',    label: 'Account Holder (Kana)', hint: 'JP only' },
+        { key: 'bankName',             label: 'Bank Name' },
+        { key: 'bankNameKana',         label: 'Bank Name (Kana)',     hint: 'JP only' },
+        { key: 'bankCode',             label: 'Bank Code',            hint: 'JP / SG' },
+        { key: 'branchNameKana',       label: 'Branch Name (Kana)',   hint: 'JP only' },
+        { key: 'branchCode',           label: 'Branch Code',          hint: 'JP / SG' },
+        { key: 'accountType',          label: 'Account Type',         hint: 'JP only' },
+        { key: 'accountNo',            label: 'Account No.' },
+        { key: 'swiftCode',            label: 'SWIFT Code',           hint: 'US / SG' },
+        { key: 'achRouting',           label: 'ACH Routing',          hint: 'US only' },
+        { key: 'wireRouting',          label: 'Wire Routing',         hint: 'US only' },
+        { key: 'payNowUen',            label: 'PayNow UEN',           hint: 'SG only' },
+        { key: 'amount',               label: 'Amount',               className: 'amount-cell' },
+        { key: 'purpose',              label: 'Purpose' },
+        { key: 'memo',                 label: 'Memo' },
+        { key: 'applicant',            label: 'Applicant' },
+        { key: 'applicationDate',      label: 'Application Date' },
+        { key: 'payoutRequired',       label: 'Payout Required',      render: renderPayoutTag }
+    ];
+
+    // ===== Utilities =====
+    function safeHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function parseQuery() {
+        const p = new URLSearchParams(window.location.search);
+        return {
+            invoiceIds: (p.get('invoiceIds') || '').split(',').map(s => Number(s)).filter(Number.isFinite),
+            oaid: p.get('oaid') || 'uwei91299304'
+        };
+    }
+    function loadInvoices() {
+        let invoices = SEED_INVOICES.slice();
+        try {
+            const raw = sessionStorage.getItem('oa.invoices.seed');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length) invoices = parsed;
+            }
+        } catch (_) {}
+        return invoices;
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('visible');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('visible'), 2000);
+    }
+
+    // ===== Cell renderers =====
+    function renderStateTag(inv) {
+        const state = inv.state || 'pending';
+        return `<span class="tag ${state}">${STATE_LABELS[state] || state}</span>`;
+    }
+    function renderPayoutTag(inv) {
+        const v = inv.fields?.payoutRequired;
+        if (v === 'yes') return `<span class="tag payout-yes">Required</span>`;
+        if (v === 'no')  return `<span class="tag payout-no">Not required</span>`;
+        return `<span class="muted">—</span>`;
+    }
+    function renderFileCell(inv) {
+        return `
+            <div class="file-cell">
+                <div class="file-ico">PDF</div>
+                <div class="file-info">
+                    <div class="file-name" title="${safeHtml(inv.name)}">${safeHtml(inv.name)}</div>
+                    <div class="file-sub">ID #${safeHtml(inv.id)} · ${safeHtml(inv.region || '')}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function cellValue(inv, col) {
+        if (col.render) return col.render(inv);
+        if (col.key === 'file') return renderFileCell(inv);
+        let raw;
+        if (['name', 'state', 'region'].includes(col.key)) {
+            raw = inv[col.key];
+        } else {
+            raw = inv.fields?.[col.key];
+        }
+        if (raw == null || raw === '') return `<span class="muted">—</span>`;
+        return safeHtml(raw);
+    }
+
+    // ===== Render =====
+    function render() {
+        const query = parseQuery();
+        const invoices = loadInvoices();
+        const linked = query.invoiceIds.length
+            ? query.invoiceIds.map(id => invoices.find(i => i.id === id)).filter(Boolean)
+            : invoices.slice(0, 3);
+
+        // Meta row
+        const currencies = Array.from(new Set(linked.map(i => i.fields?.currency).filter(Boolean)));
+        const totalsPerCurrency = {};
+        linked.forEach(i => {
+            const c = i.fields?.currency || '';
+            const n = parseFloat(String(i.fields?.amount || '').replace(/[,\s]/g, '')) || 0;
+            totalsPerCurrency[c] = (totalsPerCurrency[c] || 0) + n;
+        });
+        const totalStr = Object.entries(totalsPerCurrency)
+            .map(([cur, v]) => `${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur || ''}`.trim())
+            .join(' + ') || '—';
+
+        document.getElementById('pageSub').innerHTML = `
+            <span class="count-chip">${linked.length} invoice(s)</span>
+            <span>OAid:</span> <code>${safeHtml(query.oaid)}</code>
+            <span>·</span>
+            <span>Total: <b>${safeHtml(totalStr)}</b></span>
+        `;
+
+        const metaHost = document.getElementById('metaRow');
+        metaHost.className = 'meta-row';
+        metaHost.innerHTML = `
+            <div class="meta-cell">
+                <div class="meta-label">OA ID</div>
+                <div class="meta-value">${safeHtml(query.oaid)}</div>
+            </div>
+            <div class="meta-cell">
+                <div class="meta-label">Linked invoices</div>
+                <div class="meta-value">${linked.length}</div>
+            </div>
+            <div class="meta-cell">
+                <div class="meta-label">Currencies</div>
+                <div class="meta-value">${currencies.length ? currencies.join(' / ') : '—'}</div>
+            </div>
+            <div class="meta-cell">
+                <div class="meta-label">Total amount</div>
+                <div class="meta-value">${safeHtml(totalStr)}</div>
+            </div>
+            <div class="meta-cell">
+                <div class="meta-label">Source</div>
+                <div class="meta-value">F Expert · Invoice Review</div>
+            </div>
+        `;
+
+        // Table
+        const host = document.getElementById('tableHost');
+        if (!linked.length) {
+            host.innerHTML = `
+                <div class="empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+                    <div class="empty-title">No linked invoices</div>
+                    <div class="empty-desc">This OA has no invoices linked yet.</div>
+                </div>
+            `;
+            return;
+        }
+
+        const thead = `
+            <thead><tr>
+                ${COLUMNS.map(c => `
+                    <th class="${c.sticky ? 'sticky-left' : ''}" ${c.hint ? `title="${safeHtml(c.hint)}"` : ''}>${safeHtml(c.label)}</th>
+                `).join('')}
+            </tr></thead>
+        `;
+        const tbody = `<tbody>${linked.map(inv => `
+            <tr>
+                ${COLUMNS.map(c => `<td class="${c.sticky ? 'sticky-left' : ''} ${c.className || ''} ${c.key === 'file' ? 'file-cell' : ''}">${cellValue(inv, c)}</td>`).join('')}
+            </tr>
+        `).join('')}</tbody>`;
+
+        host.innerHTML = `<div class="table-wrap"><table>${thead}${tbody}</table></div>`;
+    }
+
+    // ===== Events =====
+    document.getElementById('copyUrlBtn').addEventListener('click', () => {
+        const url = 'd.stg.g123.jp/expert-agent/f-expert/expert-consults/invoice-review?OAid=' + (parseQuery().oaid || 'uwei91299304');
+        navigator.clipboard?.writeText(url);
+        showToast('Link copied');
+    });
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    render();
+</script>
+</body>
+</html>

@@ -564,6 +564,10 @@
     return cfg.items.filter(function (it) { return it.unread !== false; }).length;
   }
 
+  function getUrgentItems() {
+    return cfg.items.filter(function (it) { return it.group === 'urgent'; }).slice();
+  }
+
   /* ====== Operations ====== */
   function markItemRead(id) {
     cfg.items = cfg.items.filter(function (it) { return it.id !== id; });
@@ -628,6 +632,7 @@
     markItemRead: markItemRead,
     getUnreadCount: getUnreadCount,
     getItems: function () { return cfg.items.slice(); },
+    getUrgentItems: getUrgentItems,
     setConfig: function (newCfg) {
       Object.assign(cfg, newCfg);
       if (newCfg.items) cfg.items = newCfg.items.map(normalizeItem);

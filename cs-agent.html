@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS Agent - Doraemon</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Urbanist:wght@700&family=Roboto:wght@400&family=Noto+Sans+SC:wght@400&family=Noto+Sans+JP:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #f9fafb;
+    --bg-container: #ffffff;
+    --bg-hover: #efefef;
+    --bg-active: #efefef;
+    --bg-disabled: #dbdbdb;
+    --border-divider: #e5e7eb;
+    --border-default: #d9d9d9;
+    --text-default: #131825;
+    --text-secondary: #73726e;
+    --text-disabled: #ababa9;
+    --white: #ffffff;
+    --blue-base: #1677ff;
+    --cs-primary: #1c64f2;
+    --error-base: #f5222d;
+    --error-bg: #fff1f0;
+    --error-border: #ffa39e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-default);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .app {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+  }
+
+  /* ===== LEFT SIDEBAR (240px) ===== */
+  .sidebar-left {
+    width: 240px;
+    height: 100vh;
+    background: var(--bg-container);
+    border-right: 1px solid var(--border-divider);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .sidebar-logo {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 18px 20px 24px;
+    border-bottom: 1px solid var(--border-divider);
+  }
+
+  .sidebar-logo .brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sidebar-logo .brand-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .sidebar-logo .brand-name {
+    font-family: 'Urbanist', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-default);
+  }
+
+  .sidebar-logo .collapse-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-container);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+  }
+
+  .sidebar-logo .collapse-btn:hover {
+    background: var(--bg-hover);
+  }
+
+  .sidebar-content {
+    flex: 1;
+    padding: 0 16px;
+    overflow-y: auto;
+  }
+
+  .new-chat-btn {
+    margin-top: 16px;
+    height: 40px;
+    background: var(--bg-container);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .new-chat-btn:hover { background: var(--bg-hover); }
+
+  .new-chat-btn svg { width: 20px; height: 20px; color: var(--text-default); }
+
+  .new-chat-btn span {
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-default);
+  }
+
+  .nav-section { margin-top: 20px; }
+
+  .nav-section-title {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    color: var(--text-disabled);
+  }
+
+  .nav-section-title .add-btn {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .nav-section-title .add-btn:hover { background: var(--bg-hover); }
+
+  .nav-item {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    gap: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .nav-item:hover { background: var(--bg-hover); }
+
+  .nav-item.active { background: var(--bg-active); }
+
+  .nav-item-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-item-icon.cs-icon {
+    background: var(--cs-primary);
+    border-radius: 10px;
+  }
+
+  .nav-item-icon.cs-icon svg { color: white; width: 12px; height: 12px; }
+
+  .nav-item-text {
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-default);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  .nav-item .status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--cs-primary);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .nav-item .loading-icon {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    color: var(--text-disabled);
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .sidebar-user {
+    height: 72px;
+    padding: 16px;
+    border-top: 1px solid var(--border-divider);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sidebar-user .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background: #e5e7eb;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-user .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .sidebar-user .user-info { flex: 1; }
+
+  .sidebar-user .user-name {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+    color: var(--text-default);
+  }
+
+  .sidebar-user .user-role {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-disabled);
+  }
+
+  /* ===== CONVERSATION LIST (364px) ===== */
+  .conv-list {
+    width: 364px;
+    height: 100vh;
+    background: var(--bg-container);
+    border-right: 1px solid var(--border-divider);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .conv-header {
+    padding: 20px 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+
+  .conv-header .title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .conv-header .title-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--cs-primary);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .conv-header .title-text {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    color: var(--text-default);
+  }
+
+  .conv-header .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-container);
+    border: 1px solid var(--border-divider);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .icon-btn:hover { background: var(--bg-hover); }
+
+  .icon-btn svg { width: 20px; height: 20px; color: var(--text-secondary); }
+
+  .conv-tabs {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 24px 16px 0;
+    height: 36px;
+  }
+
+  .conv-tabs .tabs-group {
+    display: flex;
+    background: var(--bg-hover);
+    border-radius: 12px;
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .conv-tabs .tab {
+    height: 32px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .conv-tabs .tab.active {
+    background: var(--bg-container);
+    color: var(--text-default);
+    font-weight: 500;
+  }
+
+  .conv-tabs .waiting-btn {
+    margin-left: auto;
+    height: 36px;
+    padding: 7px 12px;
+    border: 1px solid var(--text-default);
+    border-radius: 12px;
+    background: transparent;
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-default);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .conv-search {
+    margin: 12px 16px 0;
+    height: 36px;
+    border: 1px solid var(--border-divider);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .conv-search svg { width: 20px; height: 20px; color: var(--text-disabled); flex-shrink: 0; }
+
+  .conv-search input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-default);
+    flex: 1;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .conv-search input::placeholder { color: var(--text-disabled); }
+
+  .conv-items {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 12px;
+  }
+
+  .conv-item {
+    height: 110px;
+    padding: 16px;
+    border-bottom: 1px solid var(--bg-base);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .conv-item:hover { background: var(--bg-hover); }
+
+  .conv-item.active { background: var(--bg-active); }
+
+  .conv-item-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .conv-item-title .left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .r-badge {
+    height: 22px;
+    padding: 1px 6px;
+    background: #d32029;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--white);
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .conv-item-title .title-text {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  .conv-item-title .time {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-disabled);
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .conv-item-desc {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+
+  .conv-item-desc .desc-text {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  .conv-item-desc .unread-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--cs-primary);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .conv-item-tags {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .game-tag {
+    height: 24px;
+    padding: 1px 6px;
+    border: 1px solid var(--border-divider);
+    border-radius: 4px;
+    background: var(--bg-base);
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+  }
+
+  /* ===== CHAT AREA ===== */
+  .chat-area {
+    flex: 1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg-base);
+  }
+
+  .chat-header {
+    height: 64px;
+    border-bottom: 1px solid var(--border-divider);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .chat-header .status-badge {
+    height: 24px;
+    padding: 3px 6px;
+    border: 1px solid var(--text-disabled);
+    border-radius: 4px;
+    background: var(--bg-active);
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-default);
+    flex-shrink: 0;
+  }
+
+  .chat-header .chat-title {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 16px;
+  }
+
+  .chat-header .header-icons {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .header-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    border: none;
+    background: transparent;
+  }
+
+  .header-icon-btn:hover { background: var(--bg-hover); }
+
+  .header-icon-btn svg { width: 20px; height: 20px; color: var(--text-secondary); }
+
+  .header-icon-btn .badge {
+    position: absolute;
+    top: 0;
+    right: -2px;
+    min-width: 19px;
+    height: 12px;
+    background: var(--error-base);
+    border: 1px solid var(--bg-container);
+    border-radius: 7px;
+    font-size: 10px;
+    line-height: 10px;
+    color: white;
+    text-align: center;
+    padding: 0 3px;
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .msg-user {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .msg-user .msg-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .msg-user .msg-meta .msg-time {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-secondary);
+  }
+
+  .msg-user .msg-meta .msg-name {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-secondary);
+  }
+
+  .msg-user .msg-meta .msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background: #e5e7eb;
+    overflow: hidden;
+  }
+
+  .msg-user .msg-meta .msg-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .msg-bubble {
+    background: var(--bg-hover);
+    border-radius: 12px;
+    padding: 6px 12px;
+    max-width: 364px;
+  }
+
+  .msg-bubble p {
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--text-default);
+  }
+
+  .msg-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border-divider);
+    margin: 6px 0;
+  }
+
+  .msg-flags {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    background: var(--bg-hover);
+    border-radius: 6px;
+    margin-top: 4px;
+    align-self: flex-end;
+  }
+
+  .msg-flag {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .msg-flag.active { background: var(--bg-container); }
+
+  .msg-flag img { width: 16px; height: 16px; border-radius: 2px; }
+
+  .msg-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .msg-action-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+  }
+
+  .msg-action-btn:hover, .msg-action-btn.active { background: var(--bg-active); }
+
+  .msg-action-btn svg { width: 16px; height: 16px; color: var(--text-secondary); }
+
+  .msg-bot {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .msg-bot .msg-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .msg-bot .msg-meta .bot-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .msg-bot .msg-meta .bot-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .msg-bot .msg-meta .bot-name {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-secondary);
+  }
+
+  .msg-bot .msg-meta .msg-time {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-secondary);
+  }
+
+  .msg-bot .msg-bubble {
+    max-width: 448px;
+  }
+
+  .chat-input-area {
+    padding: 0 22px 24px;
+  }
+
+  .chat-input-box {
+    background: var(--bg-container);
+    border: 1px solid var(--border-divider);
+    border-radius: 24px;
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .chat-input-text {
+    padding: 12px 16px;
+  }
+
+  .chat-input-text input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    line-height: 24px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-default);
+  }
+
+  .chat-input-text input::placeholder { color: var(--text-disabled); }
+
+  .chat-input-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+  }
+
+  .chat-input-actions .left-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .input-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+  }
+
+  .input-action-btn:hover { background: var(--bg-hover); }
+
+  .input-action-btn svg { width: 20px; height: 20px; color: var(--text-secondary); }
+
+  .send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background: var(--bg-disabled);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+  }
+
+  .send-btn.active {
+    background: var(--text-default);
+  }
+
+  .send-btn svg { width: 20px; height: 20px; color: white; transform: rotate(-90deg); }
+
+  /* ===== RIGHT PANEL (300px) ===== */
+  .right-panel {
+    width: 300px;
+    height: 100vh;
+    background: var(--bg-container);
+    border-left: 1px solid var(--border-divider);
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .right-panel-header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border-divider);
+  }
+
+  .right-panel-header .title {
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-default);
+  }
+
+  .right-panel-header .close-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  .right-panel-header .close-btn:hover { background: var(--bg-hover); }
+
+  .right-panel-header .close-btn svg { width: 16px; height: 16px; color: var(--text-secondary); }
+
+  .right-section { padding: 16px; }
+
+  .right-section-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+    color: var(--text-default);
+    margin-bottom: 8px;
+  }
+
+  .game-info-card {
+    border: 1px solid var(--border-divider);
+    border-radius: 8px;
+    background: var(--bg-base);
+    padding: 12px;
+  }
+
+  .game-info-card .game-name {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    color: var(--text-default);
+  }
+
+  .game-info-card .game-sub {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  }
+
+  .user-info-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .user-info-header .copy-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  .user-info-header .copy-btn:hover { background: var(--bg-hover); }
+
+  .user-info-card {
+    border: 1px solid var(--border-divider);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .user-info-fields {
+    background: var(--bg-base);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .info-row .label {
+    width: 88px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .info-row .value {
+    flex: 1;
+    color: var(--text-default);
+    line-height: 1.5;
+  }
+
+  .info-row .value.link { color: var(--blue-base); }
+
+  .info-row .im-icons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .info-row .im-icons img { width: 20px; height: 20px; }
+
+  .card-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border-divider);
+  }
+
+  .user-attributes {
+    background: var(--bg-base);
+    padding: 12px;
+  }
+
+  .user-rank {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .user-rank .rank-text {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+    color: var(--text-default);
+  }
+
+  .vip-tag {
+    height: 22px;
+    padding: 1px 8px;
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    border-radius: 6px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+    color: #d32029;
+  }
+
+  .user-detail-text {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+  }
+
+  .user-device {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .user-device span {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--text-secondary);
+  }
+
+  .user-device .separator { color: var(--text-disabled); }
+
+  .user-device svg { width: 16px; height: 16px; color: var(--text-secondary); }
+
+  .view-all-btn {
+    margin: 24px 16px;
+    height: 40px;
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-default);
+    width: calc(100% - 32px);
+  }
+
+  .view-all-btn:hover { background: var(--bg-hover); }
+
+  .view-all-btn svg { width: 16px; height: 16px; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar-left">
+    <div class="sidebar-logo">
+      <div class="brand">
+        <img class="brand-icon" src="https://www.figma.com/api/mcp/asset/afd4d1e4-6804-4a30-b642-d3c86602912c" alt="Doraemon">
+        <span class="brand-name">Doraemon</span>
+      </div>
+      <button class="collapse-btn" title="Toggle sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.125 3.125v13.75h13.75V3.125H3.125zM7.5 3.125v13.75"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sidebar-content">
+      <div class="new-chat-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/>
+        </svg>
+        <span>New Chat</span>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Expert Agent</div>
+        <div class="nav-item active">
+          <div class="nav-item-icon cs-icon">
+            <svg viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 5h12M8 1l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="nav-item-text">CS</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-item-icon">
+            <img src="https://www.figma.com/api/mcp/asset/6c2214a4-786e-4fa9-863e-6ed4af2c6c43" alt="i18n" width="20" height="20">
+          </div>
+          <span class="nav-item-text">i18n</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">
+          Projects
+          <span class="add-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" width="16" height="16" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 3.75v12.5M3.75 10h12.5"/>
+            </svg>
+          </span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-item-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="20" height="20" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/>
+            </svg>
+          </div>
+          <span class="nav-item-text">Infra Upgrade</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-item-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="20" height="20" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/>
+            </svg>
+          </div>
+          <span class="nav-item-text">Product Launch</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Today</div>
+        <div class="nav-item">
+          <span class="nav-item-text">AI Assistant Help</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-text">Data Analysis Project</span>
+          <svg class="loading-icon" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 1v2m0 6v2m5-5h-2M3 6H1m8.95-3.95L8.54 3.46M3.46 8.54l-1.41 1.41m7.9 0L8.54 8.54M3.46 3.46 2.05 2.05" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-text">Project Planning</span>
+          <span class="status-dot"></span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Yesterday</div>
+        <div class="nav-item">
+          <span class="nav-item-text">Marketing Campaign Ideas</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="avatar">
+        <img src="https://www.figma.com/api/mcp/asset/7fa6a205-280c-441d-bb5a-aa671e4f829d" alt="David chen">
+      </div>
+      <div class="user-info">
+        <div class="user-name">David chen</div>
+        <div class="user-role">Data Analyst</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERSATION LIST -->
+  <div class="conv-list">
+    <div class="conv-header">
+      <div class="title-group">
+        <div class="title-icon">CS</div>
+        <span class="title-text">CS Expert</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15a2.25 2.25 0 0 1 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0 1 18 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3 1.5 1.5 3-3.75"/>
+          </svg>
+        </button>
+        <button class="icon-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="conv-tabs">
+      <div class="tabs-group">
+        <button class="tab">All</button>
+        <button class="tab active">VIP</button>
+        <button class="tab">Non-VIP</button>
+      </div>
+      <button class="waiting-btn">Waiting</button>
+    </div>
+
+    <div class="conv-search">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+      </svg>
+      <input type="text" placeholder="Search by title, R rank, or game...">
+    </div>
+
+    <div class="conv-items">
+      <div class="conv-item active">
+        <div class="conv-item-title">
+          <div class="left">
+            <span class="r-badge">R15</span>
+            <span class="title-text">Weekly login bonus not received</span>
+          </div>
+          <span class="time">08:25</span>
+        </div>
+        <div class="conv-item-desc">
+          <span class="desc-text">VIP user did not receive scheduled login bonus</span>
+          <span class="unread-dot"></span>
+        </div>
+        <div class="conv-item-tags">
+          <span class="game-tag">yugioh</span>
+        </div>
+      </div>
+      <div class="conv-item">
+        <div class="conv-item-title">
+          <div class="left">
+            <span class="r-badge">R15</span>
+            <span class="title-text">Weekly login bonus not received</span>
+          </div>
+          <span class="time">08:25</span>
+        </div>
+        <div class="conv-item-desc">
+          <span class="desc-text">VIP user did not receive scheduled login bonus</span>
+          <span class="unread-dot"></span>
+        </div>
+        <div class="conv-item-tags">
+          <span class="game-tag">yugioh</span>
+        </div>
+      </div>
+      <div class="conv-item">
+        <div class="conv-item-title">
+          <div class="left">
+            <span class="r-badge">R15</span>
+            <span class="title-text">Weekly login bonus not received</span>
+          </div>
+          <span class="time">08:25</span>
+        </div>
+        <div class="conv-item-desc">
+          <span class="desc-text">VIP user did not receive scheduled login bonus</span>
+          <span class="unread-dot"></span>
+        </div>
+        <div class="conv-item-tags">
+          <span class="game-tag">yugioh</span>
+        </div>
+      </div>
+      <div class="conv-item">
+        <div class="conv-item-title">
+          <div class="left">
+            <span class="r-badge">R15</span>
+            <span class="title-text">Weekly login bonus not received</span>
+          </div>
+          <span class="time">08:25</span>
+        </div>
+        <div class="conv-item-desc">
+          <span class="desc-text">VIP user did not receive scheduled login bonus</span>
+          <span class="unread-dot"></span>
+        </div>
+        <div class="conv-item-tags">
+          <span class="game-tag">yugioh</span>
+        </div>
+      </div>
+      <div class="conv-item">
+        <div class="conv-item-title">
+          <div class="left">
+            <span class="r-badge">R15</span>
+            <span class="title-text">Weekly login bonus not received</span>
+          </div>
+          <span class="time">08:25</span>
+        </div>
+        <div class="conv-item-desc">
+          <span class="desc-text">VIP user did not receive scheduled login bonus</span>
+          <span class="unread-dot"></span>
+        </div>
+        <div class="conv-item-tags">
+          <span class="game-tag">yugioh</span>
+        </div>
+      </div>
+      <div class="conv-item">
+        <div class="conv-item-title">
+          <div class="left">
+            <span class="r-badge">R15</span>
+            <span class="title-text">Weekly login bonus not received</span>
+          </div>
+          <span class="time">08:25</span>
+        </div>
+        <div class="conv-item-desc">
+          <span class="desc-text">VIP user did not receive scheduled login bonus</span>
+          <span class="unread-dot"></span>
+        </div>
+        <div class="conv-item-tags">
+          <span class="game-tag">yugioh</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <span class="status-badge">Pending</span>
+      <span class="chat-title">Weekly login bonus not received</span>
+      <div class="header-icons">
+        <button class="header-icon-btn" style="background: var(--bg-hover);">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+          </svg>
+        </button>
+        <button class="header-icon-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
+          </svg>
+          <span class="badge">23</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-messages">
+      <!-- User message -->
+      <div class="msg-user">
+        <div class="msg-meta">
+          <span class="msg-time">2024-07-02 12:22</span>
+          <span class="msg-name">David chen</span>
+          <div class="msg-avatar">
+            <img src="https://www.figma.com/api/mcp/asset/7fa6a205-280c-441d-bb5a-aa671e4f829d" alt="David chen">
+          </div>
+        </div>
+        <div class="msg-bubble">
+          <p>I need to create a new project plan for the Q3 marketing campaign.</p>
+          <div class="msg-divider"></div>
+          <p style="font-family: 'Noto Sans SC', 'Noto Sans JP', 'Inter', sans-serif;">我需要为第三季度的营销活动创建一个新的项目计划。</p>
+        </div>
+        <div class="msg-flags">
+          <div class="msg-flag active"><img src="https://www.figma.com/api/mcp/asset/c7da2729-edc8-4b27-ba52-7d33f258654f" alt="CN"></div>
+          <div class="msg-flag"><img src="https://www.figma.com/api/mcp/asset/08e9d7b6-18f7-4e3e-842c-3359d8e4425e" alt="UK"></div>
+          <div class="msg-flag"><img src="https://www.figma.com/api/mcp/asset/4960c2c8-0bf2-4ffa-b599-9b1f1c98908d" alt="JP"></div>
+          <div class="msg-flag"><img src="https://www.figma.com/api/mcp/asset/d4a34163-b1e9-440a-b59e-c76cd34ec345" alt="KR"></div>
+          <div class="msg-flag"><img src="https://www.figma.com/api/mcp/asset/8098ce52-c528-4b06-b037-b764a5a7fd7e" alt="TW"></div>
+        </div>
+        <div class="msg-actions" style="align-self: flex-end;">
+          <button class="msg-action-btn active">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802"/>
+            </svg>
+          </button>
+          <button class="msg-action-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bot message -->
+      <div class="msg-bot">
+        <div class="msg-meta">
+          <div class="bot-avatar">
+            <img src="https://www.figma.com/api/mcp/asset/4fba360b-0572-4381-af00-834ef3206e31" alt="Xiaobao">
+          </div>
+          <span class="bot-name">Xiaobao</span>
+          <span class="msg-time">14:32</span>
+        </div>
+        <div class="msg-bubble">
+          <p>I'd be happy to help you create a project plan for the Q3 marketing campaign. Let's start with defining the key objectives, timeline, and resources needed. What are the main goals for this campaign?</p>
+          <div class="msg-divider"></div>
+          <p style="font-family: 'Noto Sans SC', 'Noto Sans JP', 'Inter', sans-serif;">乐意协助您制定Q3营销 campaign 的项目计划。我们从明确核心目标、时间线和所需资源开始——本次 campaign 的主要目标是？</p>
+        </div>
+        <div class="msg-flags">
+          <div class="msg-flag active"><img src="https://www.figma.com/api/mcp/asset/c7da2729-edc8-4b27-ba52-7d33f258654f" alt="CN"></div>
+          <div class="msg-flag"><img src="https://www.figma.com/api/mcp/asset/08e9d7b6-18f7-4e3e-842c-3359d8e4425e" alt="UK"></div>
+          <div class="msg-flag"><img src="https://www.figma.com/api/mcp/asset/4960c2c8-0bf2-4ffa-b599-9b1f1c98908d" alt="JP"></div>
+          <div class="msg-flag"><img src="https://www.figma.com/api/mcp/asset/d4a34163-b1e9-440a-b59e-c76cd34ec345" alt="KR"></div>
+          <div class="msg-flag"><img src="https://www.figma.com/api/mcp/asset/8098ce52-c528-4b06-b037-b764a5a7fd7e" alt="TW"></div>
+        </div>
+        <div class="msg-actions">
+          <button class="msg-action-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/>
+            </svg>
+          </button>
+          <button class="msg-action-btn active">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="chat-input-box">
+        <div class="chat-input-text">
+          <input type="text" placeholder="Create an expense claim for $120...">
+        </div>
+        <div class="chat-input-actions">
+          <div class="left-actions">
+            <button class="input-action-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/>
+              </svg>
+            </button>
+            <button class="input-action-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 1 0-2.636 6.364M16.5 12V8.25"/>
+              </svg>
+            </button>
+          </div>
+          <button class="send-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="right-panel-header">
+      <span class="title">Related Information</span>
+      <button class="close-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="right-section">
+      <div class="right-section-title">Game info</div>
+      <div class="game-info-card">
+        <div class="game-name">vividarmy</div>
+        <div class="game-sub">弱虫ペダルドリームレース</div>
+      </div>
+    </div>
+
+    <div class="right-section" style="padding-top: 0;">
+      <div class="user-info-header">
+        <span class="right-section-title" style="margin-bottom: 0;">User info</span>
+        <button class="copy-btn" title="Copy">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16" style="color: var(--text-secondary);">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/>
+          </svg>
+        </button>
+      </div>
+      <div class="user-info-card">
+        <div class="user-info-fields">
+          <div class="info-row">
+            <span class="label">G123 ID</span>
+            <span class="value link">G25G55GXO</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Server ID</span>
+            <span class="value">S2342</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Game UID</span>
+            <span class="value">S2342</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Role ID</span>
+            <span class="value">845101009190</span>
+          </div>
+          <div class="info-row">
+            <span class="label">IM</span>
+            <div class="im-icons">
+              <img src="https://www.figma.com/api/mcp/asset/e100003d-b965-4a1d-8060-4cb3cd39a880" alt="Line">
+              <img src="https://www.figma.com/api/mcp/asset/ee94a0cc-45cb-4e41-9bd3-b9c7e7f08c9f" alt="WhatsApp" style="border-radius: 50%;">
+            </div>
+          </div>
+        </div>
+        <div class="card-divider"></div>
+        <div class="user-attributes">
+          <div class="user-rank">
+            <span class="rank-text">Rank: 11（¥ 2,450,000)</span>
+            <span class="vip-tag">VIP4</span>
+          </div>
+          <div class="user-detail-text">Game last login: 2024-11-29 08:27:33</div>
+          <div class="user-device">
+            <span>macOS 10.15.7</span>
+            <span class="separator">|</span>
+            <span>Chrome 131.0</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25Z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="view-all-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m9.86-9.86a4.5 4.5 0 0 0-6.364 0l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/>
+      </svg>
+      View All Conversations
+    </button>
+  </div>
+</div>
+</body>
+</html>

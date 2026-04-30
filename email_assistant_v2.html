@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doraemon - 邮件助手 v2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f9fafb;
+            --bg-container: #ffffff;
+            --bg-active: #efefef;
+            --bg-disabled: #dbdbdb;
+            --bg-hover: #f5f5f5;
+            --text-default: #131825;
+            --text-secondary: #73726e;
+            --text-disabled: #ababa9;
+            --border-divider: #e5e7eb;
+            --border-default: #d9d9d9;
+            --white: #ffffff;
+            --error-base: #f5222d;
+            --primary: #1C64F2;
+            --primary-light: #e8f0fe;
+            --success: #52c41a;
+            --success-bg: #f6ffed;
+            --warning: #faad14;
+            --warning-bg: #fff7e6;
+            --blue-bg: #e6f7ff;
+            --purple: #722ed1;
+            --purple-bg: #f9f0ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-base); color: var(--text-default);
+            height: 100vh; overflow: hidden;
+        }
+
+        .app { display: flex; flex-direction: column; height: 100vh; }
+
+        /* ===== HEADER ===== */
+        .mail-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 32px; border-bottom: 1px solid var(--border-divider);
+            background: var(--bg-container); flex-shrink: 0;
+        }
+        .mail-header-left { display: flex; align-items: center; gap: 12px; }
+        .mail-header-left h2 { font-size: 20px; font-weight: 700; }
+        .back-btn {
+            width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary); transition: all 0.15s; text-decoration: none;
+        }
+        .back-btn:hover { background: var(--bg-base); color: var(--text-default); }
+        .mail-header-tabs { display: flex; gap: 4px; background: var(--bg-base); padding: 3px; border-radius: 10px; }
+        .mail-tab {
+            padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+            cursor: pointer; transition: all 0.15s; border: none; background: transparent;
+            color: var(--text-secondary); font-family: inherit;
+        }
+        .mail-tab.active { background: var(--bg-container); color: var(--text-default); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .mail-stats { display: flex; gap: 20px; }
+        .mail-stat { font-size: 13px; color: var(--text-secondary); }
+        .mail-stat-num { font-weight: 600; color: var(--text-default); }
+        .mail-stat-num.success { color: var(--success); }
+        .mail-stat-num.highlight { color: var(--primary); }
+
+        /* ===== BODY ===== */
+        .mail-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        .mail-tab-content { display: none; overflow-y: auto; flex: 1; padding: 24px 32px; }
+        .mail-tab-content::-webkit-scrollbar { width: 5px; }
+        .mail-tab-content::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+        .mail-tab-content.active { display: block; }
+        #tabRules { padding: 0; overflow: hidden; }
+        #tabRules.active { display: flex; }
+
+        /* ===== SECTIONS ===== */
+        .mail-section { margin-bottom: 24px; }
+        .mail-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .mail-section-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
+        .mail-section-count {
+            min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
+            font-size: 12px; font-weight: 600; color: var(--white); background: var(--error-base);
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .mail-section-action { font-size: 13px; color: var(--primary); cursor: pointer; font-weight: 500; }
+        .mail-section-action:hover { text-decoration: underline; }
+
+        /* ===== EMAIL CARD ===== */
+        .email-card {
+            background: var(--bg-container); border: 1px solid var(--border-divider);
+            border-radius: 16px; padding: 20px; margin-bottom: 12px;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .email-card:hover { border-color: #c8c8c8; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .email-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+        .email-priority {
+            padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+        }
+        .email-priority.urgent { background: #fff1f0; color: #cf1322; }
+        .email-priority.normal { background: var(--blue-bg); color: #096dd9; }
+        .email-source {
+            padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;
+        }
+        .email-source.ai-scan { background: var(--primary-light); color: var(--primary); }
+        .email-source.sys-trigger { background: var(--purple-bg); color: var(--purple); }
+        .email-sender { font-size: 13px; font-weight: 500; color: var(--text-default); }
+        .email-time { font-size: 12px; color: var(--text-disabled); }
+        .email-subject { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .email-summary { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+        .email-draft-preview {
+            margin-top: 12px; padding: 12px 16px; background: #f0f5ff;
+            border: 1px solid #d6e4ff; border-radius: 10px;
+        }
+        .email-draft-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 500; color: var(--primary); margin-bottom: 6px;
+        }
+        .email-draft-text { font-size: 13px; color: var(--text-default); line-height: 1.6; }
+
+        .cross-system-actions {
+            margin-top: 12px; padding: 10px 14px; background: #faf5ff;
+            border: 1px solid #e8daef; border-radius: 10px;
+        }
+        .cross-action-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 600; color: var(--purple); margin-bottom: 8px;
+        }
+        .cross-action-item {
+            display: flex; align-items: center; gap: 8px; padding: 5px 0;
+            font-size: 12px; color: var(--text-default);
+        }
+        .cross-action-sys { font-weight: 600; color: var(--purple); white-space: nowrap; }
+        .cross-action-text { flex: 1; }
+        .cross-action-confirm {
+            padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 500;
+            border: 1px solid var(--border-default); background: var(--bg-container);
+            cursor: pointer; color: var(--text-default); transition: all 0.15s;
+        }
+        .cross-action-confirm:hover { background: var(--bg-active); }
+        .cross-action-confirm.confirmed {
+            background: var(--success-bg); border-color: var(--success); color: var(--success); cursor: pointer;
+        }
+        .cross-action-link { font-size: 11px; color: var(--primary); text-decoration: none; white-space: nowrap; }
+
+        .email-card-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+        .email-btn {
+            padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+            cursor: pointer; border: none; transition: all 0.15s; font-family: inherit;
+        }
+        .email-btn.primary { background: var(--text-default); color: var(--white); }
+        .email-btn.primary:hover { background: #2a2f3a; }
+        .email-btn.outline { background: var(--bg-container); color: var(--text-default); border: 1px solid var(--border-default); }
+        .email-btn.outline:hover { background: var(--bg-hover); }
+        .email-btn.ghost { background: transparent; color: var(--text-secondary); }
+        .email-btn.ghost:hover { background: var(--bg-hover); }
+        .email-btn.dismiss { background: transparent; color: var(--text-disabled); font-size: 12px; }
+        .email-btn.dismiss:hover { color: var(--error-base); }
+
+        .email-detail-expanded {
+            display: none; margin-top: 14px; padding: 14px; background: var(--bg-base);
+            border-radius: 10px; border: 1px solid var(--border-divider);
+        }
+        .email-detail-expanded.show { display: block; }
+        .email-detail-label { font-size: 11px; font-weight: 600; color: var(--text-disabled); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .email-detail-original { font-size: 13px; color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; }
+
+        /* ===== TRUST BANNER ===== */
+        .trust-banner {
+            display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+            background: linear-gradient(135deg, #f0f5ff 0%, #e8f0fe 100%);
+            border: 1px solid #d6e4ff; border-radius: 14px; margin-bottom: 16px;
+        }
+        .trust-banner-body { flex: 1; }
+        .trust-banner-title { font-size: 14px; font-weight: 600; color: var(--text-default); }
+        .trust-banner-desc { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+        .trust-banner-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+        /* ===== PROCESSED TAB ===== */
+        .filter-chips { display: flex; gap: 8px; margin-bottom: 16px; }
+        .filter-chip {
+            padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer;
+            border: 1px solid var(--border-divider); background: var(--bg-container);
+            color: var(--text-secondary); transition: all 0.15s; font-family: inherit; font-weight: 500;
+        }
+        .filter-chip.active { background: var(--text-default); color: var(--white); border-color: var(--text-default); }
+        .filter-chip:hover:not(.active) { border-color: var(--text-disabled); }
+
+        .processed-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            background: var(--bg-container); border: 1px solid var(--border-divider);
+            border-radius: 12px; margin-bottom: 8px; transition: border-color 0.15s;
+        }
+        .processed-item:hover { border-color: #c8c8c8; }
+        .processed-item-icon { font-size: 18px; flex-shrink: 0; }
+        .processed-item-body { flex: 1; min-width: 0; }
+        .processed-item-title { font-size: 14px; font-weight: 500; }
+        .processed-item-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .processed-item-badge {
+            padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; white-space: nowrap;
+        }
+        .processed-item-badge.sent { background: var(--success-bg); color: var(--success); }
+        .processed-item-badge.edited { background: var(--blue-bg); color: #096dd9; }
+        .processed-item-badge.auto { background: var(--purple-bg); color: var(--purple); }
+        .processed-item-badge.skipped { background: var(--bg-base); color: var(--text-disabled); }
+        .processed-item-time { font-size: 12px; color: var(--text-disabled); white-space: nowrap; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+        .stat-card {
+            background: var(--bg-container); border: 1px solid var(--border-divider);
+            border-radius: 12px; padding: 16px; text-align: center;
+        }
+        .stat-card-num { font-size: 24px; font-weight: 700; color: var(--text-default); }
+        .stat-card-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+        /* ===== RULES TAB ===== */
+        .rules-list { display: flex; flex-direction: column; gap: 8px; }
+        .rule-card {
+            background: var(--bg-container); border: 1px solid var(--border-divider);
+            border-radius: 14px; padding: 16px 20px;
+            display: flex; align-items: center; gap: 16px; transition: border-color 0.15s;
+        }
+        .rule-card:hover { border-color: #c8c8c8; }
+        .rule-icon {
+            width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .rule-icon.active-rule { background: var(--success-bg); }
+        .rule-icon.paused-rule { background: var(--bg-base); }
+        .rule-info { flex: 1; min-width: 0; }
+        .rule-name { font-size: 14px; font-weight: 500; }
+        .rule-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .rule-prompt {
+            font-size: 12px; color: #7c3aed; margin-top: 4px; padding: 4px 10px;
+            background: #f9f0ff; border-radius: 6px; display: flex; align-items: flex-start; gap: 6px;
+            line-height: 1.5; word-break: break-all;
+        }
+        .rule-prompt svg { flex-shrink: 0; margin-top: 2px; }
+        .rule-meta { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+        .rule-meta-item { font-size: 11px; color: var(--text-disabled); display: flex; align-items: center; gap: 4px; }
+        .rule-tag {
+            padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; margin-left: 6px;
+        }
+        .rule-tag.cross { background: var(--purple-bg); color: var(--purple); }
+        .rule-tag.mail { background: var(--blue-bg); color: #096dd9; }
+
+        .rule-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .rule-toggle {
+            width: 40px; height: 22px; border-radius: 11px; position: relative;
+            cursor: pointer; transition: background 0.2s; flex-shrink: 0; border: none;
+        }
+        .rule-toggle.on { background: var(--primary); }
+        .rule-toggle.off { background: var(--bg-disabled); }
+        .rule-toggle::after {
+            content: ''; position: absolute; top: 2px;
+            width: 18px; height: 18px; border-radius: 50%; background: var(--white);
+            transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .rule-toggle.on::after { left: 20px; }
+        .rule-toggle.off::after { left: 2px; }
+        .rule-delete {
+            width: 28px; height: 28px; border: none; background: transparent; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-disabled); transition: all 0.15s; opacity: 0;
+        }
+        .rule-card:hover .rule-delete { opacity: 1; }
+        .rule-delete:hover { background: #fff1f0; color: #cf1322; }
+
+        /* ===== SEND MODAL ===== */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 500;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: var(--bg-container); border-radius: 16px; width: 480px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15); animation: modalIn 0.2s ease-out;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-divider); }
+        .modal-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .modal-close { width: 32px; height: 32px; border: none; background: transparent; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-disabled); transition: all 0.15s; }
+        .modal-close:hover { background: var(--bg-base); color: var(--text-default); }
+        .modal-body { padding: 20px 24px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border-divider); }
+
+        .send-preview-to { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+        .send-preview-subject { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+        .send-preview-body {
+            padding: 14px; background: var(--bg-base); border-radius: 10px;
+            font-size: 13px; line-height: 1.7; color: var(--text-default);
+            max-height: 200px; overflow-y: auto; white-space: pre-wrap;
+        }
+
+        /* ===== RULES TAB LAYOUT ===== */
+        .rules-left { flex: 1; overflow-y: auto; padding: 24px 24px 24px 32px; }
+        .rules-left::-webkit-scrollbar { width: 4px; }
+        .rules-left::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+        /* ===== INLINE CHAT PANEL ===== */
+        .chat-panel {
+            width: 340px; flex-shrink: 0; display: flex; flex-direction: column;
+            border-left: 1px solid var(--border-divider); background: var(--bg-container);
+        }
+        .chat-panel-header {
+            padding: 16px 20px; border-bottom: 1px solid var(--border-divider);
+            font-size: 15px; font-weight: 600;
+        }
+        .chat-panel-messages {
+            flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+        }
+        .chat-panel-messages::-webkit-scrollbar { width: 4px; }
+        .chat-panel-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+        .chat-msg { max-width: 90%; line-height: 1.6; font-size: 13px; }
+        .chat-msg.bot {
+            align-self: flex-start; background: var(--bg-base); padding: 10px 14px;
+            border-radius: 2px 14px 14px 14px; color: var(--text-default);
+        }
+        .chat-msg.user {
+            align-self: flex-end; background: var(--text-default); color: var(--white);
+            padding: 10px 14px; border-radius: 14px 2px 14px 14px;
+        }
+        .chat-msg .rule-card-inline {
+            background: var(--bg-container); border: 1px solid var(--border-divider);
+            border-radius: 10px; padding: 12px 14px; margin: 8px 0;
+        }
+        .chat-msg .rule-card-inline .rc-name { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+        .chat-msg .rule-card-inline .rc-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+        .chat-msg .rule-card-inline .rc-meta { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--text-disabled); }
+        .chat-confirm-btn {
+            display: inline-block; margin-top: 8px; padding: 6px 20px; border-radius: 8px;
+            font-size: 13px; font-weight: 500; border: none; cursor: pointer;
+            background: var(--text-default); color: var(--white); transition: all 0.15s;
+            font-family: inherit;
+        }
+        .chat-confirm-btn:hover { background: #2a2f3a; }
+        .chat-confirm-btn.confirmed {
+            background: var(--bg-base); color: var(--text-disabled); cursor: default;
+        }
+        .chat-panel-input {
+            padding: 12px 16px; border-top: 1px solid var(--border-divider);
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .chat-panel-input textarea {
+            width: 100%; border: none; outline: none; resize: none; font-family: inherit;
+            font-size: 13px; line-height: 1.5; color: var(--text-default); background: transparent;
+            max-height: 80px;
+        }
+        .chat-panel-input textarea::placeholder { color: var(--text-disabled); }
+        .chat-panel-input-bottom {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .chat-send-btn {
+            height: 28px; padding: 0 10px; border-radius: 14px; border: none;
+            background: transparent; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.15s; flex-shrink: 0; gap: 3px;
+        }
+        .chat-send-btn:hover { background: var(--bg-base); }
+        .chat-send-btn.active { background: var(--text-default); }
+        .chat-send-btn.active svg path { stroke: var(--white); }
+        .chat-send-btn.active span { color: var(--white) !important; }
+        .chat-bot-avatar { align-self: center; margin-top: 60px; margin-bottom: 8px; }
+        .chat-bot-greeting { align-self: center; text-align: center; font-size: 14px; font-weight: 500; color: var(--text-default); margin-bottom: 16px; line-height: 1.5; }
+        .chat-panel-input-icons { display: flex; gap: 6px; }
+        .chat-panel-input-icons button {
+            width: 28px; height: 28px; border: none; background: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; border-radius: 6px;
+            color: var(--text-disabled); transition: color 0.15s, background 0.15s;
+        }
+        .chat-panel-input-icons button:hover { background: var(--bg-base); color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="mail-header">
+        <div class="mail-header-left">
+            <a href="workspace.html" class="back-btn" title="返回工作区">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15l-5-5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <h2>邮件助手</h2>
+            <div class="mail-header-tabs">
+                <button class="mail-tab active" data-tab="action">需要处理</button>
+                <button class="mail-tab" data-tab="processed">已处理</button>
+                <button class="mail-tab" data-tab="rules">自动化规则</button>
+            </div>
+        </div>
+        <div class="mail-stats">
+            <div class="mail-stat"><span class="mail-stat-num">23</span> 今日收到</div>
+            <div class="mail-stat"><span class="mail-stat-num success">18</span> AI 已处理</div>
+            <div class="mail-stat"><span class="mail-stat-num highlight">5</span> 需你关注</div>
+        </div>
+    </div>
+
+    <div class="mail-body" id="mailBody">
+
+        <!-- ==================== Tab: 需要处理 ==================== -->
+        <div class="mail-tab-content active" id="tabAction">
+            <div class="trust-banner">
+                <div class="trust-banner-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#1C64F2" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="#1C64F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="trust-banner-body">
+                    <div class="trust-banner-title">AI 授权建议</div>
+                    <div class="trust-banner-desc">你过去 10 次都直接发送了感谢邮件草稿，以后这类邮件要不要我直接发送，不再打扰你？</div>
+                </div>
+                <div class="trust-banner-actions">
+                    <button class="email-btn primary" onclick="this.closest('.trust-banner').style.display='none'">同意</button>
+                    <button class="email-btn ghost" onclick="this.closest('.trust-banner').style.display='none'">暂不</button>
+                </div>
+            </div>
+
+            <div class="mail-section">
+                <div class="mail-section-header">
+                    <div class="mail-section-title">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 18.333a8.333 8.333 0 100-16.666 8.333 8.333 0 000 16.666z" stroke="#f5222d" stroke-width="1.5"/><path d="M10 6.667V10l2.5 1.667" stroke="#f5222d" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        待回复邮件
+                        <span class="mail-section-count">3</span>
+                    </div>
+                </div>
+
+                <!-- Email 1 -->
+                <div class="email-card">
+                    <div class="email-card-meta">
+                        <span class="email-priority urgent">紧急</span>
+                        <span class="email-source ai-scan">📨 AI 识别</span>
+                        <span class="email-sender">田中太郎 (A 出版社)</span>
+                        <span class="email-time">今天 14:23</span>
+                    </div>
+                    <div class="email-subject">关于「天剑」角色监修第 3 轮反馈</div>
+                    <div class="email-summary">对方确认了 5 项修改中的 3 项，剩余 2 项提出新建议，需要在本周五前回复</div>
+                    <div class="email-draft-preview">
+                        <div class="email-draft-label">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#1C64F2" stroke-width="1.2"/><path d="M5 7l1.5 1.5L9 5.5" stroke="#1C64F2" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            AI 已准备草稿
+                        </div>
+                        <div class="email-draft-text">田中先生，一直承蒙关照。感谢您的确认。关于您提出的剩余 2 项建议，我们团队将进行讨论，周五之前给您答复...</div>
+                    </div>
+                    <div class="cross-system-actions">
+                        <div class="cross-action-label">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v4M7 9v4M1 7h4M9 7h4" stroke="#7c3aed" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="7" r="2" stroke="#7c3aed" stroke-width="1.2"/></svg>
+                            跨系统操作
+                        </div>
+                        <div class="cross-action-item">
+                            <span>⏳</span>
+                            <span class="cross-action-sys">A-System:</span>
+                            <span class="cross-action-text">新建任务「天剑监修反馈」，状态 In Progress</span>
+                            <button class="cross-action-confirm" onclick="confirmCrossAction(this)">确认</button>
+                        </div>
+                        <div class="cross-action-item">
+                            <span>⏳</span>
+                            <span class="cross-action-sys">日历:</span>
+                            <span class="cross-action-text">创建提醒「周五前回复田中监修反馈」</span>
+                            <button class="cross-action-confirm" onclick="confirmCrossAction(this)">确认</button>
+                        </div>
+                    </div>
+                    <div class="email-card-actions">
+                        <button class="email-btn primary" onclick="location.href='chat.html?scene=email-reply-1'">编辑回复</button>
+                        <button class="email-btn outline" onclick="openSendModal('田中太郎','Re: 「天剑」角色监修第 3 轮反馈',this)">直接发送</button>
+                        <button class="email-btn ghost" onclick="toggleDetail(this)">展开原文</button>
+                        <button class="email-btn dismiss" onclick="dismissEmail(this)">不处理</button>
+                    </div>
+                    <div class="email-detail-expanded">
+                        <div class="email-detail-label">原始邮件</div>
+                        <div class="email-detail-original">您好，我是 A 出版社的田中。
+
+关于「天剑」角色监修第 3 轮反馈，特此联络。
+
+■ 已确认（3 项）
+1. 主角色的颜色调整 → 已批准
+2. 副角色的姿势修改 → 已批准
+3. 背景特效的修正 → 已批准
+
+■ 追加建议（2 项）
+4. 主角色的表情 → 建议增加微笑版本
+5. 武器的细节 → 建议增加更多光泽效果
+
+希望您能在周五之前回复。</div>
+                    </div>
+                </div>
+
+                <!-- Email 2 -->
+                <div class="email-card">
+                    <div class="email-card-meta">
+                        <span class="email-priority urgent">紧急</span>
+                        <span class="email-source sys-trigger">⚡ A-System 触发</span>
+                        <span class="email-sender">→ 佐藤花子 (B 工作室)</span>
+                        <span class="email-time">今天 11:05</span>
+                    </div>
+                    <div class="email-subject">催促：「星海」角色设定稿已逾期 3 天</div>
+                    <div class="email-summary">A-System 检测到任务逾期，AI 已自动生成催促邮件草稿</div>
+                    <div class="email-draft-preview">
+                        <div class="email-draft-label">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#1C64F2" stroke-width="1.2"/><path d="M5 7l1.5 1.5L9 5.5" stroke="#1C64F2" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            AI 已准备催促邮件草稿
+                        </div>
+                        <div class="email-draft-text">佐藤女士您好，关于「星海」项目的角色设定稿交付事宜，原定交付日期为 3 月 13 日，目前已逾期 3 天。请问目前进度如何？</div>
+                    </div>
+                    <div class="email-card-actions">
+                        <button class="email-btn primary" onclick="location.href='chat.html?scene=email-reply-2'">编辑后发送</button>
+                        <button class="email-btn outline" onclick="openSendModal('佐藤花子','「星海」角色设定稿逾期提醒',this)">直接发送</button>
+                        <button class="email-btn dismiss" onclick="dismissEmail(this)">不处理</button>
+                    </div>
+                </div>
+
+                <!-- Email 3 -->
+                <div class="email-card">
+                    <div class="email-card-meta">
+                        <span class="email-priority normal">一般</span>
+                        <span class="email-source ai-scan">📨 AI 识别</span>
+                        <span class="email-sender">铃木一郎 (C 游戏)</span>
+                        <span class="email-time">今天 09:40</span>
+                    </div>
+                    <div class="email-subject">Q2 合作报价确认</div>
+                    <div class="email-summary">发来了 Q2 合作方案报价单，总金额 ¥2,400,000，需确认后签署</div>
+                    <div class="email-draft-preview">
+                        <div class="email-draft-label">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#1C64F2" stroke-width="1.2"/><path d="M5 7l1.5 1.5L9 5.5" stroke="#1C64F2" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            AI 已准备草稿
+                        </div>
+                        <div class="email-draft-text">铃木先生，感谢您发送报价单。我们将确认内容后在公司内部讨论，下周之内给您回复...</div>
+                    </div>
+                    <div class="cross-system-actions">
+                        <div class="cross-action-label">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v4M7 9v4M1 7h4M9 7h4" stroke="#7c3aed" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="7" r="2" stroke="#7c3aed" stroke-width="1.2"/></svg>
+                            跨系统操作
+                        </div>
+                        <div class="cross-action-item">
+                            <span>✅</span>
+                            <span class="cross-action-sys">P-System:</span>
+                            <span class="cross-action-text">合同金额 ≥ 审批线，已查询审批上级为李总监</span>
+                        </div>
+                        <div class="cross-action-item">
+                            <span>⏳</span>
+                            <span class="cross-action-sys">A-System:</span>
+                            <span class="cross-action-text">建议创建任务「C 游戏 Q2 合同签署」指派李总监审批</span>
+                            <button class="cross-action-confirm" onclick="confirmCrossAction(this)">创建任务</button>
+                        </div>
+                    </div>
+                    <div class="email-card-actions">
+                        <button class="email-btn primary" onclick="location.href='chat.html?scene=email-reply-3'">编辑回复</button>
+                        <button class="email-btn outline" onclick="openSendModal('铃木一郎','Re: Q2 合作报价确认',this)">直接发送</button>
+                        <button class="email-btn ghost" onclick="toggleDetail(this)">展开原文</button>
+                        <button class="email-btn dismiss" onclick="dismissEmail(this)">不处理</button>
+                    </div>
+                    <div class="email-detail-expanded">
+                        <div class="email-detail-label">原始邮件</div>
+                        <div class="email-detail-original">您好，我是 C 游戏的铃木。
+
+现将 Q2 合作方案的报价单发送给您。
+合计金额：¥2,400,000（不含税）
+
+详细内容请查看附件 PDF。
+确认后请签署合同。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Tab: 已处理（合并我已处理 + AI 已处理） ==================== -->
+        <div class="mail-tab-content" id="tabProcessed">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-num">23</div>
+                    <div class="stat-card-label">今日收件</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-num" style="color:var(--success);">15</div>
+                    <div class="stat-card-label">AI 自动处理</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-num" style="color:var(--primary);">4</div>
+                    <div class="stat-card-label">你已处理</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-num" style="color:var(--text-disabled);">1</div>
+                    <div class="stat-card-label">标记不处理</div>
+                </div>
+            </div>
+
+            <div class="filter-chips">
+                <button class="filter-chip active" data-filter="all" onclick="filterProcessed(this)">全部</button>
+                <button class="filter-chip" data-filter="user" onclick="filterProcessed(this)">我处理的</button>
+                <button class="filter-chip" data-filter="ai" onclick="filterProcessed(this)">AI 自动处理</button>
+            </div>
+
+            <div class="rules-list" id="processedList">
+                <div class="processed-item" data-type="user">
+                    <div class="processed-item-icon">✉️</div>
+                    <div class="processed-item-body">
+                        <div class="processed-item-title">回复：D 出版社合作意向确认</div>
+                        <div class="processed-item-desc">直接发送 AI 草稿 → 松田先生</div>
+                    </div>
+                    <span class="processed-item-badge sent">已发送</span>
+                    <span class="processed-item-time">15:30</span>
+                </div>
+                <div class="processed-item" data-type="user">
+                    <div class="processed-item-icon">✏️</div>
+                    <div class="processed-item-body">
+                        <div class="processed-item-title">回复：E 工作室 UI 素材交付确认</div>
+                        <div class="processed-item-desc">编辑后发送 → 修改了交付时间</div>
+                    </div>
+                    <span class="processed-item-badge edited">已编辑发送</span>
+                    <span class="processed-item-time">14:10</span>
+                </div>
+                <div class="processed-item" data-type="user">
+                    <div class="processed-item-icon">✉️</div>
+                    <div class="processed-item-body">
+                        <div class="processed-item-title">催促：F 游戏本地化文档（A-System 触发）</div>
+                        <div class="processed-item-desc">确认发送 AI 催促草稿 → 高桥负责人</div>
+                    </div>
+                    <span class="processed-item-badge sent">已发送</span>
+                    <span class="processed-item-time">11:45</span>
+                </div>
+                <div class="processed-item" data-type="user">
+                    <div class="processed-item-icon">⏭️</div>
+                    <div class="processed-item-body">
+                        <div class="processed-item-title">内部通知：服务器维护公告</div>
+                        <div class="processed-item-desc">标记为不处理</div>
+                    </div>
+                    <span class="processed-item-badge skipped">不处理</span>
+                    <span class="processed-item-time">10:20</span>
+                </div>
+                <div class="processed-item" data-type="ai">
+                    <div class="processed-item-icon">📦</div>
+                    <div class="processed-item-body">
+                        <div class="processed-item-title">系统通知 ×5 → 已归档</div>
+                        <div class="processed-item-desc">OA 系统审批通知、服务器监控告警</div>
+                    </div>
+                    <span class="processed-item-badge auto">AI 归档</span>
+                    <span class="processed-item-time">14:30</span>
+                </div>
+                <div class="processed-item" data-type="ai">
+                    <div class="processed-item-icon">🏷️</div>
+                    <div class="processed-item-body">
+                        <div class="processed-item-title">出版社邮件 ×3 → 已标记「监修」</div>
+                        <div class="processed-item-desc">来自 A 出版社、B 出版社的监修相关邮件</div>
+                    </div>
+                    <span class="processed-item-badge auto">AI 打标签</span>
+                    <span class="processed-item-time">13:15</span>
+                </div>
+                <div class="processed-item" data-type="ai">
+                    <div class="processed-item-icon">📤</div>
+                    <div class="processed-item-body">
+                        <div class="processed-item-title">感谢回复 ×3 → 已自动发送</div>
+                        <div class="processed-item-desc">AI 自动发送（已授权）</div>
+                    </div>
+                    <span class="processed-item-badge auto">AI 发送</span>
+                    <span class="processed-item-time">11:00</span>
+                </div>
+                <div class="processed-item" data-type="ai">
+                    <div class="processed-item-icon">📦</div>
+                    <div class="processed-item-body">
+                        <div class="processed-item-title">订阅邮件 ×4 → 已归档</div>
+                        <div class="processed-item-desc">Newsletter、营销推广类邮件</div>
+                    </div>
+                    <span class="processed-item-badge auto">AI 归档</span>
+                    <span class="processed-item-time">10:30</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Tab: 自动化规则 ==================== -->
+        <div class="mail-tab-content" id="tabRules">
+            <div class="rules-left">
+                <div class="mail-section">
+                    <div class="mail-section-header">
+                        <div class="mail-section-title">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2.5l2.5 5 5.5.833-4 3.834 1 5.5L10 15l-5 2.667 1-5.5-4-3.834 5.5-.833L10 2.5z" stroke="#722ed1" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            运行中的规则
+                            <span class="mail-section-count" style="background:#722ed1;">6</span>
+                        </div>
+                    </div>
+                    <div class="rules-list" id="rulesList">
+                    <div class="rule-card">
+                        <div class="rule-icon active-rule"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#52c41a" stroke-width="1.3"/><path d="M6 9l2 2 4-4" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <div class="rule-info">
+                            <div class="rule-name">未回复自动提醒 <span class="rule-tag mail">邮件</span></div>
+                            <div class="rule-desc">已发邮件超过 48 小时未收到回复时提醒</div>
+                            <div class="rule-meta"><span class="rule-meta-item">每 6 小时检查</span><span class="rule-meta-item">上次触发: 今天 12:00</span></div>
+                        </div>
+                        <div class="rule-actions"><button class="rule-toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button><button class="rule-delete" title="删除规则" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon active-rule"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#52c41a" stroke-width="1.3"/><path d="M6 9l2 2 4-4" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <div class="rule-info">
+                            <div class="rule-name">出版社邮件自动标记 <span class="rule-tag mail">邮件</span></div>
+                            <div class="rule-desc">发件人包含「出版社」时，自动打标签「监修」</div>
+                            <div class="rule-prompt"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v4l2.5 1.5M6 11a5 5 0 110-10" stroke="#7c3aed" stroke-width="1" stroke-linecap="round"/></svg>识别邮件中涉及的游戏项目名称，作为标签的二级分类</div>
+                            <div class="rule-meta"><span class="rule-meta-item">实时触发</span><span class="rule-meta-item">已触发 23 次</span></div>
+                        </div>
+                        <div class="rule-actions"><button class="rule-toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button><button class="rule-delete" title="删除规则" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon active-rule"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#52c41a" stroke-width="1.3"/><path d="M6 9l2 2 4-4" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <div class="rule-info">
+                            <div class="rule-name">感谢邮件自动发送 <span class="rule-tag mail">邮件</span></div>
+                            <div class="rule-desc">收到监修确认回复后，AI 自动发送感谢邮件</div>
+                            <div class="rule-meta"><span class="rule-meta-item">实时触发</span><span class="rule-meta-item">已自动发送 12 封</span></div>
+                        </div>
+                        <div class="rule-actions"><button class="rule-toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button><button class="rule-delete" title="删除规则" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon active-rule"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#52c41a" stroke-width="1.3"/><path d="M6 9l2 2 4-4" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <div class="rule-info">
+                            <div class="rule-name">任务逾期自动催促 <span class="rule-tag cross">跨系统</span></div>
+                            <div class="rule-desc">A-System 任务逾期时，自动向负责人发送催促邮件</div>
+                            <div class="rule-prompt"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v4l2.5 1.5M6 11a5 5 0 110-10" stroke="#7c3aed" stroke-width="1" stroke-linecap="round"/></svg>邮件中列出任务名称、截止日期和逾期天数，语气正式但不强硬</div>
+                            <div class="rule-meta"><span class="rule-meta-item">事件触发</span><span class="rule-meta-item">待确认后发送</span></div>
+                        </div>
+                        <div class="rule-actions"><button class="rule-toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button><button class="rule-delete" title="删除规则" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon active-rule"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#52c41a" stroke-width="1.3"/><path d="M6 9l2 2 4-4" stroke="#52c41a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <div class="rule-info">
+                            <div class="rule-name">审批邮件查询上级 <span class="rule-tag cross">跨系统</span></div>
+                            <div class="rule-desc">邮件涉及审批/金额时，自动从 P-System 查询审批人</div>
+                            <div class="rule-meta"><span class="rule-meta-item">实时触发</span><span class="rule-meta-item">自动执行</span></div>
+                        </div>
+                        <div class="rule-actions"><button class="rule-toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button><button class="rule-delete" title="删除规则" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon paused-rule"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#ababa9" stroke-width="1.3"/><path d="M7.5 6.5v5M10.5 6.5v5" stroke="#ababa9" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+                        <div class="rule-info">
+                            <div class="rule-name">每日邮件汇总 <span class="rule-tag mail">邮件</span></div>
+                            <div class="rule-desc">每天 9 点归纳前一天收到的邮件，生成 Todo List</div>
+                            <div class="rule-prompt"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v4l2.5 1.5M6 11a5 5 0 110-10" stroke="#7c3aed" stroke-width="1" stroke-linecap="round"/></svg>归纳前一天所有邮件，提取待办事项生成 Todo List，通过 D 发送给我</div>
+                            <div class="rule-meta"><span class="rule-meta-item">每天 09:00</span><span class="rule-meta-item"><span style="color:var(--warning);">已暂停</span></span></div>
+                        </div>
+                        <div class="rule-actions"><button class="rule-toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button><button class="rule-delete" title="删除规则" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Chat Panel (right side) -->
+            <div class="chat-panel">
+                <div class="chat-panel-header">Chat</div>
+                <div class="chat-panel-messages" id="chatMessages">
+                    <div class="chat-bot-avatar">
+                        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="18" fill="#4dd4e6"/><circle cx="18" cy="17" r="8" fill="#fff"/><circle cx="18" cy="17" r="4" fill="#4dd4e6"/></svg>
+                    </div>
+                    <div class="chat-bot-greeting">What can I help you with?<br><span style="font-size:12px;color:var(--text-secondary);">告诉我你想设置的自动化规则</span></div>
+                    <div class="chat-msg bot">你好！我是邮件助手。<br><br>你可以用自然语言告诉我你想要的自动化规则，比如：<br>· 收到出版社的邮件自动打标签<br>· 任务逾期时给负责人发催促邮件<br>· 每天汇总昨天的邮件生成 Todo<br><br>我会帮你理解需求、生成规则，你确认就行。</div>
+                </div>
+                <div class="chat-panel-input">
+                    <textarea id="chatInput" rows="1" placeholder="Describe your task, and I'll take it from there..." oninput="autoResize(this);toggleSendBtn();" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}"></textarea>
+                    <div class="chat-panel-input-bottom">
+                        <div class="chat-panel-input-icons">
+                            <button title="附件"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8l-5.3 5.3a3.5 3.5 0 01-5 0 3.5 3.5 0 010-5L9 3a2.3 2.3 0 013.3 0 2.3 2.3 0 010 3.3L7 11.5a1.2 1.2 0 01-1.7 0 1.2 1.2 0 010-1.7L10 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                            <button title="表情"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 6.5h.01M10.5 6.5h.01M5.5 9.5a3.5 3.5 0 005 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                        </div>
+                        <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMsg()">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M14 2L7.5 8.5M14 2l-4.5 12-2.5-5.5L2 6l12-4z" stroke="#73726e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span style="font-size:11px;color:var(--text-disabled);margin-left:3px;">Send</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Send Confirmation Modal -->
+<div class="modal-overlay" id="sendModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>确认发送</h3>
+            <button class="modal-close" onclick="closeSendModal()"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        </div>
+        <div class="modal-body">
+            <div class="send-preview-to" id="sendModalTo"></div>
+            <div class="send-preview-subject" id="sendModalSubject"></div>
+            <div class="send-preview-body" id="sendModalBody"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="email-btn ghost" onclick="closeSendModal()">取消</button>
+            <button class="email-btn primary" onclick="confirmSend()">确认发送</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ====== Tab switching ======
+    document.querySelectorAll('.mail-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.mail-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.mail-tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            const target = tab.dataset.tab;
+            const map = { action: 'tabAction', processed: 'tabProcessed', rules: 'tabRules' };
+            document.getElementById(map[target]).classList.add('active');
+        });
+    });
+
+    
+
+    // ====== Email actions ======
+    function toggleDetail(btn) {
+        const card = btn.closest('.email-card');
+        const detail = card.querySelector('.email-detail-expanded');
+        const isOpen = detail.classList.toggle('show');
+        btn.textContent = isOpen ? '收起原文' : '展开原文';
+    }
+
+    function dismissEmail(btn) {
+        const card = btn.closest('.email-card');
+        card.style.transition = 'opacity 0.3s, transform 0.3s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(-20px)';
+        setTimeout(() => card.remove(), 300);
+    }
+
+    function confirmCrossAction(btn) {
+        if (btn.classList.contains('confirmed')) {
+            btn.classList.remove('confirmed');
+            btn.textContent = btn.dataset.originalText || '确认';
+        } else {
+            btn.dataset.originalText = btn.textContent;
+            btn.classList.add('confirmed');
+            btn.textContent = '✓ 已确认';
+        }
+    }
+
+    // ====== Send Modal ======
+    let _sendBtn = null;
+    function openSendModal(to, subject, btn) {
+        _sendBtn = btn;
+        document.getElementById('sendModalTo').textContent = '收件人：' + to;
+        document.getElementById('sendModalSubject').textContent = '主题：' + subject;
+        const card = btn.closest('.email-card');
+        const draftText = card.querySelector('.email-draft-text');
+        document.getElementById('sendModalBody').textContent = draftText ? draftText.textContent : '';
+        document.getElementById('sendModal').classList.add('show');
+    }
+    function closeSendModal() { document.getElementById('sendModal').classList.remove('show'); }
+    function confirmSend() {
+        if (_sendBtn) {
+            const actions = _sendBtn.closest('.email-card-actions');
+            if (actions) {
+                actions.innerHTML = '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#52c41a" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="#52c41a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:13px;color:var(--success);font-weight:500;">已发送</span></div>';
+            }
+        }
+        closeSendModal();
+    }
+
+    // ====== Filter processed ======
+    function filterProcessed(chip) {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const filter = chip.dataset.filter;
+        document.querySelectorAll('#processedList .processed-item').forEach(item => {
+            if (filter === 'all') { item.style.display = 'flex'; }
+            else { item.style.display = item.dataset.type === filter ? 'flex' : 'none'; }
+        });
+    }
+
+    // ====== Delete rule ======
+    function deleteRule(btn) {
+        const card = btn.closest('.rule-card');
+        if (!card) return;
+        card.style.transition = 'opacity 0.2s, transform 0.2s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(20px)';
+        setTimeout(() => card.remove(), 200);
+    }
+</script>
+
+<!-- Inline chat logic -->
+<script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 80) + 'px';
+    }
+
+    function toggleSendBtn() {
+        chatSendBtn.classList.toggle('active', chatInput.value.trim().length > 0);
+    }
+
+    function addMsg(role, html) {
+        const div = document.createElement('div');
+        div.className = 'chat-msg ' + role;
+        div.innerHTML = html;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function generateRuleCardHTML(name, desc, freq, mode) {
+        return `好的，我将为你创建以下规则：
+<div class="rule-card-inline">
+  <div class="rc-name">${name}</div>
+  <div class="rc-desc">${desc}</div>
+  <div class="rc-meta"><span>⏱ ${freq}</span><span>🔒 ${mode}</span></div>
+</div>
+<button class="chat-confirm-btn" onclick="confirmRuleCreation(this,'${name}')">确认创建</button>`;
+    }
+
+    const RESPONSES = {
+        '归纳|todo|汇总': () => generateRuleCardHTML('每日邮件汇总', '每天 09:00 归纳前一天收到的邮件，提取关键待办事项生成 Todo List，通过 D 发送给你', '每天 09:00', '自动执行'),
+        '标签|出版社': () => generateRuleCardHTML('出版社邮件自动标记', '发件人包含「出版社」时，自动打标签「监修」', '实时触发', '自动执行'),
+        '催促|逾期|任务': () => generateRuleCardHTML('任务逾期自动催促', 'A-System 任务逾期时，向负责人发送催促邮件，列出任务名称、截止日期和逾期天数', '事件触发', '待确认后发送'),
+        '查看|现有|列表': () => '你可以在左侧规则列表中查看所有已配置的规则，支持开关和删除。<br><br>如果需要修改某条规则，告诉我规则名称和要修改的内容即可。',
+        '回复|提醒|未回复': () => generateRuleCardHTML('未回复自动提醒', '已发邮件超过 48 小时未收到回复时，发送提醒通知', '每 6 小时检查', '自动执行'),
+        '感谢|谢谢': () => generateRuleCardHTML('感谢邮件自动发送', '收到监修确认回复后，AI 自动发送感谢邮件', '实时触发', '自动执行'),
+    };
+
+    function getResponse(text) {
+        for (const [keywords, fn] of Object.entries(RESPONSES)) {
+            if (keywords.split('|').some(k => text.includes(k))) return fn();
+        }
+        return '好的，请再具体描述一下：<br>· 什么时候触发？（收到某类邮件 / 外部系统事件）<br>· 执行什么动作？（打标签 / 归档 / 发邮件 / 创建任务…）<br><br>我会帮你生成规则摘要。';
+    }
+
+    function sendChatMsg() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        addMsg('user', text);
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+        toggleSendBtn();
+        setTimeout(() => {
+            addMsg('bot', getResponse(text));
+        }, 400);
+    }
+
+    function confirmRuleCreation(btn, name) {
+        if (btn.classList.contains('confirmed')) return;
+        btn.classList.add('confirmed');
+        btn.innerHTML = '✓ 已确认';
+        setTimeout(() => addMsg('bot', `「${name}」规则已创建成功！你可以在左侧列表中查看和管理。<br><br>还需要设置其他规则吗？`), 300);
+    }
+</script>
+</body>
+</html>

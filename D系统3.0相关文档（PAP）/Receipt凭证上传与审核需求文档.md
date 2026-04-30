@@ -212,6 +212,177 @@
 
 ---
 
+## 三、OA 审批集成（多 Invoice 捆绑）
+
+在 F Expert 审核完 Invoice 后，针对需要付款（`Payout required = Yes`）的发票，需要通过 OA 审批流程取得公司侧授权。本章节描述 Invoice 与 OA 之间的数据关系、状态机与原型落点。
+
+### 3.1 目标与约束
+
+- 支持 **多张 Invoice 合并到一个 OA 审批**（例如一个月度费用清单、一次性集中报销等）。
+- Invoice 与 OA 是 `1 : N ↔ 1` 关系：一个 OA 可包含多张 Invoice；一张 Invoice 在某一时刻仅归属一个 OA。
+- 多张 Invoice 捆绑发起时 **币种必须一致**；不一致直接拒绝发起并提示。
+- OA 页面是 F Expert 的独立工作台：`F-PAP-OA-APPROVAL.html`。
+- 原型侧 OA 决策使用 `[Mock] Approve` / `[Mock] Reject with reason`，真实侧由 OA 系统回调。
+
+### 3.2 状态机
+
+**Invoice 的 OA 状态（`invoice.oaState`）**
+
+
+| 状态码            | 中文    | 说明                                                  |
+| -------------- | ----- | --------------------------------------------------- |
+| `not_required` | 无需审批  | 该 Invoice 的 `Payout required = No`，无需 OA            |
+| `pending_init` | 待发起   | 财务已 Approve 且需要付款，但尚未发起任何 OA                        |
+| `in_review`    | 审批中   | 已捆绑到某条 OA 并提交，等待 OA 决策                               |
+| `approved`     | 通过    | OA 决策通过                                             |
+| `rejected`     | 拒绝    | OA 决策拒绝（支持重新发起）                                     |
+
+**OA 记录的状态（`oa.state`）**
+
+
+| 状态码         | 中文    | 说明                                      |
+| ----------- | ----- | --------------------------------------- |
+| `draft`     | 草稿    | `Save as Draft` 后的 OA，未提交                |
+| `in_review` | 审批中   | 已提交到 OA 系统等待决策                           |
+| `approved`  | 通过    | OA 系统或 Mock 决策通过                         |
+| `rejected`  | 拒绝    | OA 系统或 Mock 决策拒绝（需提供拒绝原因）                |
+
+**状态流转**
+
+```
+Invoice 视角：
+  财务 Approve ┬─► (Payout=No)  oaState = not_required
+               └─► (Payout=Yes) oaState = pending_init
+  pending_init ──(进入 OA 并提交)──► in_review
+  in_review    ──(OA 通过)────────► approved
+  in_review    ──(OA 拒绝)────────► rejected
+  rejected     ──(再次发起 OA)─────► in_review
+
+OA 视角：
+  (new) ─► draft ─(submit)─► in_review ─(mock approve)─► approved
+                                       └─(mock reject)──► rejected
+  rejected ──(编辑复制后新发起)──► 新 OA 从 in_review 起
+```
+
+### 3.3 入口
+
+1. **Review 列表页 · 批量浮条**（主入口）
+   - 列表首列新增多选框，仅对 `state=checked` + `payoutRequired=yes` + `oaState ∈ {pending_init, rejected}` 的 Invoice 可选
+   - 选中 ≥1 条后底部浮条展示：已选数量、合计金额（按币种聚合显示）、`Clear selection`、`Initiate OA Approval`
+   - 多币种时浮条显示警告且禁用 `Initiate OA Approval`
+   - 点击 `Initiate OA Approval` 进入 `F-PAP-OA-APPROVAL.html?action=new&invoiceIds=...`，新建态 OA 自动预链接选中 Invoice、自动同步币种/合计/Content
+2. **Review 详情页 · OA 区块**
+   - 对 `state=checked` 的 Invoice，右侧 Summary 顶部新增 `OA Approval` 区块，显示当前 `oaState` 胶囊
+   - `pending_init` → 显示 `Initiate OA` 按钮，跳转 `F-PAP-OA-APPROVAL.html?action=new&invoiceIds=<self>`
+   - `in_review` → 显示 `View <OA-ID>` 跳转到 OA 详情；字段全部只读并提示「OA 审批中，字段已锁定」
+   - `approved` → 显示 `View <OA-ID>`；不可再修改金额
+   - `rejected` → 显示 `View <OA-ID>` + `Re-initiate` 按钮；不可再修改金额
+   - `not_required` → 仅显示状态胶囊
+3. **OA 页自身 · Initiate OA**
+   - 右上角 `+ Initiate OA` 可独立进入空白新建表单；用户在表单内通过 `+ Add invoice` 弹窗挑选待捆绑的 Invoice
+
+### 3.4 OA 发起表单（多 Invoice 捆绑）
+
+表单整体分为 2 个 Section + 1 个右侧 Invoice Preview：
+
+**Section A · Linked Invoices**
+
+- 卡片列表：`文件名 · 金额 · 币种 · ✕ 移除`
+- 底部 `+ Add invoice` 打开「Invoice Picker」弹窗
+- 合计栏：`Total = Σ amount`；多币种时显示黄色告警徽章「Mixed currencies — cannot submit」并禁用提交
+
+**Section B · Request Info（动态字段）**
+
+| 字段                   | 适用 Type                                | 必填 | 备注                                             |
+| -------------------- | -------------------------------------- | -- | ---------------------------------------------- |
+| Type                 | 所有                                     | ✅  | `共通経費 / 給与・経費精算 / 総務備品購入 / IT 外部サービス / 契約 / Internal Transaction` |
+| Office               | 所有                                     | ✅  | 根据 Linked Invoice 首张自动建议                        |
+| Content              | 所有                                     | ✅  | 自动生成 `invoice://<filename>.pdf`，每张 Invoice 一行，只读 |
+| Currency / Amount    | 所有                                     | ✅  | 根据 Linked Invoice 自动同步；多币种禁止提交                  |
+| Est. Pay Day         | 所有                                     | ✅  | 预计付款日期                                          |
+| Remarks              | 所有                                     | ⭕  | 备注                                              |
+| Recipient            | `給与・経費精算`                              | ⭕  | 领款人                                             |
+| Counterparty         | `総務備品購入` / `契約`                        | ⭕  | 供应商 / 对方                                        |
+| Service Name         | `IT 外部サービス`                            | ⭕  | 服务名称                                            |
+| Service Description  | `IT 外部サービス`                            | ⭕  | 服务描述                                            |
+| Attachment Reference | `契約`                                   | ⭕  | 合同附件引用                                          |
+| Cost / Plan          | `Internal Transaction`                 | ⭕  | 成本 / 计划                                         |
+
+**右侧 Invoice Preview**
+
+- 多张 Invoice 以 Tab 形式切换
+- iframe 内嵌 PDF 预览；点击左侧 Invoice 卡片或 Tab 都可切换当前预览
+
+**动作区**
+
+| 按钮                | 行为                                                                              |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `Cancel`          | 放弃本次变更并退出表单                                                                     |
+| `Save as Draft`   | 保存为 `draft`；被捆绑的 Invoice `oaState` 回退至 `pending_init`，`activeOaId` 指向该草稿         |
+| `Submit`          | 校验必填 + 币种一致，保存为 `in_review`，被捆绑 Invoice `oaState = in_review`，`activeOaId` 绑定 |
+
+### 3.5 Invoice 字段可编辑矩阵（基于 OA 状态）
+
+**前提**：只有 `state = checked`（财务已 Approve）的 Invoice 才进入本矩阵；`pending` / `denied` 保留原 Approve 流程下的编辑规则，与 OA 无关。
+
+| oaState        | 是否允许 `Edit` | 可编辑字段范围                                | 允许修改「Amount」 |
+| -------------- | ---------- | -------------------------------------- | ----------- |
+| `not_required` | ✅          | 原本就支持编辑的字段（不含 Applicant / Apply Date）  | ❌           |
+| `pending_init` | ✅          | 同上                                     | ❌           |
+| `in_review`    | ❌（字段全锁）    | —                                      | ❌           |
+| `approved`     | ✅          | 原本就支持编辑的字段                             | ✅           |
+| `rejected`     | ✅          | 原本就支持编辑的字段                             | ✅           |
+
+> 原则：
+> - `in_review` 期间禁止修改 Invoice，避免与正在审批中的 OA 表单数据漂移；
+> - `not_required` / `pending_init` 允许修改除 `Amount` 外的所有原可编辑字段——Amount 在 OA 未发起/无需审批时被视为 AI 解析原值，需保持一致；
+> - `approved` / `rejected` 属于 OA 已关闭的终态，此时 Amount 可被财务再编辑（例如驳回后调整再重新发起、或通过后补正），因此放开所有原可编辑字段（含 Amount）；
+> - 「原本就不支持编辑的字段」（如 Applicant、Apply Date、系统自填字段）在任何 OA 状态下都保持只读。
+
+#### 原型必须覆盖的 5 种情景
+
+`F-PAP-PAYMENT-REVIEW.html` 的 seed 数据已按下表配置，确保 Demo 可以直接点开对照：
+
+| 情景                          | Invoice ID（seed） | 预期表现                                                                 |
+| --------------------------- | ---------------- | -------------------------------------------------------------------- |
+| `checked` + `not_required`  | id 4             | 详情页 `Edit` 可点击；进入编辑后 Amount 只读，其余可改；OA 区域隐藏                |
+| `checked` + `pending_init`  | id 6 / id 8      | 详情页 `Edit` 可点击；Amount 只读，其余可改；OA 区域显示 `Initiate OA` 按钮   |
+| `checked` + `in_review`     | id 5             | 详情页 `Edit` 按钮隐藏；全表单只读；OA 区域显示 `View OA-2026-0005` + 蓝色提示 |
+| `checked` + `approved`      | id 3             | 详情页 `Edit` 可点击；所有字段（含 Amount）可改；OA 区域显示 `View OA-2026-0003`   |
+| `checked` + `rejected`      | id 7             | 详情页 `Edit` 可点击；所有字段（含 Amount）可改；OA 区域显示 `View OA-2026-0007` + `Re-initiate` |
+
+### 3.6 OA 页结构
+
+`F-PAP-OA-APPROVAL.html`
+
+```
+┌─────────┬──────────────┬─────────────────────────────────────────┐
+│ Sidebar │ OA 列表（含    │ 主区：空态 / 只读详情 / 新建或编辑表单         │
+│         │ 筛选 + 搜索）   │   · Linked Invoices                      │
+│         │  · Draft      │   · Request Info（随 Type 动态）           │
+│         │  · In review  │   · Invoice Preview（右侧 Tab）           │
+│         │  · Approved   │   · 底部 Cancel / Save as Draft / Submit │
+│         │  · Rejected   │   · [Mock] Approve / Reject（仅 in_review）│
+└─────────┴──────────────┴─────────────────────────────────────────┘
+```
+
+- `+ Initiate OA`：主区右上角，进入空白新建表单
+- 列表项点击：右侧展示对应 OA 只读详情 + 决策栏
+- 左侧浅灰「Back」图标 / 主区 `Back` 按钮：返回 `F-PAP-PAYMENT-REVIEW.html`
+- Invoice 与 OA 之间通过 `sessionStorage` 同步 `oa.records` 与 `oa.invoiceAnnotations`，保证两页面数据一致（原型阶段实现）
+
+### 3.7 交互约束与校验
+
+- 提交 OA 前的硬校验：
+  - `Linked Invoices` 非空
+  - 币种一致（若不一致直接禁用 Submit 且给出警告徽章）
+  - 必填字段（Type / Office / Content / Currency / Amount / Est. Pay Day）
+- 在 OA `in_review` 期间：
+  - 不允许从 OA 侧移除/增加 Invoice；需先驳回或撤回
+- Invoice Picker 仅展示符合条件的 Invoice（`checked + Payout=Yes + oaState ∈ pending_init | rejected`），并自动禁用币种不一致项
+
+---
+
 
 
 ### 待确认事项

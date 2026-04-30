@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doraemon - 邮件助手</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper: #f5f1ea;
+            --paper-deep: #ece6db;
+            --card: #fffefa;
+            --ink: #1a1715;
+            --ink-soft: #4a453e;
+            --ink-muted: #8a847a;
+            --ink-faint: #b8b2a6;
+            --stroke: #e0d9cd;
+            --stroke-light: #eee8dd;
+
+            --vermillion: #c54b3a;
+            --vermillion-soft: #fdf0ee;
+            --indigo: #2b5c8a;
+            --indigo-soft: #edf3f9;
+            --matcha: #5a8f65;
+            --matcha-soft: #edf5ef;
+            --amber: #b8860b;
+            --amber-soft: #faf4e4;
+            --plum: #7b5ea7;
+            --plum-soft: #f5f0fa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+        }
+
+        .app { display: flex; flex-direction: column; height: 100vh; }
+
+        /* ═══════════════════ HEADER ═══════════════════ */
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px; height: 64px;
+            background: var(--card); border-bottom: 1px solid var(--stroke);
+            flex-shrink: 0;
+            animation: fadeDown 0.4s ease-out;
+        }
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-8px); } }
+
+        .header-left { display: flex; align-items: center; gap: 20px; }
+
+        .back-link {
+            width: 36px; height: 36px; border-radius: 8px; display: flex;
+            align-items: center; justify-content: center; color: var(--ink-muted);
+            text-decoration: none; transition: all 0.2s;
+        }
+        .back-link:hover { background: var(--paper-deep); color: var(--ink); }
+
+        .header-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 24px; font-weight: 400; letter-spacing: -0.01em;
+            color: var(--ink);
+        }
+        .header-title::after {
+            content: '';
+            display: inline-block; width: 6px; height: 6px;
+            background: var(--vermillion); border-radius: 50%;
+            margin-left: 6px; vertical-align: super; font-size: 0;
+        }
+
+        .tab-bar {
+            display: flex; gap: 2px;
+            background: var(--paper-deep); padding: 3px; border-radius: 10px;
+        }
+        .tab-item {
+            padding: 7px 18px; border-radius: 8px; font-size: 13px;
+            font-weight: 500; cursor: pointer; border: none;
+            background: transparent; color: var(--ink-muted);
+            font-family: 'Outfit', sans-serif; transition: all 0.2s;
+            position: relative;
+        }
+        .tab-item.active {
+            background: var(--card); color: var(--ink);
+            box-shadow: 0 1px 4px rgba(26,23,21,0.06);
+        }
+        .tab-item .tab-badge {
+            position: absolute; top: -2px; right: -2px;
+            width: 18px; height: 18px; border-radius: 9px;
+            background: var(--vermillion); color: #fff;
+            font-size: 10px; font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
+            line-height: 1;
+        }
+
+        .header-stats { display: flex; gap: 24px; }
+        .stat-label {
+            font-size: 13px; color: var(--ink-muted);
+            font-family: 'Outfit', sans-serif;
+        }
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500; font-size: 14px; margin-right: 4px;
+        }
+        .stat-value.red { color: var(--vermillion); }
+        .stat-value.green { color: var(--matcha); }
+        .stat-value.blue { color: var(--indigo); }
+
+        /* ═══════════════════ BODY ═══════════════════ */
+        .body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+        .tab-pane {
+            display: none; overflow-y: auto; flex: 1; padding: 28px 40px;
+        }
+        .tab-pane::-webkit-scrollbar { width: 5px; }
+        .tab-pane::-webkit-scrollbar-thumb { background: var(--stroke); border-radius: 3px; }
+        .tab-pane.active { display: block; }
+        #tabRules { padding: 0; overflow: hidden; }
+        #tabRules.active { display: flex; }
+
+        /* ═══════════════════ SECTION HEADERS ═══════════════════ */
+        .section-head {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 16px;
+        }
+        .section-head::before {
+            content: ''; display: block;
+            width: 3px; height: 18px; border-radius: 2px;
+            background: var(--vermillion);
+        }
+        .section-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 18px; font-weight: 400;
+        }
+        .section-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; font-weight: 500;
+            padding: 2px 8px; border-radius: 4px;
+            background: var(--vermillion); color: #fff;
+        }
+
+        /* ═══════════════════ EMAIL CARDS ═══════════════════ */
+        .ecard {
+            background: var(--card); border: 1px solid var(--stroke);
+            border-left: 3px solid var(--stroke);
+            padding: 20px 24px; margin-bottom: 12px;
+            transition: all 0.2s;
+            animation: cardIn 0.35s ease-out both;
+        }
+        .ecard:nth-child(1) { animation-delay: 0.05s; }
+        .ecard:nth-child(2) { animation-delay: 0.12s; }
+        .ecard:nth-child(3) { animation-delay: 0.19s; }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .ecard:hover { border-left-color: var(--vermillion); box-shadow: 0 2px 12px rgba(26,23,21,0.05); }
+
+        .ecard-meta {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .badge {
+            padding: 2px 8px; font-size: 10px; font-weight: 600;
+            letter-spacing: 0.03em; text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .badge.urgent { background: var(--vermillion); color: #fff; }
+        .badge.normal { background: var(--indigo-soft); color: var(--indigo); }
+        .badge.ai-scan { background: var(--amber-soft); color: var(--amber); border: 1px solid #e8d9a8; }
+        .badge.sys-trigger { background: var(--plum-soft); color: var(--plum); border: 1px solid #ddd0ec; }
+
+        .ecard-sender {
+            font-size: 13px; font-weight: 500; color: var(--ink-soft);
+        }
+        .ecard-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; color: var(--ink-faint);
+        }
+        .ecard-subject {
+            font-family: 'Instrument Serif', serif;
+            font-size: 17px; font-weight: 400;
+            margin-bottom: 4px; line-height: 1.3;
+        }
+        .ecard-summary {
+            font-size: 13px; color: var(--ink-muted); line-height: 1.55;
+        }
+
+        /* AI draft */
+        .ai-draft {
+            margin-top: 14px; padding: 14px 18px;
+            background: linear-gradient(135deg, #f7f4ef 0%, #f0ece3 100%);
+            border-left: 2px solid var(--amber);
+            position: relative;
+        }
+        .ai-draft-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; font-weight: 500; color: var(--amber);
+            text-transform: uppercase; letter-spacing: 0.08em;
+            margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+        }
+        .ai-draft-label::before {
+            content: ''; width: 5px; height: 5px; border-radius: 50%;
+            background: var(--amber); animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+        }
+        .ai-draft-text {
+            font-size: 13px; color: var(--ink-soft); line-height: 1.65;
+            font-style: italic;
+        }
+
+        /* cross system */
+        .cross-box {
+            margin-top: 12px; padding: 12px 16px;
+            background: var(--plum-soft);
+            border-left: 2px solid var(--plum);
+        }
+        .cross-box-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; font-weight: 500; color: var(--plum);
+            text-transform: uppercase; letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+        .cross-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 4px 0; font-size: 12px;
+        }
+        .cross-sys {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500; color: var(--plum); font-size: 11px;
+            white-space: nowrap;
+        }
+        .cross-text { flex: 1; color: var(--ink-soft); }
+        .cross-btn {
+            padding: 3px 12px; font-size: 11px; font-weight: 500;
+            border: 1px solid var(--stroke); background: var(--card);
+            cursor: pointer; color: var(--ink); transition: all 0.15s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .cross-btn:hover { border-color: var(--ink-muted); }
+        .cross-btn.confirmed {
+            background: var(--matcha-soft); border-color: var(--matcha);
+            color: var(--matcha);
+        }
+
+        /* email actions */
+        .ecard-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+        .btn {
+            padding: 8px 18px; font-size: 13px; font-weight: 500;
+            cursor: pointer; border: none; transition: all 0.15s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn-primary {
+            background: var(--ink); color: var(--paper);
+        }
+        .btn-primary:hover { background: #2d2a26; }
+        .btn-outline {
+            background: var(--card); color: var(--ink);
+            border: 1px solid var(--stroke);
+        }
+        .btn-outline:hover { border-color: var(--ink-muted); }
+        .btn-ghost {
+            background: transparent; color: var(--ink-muted);
+        }
+        .btn-ghost:hover { color: var(--ink); background: var(--paper-deep); }
+        .btn-dismiss {
+            background: transparent; color: var(--ink-faint);
+            font-size: 12px; margin-left: auto;
+        }
+        .btn-dismiss:hover { color: var(--vermillion); }
+
+        /* expanded detail */
+        .ecard-detail {
+            display: none; margin-top: 14px; padding: 16px 18px;
+            background: var(--paper); border: 1px solid var(--stroke-light);
+        }
+        .ecard-detail.show { display: block; }
+        .ecard-detail-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; font-weight: 500; color: var(--ink-faint);
+            text-transform: uppercase; letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+        .ecard-detail-body {
+            font-size: 13px; color: var(--ink-muted); line-height: 1.75;
+            white-space: pre-wrap;
+        }
+
+        /* ═══════════════════ TRUST BANNER ═══════════════════ */
+        .trust {
+            display: flex; align-items: center; gap: 16px;
+            padding: 16px 20px; margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--indigo-soft) 0%, #e6edf5 100%);
+            border: 1px solid #c9d6e5;
+            border-left: 3px solid var(--indigo);
+            animation: cardIn 0.3s ease-out both;
+        }
+        .trust-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--indigo); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .trust-body { flex: 1; }
+        .trust-title {
+            font-weight: 600; font-size: 14px; color: var(--ink);
+            margin-bottom: 2px;
+        }
+        .trust-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+        .trust-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+        /* ═══════════════════ PROCESSED TAB ═══════════════════ */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+            margin-bottom: 28px;
+        }
+        .scard {
+            background: var(--card); border: 1px solid var(--stroke);
+            padding: 20px; text-align: center;
+            transition: border-color 0.2s;
+        }
+        .scard:hover { border-color: var(--ink-faint); }
+        .scard-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px; font-weight: 500;
+        }
+        .scard-label {
+            font-size: 12px; color: var(--ink-muted); margin-top: 4px;
+        }
+
+        .chips { display: flex; gap: 8px; margin-bottom: 20px; }
+        .chip {
+            padding: 6px 16px; font-size: 13px; font-weight: 500;
+            cursor: pointer; border: 1px solid var(--stroke);
+            background: var(--card); color: var(--ink-muted);
+            font-family: 'Outfit', sans-serif; transition: all 0.2s;
+        }
+        .chip.active {
+            background: var(--ink); color: var(--paper);
+            border-color: var(--ink);
+        }
+        .chip:hover:not(.active) { border-color: var(--ink-faint); }
+
+        .pitem {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 18px; background: var(--card);
+            border: 1px solid var(--stroke); margin-bottom: 6px;
+            transition: all 0.2s;
+            animation: cardIn 0.3s ease-out both;
+        }
+        .pitem:nth-child(1) { animation-delay: 0.03s; }
+        .pitem:nth-child(2) { animation-delay: 0.06s; }
+        .pitem:nth-child(3) { animation-delay: 0.09s; }
+        .pitem:nth-child(4) { animation-delay: 0.12s; }
+        .pitem:nth-child(5) { animation-delay: 0.15s; }
+        .pitem:nth-child(6) { animation-delay: 0.18s; }
+        .pitem:nth-child(7) { animation-delay: 0.21s; }
+        .pitem:nth-child(8) { animation-delay: 0.24s; }
+        .pitem:hover { border-left: 3px solid var(--ink-faint); }
+        .pitem-icon { font-size: 18px; flex-shrink: 0; }
+        .pitem-body { flex: 1; min-width: 0; }
+        .pitem-title { font-size: 14px; font-weight: 500; }
+        .pitem-desc { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+        .pitem-badge {
+            font-family: 'JetBrains Mono', monospace;
+            padding: 3px 10px; font-size: 10px; font-weight: 500;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        .pitem-badge.sent { background: var(--matcha-soft); color: var(--matcha); }
+        .pitem-badge.edited { background: var(--indigo-soft); color: var(--indigo); }
+        .pitem-badge.auto { background: var(--plum-soft); color: var(--plum); }
+        .pitem-badge.skipped { background: var(--paper-deep); color: var(--ink-faint); }
+        .pitem-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; color: var(--ink-faint); white-space: nowrap;
+        }
+
+        /* ═══════════════════ RULES TAB (left) ═══════════════════ */
+        .rules-col {
+            flex: 1; overflow-y: auto;
+            padding: 28px 24px 28px 40px;
+        }
+        .rules-col::-webkit-scrollbar { width: 4px; }
+        .rules-col::-webkit-scrollbar-thumb { background: var(--stroke); border-radius: 2px; }
+
+        .rcard {
+            background: var(--card); border: 1px solid var(--stroke);
+            padding: 16px 20px;
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 8px; transition: all 0.2s;
+            animation: cardIn 0.3s ease-out both;
+        }
+        .rcard:nth-child(1) { animation-delay: 0.03s; }
+        .rcard:nth-child(2) { animation-delay: 0.06s; }
+        .rcard:nth-child(3) { animation-delay: 0.09s; }
+        .rcard:nth-child(4) { animation-delay: 0.12s; }
+        .rcard:nth-child(5) { animation-delay: 0.15s; }
+        .rcard:nth-child(6) { animation-delay: 0.18s; }
+        .rcard:hover { border-left: 3px solid var(--vermillion); }
+
+        .rcard-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .rcard-dot.on { background: var(--matcha); box-shadow: 0 0 0 3px var(--matcha-soft); }
+        .rcard-dot.off { background: var(--ink-faint); }
+
+        .rcard-body { flex: 1; min-width: 0; }
+        .rcard-name {
+            font-size: 14px; font-weight: 500; display: flex;
+            align-items: center; gap: 8px;
+        }
+        .rtag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; font-weight: 500; padding: 2px 7px;
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .rtag.mail { background: var(--indigo-soft); color: var(--indigo); }
+        .rtag.cross { background: var(--plum-soft); color: var(--plum); }
+
+        .rcard-desc {
+            font-size: 12px; color: var(--ink-muted); margin-top: 3px;
+        }
+        .rcard-prompt {
+            font-size: 12px; color: var(--plum); margin-top: 5px;
+            padding: 4px 10px; background: var(--plum-soft);
+            display: flex; align-items: flex-start; gap: 6px;
+            line-height: 1.5; font-style: italic;
+        }
+        .rcard-meta {
+            display: flex; gap: 14px; margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: var(--ink-faint);
+            letter-spacing: 0.02em;
+        }
+
+        .rcard-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .toggle-sw {
+            width: 38px; height: 20px; border-radius: 10px; position: relative;
+            cursor: pointer; transition: background 0.25s; border: none;
+            flex-shrink: 0;
+        }
+        .toggle-sw.on { background: var(--indigo); }
+        .toggle-sw.off { background: var(--ink-faint); }
+        .toggle-sw::after {
+            content: ''; position: absolute; top: 2px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #fff; transition: left 0.25s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        .toggle-sw.on::after { left: 20px; }
+        .toggle-sw.off::after { left: 2px; }
+
+        .del-btn {
+            width: 28px; height: 28px; border: none; background: transparent;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--ink-faint); transition: all 0.15s;
+            opacity: 0;
+        }
+        .rcard:hover .del-btn { opacity: 1; }
+        .del-btn:hover { background: var(--vermillion-soft); color: var(--vermillion); }
+
+        /* ═══════════════════ CHAT PANEL (right) ═══════════════════ */
+        .chat-col {
+            width: 360px; flex-shrink: 0;
+            display: flex; flex-direction: column;
+            border-left: 1px solid var(--stroke);
+            background: var(--card);
+        }
+        .chat-head {
+            padding: 18px 24px; border-bottom: 1px solid var(--stroke);
+            font-family: 'Instrument Serif', serif;
+            font-size: 18px; display: flex; align-items: center; gap: 8px;
+        }
+        .chat-head::before {
+            content: ''; width: 8px; height: 8px; border-radius: 50%;
+            background: var(--matcha);
+            box-shadow: 0 0 0 3px var(--matcha-soft);
+        }
+        .chat-msgs {
+            flex: 1; overflow-y: auto; padding: 20px;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .chat-msgs::-webkit-scrollbar { width: 4px; }
+        .chat-msgs::-webkit-scrollbar-thumb { background: var(--stroke); border-radius: 2px; }
+
+        .chat-welcome {
+            align-self: center; text-align: center;
+            margin: 40px 0 16px;
+        }
+        .chat-welcome-icon {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--indigo) 0%, var(--plum) 100%);
+            margin: 0 auto 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .chat-welcome-text {
+            font-family: 'Instrument Serif', serif;
+            font-size: 16px; color: var(--ink); margin-bottom: 4px;
+        }
+        .chat-welcome-sub {
+            font-size: 12px; color: var(--ink-muted);
+        }
+
+        .cmsg { max-width: 88%; line-height: 1.6; font-size: 13px; }
+        .cmsg.bot {
+            align-self: flex-start; background: var(--paper);
+            padding: 12px 16px; color: var(--ink-soft);
+            border: 1px solid var(--stroke-light);
+        }
+        .cmsg.user {
+            align-self: flex-end; background: var(--ink);
+            color: var(--paper); padding: 12px 16px;
+        }
+        .cmsg .rc-inline {
+            background: var(--card); border: 1px solid var(--stroke);
+            padding: 12px 14px; margin: 10px 0;
+        }
+        .cmsg .rc-inline .rc-name {
+            font-weight: 600; font-size: 13px; margin-bottom: 4px;
+        }
+        .cmsg .rc-inline .rc-desc {
+            font-size: 12px; color: var(--ink-muted); line-height: 1.5;
+        }
+        .cmsg .rc-inline .rc-meta {
+            display: flex; gap: 12px; margin-top: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: var(--ink-faint);
+        }
+        .confirm-rule-btn {
+            display: inline-block; margin-top: 10px;
+            padding: 7px 22px; font-size: 13px; font-weight: 500;
+            border: none; cursor: pointer;
+            background: var(--ink); color: var(--paper);
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.15s;
+        }
+        .confirm-rule-btn:hover { background: #2d2a26; }
+        .confirm-rule-btn.confirmed {
+            background: var(--paper-deep); color: var(--ink-faint);
+            cursor: default;
+        }
+
+        .chat-input-area {
+            padding: 14px 20px; border-top: 1px solid var(--stroke);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .chat-input-area textarea {
+            width: 100%; border: none; outline: none; resize: none;
+            font-family: 'Outfit', sans-serif; font-size: 13px;
+            line-height: 1.5; color: var(--ink); background: transparent;
+            max-height: 80px;
+        }
+        .chat-input-area textarea::placeholder { color: var(--ink-faint); }
+        .chat-input-bottom {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .chat-input-icons { display: flex; gap: 4px; }
+        .chat-input-icons button {
+            width: 30px; height: 30px; border: none; background: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: var(--ink-faint); transition: all 0.15s;
+        }
+        .chat-input-icons button:hover { color: var(--ink-muted); background: var(--paper); }
+        .send-btn {
+            height: 30px; padding: 0 14px; border: none;
+            background: transparent; display: flex; align-items: center;
+            gap: 5px; cursor: pointer; transition: all 0.15s;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; color: var(--ink-faint);
+            letter-spacing: 0.04em;
+        }
+        .send-btn:hover { color: var(--ink-muted); }
+        .send-btn.active { background: var(--ink); color: var(--paper); }
+        .send-btn.active svg path { stroke: var(--paper); }
+
+        /* ═══════════════════ MODAL ═══════════════════ */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(26,23,21,0.4);
+            z-index: 500; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--card); width: 480px;
+            box-shadow: 0 24px 80px rgba(26,23,21,0.18);
+            animation: modalPop 0.25s ease-out;
+        }
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.97) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 24px; border-bottom: 1px solid var(--stroke);
+        }
+        .modal-head h3 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 18px; font-weight: 400;
+        }
+        .modal-x {
+            width: 32px; height: 32px; border: none; background: transparent;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: var(--ink-faint); transition: all 0.15s;
+        }
+        .modal-x:hover { color: var(--ink); background: var(--paper); }
+        .modal-content { padding: 20px 24px; }
+        .modal-foot {
+            display: flex; justify-content: flex-end; gap: 10px;
+            padding: 16px 24px; border-top: 1px solid var(--stroke);
+        }
+        .preview-to { font-size: 13px; color: var(--ink-muted); margin-bottom: 4px; }
+        .preview-subject { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+        .preview-body {
+            padding: 16px; background: var(--paper);
+            font-size: 13px; line-height: 1.75; color: var(--ink-soft);
+            max-height: 200px; overflow-y: auto; white-space: pre-wrap;
+            border: 1px solid var(--stroke-light);
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <a href="workspace.html" class="back-link" title="返回工作区">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15l-5-5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <h1 class="header-title">邮件助手</h1>
+            <div class="tab-bar">
+                <button class="tab-item active" data-tab="action">需要处理<span class="tab-badge">3</span></button>
+                <button class="tab-item" data-tab="processed">已处理</button>
+                <button class="tab-item" data-tab="rules">自动化规则</button>
+            </div>
+        </div>
+        <div class="header-stats">
+            <span class="stat-label"><span class="stat-value">23</span>今日收到</span>
+            <span class="stat-label"><span class="stat-value green">18</span>AI 已处理</span>
+            <span class="stat-label"><span class="stat-value red">5</span>需你关注</span>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="body">
+
+        <!-- ═══ Tab: 需要处理 ═══ -->
+        <div class="tab-pane active" id="tabAction">
+
+            <div class="trust">
+                <div class="trust-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2 4 4.5.7-3.3 3.1.8 4.5L10 12.2 5.9 14.3l.8-4.5L3.5 6.7 8 6l2-4z" fill="#fff"/></svg>
+                </div>
+                <div class="trust-body">
+                    <div class="trust-title">AI 授权建议</div>
+                    <div class="trust-desc">你过去 10 次都直接发送了感谢邮件草稿，以后这类邮件要不要我直接发送，不再打扰你？</div>
+                </div>
+                <div class="trust-actions">
+                    <button class="btn btn-primary" onclick="this.closest('.trust').style.display='none'">同意授权</button>
+                    <button class="btn btn-ghost" onclick="this.closest('.trust').style.display='none'">暂不</button>
+                </div>
+            </div>
+
+            <div class="section-head">
+                <span class="section-title">待回复邮件</span>
+                <span class="section-count">3</span>
+            </div>
+
+            <!-- Email 1 -->
+            <div class="ecard">
+                <div class="ecard-meta">
+                    <span class="badge urgent">urgent</span>
+                    <span class="badge ai-scan">AI 识别</span>
+                    <span class="ecard-sender">田中太郎 (A 出版社)</span>
+                    <span class="ecard-time">14:23</span>
+                </div>
+                <div class="ecard-subject">关于「天剑」角色监修第 3 轮反馈</div>
+                <div class="ecard-summary">对方确认了 5 项修改中的 3 项，剩余 2 项提出新建议，需要在本周五前回复</div>
+                <div class="ai-draft">
+                    <div class="ai-draft-label">AI Draft Ready</div>
+                    <div class="ai-draft-text">田中先生，一直承蒙关照。感谢您的确认。关于您提出的剩余 2 项建议，我们团队将进行讨论，周五之前给您答复...</div>
+                </div>
+                <div class="cross-box">
+                    <div class="cross-box-label">Cross-System Actions</div>
+                    <div class="cross-item">
+                        <span class="cross-sys">A-System</span>
+                        <span class="cross-text">新建任务「天剑监修反馈」，状态 In Progress</span>
+                        <button class="cross-btn" onclick="confirmCrossAction(this)">确认</button>
+                    </div>
+                    <div class="cross-item">
+                        <span class="cross-sys">Calendar</span>
+                        <span class="cross-text">创建提醒「周五前回复田中监修反馈」</span>
+                        <button class="cross-btn" onclick="confirmCrossAction(this)">确认</button>
+                    </div>
+                </div>
+                <div class="ecard-actions">
+                    <button class="btn btn-primary" onclick="location.href='chat.html?scene=email-reply-1'">编辑回复</button>
+                    <button class="btn btn-outline" onclick="openSendModal('田中太郎','Re: 「天剑」角色监修第 3 轮反馈',this)">直接发送</button>
+                    <button class="btn btn-ghost" onclick="toggleDetail(this)">展开原文</button>
+                    <button class="btn btn-dismiss" onclick="dismissEmail(this)">不处理</button>
+                </div>
+                <div class="ecard-detail">
+                    <div class="ecard-detail-label">Original Message</div>
+                    <div class="ecard-detail-body">您好，我是 A 出版社的田中。
+
+关于「天剑」角色监修第 3 轮反馈，特此联络。
+
+■ 已确认（3 项）
+1. 主角色的颜色调整 → 已批准
+2. 副角色的姿势修改 → 已批准
+3. 背景特效的修正 → 已批准
+
+■ 追加建议（2 项）
+4. 主角色的表情 → 建议增加微笑版本
+5. 武器的细节 → 建议增加更多光泽效果
+
+希望您能在周五之前回复。</div>
+                </div>
+            </div>
+
+            <!-- Email 2 -->
+            <div class="ecard">
+                <div class="ecard-meta">
+                    <span class="badge urgent">urgent</span>
+                    <span class="badge sys-trigger">A-System 触发</span>
+                    <span class="ecard-sender">→ 佐藤花子 (B 工作室)</span>
+                    <span class="ecard-time">11:05</span>
+                </div>
+                <div class="ecard-subject">催促：「星海」角色设定稿已逾期 3 天</div>
+                <div class="ecard-summary">A-System 检测到任务逾期，AI 已自动生成催促邮件草稿</div>
+                <div class="ai-draft">
+                    <div class="ai-draft-label">AI Draft Ready</div>
+                    <div class="ai-draft-text">佐藤女士您好，关于「星海」项目的角色设定稿交付事宜，原定交付日期为 3 月 13 日，目前已逾期 3 天。请问目前进度如何？</div>
+                </div>
+                <div class="ecard-actions">
+                    <button class="btn btn-primary" onclick="location.href='chat.html?scene=email-reply-2'">编辑后发送</button>
+                    <button class="btn btn-outline" onclick="openSendModal('佐藤花子','「星海」角色设定稿逾期提醒',this)">直接发送</button>
+                    <button class="btn btn-dismiss" onclick="dismissEmail(this)">不处理</button>
+                </div>
+            </div>
+
+            <!-- Email 3 -->
+            <div class="ecard">
+                <div class="ecard-meta">
+                    <span class="badge normal">normal</span>
+                    <span class="badge ai-scan">AI 识别</span>
+                    <span class="ecard-sender">铃木一郎 (C 游戏)</span>
+                    <span class="ecard-time">09:40</span>
+                </div>
+                <div class="ecard-subject">Q2 合作报价确认</div>
+                <div class="ecard-summary">发来了 Q2 合作方案报价单，总金额 ¥2,400,000，需确认后签署</div>
+                <div class="ai-draft">
+                    <div class="ai-draft-label">AI Draft Ready</div>
+                    <div class="ai-draft-text">铃木先生，感谢您发送报价单。我们将确认内容后在公司内部讨论，下周之内给您回复...</div>
+                </div>
+                <div class="cross-box">
+                    <div class="cross-box-label">Cross-System Actions</div>
+                    <div class="cross-item">
+                        <span class="cross-sys">P-System</span>
+                        <span class="cross-text">合同金额 ≥ 审批线，已查询审批上级为李总监</span>
+                    </div>
+                    <div class="cross-item">
+                        <span class="cross-sys">A-System</span>
+                        <span class="cross-text">建议创建任务「C 游戏 Q2 合同签署」指派李总监审批</span>
+                        <button class="cross-btn" onclick="confirmCrossAction(this)">创建任务</button>
+                    </div>
+                </div>
+                <div class="ecard-actions">
+                    <button class="btn btn-primary" onclick="location.href='chat.html?scene=email-reply-3'">编辑回复</button>
+                    <button class="btn btn-outline" onclick="openSendModal('铃木一郎','Re: Q2 合作报价确认',this)">直接发送</button>
+                    <button class="btn btn-ghost" onclick="toggleDetail(this)">展开原文</button>
+                    <button class="btn btn-dismiss" onclick="dismissEmail(this)">不处理</button>
+                </div>
+                <div class="ecard-detail">
+                    <div class="ecard-detail-label">Original Message</div>
+                    <div class="ecard-detail-body">您好，我是 C 游戏的铃木。
+
+现将 Q2 合作方案的报价单发送给您。
+合计金额：¥2,400,000（不含税）
+
+详细内容请查看附件 PDF。
+确认后请签署合同。</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ Tab: 已处理 ═══ -->
+        <div class="tab-pane" id="tabProcessed">
+            <div class="stats-row">
+                <div class="scard"><div class="scard-num">23</div><div class="scard-label">今日收件</div></div>
+                <div class="scard"><div class="scard-num" style="color:var(--matcha);">15</div><div class="scard-label">AI 自动处理</div></div>
+                <div class="scard"><div class="scard-num" style="color:var(--indigo);">4</div><div class="scard-label">你已处理</div></div>
+                <div class="scard"><div class="scard-num" style="color:var(--ink-faint);">1</div><div class="scard-label">标记不处理</div></div>
+            </div>
+
+            <div class="chips">
+                <button class="chip active" data-filter="all" onclick="filterProcessed(this)">全部</button>
+                <button class="chip" data-filter="user" onclick="filterProcessed(this)">我处理的</button>
+                <button class="chip" data-filter="ai" onclick="filterProcessed(this)">AI 自动处理</button>
+            </div>
+
+            <div id="processedList">
+                <div class="pitem" data-type="user">
+                    <div class="pitem-icon">✉️</div>
+                    <div class="pitem-body">
+                        <div class="pitem-title">回复：D 出版社合作意向确认</div>
+                        <div class="pitem-desc">直接发送 AI 草稿 → 松田先生</div>
+                    </div>
+                    <span class="pitem-badge sent">sent</span>
+                    <span class="pitem-time">15:30</span>
+                </div>
+                <div class="pitem" data-type="user">
+                    <div class="pitem-icon">✏️</div>
+                    <div class="pitem-body">
+                        <div class="pitem-title">回复：E 工作室 UI 素材交付确认</div>
+                        <div class="pitem-desc">编辑后发送 → 修改了交付时间</div>
+                    </div>
+                    <span class="pitem-badge edited">edited</span>
+                    <span class="pitem-time">14:10</span>
+                </div>
+                <div class="pitem" data-type="user">
+                    <div class="pitem-icon">✉️</div>
+                    <div class="pitem-body">
+                        <div class="pitem-title">催促：F 游戏本地化文档（A-System 触发）</div>
+                        <div class="pitem-desc">确认发送 AI 催促草稿 → 高桥负责人</div>
+                    </div>
+                    <span class="pitem-badge sent">sent</span>
+                    <span class="pitem-time">11:45</span>
+                </div>
+                <div class="pitem" data-type="user">
+                    <div class="pitem-icon">⏭️</div>
+                    <div class="pitem-body">
+                        <div class="pitem-title">内部通知：服务器维护公告</div>
+                        <div class="pitem-desc">标记为不处理</div>
+                    </div>
+                    <span class="pitem-badge skipped">skip</span>
+                    <span class="pitem-time">10:20</span>
+                </div>
+                <div class="pitem" data-type="ai">
+                    <div class="pitem-icon">📦</div>
+                    <div class="pitem-body">
+                        <div class="pitem-title">系统通知 ×5 → 已归档</div>
+                        <div class="pitem-desc">OA 系统审批通知、服务器监控告警</div>
+                    </div>
+                    <span class="pitem-badge auto">auto</span>
+                    <span class="pitem-time">14:30</span>
+                </div>
+                <div class="pitem" data-type="ai">
+                    <div class="pitem-icon">🏷️</div>
+                    <div class="pitem-body">
+                        <div class="pitem-title">出版社邮件 ×3 → 已标记「监修」</div>
+                        <div class="pitem-desc">来自 A 出版社、B 出版社的监修相关邮件</div>
+                    </div>
+                    <span class="pitem-badge auto">auto</span>
+                    <span class="pitem-time">13:15</span>
+                </div>
+                <div class="pitem" data-type="ai">
+                    <div class="pitem-icon">📤</div>
+                    <div class="pitem-body">
+                        <div class="pitem-title">感谢回复 ×3 → 已自动发送</div>
+                        <div class="pitem-desc">AI 自动发送（已授权）</div>
+                    </div>
+                    <span class="pitem-badge auto">auto</span>
+                    <span class="pitem-time">11:00</span>
+                </div>
+                <div class="pitem" data-type="ai">
+                    <div class="pitem-icon">📦</div>
+                    <div class="pitem-body">
+                        <div class="pitem-title">订阅邮件 ×4 → 已归档</div>
+                        <div class="pitem-desc">Newsletter、营销推广类邮件</div>
+                    </div>
+                    <span class="pitem-badge auto">auto</span>
+                    <span class="pitem-time">10:30</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ Tab: 自动化规则 ═══ -->
+        <div class="tab-pane" id="tabRules">
+            <div class="rules-col">
+                <div class="section-head">
+                    <span class="section-title">运行中的规则</span>
+                    <span class="section-count">6</span>
+                </div>
+                <div id="rulesList">
+                    <div class="rcard">
+                        <div class="rcard-dot on"></div>
+                        <div class="rcard-body">
+                            <div class="rcard-name">未回复自动提醒 <span class="rtag mail">mail</span></div>
+                            <div class="rcard-desc">已发邮件超过 48 小时未收到回复时提醒</div>
+                            <div class="rcard-meta"><span>每 6 小时检查</span><span>上次触发: 今天 12:00</span></div>
+                        </div>
+                        <div class="rcard-actions">
+                            <button class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            <button class="del-btn" title="删除" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="rcard">
+                        <div class="rcard-dot on"></div>
+                        <div class="rcard-body">
+                            <div class="rcard-name">出版社邮件自动标记 <span class="rtag mail">mail</span></div>
+                            <div class="rcard-desc">发件人包含「出版社」时，自动打标签「监修」</div>
+                            <div class="rcard-prompt">识别邮件中涉及的游戏项目名称，作为标签的二级分类</div>
+                            <div class="rcard-meta"><span>实时触发</span><span>已触发 23 次</span></div>
+                        </div>
+                        <div class="rcard-actions">
+                            <button class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            <button class="del-btn" title="删除" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="rcard">
+                        <div class="rcard-dot on"></div>
+                        <div class="rcard-body">
+                            <div class="rcard-name">感谢邮件自动发送 <span class="rtag mail">mail</span></div>
+                            <div class="rcard-desc">收到监修确认回复后，AI 自动发送感谢邮件</div>
+                            <div class="rcard-meta"><span>实时触发</span><span>已自动发送 12 封</span></div>
+                        </div>
+                        <div class="rcard-actions">
+                            <button class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            <button class="del-btn" title="删除" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="rcard">
+                        <div class="rcard-dot on"></div>
+                        <div class="rcard-body">
+                            <div class="rcard-name">任务逾期自动催促 <span class="rtag cross">cross</span></div>
+                            <div class="rcard-desc">A-System 任务逾期时，自动向负责人发送催促邮件</div>
+                            <div class="rcard-prompt">邮件中列出任务名称、截止日期和逾期天数，语气正式但不强硬</div>
+                            <div class="rcard-meta"><span>事件触发</span><span>待确认后发送</span></div>
+                        </div>
+                        <div class="rcard-actions">
+                            <button class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            <button class="del-btn" title="删除" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="rcard">
+                        <div class="rcard-dot on"></div>
+                        <div class="rcard-body">
+                            <div class="rcard-name">审批邮件查询上级 <span class="rtag cross">cross</span></div>
+                            <div class="rcard-desc">邮件涉及审批/金额时，自动从 P-System 查询审批人</div>
+                            <div class="rcard-meta"><span>实时触发</span><span>自动执行</span></div>
+                        </div>
+                        <div class="rcard-actions">
+                            <button class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            <button class="del-btn" title="删除" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="rcard">
+                        <div class="rcard-dot off"></div>
+                        <div class="rcard-body">
+                            <div class="rcard-name">每日邮件汇总 <span class="rtag mail">mail</span></div>
+                            <div class="rcard-desc">每天 9 点归纳前一天收到的邮件，生成 Todo List</div>
+                            <div class="rcard-prompt">归纳前一天所有邮件，提取待办事项生成 Todo List，通过 D 发送给我</div>
+                            <div class="rcard-meta"><span>每天 09:00</span><span style="color:var(--amber);">已暂停</span></div>
+                        </div>
+                        <div class="rcard-actions">
+                            <button class="toggle-sw off" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+                            <button class="del-btn" title="删除" onclick="deleteRule(this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4v7.5h7V4M6 6.5v3M8 6.5v3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Panel -->
+            <div class="chat-col">
+                <div class="chat-head">邮件助手</div>
+                <div class="chat-msgs" id="chatMessages">
+                    <div class="chat-welcome">
+                        <div class="chat-welcome-icon">
+                            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v6l4 2M11 19a8 8 0 110-16" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+                        </div>
+                        <div class="chat-welcome-text">Tell me your rules</div>
+                        <div class="chat-welcome-sub">用自然语言描述你想要的自动化规则</div>
+                    </div>
+                    <div class="cmsg bot">你好！我是邮件助手。<br><br>你可以告诉我你想要的自动化规则，比如：<br><br>· 收到出版社的邮件自动打标签<br>· 任务逾期时给负责人发催促邮件<br>· 每天汇总昨天的邮件生成 Todo<br><br>我会帮你生成规则，你确认就行。</div>
+                </div>
+                <div class="chat-input-area">
+                    <textarea id="chatInput" rows="1" placeholder="描述你想设置的规则…" oninput="autoResize(this);toggleSendBtn();" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}"></textarea>
+                    <div class="chat-input-bottom">
+                        <div class="chat-input-icons">
+                            <button title="附件"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8l-5.3 5.3a3.5 3.5 0 01-5 0 3.5 3.5 0 010-5L9 3a2.3 2.3 0 013.3 0 2.3 2.3 0 010 3.3L7 11.5a1.2 1.2 0 01-1.7 0 1.2 1.2 0 010-1.7L10 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                            <button title="表情"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 6.5h.01M10.5 6.5h.01M5.5 9.5a3.5 3.5 0 005 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                        </div>
+                        <button class="send-btn" id="chatSendBtn" onclick="sendChatMsg()">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M14 2L7.5 8.5M14 2l-4.5 12-2.5-5.5L2 6l12-4z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Send Confirmation Modal -->
+<div class="modal-overlay" id="sendModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h3>确认发送</h3>
+            <button class="modal-x" onclick="closeSendModal()"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        </div>
+        <div class="modal-content">
+            <div class="preview-to" id="sendModalTo"></div>
+            <div class="preview-subject" id="sendModalSubject"></div>
+            <div class="preview-body" id="sendModalBody"></div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeSendModal()">取消</button>
+            <button class="btn btn-primary" onclick="confirmSend()">确认发送</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ═══════ Tab switching ═══════
+    document.querySelectorAll('.tab-item').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const map = { action: 'tabAction', processed: 'tabProcessed', rules: 'tabRules' };
+            document.getElementById(map[tab.dataset.tab]).classList.add('active');
+        });
+    });
+
+    // ═══════ Email actions ═══════
+    function toggleDetail(btn) {
+        const card = btn.closest('.ecard');
+        const detail = card.querySelector('.ecard-detail');
+        const isOpen = detail.classList.toggle('show');
+        btn.textContent = isOpen ? '收起原文' : '展开原文';
+    }
+
+    function dismissEmail(btn) {
+        const card = btn.closest('.ecard');
+        card.style.transition = 'opacity 0.3s, transform 0.3s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(-20px)';
+        setTimeout(() => card.remove(), 300);
+    }
+
+    function confirmCrossAction(btn) {
+        if (btn.classList.contains('confirmed')) {
+            btn.classList.remove('confirmed');
+            btn.textContent = btn.dataset.originalText || '确认';
+        } else {
+            btn.dataset.originalText = btn.textContent;
+            btn.classList.add('confirmed');
+            btn.textContent = '✓ 已确认';
+        }
+    }
+
+    // ═══════ Send Modal ═══════
+    let _sendBtn = null;
+    function openSendModal(to, subject, btn) {
+        _sendBtn = btn;
+        document.getElementById('sendModalTo').textContent = '收件人：' + to;
+        document.getElementById('sendModalSubject').textContent = '主题：' + subject;
+        const card = btn.closest('.ecard');
+        const draftText = card.querySelector('.ai-draft-text');
+        document.getElementById('sendModalBody').textContent = draftText ? draftText.textContent : '';
+        document.getElementById('sendModal').classList.add('show');
+    }
+    function closeSendModal() { document.getElementById('sendModal').classList.remove('show'); }
+    function confirmSend() {
+        if (_sendBtn) {
+            const actions = _sendBtn.closest('.ecard-actions');
+            if (actions) {
+                actions.innerHTML = '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#5a8f65" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="#5a8f65" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:13px;color:var(--matcha);font-weight:500;font-family:JetBrains Mono,monospace;">SENT</span></div>';
+            }
+        }
+        closeSendModal();
+    }
+
+    // ═══════ Filter processed ═══════
+    function filterProcessed(chip) {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const filter = chip.dataset.filter;
+        document.querySelectorAll('#processedList .pitem').forEach(item => {
+            if (filter === 'all') { item.style.display = 'flex'; }
+            else { item.style.display = item.dataset.type === filter ? 'flex' : 'none'; }
+        });
+    }
+
+    // ═══════ Delete rule ═══════
+    function deleteRule(btn) {
+        const card = btn.closest('.rcard');
+        if (!card) return;
+        card.style.transition = 'opacity 0.25s, transform 0.25s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(20px)';
+        setTimeout(() => card.remove(), 250);
+    }
+</script>
+
+<!-- ═══════ Inline chat logic ═══════ -->
+<script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 80) + 'px';
+    }
+
+    function toggleSendBtn() {
+        chatSendBtn.classList.toggle('active', chatInput.value.trim().length > 0);
+    }
+
+    function addMsg(role, html) {
+        const div = document.createElement('div');
+        div.className = 'cmsg ' + role;
+        div.innerHTML = html;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function ruleCardHTML(name, desc, freq, mode) {
+        return `好的，我将为你创建以下规则：
+<div class="rc-inline">
+  <div class="rc-name">${name}</div>
+  <div class="rc-desc">${desc}</div>
+  <div class="rc-meta"><span>⏱ ${freq}</span><span>🔒 ${mode}</span></div>
+</div>
+<button class="confirm-rule-btn" onclick="confirmRuleCreation(this,'${name}')">确认创建</button>`;
+    }
+
+    const RESPONSES = {
+        '归纳|todo|汇总': () => ruleCardHTML('每日邮件汇总', '每天 09:00 归纳前一天收到的邮件，提取关键待办事项生成 Todo List，通过 D 发送给你', '每天 09:00', '自动执行'),
+        '标签|出版社': () => ruleCardHTML('出版社邮件自动标记', '发件人包含「出版社」时，自动打标签「监修」', '实时触发', '自动执行'),
+        '催促|逾期|任务': () => ruleCardHTML('任务逾期自动催促', 'A-System 任务逾期时，向负责人发送催促邮件，列出任务名称、截止日期和逾期天数', '事件触发', '待确认后发送'),
+        '查看|现有|列表': () => '你可以在左侧规则列表中查看所有已配置的规则，支持开关和删除。<br><br>如果需要修改某条规则，告诉我规则名称和要修改的内容即可。',
+        '回复|提醒|未回复': () => ruleCardHTML('未回复自动提醒', '已发邮件超过 48 小时未收到回复时，发送提醒通知', '每 6 小时检查', '自动执行'),
+        '感谢|谢谢': () => ruleCardHTML('感谢邮件自动发送', '收到监修确认回复后，AI 自动发送感谢邮件', '实时触发', '自动执行'),
+    };
+
+    function getResponse(text) {
+        for (const [keywords, fn] of Object.entries(RESPONSES)) {
+            if (keywords.split('|').some(k => text.includes(k))) return fn();
+        }
+        return '好的，请再具体描述一下：<br><br>· 什么时候触发？（收到某类邮件 / 外部系统事件）<br>· 执行什么动作？（打标签 / 归档 / 发邮件 / 创建任务…）<br><br>我会帮你生成规则摘要。';
+    }
+
+    function sendChatMsg() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        addMsg('user', text);
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+        toggleSendBtn();
+        setTimeout(() => addMsg('bot', getResponse(text)), 400);
+    }
+
+    function confirmRuleCreation(btn, name) {
+        if (btn.classList.contains('confirmed')) return;
+        btn.classList.add('confirmed');
+        btn.innerHTML = '✓ 已确认';
+        setTimeout(() => addMsg('bot', `「${name}」规则已创建成功！你可以在左侧列表中查看和管理。<br><br>还需要设置其他规则吗？`), 300);
+    }
+</script>
+</body>
+</html>

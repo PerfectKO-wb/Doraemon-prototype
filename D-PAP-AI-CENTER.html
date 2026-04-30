@@ -316,7 +316,8 @@ html,body{width:100%;height:100%;overflow:hidden;}
   border-color:rgba(255,59,48,.2);
   box-shadow:0 4px 16px rgba(255,59,48,.08), inset 0 1px 0 rgba(255,255,255,.5);
 }
-.g-card.overdue{
+.g-card.overdue{}
+.g-card.urgent-border{
   border-left:2.5px solid rgba(255,59,48,.6);
 }
 
@@ -393,6 +394,59 @@ html,body{width:100%;height:100%;overflow:hidden;}
 }
 .todo-count{font-size:11px;font-weight:700;color:rgba(0,0,0,.35);letter-spacing:.5px;}
 .todo-overdue{font-size:11px;font-weight:700;color:#ff3b30;letter-spacing:.5px;}
+
+/* ── URGENT COLLAPSE ENTRY ── */
+.urgent-entry-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-left:2.5px solid rgba(255,59,48,.5);
+  border-radius:14px;
+  padding:13px 16px;
+  cursor:pointer;
+  transition:all .2s ease;
+  box-shadow:0 4px 16px rgba(255,59,48,.07), inset 0 1px 0 rgba(255,255,255,.5);
+  margin-bottom:8px;
+  user-select:none;
+}
+.urgent-entry-card:hover{
+  background:rgba(255,255,255,.7);
+  box-shadow:0 8px 24px rgba(255,59,48,.1), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.urgent-entry-row{display:flex;align-items:center;gap:10px;}
+.urgent-entry-left{flex:1;min-width:0;}
+.urgent-entry-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:700;color:rgba(0,0,0,.8);line-height:1.4;
+}
+.urgent-entry-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:18px;padding:0 6px;
+  border-radius:9px;font-size:11px;font-weight:700;
+  background:rgba(255,59,48,.12);color:#c0392b;border:1px solid rgba(255,59,48,.22);
+}
+.urgent-entry-sub{margin-top:3px;font-size:11.5px;color:rgba(0,0,0,.45);line-height:1.4;}
+.urgent-entry-chevron{
+  width:24px;height:24px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(0,0,0,.35);transition:transform .22s ease;flex-shrink:0;
+}
+.urgent-entry-chevron.open{transform:rotate(180deg);}
+/* Expanded header bar (no outer box) */
+.urgent-expanded-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 8px;
+  cursor:pointer;user-select:none;
+}
+.urgent-expanded-header-label{
+  display:flex;align-items:center;gap:7px;
+  font-size:12px;font-weight:700;color:#c0392b;letter-spacing:.03em;
+}
+.urgent-expanded-collapse{
+  display:flex;align-items:center;gap:4px;
+  font-size:11px;color:rgba(0,0,0,.35);
+}
 
 /* ── TODO CARD HOVER BUTTON ── */
 .g-card.todo-card{position:relative;}
@@ -1117,41 +1171,86 @@ function renderPdmDoing(){
   if(ref) ref.textContent = `「${t.title}」`;
 }
 
+let urgentCollapsed = true;
+
+function toggleUrgentCollapse(){
+  urgentCollapsed = !urgentCollapsed;
+  renderPdmTodo();
+}
+
 function renderPdmTodo(){
-  // when pdmDoingIdx === -1 (A-ticket is doing), show all pdm tasks in todo
   const todos = pdmTasks.filter((_,i)=> pdmDoingIdx < 0 || i !== pdmDoingIdx);
-  const showATicket = pdmDoingIdx >= 0; // show A-ticket in list unless it's currently Doing
-  const totalCount = todos.length + (showATicket ? 1 : 0);
-  const overdueCount = todos.filter(t=>t.overdue).length + (showATicket ? 1 : 0);
+  const todoATickets = (typeof aTickets === 'undefined')
+    ? []
+    : aTickets.filter((_, i) => i !== aTicketDoingIdx);
+  const totalCount = todos.length + todoATickets.length;
+  const overdueCount = todos.filter(t=>t.overdue).length + todoATickets.length;
   document.getElementById('pdmTodoCount').textContent = totalCount + ' ·';
   document.getElementById('pdmTodoOverdue').textContent = overdueCount + ' OVERDUE';
 
-  const aTicketCard = showATicket ? `
-    <div class="g-card todo-card overdue ds3-task-appear" style="animation-delay:0s;">
-      <div class="card-title" style="padding-right:36px;">
-        ${aTicket.title}
-        <span style="display:inline-flex;align-items:center;gap:3px;margin-left:6px;
-          font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
-          padding:2px 7px;border-radius:6px;vertical-align:middle;
-          background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">
-          ⚠ Urgent
-        </span>
-      </div>
-      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${aTicket.ddl} · 今日必处理</div>
-      <div class="card-desc">
-        ${aTicket.sessions.map(s=>`
-          <div style="color:rgba(0,0,0,.6);margin-bottom:3px;font-size:12px;line-height:1.5;">${s.label}</div>
-        `).join('')}
-      </div>
-      <button class="todo-start-btn" onclick="event.stopPropagation();window.switchToDoing(-1)" title="切换为 Doing">
+  const urgentTag = `<span style="flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:2px 7px;border-radius:6px;
+    background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">⚠ Urgent</span>`;
+
+  const needCollapse = todoATickets.length > 2;
+
+  // individual cards html (used in both paths)
+  const makeCards = (tickets) => tickets.map((at) => {
+    const realIdx = aTickets.indexOf(at);
+    const desc = at.label.replace(/^\[WARNING\]\s+\S+\s+—\s+/, '');
+    return `
+    <div class="g-card todo-card urgent-border" style="background:rgba(255,255,255,.5);">
+      <div class="card-title" style="padding-right:36px;display:flex;align-items:center;gap:6px;">${urgentTag}<span>${at.title}</span></div>
+      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${at.ddl} · 今日必处理</div>
+      <div class="card-desc"><div style="color:rgba(0,0,0,.6);font-size:12px;line-height:1.5;">${desc}</div></div>
+      <button class="todo-start-btn" onclick="event.stopPropagation();window.switchToDoing(-1,${realIdx})" title="切换为 Doing">
         <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6-10 6V0z"/></svg>
       </button>
-    </div>` : '';
+    </div>`;
+  }).join('');
 
-  document.getElementById('pdmTodoList').innerHTML = aTicketCard + todos.map((t, listIdx)=>{
+  let urgentHtml = '';
+  if (!needCollapse) {
+    // ≤1 card: render directly
+    urgentHtml = makeCards(todoATickets);
+  } else if (urgentCollapsed) {
+    // Collapsed: single entry card
+    const titles = todoATickets.map(at => at.title.replace(/^\[.*?\]\s*/, '')).join('、');
+    urgentHtml = `
+    <div class="urgent-entry-card ds3-task-appear" onclick="toggleUrgentCollapse()">
+      <div class="urgent-entry-row">
+        <div class="urgent-entry-left">
+          <div class="urgent-entry-title">
+            ⚠ Urgent 告警
+            <span class="urgent-entry-badge">${todoATickets.length}</span>
+          </div>
+          <div class="urgent-entry-sub">今日 DDL · 点击展开处理</div>
+        </div>
+        <div class="urgent-entry-chevron">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>`;
+  } else {
+    // Expanded: lightweight header bar + cards directly (no outer wrapper)
+    urgentHtml = `
+    <div class="urgent-expanded-header ds3-task-appear" onclick="toggleUrgentCollapse()">
+      <div class="urgent-expanded-header-label">
+        ⚠ Urgent 告警
+        <span class="urgent-entry-badge">${todoATickets.length}</span>
+      </div>
+      <span class="urgent-expanded-collapse">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 8l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        收起
+      </span>
+    </div>
+    ${makeCards(todoATickets)}`;
+  }
+
+  document.getElementById('pdmTodoList').innerHTML = urgentHtml + todos.map((t, listIdx)=>{
     const realIdx = pdmTasks.indexOf(t);
     return `
-      <div class="g-card todo-card ${t.overdue?'overdue':''} ds3-task-appear" style="animation-delay:${(listIdx+(showATicket?1:0))*0.07}s;">
+      <div class="g-card todo-card ${t.overdue?'overdue':''} ds3-task-appear" style="animation-delay:${(listIdx+todoATickets.length)*0.07}s;">
         <div class="card-title">${t.title}</div>
         <div class="ddl-row"><span class="ddl-dot"></span>${t.ddlLabel}</div>
         <div class="card-desc">${t.desc}</div>
@@ -1171,70 +1270,114 @@ function switchToDoing(newDoingIdx){
   if(card) card.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
-/* ── ALERT A-TICKET ── */
-const aTicket = {
-  system: 'Publisher',
-  title: '[Publisher系统] 线上问题处理',
-  severity: 'Urgent',
-  owner: '王彬-Wang Bin',
-  ddl: '2026-04-28',
-  type: 'bug',
-  dept: 'Tech',
-  sessions: [
-    {
-      id: 'S-001',
-      label: '[WARNING] publisher — npm install timeout 导致部署失败',
-      time: '09:42',
-      url: 'chat_urgent_warning.html?scene=publisher-alert'
-    },
-    {
-      id: 'S-002',
-      label: '[WARNING] publisher — vividarmy-game-server 内存超限重启',
-      time: '11:15',
-      url: 'chat_urgent_warning.html?scene=publisher-alert'
-    },
-    {
-      id: 'S-003',
-      label: '[WARNING] publisher — production 回滚验证超时',
-      time: '13:07',
-      url: 'chat_urgent_warning.html?scene=publisher-alert'
-    }
-  ]
-};
+/* ── ALERT A-TICKETS ── */
+const aTickets = [
+  {
+    id: 'A-001',
+    title: '[publisher] vividarmy-game-server — deploy_failed',
+    severity: 'Urgent',
+    owner: '王彬-Wang Bin',
+    ddl: '2026-04-30',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] publisher — npm install timeout 导致部署失败',
+    url: 'chat_urgent_warning.html?scene=publisher-alert'
+  },
+  {
+    id: 'A-002',
+    title: '[publisher] vividarmy-game-server — service_down',
+    severity: 'Urgent',
+    owner: '王彬-Wang Bin',
+    ddl: '2026-04-30',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] publisher — vividarmy-game-server 内存超限重启',
+    url: 'chat_urgent_warning.html?scene=publisher-alert'
+  },
+  {
+    id: 'A-003',
+    title: '[publisher] production — rollback_timeout',
+    severity: 'Urgent',
+    owner: '王彬-Wang Bin',
+    ddl: '2026-04-30',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] publisher — production 回滚验证超时',
+    url: 'chat_urgent_warning.html?scene=publisher-alert'
+  },
+  {
+    id: 'A-004',
+    title: '[cs-gateway] auth-service — service_down',
+    severity: 'Urgent',
+    owner: '王彬-Wang Bin',
+    ddl: '2026-04-30',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] cs-gateway — auth-service 认证接口连续 5xx，错误率 38%',
+    url: 'chat_urgent_warning.html?scene=publisher-alert'
+  },
+  {
+    id: 'A-005',
+    title: '[data-pipeline] etl-worker — queue_backlog',
+    severity: 'Urgent',
+    owner: '王彬-Wang Bin',
+    ddl: '2026-04-30',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] data-pipeline — ETL 队列积压超 10k，消费延迟 > 15min',
+    url: 'chat_urgent_warning.html?scene=publisher-alert'
+  },
+  {
+    id: 'A-006',
+    title: '[payment] checkout-api — high_latency',
+    severity: 'Urgent',
+    owner: '王彬-Wang Bin',
+    ddl: '2026-04-30',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] payment — checkout-api P99 延迟从 180ms 飙升至 2.4s',
+    url: 'chat_urgent_warning.html?scene=publisher-alert'
+  }
+];
+let aTicketDoingIdx = 0; // index in aTickets currently in Doing; -1 = none
 
-/* Override switchToDoing to handle A-ticket (idx = -1) */
+function renderATicketDoing() {
+  const at = aTickets[aTicketDoingIdx];
+  // strip "[WARNING] system — " prefix from label for cleaner display
+  const desc = at.label.replace(/^\[WARNING\]\s+\S+\s+—\s+/, '');
+  document.getElementById('pdmDoingCard').innerHTML = `
+    <div class="g-card doing ds3-card-appear doing-card-anim" style="cursor:pointer;" onclick="window.location.href='${at.url}'">
+      <div class="card-title" style="display:flex;align-items:center;gap:6px;">
+        <span style="flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+          padding:2px 7px;border-radius:6px;
+          background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">⚠ Urgent</span>
+        <span>${at.title}</span>
+      </div>
+      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${at.ddl} · 今日必处理</div>
+      <div class="doing-card-desc">${desc}</div>
+    </div>`;
+  const ref = document.getElementById('pdmDoingBodyRef');
+  if(ref) ref.textContent = `「${at.title}」`;
+}
+
+/* Override switchToDoing to handle A-tickets (idx = -1, aIdx = which aTicket) */
 const _origSwitchToDoing = switchToDoing;
-window.switchToDoing = function(newDoingIdx){
+window.switchToDoing = function(newDoingIdx, aIdx){
   if(newDoingIdx === -1){
+    if(aIdx !== undefined) aTicketDoingIdx = aIdx;
     pdmDoingIdx = -1;
-    document.getElementById('pdmDoingCard').innerHTML = `
-      <div class="g-card doing ds3-card-appear doing-card-anim" style="cursor:pointer;" onclick="window.location.href='homepage_urgent_warning.html'">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-          <span style="font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
-            padding:2px 7px;border-radius:6px;
-            background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">⚠ Urgent</span>
-          <span style="font-size:10px;color:rgba(0,0,0,.4);">bug · Tech · ${aTicket.owner}</span>
-        </div>
-        <div class="card-title">${aTicket.title}</div>
-        <div class="ddl-row"><span class="ddl-dot" style="background:#ff3b30;"></span>DDL ${aTicket.ddl} · 今日必处理</div>
-        <div class="doing-card-desc" style="margin-top:8px;">
-          ${aTicket.sessions.map(s=>`
-            <div style="color:rgba(0,0,0,.65);margin-bottom:4px;font-size:12px;line-height:1.5;">${s.label}</div>
-          `).join('')}
-        </div>
-      </div>`;
-    const ref = document.getElementById('pdmDoingBodyRef');
-    if(ref) ref.textContent = `「${aTicket.title}」`;
+    renderATicketDoing();
     renderPdmTodo();
     document.getElementById('pdmDoingCard').scrollIntoView({behavior:'smooth', block:'nearest'});
   } else {
-    if(pdmDoingIdx === -1) pdmDoingIdx = 0; // reset sentinel before original logic
+    aTicketDoingIdx = -1; // no A-ticket in Doing when a regular task takes over
+    if(pdmDoingIdx === -1) pdmDoingIdx = 0;
     _origSwitchToDoing(newDoingIdx);
   }
 };
 
 if(user.view==='pdm'){
-  window.switchToDoing(-1);
+  window.switchToDoing(-1, 0);
 }
 
 /* ── DOING INPUT ── */

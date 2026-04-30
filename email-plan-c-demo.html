@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-System 3.0 — AI Agent 工作台 Demo v3</title>
+    <style>
+        :root { --ds3-accent-blue:#007aff; --ds3-accent-purple:#af52de; --ds3-success:#34c759; --ds3-warning:#ff9f0a; --ds3-error:#ff3b30; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;background:linear-gradient(160deg,#f0f4f8,#e8edf5 50%,#f5f0fa);color:rgba(0,0,0,0.85);height:100vh;overflow:hidden;}
+        .ds3-root{position:relative;width:100vw;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+        .glass{background:rgba(255,255,255,0.25);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.5);box-shadow:0 8px 32px rgba(31,38,135,0.08),inset 0 1px 0 rgba(255,255,255,0.5);}
+        .glass-strong{background:rgba(255,255,255,0.45);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.6);box-shadow:0 8px 32px rgba(31,38,135,0.1),inset 0 1px 0 rgba(255,255,255,0.5);}
+        .ds3-scrollbar::-webkit-scrollbar{width:4px;}.ds3-scrollbar::-webkit-scrollbar-track{background:transparent;}.ds3-scrollbar::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:2px;}
+
+        .user-switcher{position:absolute;top:16px;left:16px;z-index:100;}
+        .user-btn{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:20px;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.3);backdrop-filter:blur(20px) saturate(180%);box-shadow:0 4px 16px rgba(31,38,135,0.06),inset 0 1px 0 rgba(255,255,255,0.5);color:rgba(0,0,0,0.8);cursor:pointer;font-size:13px;font-weight:500;}
+        .user-avatar{width:28px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+        .user-avatar.worker{background:rgba(0,122,255,0.12);color:#007aff;}.user-avatar.dm{background:rgba(175,82,222,0.12);color:#af52de;}.user-avatar.maintainer{background:rgba(52,199,89,0.12);color:#34c759;}
+        .user-dropdown{position:absolute;top:44px;left:0;padding:4px;border-radius:16px;min-width:220px;background:rgba(255,255,255,0.65);backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.6);box-shadow:0 8px 32px rgba(31,38,135,0.1),inset 0 1px 0 rgba(255,255,255,0.5);display:none;}
+        .user-dropdown.show{display:block;animation:fadeSlideIn .2s ease;}
+        .user-dropdown-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border:none;border-radius:10px;background:transparent;color:rgba(0,0,0,0.7);cursor:pointer;font-size:13px;text-align:left;font-weight:500;}
+        .user-dropdown-item:hover{background:rgba(0,0,0,0.04);}.user-dropdown-item.active{background:rgba(0,122,255,0.08);color:#007aff;}
+        .user-dropdown-item .role-label{font-size:11px;opacity:0.45;}
+
+        .main-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:50px 40px 40px;}
+        .stream-center{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
+        .wide-center{max-width:960px;margin:0 auto;}
+        .date-main{font-size:32px;font-weight:800;color:rgba(0,0,0,0.85);line-height:1.2;}
+        .date-sub{font-size:14px;font-weight:500;color:rgba(0,0,0,0.35);margin-top:4px;}
+        .stream-text{font-size:16px;line-height:1.9;white-space:pre-wrap;}
+        .stream-text.current{color:rgba(0,0,0,0.8);font-weight:500;}.stream-text.done{color:rgba(0,0,0,0.35);transition:color .6s ease;}.stream-text.spacer{height:12px;}
+        .cursor-blink{display:inline-block;width:2px;height:18px;background:rgba(0,0,0,0.7);margin-left:2px;vertical-align:text-bottom;animation:cursorBlink .8s step-end infinite;}
+
+        .task-cards{display:flex;flex-direction:column;gap:10px;margin:20px 0;}
+        .task-card{border-radius:20px;padding:20px 24px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .2s ease;opacity:0;transform:translateY(12px);}
+        .task-card.visible{opacity:1;transform:translateY(0);}
+        .task-card:hover{background:rgba(255,255,255,0.65)!important;transform:translateY(-2px);box-shadow:0 12px 40px rgba(31,38,135,0.15),inset 0 1px 0 rgba(255,255,255,0.6);}
+        .task-card-icon{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.03);font-size:22px;}
+        .task-card-body{flex:1;min-width:0;}.task-card-title{font-size:15px;font-weight:700;margin-bottom:3px;}.task-card-title.completed{color:rgba(0,0,0,0.4);}
+        .task-card-desc{font-size:12px;color:rgba(0,0,0,0.45);line-height:1.5;}
+        .task-card-pending{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;}
+        .task-card-num{font-size:18px;font-weight:800;color:rgba(0,0,0,0.7);line-height:1;}.task-card-label{font-size:9px;font-weight:600;color:rgba(0,0,0,0.3);letter-spacing:.3px;}
+        .task-card-arrow{font-size:16px;color:rgba(0,0,0,0.2);flex-shrink:0;}
+        .task-ref{display:flex;align-items:center;gap:8px;margin-top:16px;margin-bottom:4px;opacity:0;animation:slideIn .3s ease-out forwards;}
+        .task-ref-icon{font-size:14px;}.task-ref-label{font-size:12px;font-weight:700;color:rgba(0,0,0,0.55);letter-spacing:.3px;}
+
+        .email-inline{border-radius:18px;padding:18px 22px;margin:8px 0 16px;border-left:3px solid var(--ds3-accent-purple);opacity:0;animation:slideIn .5s ease .1s forwards;}
+        .email-inline-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+        .email-inline-icon{width:28px;height:28px;border-radius:8px;background:rgba(175,82,222,0.1);display:flex;align-items:center;justify-content:center;font-size:13px;}
+        .email-inline-sender{font-size:13px;font-weight:600;color:rgba(0,0,0,0.8);}
+        .email-inline-tag{font-size:9px;font-weight:700;letter-spacing:.4px;padding:2px 6px;border-radius:5px;}
+        .email-inline-tag.urgent{background:rgba(255,59,48,0.1);color:#ff3b30;border:1px solid rgba(255,59,48,0.2);}
+        .email-inline-tag.normal{background:rgba(0,0,0,0.03);color:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.06);}
+        .email-inline-time{font-size:12px;color:rgba(0,0,0,0.3);margin-left:auto;}
+        .email-inline-subject{font-size:14px;font-weight:600;margin-bottom:4px;}
+        .email-inline-summary{font-size:13px;color:rgba(0,0,0,0.5);line-height:1.6;margin-bottom:12px;}
+        .email-draft-box{padding:12px 16px;border-radius:12px;margin-bottom:12px;background:rgba(175,82,222,0.04);border:1px solid rgba(175,82,222,0.12);}
+        .email-draft-label{font-size:10px;font-weight:700;color:var(--ds3-accent-purple);letter-spacing:.3px;margin-bottom:4px;display:flex;align-items:center;gap:4px;}
+        .email-draft-text{font-size:12px;color:rgba(0,0,0,0.5);line-height:1.6;}
+        .email-inline-actions{display:flex;gap:8px;}
+        .cross-action{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;margin:4px 0;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);backdrop-filter:blur(8px);opacity:0;animation:slideIn .4s ease forwards;}
+        .cross-action-sys{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;}
+        .cross-action-sys.a-sys{background:var(--ds3-accent-blue);}.cross-action-sys.cal{background:var(--ds3-warning);}
+        .cross-action-text{flex:1;font-size:13px;color:rgba(0,0,0,0.7);line-height:1.5;}
+
+        .btn{padding:7px 16px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:inherit;}
+        .btn-primary{background:rgba(175,82,222,0.15);color:#af52de;border:1px solid rgba(175,82,222,0.2);}.btn-primary:hover{background:rgba(175,82,222,0.25);}
+        .btn-blue{background:rgba(0,122,255,0.12);color:#007aff;border:1px solid rgba(0,122,255,0.2);}.btn-blue:hover{background:rgba(0,122,255,0.2);}
+        .btn-outline{background:rgba(0,122,255,0.1);color:#007aff;border:1px solid rgba(0,122,255,0.2);}.btn-outline:hover{background:rgba(0,122,255,0.2);}
+        .btn-ghost{background:rgba(0,0,0,0.04);color:rgba(0,0,0,0.5);border:1px solid rgba(0,0,0,0.06);}.btn-ghost:hover{background:rgba(0,0,0,0.08);}
+        .btn-sm{padding:5px 12px;font-size:11px;border-radius:10px;}
+        .btn-green{background:rgba(52,199,89,0.12);color:#34c759;border:1px solid rgba(52,199,89,0.2);}.btn-green:hover{background:rgba(52,199,89,0.22);}
+
+        .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+        .metric-card{border-radius:14px;padding:14px 16px;}.metric-label{font-size:10px;font-weight:600;color:rgba(0,0,0,0.35);text-transform:uppercase;letter-spacing:.5px;}
+        .metric-value{font-size:24px;font-weight:800;color:rgba(0,0,0,0.7);margin-top:4px;}.metric-sub{font-size:10px;color:rgba(0,0,0,0.35);margin-top:4px;}
+        .alert-card{border-radius:14px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+        .alert-icon{font-size:18px;flex-shrink:0;}.alert-body{flex:1;}.alert-title{font-size:13px;font-weight:600;color:rgba(0,0,0,0.8);}.alert-desc{font-size:11px;color:rgba(0,0,0,0.4);margin-top:2px;}
+        .team-table{width:100%;border-collapse:separate;border-spacing:0;}
+        .team-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:600;color:rgba(0,0,0,0.35);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(0,0,0,0.06);}
+        .team-table td{padding:10px 14px;font-size:13px;color:rgba(0,0,0,0.7);border-bottom:1px solid rgba(0,0,0,0.04);}
+        .team-table tr:hover td{background:rgba(255,255,255,0.3);}
+        .status-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;}
+        .status-badge.good{background:rgba(52,199,89,0.1);color:#34c759;}.status-badge.warn{background:rgba(255,159,10,0.1);color:#ff9f0a;}.status-badge.bad{background:rgba(255,59,48,0.1);color:#ff3b30;}
+        .dept-tag{font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;}
+        .dept-tag.bd{background:rgba(0,122,255,0.08);color:#007aff;}.dept-tag.cs{background:rgba(175,82,222,0.08);color:#af52de;}.dept-tag.ops{background:rgba(255,159,10,0.08);color:#ff9f0a;}.dept-tag.pm{background:rgba(52,199,89,0.08);color:#34c759;}
+
+        .m-panels{display:flex;gap:12px;height:calc(100vh - 210px);min-height:480px;}
+        .m-panel-left{width:270px;flex-shrink:0;border-radius:20px;display:flex;flex-direction:column;overflow:hidden;}
+        .m-panel-right{flex:1;border-radius:20px;display:flex;flex-direction:column;overflow:hidden;}
+        .m-panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.04);flex-shrink:0;}
+        .m-panel-body{flex:1;overflow-y:auto;padding:6px;}
+        .wf-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;margin-bottom:2px;cursor:pointer;transition:all .15s;}
+        .wf-item:hover{background:rgba(0,0,0,0.03);}.wf-item.active{background:rgba(0,122,255,0.06);}
+        .wf-dot{width:8px;height:8px;border-radius:4px;flex-shrink:0;}.wf-dot.on{background:var(--ds3-success);}.wf-dot.off{background:rgba(0,0,0,0.15);}
+        .wf-body{flex:1;min-width:0;}.wf-name{font-size:13px;font-weight:600;color:rgba(0,0,0,0.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .wf-info{font-size:10px;color:rgba(0,0,0,0.35);margin-top:2px;}
+        .wf-tag{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;flex-shrink:0;}.wf-tag.email{background:rgba(175,82,222,0.1);color:#af52de;}.wf-tag.cross{background:rgba(0,122,255,0.1);color:#007aff;}.wf-tag.kb{background:rgba(52,199,89,0.1);color:#34c759;}
+
+        .chat-header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.04);flex-shrink:0;}
+        .chat-header-icon{font-size:16px;}.chat-header-title{font-size:14px;font-weight:600;color:rgba(0,0,0,0.7);}.chat-header-sub{font-size:11px;color:rgba(0,0,0,0.3);margin-left:auto;}
+        .chat-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px;}
+        .chat-msg{display:flex;gap:10px;max-width:92%;}.chat-msg.ai{align-self:flex-start;}.chat-msg.user{align-self:flex-end;flex-direction:row-reverse;}
+        .chat-av{width:28px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+        .chat-av.ai{background:rgba(52,199,89,0.12);color:#34c759;}.chat-av.user{background:rgba(0,122,255,0.12);color:#007aff;}
+        .chat-bubble{padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.7;white-space:pre-line;}
+        .chat-bubble.ai{background:rgba(0,0,0,0.035);border:1px solid rgba(0,0,0,0.05);border-top-left-radius:4px;}
+        .chat-bubble.user{background:rgba(0,122,255,0.07);border:1px solid rgba(0,122,255,0.1);border-top-right-radius:4px;color:rgba(0,0,0,0.75);}
+        .wf-summary{border-radius:16px;padding:16px 20px;margin:2px 0;background:rgba(255,255,255,0.5);border:1px solid rgba(52,199,89,0.2);}
+        .wf-summary-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+        .wf-summary-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}.wf-summary-label{font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);min-width:72px;flex-shrink:0;}
+        .wf-summary-value{font-size:12px;color:rgba(0,0,0,0.65);line-height:1.5;}.wf-summary-actions{display:flex;gap:8px;margin-top:14px;}
+        .scope-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}.scope-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:8px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.06);color:rgba(0,0,0,0.5);}
+        .scope-tag.selected{background:rgba(0,122,255,0.08);border-color:rgba(0,122,255,0.2);color:#007aff;}
+        .chat-input-area{display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid rgba(0,0,0,0.04);flex-shrink:0;}
+        .chat-input{flex:1;padding:8px 14px;border-radius:20px;border:1px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.02);font-size:13px;font-family:inherit;outline:none;}
+        .chat-input:focus{border-color:rgba(0,122,255,0.3);background:rgba(255,255,255,0.5);}
+        .chat-send-btn{width:32px;height:32px;border-radius:16px;border:none;background:var(--ds3-accent-blue);color:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+        .dm-tabs{display:flex;gap:4px;margin-bottom:24px;padding:3px;border-radius:14px;width:fit-content;}
+        .dm-tab{padding:7px 18px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:rgba(0,0,0,0.4);transition:all .15s;}
+        .dm-tab.active{background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.7);}
+        .section-label{font-size:11px;font-weight:600;color:rgba(0,0,0,0.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
+
+        .view{display:none;height:100%;}.view.active{display:flex;flex-direction:column;}
+
+        .panel-overlay{position:fixed;inset:0;z-index:200;background:rgba(240,244,248,0.6);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding-top:60px;}
+        .panel-overlay.show{display:flex;animation:fadeIn .2s ease;}
+        .panel-content{position:relative;border-radius:24px;width:100%;max-width:560px;max-height:calc(100vh - 120px);display:flex;flex-direction:column;overflow:hidden;animation:panelIn .35s ease-out;}
+        .panel-header{display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid rgba(0,0,0,0.04);flex-shrink:0;}
+        .panel-body{flex:1;overflow-y:auto;padding:16px 24px 20px;}
+        .panel-footer{padding:14px 24px;border-top:1px solid rgba(0,0,0,0.04);display:flex;gap:8px;flex-shrink:0;}.panel-footer .btn{flex:1;text-align:center;padding:10px;}
+        .panel-close{width:30px;height:30px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:rgba(0,0,0,0.03);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,0.35);}
+        .panel-meta{margin-bottom:14px;}.panel-meta-row{display:flex;gap:8px;margin-bottom:5px;font-size:13px;}.panel-meta-label{color:rgba(0,0,0,0.35);min-width:48px;}.panel-meta-value{color:rgba(0,0,0,0.7);font-weight:500;}
+        .panel-divider{height:1px;background:rgba(0,0,0,0.06);margin:14px 0;}
+        .panel-section-label{font-size:10px;font-weight:700;color:rgba(0,0,0,0.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+        .panel-original{font-size:13px;line-height:1.7;white-space:pre-line;padding:14px;border-radius:12px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.06);}
+
+        /* ===== BOTTOM-RIGHT CONTROLS ===== */
+        .bottom-controls{position:fixed;bottom:20px;right:20px;z-index:300;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+        .ctrl-btn{border-radius:12px;padding:8px 16px;border:none;background:rgba(255,255,255,0.6);backdrop-filter:blur(20px) saturate(180%);box-shadow:0 8px 32px rgba(31,38,135,0.08),inset 0 1px 0 rgba(255,255,255,0.5);cursor:pointer;font-size:11px;font-weight:600;color:rgba(0,0,0,0.5);transition:all .15s;}
+        .ctrl-btn:hover{background:rgba(255,255,255,0.8);}
+        .ctrl-btn.active-char{background:rgba(0,122,255,0.1);color:#007aff;border:1px solid rgba(0,122,255,0.15);}
+        .ctrl-menu{border-radius:16px;padding:12px 6px;min-width:240px;background:rgba(255,255,255,0.75);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.6);box-shadow:0 8px 32px rgba(31,38,135,0.1);display:none;}
+        .ctrl-menu.show{display:block;animation:fadeSlideIn .2s ease;}
+        .ctrl-menu-title{font-size:9px;font-weight:700;color:rgba(0,0,0,0.3);text-transform:uppercase;letter-spacing:1px;padding:4px 12px 6px;border-bottom:1px solid rgba(0,0,0,0.06);margin-bottom:4px;}
+        .ctrl-menu-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:none;width:100%;background:transparent;cursor:pointer;text-align:left;transition:background .15s;}
+        .ctrl-menu-item:hover{background:rgba(0,0,0,0.03);}.ctrl-menu-item.active{background:rgba(0,0,0,0.06);}
+        .ctrl-menu-item .ci-icon{font-size:16px;width:28px;text-align:center;}
+        .ctrl-menu-item .ci-name{font-size:12px;font-weight:600;color:rgba(0,0,0,0.7);}
+        .ctrl-menu-item .ci-desc{font-size:10px;color:rgba(0,0,0,0.35);margin-top:1px;}
+        .case-id{font-size:10px;font-weight:700;color:rgba(0,0,0,0.4);min-width:48px;}.case-desc{font-size:11px;color:rgba(0,0,0,0.5);font-weight:500;}
+        .batch-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;font-size:10px;font-weight:700;background:rgba(0,122,255,0.06);color:var(--ds3-accent-blue);border:1px solid rgba(0,122,255,0.1);margin-bottom:12px;}
+
+        @keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
+        @keyframes slideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+        @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+        @keyframes fadeSlideIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+        @keyframes panelIn{from{opacity:0;transform:translateY(-16px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+    </style>
+</head>
+<body>
+<div class="ds3-root">
+    <div class="user-switcher">
+        <button class="user-btn" id="userBtn"><span class="user-avatar worker" id="userAvatar">LW</span><span id="userName">王丽莎</span><span style="font-size:10px;opacity:0.4;">▾</span></button>
+        <div class="user-dropdown" id="userDropdown"></div>
+    </div>
+    <div class="view active" id="viewWorker"><div class="main-scroll ds3-scrollbar" id="workerScroll"><div class="stream-center" id="streamContainer"></div></div></div>
+    <div class="view" id="viewDM"><div class="main-scroll ds3-scrollbar"><div class="wide-center" style="padding-top:10px;" id="dmContent"></div></div></div>
+    <div class="view" id="viewMaintainer"><div class="main-scroll ds3-scrollbar"><div class="wide-center" style="padding-top:10px;max-width:960px;" id="maintainerContent"></div></div></div>
+
+    <div class="bottom-controls">
+        <div class="ctrl-menu" id="charMenu">
+            <div class="ctrl-menu-title">👤 Character List · 切换工种</div>
+            <button class="ctrl-menu-item active" data-char="bd"><div class="ci-icon">💼</div><div><div class="ci-name">BD 专员 · 王丽莎</div><div class="ci-desc">商务拓展：合同、合作、授权</div></div></button>
+            <button class="ctrl-menu-item" data-char="cs"><div class="ci-icon">🎧</div><div><div class="ci-name">CS Expert · 陈娜</div><div class="ci-desc">客服专家：工单、知识库、评估</div></div></button>
+            <button class="ctrl-menu-item" data-char="ops"><div class="ci-icon">📊</div><div><div class="ci-name">运营专员 · 李明</div><div class="ci-desc">运营管理：活动、供应商、投放</div></div></button>
+        </div>
+        <div class="ctrl-menu" id="caseMenu">
+            <div class="ctrl-menu-title">🧪 Demo Scenarios</div>
+            <button class="ctrl-menu-item active" data-case="morning"><span class="case-id">Case 1</span><span class="case-desc">早晨播报（08:30 批次）</span></button>
+            <button class="ctrl-menu-item" data-case="nudge"><span class="case-id">Case 2</span><span class="case-desc">邮件回复督促</span></button>
+            <button class="ctrl-menu-item" data-case="complete"><span class="case-id">Case 3</span><span class="case-desc">邮件全部处理完成</span></button>
+        </div>
+        <div style="display:flex;gap:6px;">
+            <button class="ctrl-btn active-char" id="charBtn">👤 BD 专员</button>
+            <button class="ctrl-btn" id="caseBtn">🧪 Case List</button>
+        </div>
+    </div>
+</div>
+
+<div class="panel-overlay" id="emailPanel" onclick="closePanel()">
+    <div class="panel-content glass-strong" onclick="event.stopPropagation()">
+        <div class="panel-header"><span style="font-size:20px;">📧</span><div style="flex:1;"><div style="font-size:17px;font-weight:700;">邮件详情</div></div><button class="panel-close" onclick="closePanel()">✕</button></div>
+        <div class="panel-body ds3-scrollbar" id="panelBody"></div>
+        <div class="panel-footer"><button class="btn btn-primary" onclick="closePanel()">编辑并发送</button><button class="btn btn-outline" onclick="closePanel()">直接发送草稿</button><button class="btn btn-ghost" onclick="closePanel()">稍后处理</button></div>
+    </div>
+</div>
+
+<script>
+/* ===== CHARACTER DATA ===== */
+const C = {
+bd: {
+    label:'BD 专员', icon:'💼',
+    worker:{name:'王丽莎',avatar:'LW',title:'执行者 · BD 专员'},
+    dm:{name:'金莎拉',avatar:'SK',title:'决策者 · 运营总监'},
+    mt:{name:'赵明',avatar:'ZM',title:'维护者 · 系统管理员'},
+    tasks:[
+        {id:'email',icon:'📧',title:'邮件处理',desc:'回复邮件和跨系统联动',pending:4},
+        {id:'contracts',icon:'📝',title:'合同跟进',desc:'待签署和待审核的合同',pending:3},
+        {id:'proposals',icon:'💼',title:'商务提案',desc:'客户提案准备和跟进',pending:2},
+    ],
+    emails:[
+        {sender:'田中太郎 (A 出版社)',urgent:true,time:'昨日 22:31',subject:'关于「天剑」角色监修第 3 轮反馈',summary:'对方确认了 5 项修改中的 3 项，剩余 2 项提出新建议，需要在本周五前回复。',draft:'田中様、いつもお世話になっております。ご提案いただいた残り 2 点について、チームで検討の上、金曜日までにご返答いたします...'},
+        {sender:'佐藤花子 (B 工作室)',urgent:false,time:'今日 07:12',subject:'合作意向确认 — Q3 联合推广',summary:'对方确认参与 Q3 联合推广计划，需要我方提供推广方案和预算框架。',draft:'佐藤様、Q3共同プロモーションのご参加、大変嬉しく思います。企画書と予算案を今週中にお送りいたします...'},
+        {sender:'鈴木一郎 (C 游戏)',urgent:false,time:'今日 06:45',subject:'Q2 合作报价确认',summary:'发来了 Q2 合作方案报价单，总金额 ¥2,400,000，需确认后签署合同。',draft:'鈴木様、お見積りをいただきありがとうございます。内容を確認の上、社内で検討いたします...'},
+        {sender:'ABC Entertainment',urgent:false,time:'今日 03:20',subject:'版权授权询价 — IP 联动项目',summary:'询问「天剑」IP 在东南亚市场的授权条件和报价。',draft:'Dear ABC team, Thank you for your interest in the "Tenjian" IP. Please find our standard licensing terms below...'},
+    ],
+    crossActions:[{cls:'a-sys',icon:'A',text:'创建任务「天剑监修反馈处理」→ 指派 David Chen, DDL 3/28'},{cls:'cal',icon:'📅',text:'创建提醒：周五前回复田中 → 2026/03/27 09:00'}],
+    batchInfo:'08:30 早晨批次 · 拉取昨晚至今晨新邮件 18 封 → AI 分析完成，4 封需要你处理',
+    morningIntro:'今天有 3 项任务需要处理，其中有 4 封邮件需要你回复。',
+    urgentNote:'有 1 封来自田中太郎（A 出版社）的邮件标记为紧急，建议优先处理。',
+    otherTaskNotes:['3 份合同待跟进：B 工作室续约合同待签署、C 游戏 Q2 合同待确认、D 平台授权协议待审批。','2 份提案待处理：Q3 联合推广方案（佐藤花子跟进）、东南亚市场拓展计划。'],
+    completeNotes:['处理 4 封邮件：确认发送 AI 草稿 2 封，编辑后发送 2 封。跨系统创建 A 任务 1 个、日历提醒 1 个。','跟进 3 份合同：B 工作室续约已签署，C 游戏 Q2 合同已确认，D 平台授权协议进入法务审批。','完成 2 份提案准备：Q3 联合推广方案初稿完成、东南亚市场拓展计划框架已搭建。'],
+    dmData:{title:'BD 团队工作效率总览',subtitle:'实时监控团队各项任务处理情况和 AI 自动化效果',
+        overview:[{l:'今日总任务',v:'27'},{l:'整体完成率',v:'63%',c:'success'},{l:'AI 参与率',v:'58%',c:'blue'},{l:'异常告警',v:'1',c:'warning'}],
+        alerts:[{level:'warn',icon:'🟡',name:'周芳',dept:'bd',deptLabel:'BD',desc:'3 封合作方邮件超 48h 未回复，2 份合同即将到期'}],
+        sections:[
+            {icon:'📝',title:'合同跟进',metrics:[{l:'跟踪中',v:'12'},{l:'已签署',v:'7'},{l:'待签署',v:'3',c:'warning'},{l:'即将到期',v:'2',c:'error'}]},
+            {icon:'📧',title:'邮件处理',metrics:[{l:'今日收件',v:'58'},{l:'已处理',v:'38'},{l:'AI 自动',v:'24',s:'自动化率 41%',c:'success'},{l:'待处理',v:'12',c:'warning'}]},
+            {icon:'💼',title:'商务提案',metrics:[{l:'进行中',v:'8'},{l:'本周新增',v:'3'},{l:'转化率',v:'37.5%',c:'blue'},{l:'待跟进',v:'4'}]},
+        ],
+        members:[{n:'王丽莎',cols:['4/3','14/4','2/2'],s:'good',sl:'正常'},{n:'周芳',cols:['3/4','11/6','3/1'],s:'warn',sl:'偏慢'},{n:'刘洋',cols:['5/2','13/2','3/0'],s:'good',sl:'正常'}],
+        memberCols:['合同(签/待签)','邮件(已处理/待)','提案(进行/待跟进)']},
+    panelDetail:{from:'田中太郎 (A 出版社)',subject:'关于「天剑」角色监修第 3 轮反馈',time:'2026-03-25 22:31',original:'お世話になっております。A出版社の田中です。\n\n「天剣」キャラクター監修第3回のフィードバックについてご連絡いたします。\n\n■ 確認済み（3件）\n1. メインキャラクターの色調整 → 承認\n2. サブキャラクターのポーズ変更 → 承認\n3. 背景エフェクトの修正 → 承認\n\n■ 追加提案（2件）\n4. 表情 → 笑顔バージョン追加\n5. 武器ディテール → 光沢を加える\n\n金曜日までにご返答いただけますと幸いです。\n田中太郎',draft:'田中様、いつもお世話になっております。\nご確認いただきありがとうございます。3件のご承認、承知いたしました。\n\nご提案いただいた残り2点について：\n・表情の笑顔バージョン追加\n・武器のディテール光沢強化\n\nチームで検討の上、金曜日までにご返答いたします。'},
+    mtData:{
+        workflows:[
+            {id:'contract-expiry',name:'合同到期自动提醒',tag:'跨系统',tagCls:'cross',on:true,info:'每日检查 · BD 团队'},
+            {id:'daily-dispatch',name:'每日邮件分发处理',tag:'邮件',tagCls:'email',on:true,info:'定时 08:30/13:00 · 全公司'},
+            {id:'proposal-followup',name:'提案跟进自动催促',tag:'跨系统',tagCls:'cross',on:true,info:'提案发出 3 天后 · BD 团队'},
+            {id:'auto-thanks',name:'感谢邮件自动回复',tag:'邮件',tagCls:'email',on:true,info:'实时触发 · BD 团队'},
+            {id:'sys-archive',name:'系统通知自动归档',tag:'邮件',tagCls:'email',on:true,info:'实时触发 · 全公司'},
+        ],
+        agents:[
+            {id:'contract-tracker',name:'合同追踪 Agent',desc:'监控合同状态、到期提醒、签署进度跟踪',icon:'📝'},
+            {id:'email-classifier',name:'邮件智能分类 & 行动生成',desc:'分析收件，判断优先级，生成回复草稿',icon:'📧'},
+            {id:'proposal-agent',name:'商务提案 Agent',desc:'提案进度追踪、客户反馈收集',icon:'💼'},
+            {id:'email-monitor',name:'邮件监控 Agent',desc:'定时拉取邮箱新邮件并触发工作流',icon:'📡'},
+        ],
+    },
+},
+cs: {
+    label:'CS Expert', icon:'🎧',
+    worker:{name:'陈娜',avatar:'CN',title:'执行者 · CS Expert'},
+    dm:{name:'刘芳',avatar:'LF',title:'决策者 · CS 总监'},
+    mt:{name:'赵明',avatar:'ZM',title:'维护者 · 系统管理员'},
+    tasks:[
+        {id:'email',icon:'📧',title:'邮件处理',desc:'回复邮件和跨系统联动',pending:3},
+        {id:'tickets',icon:'🎫',title:'客服工单处理',desc:'处理用户转交的工单，解答疑问',pending:12},
+        {id:'knowledge',icon:'📚',title:'知识库维护',desc:'冲突、重复、低热度知识整理',pending:5},
+        {id:'evaluation',icon:'✅',title:'服务评估',desc:'对话质量评估',pending:8},
+    ],
+    emails:[
+        {sender:'山田健太 (用户)',urgent:true,time:'昨日 21:15',subject:'退款申请 — 订单 #20260312 充值未到账',summary:'用户反映充值 ¥6,800 后 48 小时未到账，要求退款。附交易截图，需核实后回复。',draft:'山田様、ご連絡いただきありがとうございます。ご注文 #20260312 の件、確認いたします。48時間以内にお返事いたします...'},
+        {sender:'ABC Platform Support',urgent:false,time:'今日 08:02',subject:'API Rate Limit Warning — Your account',summary:'平台通知 API 调用频率接近上限，需协调技术团队调整配额。',draft:'Dear ABC Support, Thank you for the notification. We will review our API usage and optimize accordingly...'},
+        {sender:'佐々木 (合作方技术)',urgent:false,time:'今日 06:30',subject:'SDK 集成问题 — v3.2 兼容性',summary:'合作方报告 SDK v3.2 在 iOS 16 上的兼容性问题，需要技术确认。',draft:'佐々木様、ご報告ありがとうございます。技術チームに確認の上、対応方法をご連絡いたします...'},
+    ],
+    crossActions:[{cls:'a-sys',icon:'A',text:'创建任务「退款核实 #20260312」→ 指派财务组, DDL 3/26'},{cls:'cal',icon:'📅',text:'创建提醒：48h 内回复山田 → 2026/03/26 21:15'}],
+    batchInfo:'08:30 早晨批次 · 拉取昨晚至今晨新邮件 24 封 → AI 分析完成，3 封需要你处理',
+    morningIntro:'今天有 4 项任务需要处理，其中有 3 封邮件需要你回复。',
+    urgentNote:'有 1 封用户退款申请标记为紧急，建议优先处理。',
+    otherTaskNotes:['12 个工单待处理，其中 3 个用户等待时间较长，建议优先响应。','5 条知识库条目待审核：冲突 2 条、重复 2 条、低热度 1 条。','8 组对话待评估，请在今天完成。'],
+    completeNotes:['处理 3 封邮件：确认发送 AI 草稿 1 封，编辑后发送 2 封。跨系统创建 A 任务 1 个。','共处理 12 个工单，平均响应时间 4.2 分钟，其中 Expert AI 处理 8 个。','审核并更新了 5 条知识库条目。','完成 8 组对话质量评估，评分报告已自动生成。'],
+    dmData:{title:'CS 团队工作效率总览',subtitle:'实时监控团队各项任务处理情况和 AI 自动化效果',
+        overview:[{l:'今日总任务',v:'112'},{l:'整体完成率',v:'69.6%',c:'success'},{l:'AI 参与率',v:'72%',c:'blue'},{l:'异常告警',v:'2',c:'warning'}],
+        alerts:[{level:'danger',icon:'🔴',name:'张伟',dept:'cs',deptLabel:'CS',desc:'12 个工单积压，5 封邮件超 24h 未回复，评估任务零进展'}],
+        sections:[
+            {icon:'🎫',title:'客服工单处理',metrics:[{l:'今日工单',v:'156'},{l:'已处理',v:'128'},{l:'AI 处理',v:'96',s:'75.0%',c:'success'},{l:'平均响应',v:'4.2 min',c:'blue'}]},
+            {icon:'📧',title:'邮件处理',metrics:[{l:'今日收件',v:'87'},{l:'已处理',v:'73'},{l:'AI 自动',v:'68',s:'78.2%',c:'success'},{l:'待处理',v:'14',c:'warning'}]},
+            {icon:'📚',title:'知识库维护',metrics:[{l:'待审核',v:'24'},{l:'已审核',v:'18'},{l:'冲突',v:'4',c:'warning'},{l:'重复',v:'3'}]},
+            {icon:'✅',title:'服务评估',metrics:[{l:'今日待评',v:'45'},{l:'已完成',v:'32'},{l:'平均得分',v:'4.2/5',c:'blue'},{l:'合格率',v:'91%',c:'success'}]},
+        ],
+        members:[{n:'陈娜',cols:['21/3','3/0','5/5','8/8'],s:'good',sl:'正常'},{n:'张伟',cols:['14/12','5/7','3/5','0/8'],s:'bad',sl:'积压'},{n:'赵磊',cols:['28/0','0/0','5/5','8/8'],s:'good',sl:'已清空'}],
+        memberCols:['工单(处理/积压)','邮件(处理/积压)','知识库','评估']},
+    panelDetail:{from:'山田健太 (用户)',subject:'退款申请 — 订单 #20260312',time:'2026-03-25 21:15',original:'こんにちは。\n\n3月12日に ¥6,800 のチャージを行いましたが、48時間経過してもアカウントに反映されません。\n\n添付：取引のスクリーンショット\n取引ID: TXN-20260312-8847\n\n至急対応をお願いいたします。返金を希望します。\n\n山田健太',draft:'山田様、ご連絡いただきありがとうございます。\n\nご注文 #20260312（¥6,800）の未反映の件、大変ご不便をおかけしております。\n\n現在、取引ID TXN-20260312-8847 を元に確認を進めております。\n48時間以内に調査結果をご報告いたします。'},
+    mtData:{
+        workflows:[
+            {id:'ticket-dispatch',name:'工单智能分配',tag:'跨系统',tagCls:'cross',on:true,info:'实时触发 · CS 团队'},
+            {id:'daily-dispatch',name:'每日邮件分发处理',tag:'邮件',tagCls:'email',on:true,info:'定时 08:30/13:00 · 全公司'},
+            {id:'kb-conflict',name:'知识库冲突自动检测',tag:'知识库',tagCls:'cross',on:true,info:'每 4 小时 · CS 团队'},
+            {id:'ticket-escalation',name:'工单超时自动升级',tag:'跨系统',tagCls:'cross',on:true,info:'实时触发 · CS 团队'},
+            {id:'eval-schedule',name:'评估任务自动调度',tag:'跨系统',tagCls:'cross',on:true,info:'每日 09:00 · CS 团队'},
+            {id:'auto-thanks',name:'感谢邮件自动回复',tag:'邮件',tagCls:'email',on:true,info:'实时触发 · BD 团队'},
+        ],
+        agents:[
+            {id:'ticket-agent',name:'工单智能分配 Agent',desc:'自动分配工单给最合适的客服专员，负载均衡',icon:'🎫'},
+            {id:'email-classifier',name:'邮件智能分类 & 行动生成',desc:'分析收件，判断优先级，生成回复草稿',icon:'📧'},
+            {id:'kb-agent',name:'知识库监控 Agent',desc:'检测冲突、重复和低热度知识，推送审核任务',icon:'📚'},
+            {id:'eval-agent',name:'评估调度 Agent',desc:'自动分配对话质量评估任务，生成评分报告',icon:'✅'},
+            {id:'email-monitor',name:'邮件监控 Agent',desc:'定时拉取邮箱新邮件并触发工作流',icon:'📡'},
+        ],
+    },
+},
+ops: {
+    label:'运营专员', icon:'📊',
+    worker:{name:'李明',avatar:'LM',title:'执行者 · 运营专员'},
+    dm:{name:'金莎拉',avatar:'SK',title:'决策者 · 运营总监'},
+    mt:{name:'赵明',avatar:'ZM',title:'维护者 · 系统管理员'},
+    tasks:[
+        {id:'email',icon:'📧',title:'邮件处理',desc:'回复邮件和跨系统联动',pending:5},
+        {id:'campaigns',icon:'📢',title:'活动运营',desc:'活动策划、排期和效果跟踪',pending:4},
+        {id:'suppliers',icon:'🏭',title:'供应商管理',desc:'供应商沟通、报价和合同',pending:3},
+    ],
+    emails:[
+        {sender:'王总 (D 供应商)',urgent:true,time:'昨日 23:10',subject:'紧急：春季促销物料交付延迟通知',summary:'供应商通知春季促销物料将延迟 3 天交付，可能影响 4/1 活动上线。需紧急协调。',draft:'王总您好，收到延迟通知。我们需要紧急讨论替代方案，请问今天下午方便电话沟通吗？...'},
+        {sender:'Google Ads Support',urgent:false,time:'今日 07:30',subject:'Campaign Performance Alert — CTR Drop',summary:'Google Ads 通知春季推广 campaign CTR 下降 23%，建议优化广告创意。',draft:'Dear Google Ads team, Thank you for the alert. We will review the campaign creatives and make adjustments...'},
+        {sender:'张总 (E 平台)',urgent:false,time:'今日 06:50',subject:'Q2 联合活动排期确认',summary:'平台方确认 Q2 联合活动排期，需回复确认并提供活动素材。',draft:'张总您好，感谢确认 Q2 联合活动排期。我们将在本周内提供活动素材和推广方案...'},
+        {sender:'KOL 小红 (社媒)',urgent:false,time:'今日 05:40',subject:'合作邀约回复 — 春季推广',summary:'KOL 回复愿意参与春季推广合作，报价 ¥15,000/条，需确认。',draft:'小红您好，感谢您对春季推广合作的兴趣！我们对报价和合作内容进行内部确认后尽快回复...'},
+        {sender:'财务部',urgent:false,time:'今日 04:00',subject:'3 月供应商付款审批',summary:'财务提醒 3 月供应商付款审批截止日为本周五，需确认 3 家供应商付款单。',draft:'财务部您好，收到。我将在今天完成 3 家供应商付款单的确认...'},
+    ],
+    crossActions:[{cls:'a-sys',icon:'A',text:'创建任务「春季促销物料延迟协调」→ 指派运营组, DDL 3/28'},{cls:'cal',icon:'📅',text:'创建提醒：联系 D 供应商讨论替代方案 → 今日 14:00'}],
+    batchInfo:'08:30 早晨批次 · 拉取昨晚至今晨新邮件 31 封 → AI 分析完成，5 封需要你处理',
+    morningIntro:'今天有 3 项任务需要处理，其中有 5 封邮件需要你回复。',
+    urgentNote:'有 1 封来自 D 供应商的紧急通知：春季促销物料延迟，建议立即处理。',
+    otherTaskNotes:['4 个活动运营任务：春季促销物料跟进、Q2 联合活动排期、KOL 合作确认、广告创意优化。','3 个供应商管理任务：D 供应商付款确认、E 平台素材提交、F 物流合同续签。'],
+    completeNotes:['处理 5 封邮件：确认发送 AI 草稿 3 封，编辑后发送 2 封。跨系统创建 A 任务 1 个、日历提醒 1 个。','完成 4 个活动运营任务：春季促销物料方案确认、Q2 排期回复、KOL 合作敲定、广告创意已提交优化。','跟进 3 个供应商：D 供应商付款已确认、E 平台素材已提交、F 物流合同已续签。'],
+    dmData:{title:'运营团队工作效率总览',subtitle:'实时监控团队各项任务处理情况和 AI 自动化效果',
+        overview:[{l:'今日总任务',v:'36'},{l:'整体完成率',v:'58%',c:'success'},{l:'AI 参与率',v:'61%',c:'blue'},{l:'异常告警',v:'1',c:'warning'}],
+        alerts:[{level:'warn',icon:'🟡',name:'李明',dept:'ops',deptLabel:'运营',desc:'春季促销物料延迟需紧急协调，5 封供应商邮件未处理'}],
+        sections:[
+            {icon:'📢',title:'活动运营',metrics:[{l:'进行中',v:'6'},{l:'本周上线',v:'2'},{l:'CTR 均值',v:'3.2%',c:'blue'},{l:'ROI',v:'2.8x',c:'success'}]},
+            {icon:'📧',title:'邮件处理',metrics:[{l:'今日收件',v:'72'},{l:'已处理',v:'49'},{l:'AI 自动',v:'33',s:'自动化率 46%',c:'success'},{l:'待处理',v:'16',c:'warning'}]},
+            {icon:'🏭',title:'供应商管理',metrics:[{l:'合作中',v:'15'},{l:'本月付款',v:'8'},{l:'待确认',v:'3',c:'warning'},{l:'合同到期',v:'1',c:'error'}]},
+        ],
+        members:[{n:'李明',cols:['3/2','22/5','5/3'],s:'warn',sl:'偏慢'},{n:'赵芳',cols:['2/1','18/4','4/2'],s:'good',sl:'正常'},{n:'孙磊',cols:['1/0','19/0','6/0'],s:'good',sl:'已清空'}],
+        memberCols:['活动(进行/待办)','邮件(处理/积压)','供应商(跟进/待确认)']},
+    panelDetail:{from:'王总 (D 供应商)',subject:'春季促销物料交付延迟通知',time:'2026-03-25 23:10',original:'李明您好，\n\n非常抱歉通知您，由于原材料供应紧张，春季促销活动的以下物料将延迟交付：\n\n1. 宣传海报 × 5000 张 — 延迟 3 天（原定 3/28，现预计 3/31）\n2. 展示立牌 × 200 个 — 延迟 2 天（原定 3/28，现预计 3/30）\n3. 礼品袋 × 3000 个 — 按时交付\n\n我们正在全力协调加急生产。如需讨论替代方案，请随时联系我。\n\n王总',draft:'王总您好，\n\n收到物料延迟的通知，感谢及时告知。\n\n关于延迟的海报和立牌，我们需要紧急讨论以下事项：\n1. 是否可以分批交付（优先交付一部分）\n2. 是否有替代材质方案可以加速生产\n\n请问今天下午方便电话沟通吗？'},
+    mtData:{
+        workflows:[
+            {id:'campaign-daily',name:'活动数据日报',tag:'跨系统',tagCls:'cross',on:true,info:'每日 09:00 · 运营团队'},
+            {id:'daily-dispatch',name:'每日邮件分发处理',tag:'邮件',tagCls:'email',on:true,info:'定时 08:30/13:00 · 全公司'},
+            {id:'supplier-payment',name:'供应商付款到期提醒',tag:'跨系统',tagCls:'cross',on:true,info:'每周一 · 运营团队'},
+            {id:'ad-alert',name:'广告异常自动告警',tag:'跨系统',tagCls:'cross',on:true,info:'实时触发 · 运营团队'},
+            {id:'sys-archive',name:'系统通知自动归档',tag:'邮件',tagCls:'email',on:true,info:'实时触发 · 全公司'},
+        ],
+        agents:[
+            {id:'campaign-agent',name:'活动运营 Agent',desc:'活动排期管理、数据监控、ROI 分析',icon:'📢'},
+            {id:'email-classifier',name:'邮件智能分类 & 行动生成',desc:'分析收件，判断优先级，生成回复草稿',icon:'📧'},
+            {id:'supplier-agent',name:'供应商管理 Agent',desc:'供应商沟通追踪、付款提醒、合同管理',icon:'🏭'},
+            {id:'email-monitor',name:'邮件监控 Agent',desc:'定时拉取邮箱新邮件并触发工作流',icon:'📡'},
+        ],
+    },
+}};
+
+let curChar = 'bd';
+let curRole = 'worker';
+let curCase = 'morning';
+
+function ch() { return C[curChar]; }
+
+/* ===== USER SWITCHER ===== */
+function renderDropdown() {
+    const c = ch();
+    const items = [{role:'worker',...c.worker,cls:'worker'},{role:'dm',...c.dm,cls:'dm'},{role:'maintainer',...c.mt,cls:'maintainer'}];
+    const dd = document.getElementById('userDropdown');
+    dd.innerHTML = items.map(it => `<button class="user-dropdown-item ${it.role===curRole?'active':''}" data-role="${it.role}">
+        <span class="user-avatar ${it.cls}" style="width:24px;height:24px;border-radius:12px;font-size:9px;">${it.avatar}</span>
+        <div><div style="font-weight:600;">${it.name}</div><div class="role-label">${it.title}</div></div></button>`).join('');
+    dd.querySelectorAll('.user-dropdown-item').forEach(item => item.addEventListener('click', () => switchRole(item.dataset.role)));
+    const cur = items.find(i => i.role === curRole);
+    document.getElementById('userName').textContent = cur.name;
+    const av = document.getElementById('userAvatar');
+    av.textContent = cur.avatar; av.className = 'user-avatar ' + cur.cls;
+}
+function switchRole(role) {
+    curRole = role; renderDropdown();
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById({worker:'viewWorker',dm:'viewDM',maintainer:'viewMaintainer'}[role]).classList.add('active');
+    document.getElementById('userDropdown').classList.remove('show');
+    if (role === 'dm') renderDM();
+    if (role === 'maintainer') initMaintainer();
+}
+document.getElementById('userBtn').onclick = () => document.getElementById('userDropdown').classList.toggle('show');
+document.addEventListener('click', e => { if (!e.target.closest('.user-switcher')) document.getElementById('userDropdown').classList.remove('show'); if (!e.target.closest('.bottom-controls')) { document.getElementById('charMenu').classList.remove('show'); document.getElementById('caseMenu').classList.remove('show'); }});
+
+/* ===== CHARACTER & CASE SWITCH ===== */
+document.getElementById('charBtn').onclick = e => { e.stopPropagation(); document.getElementById('charMenu').classList.toggle('show'); document.getElementById('caseMenu').classList.remove('show'); };
+document.getElementById('caseBtn').onclick = e => { e.stopPropagation(); document.getElementById('caseMenu').classList.toggle('show'); document.getElementById('charMenu').classList.remove('show'); };
+document.querySelectorAll('#charMenu .ctrl-menu-item').forEach(item => item.addEventListener('click', () => {
+    curChar = item.dataset.char;
+    document.querySelectorAll('#charMenu .ctrl-menu-item').forEach(i => i.classList.remove('active')); item.classList.add('active');
+    document.getElementById('charMenu').classList.remove('show');
+    document.getElementById('charBtn').innerHTML = `👤 ${ch().label}`;
+    renderDropdown();
+    if (curRole === 'worker') runCase(curCase); if (curRole === 'dm') renderDM(); if (curRole === 'maintainer') initMaintainer();
+}));
+document.querySelectorAll('#caseMenu .ctrl-menu-item').forEach(item => item.addEventListener('click', () => {
+    curCase = item.dataset.case;
+    document.querySelectorAll('#caseMenu .ctrl-menu-item').forEach(i => i.classList.remove('active')); item.classList.add('active');
+    document.getElementById('caseMenu').classList.remove('show');
+    if (curRole === 'worker') runCase(curCase);
+}));
+
+/* ===== DM VIEW (full team performance) ===== */
+function renderDM() {
+    const d = ch().dmData;
+    const colorMap = {success:'var(--ds3-success)',blue:'var(--ds3-accent-blue)',warning:'var(--ds3-warning)',error:'var(--ds3-error)'};
+    document.getElementById('dmContent').innerHTML = `
+        <div style="margin-bottom:24px;"><div class="date-main" style="font-size:22px;">${d.title}</div><div class="date-sub">${d.subtitle}</div></div>
+        <div class="metrics-grid">${d.overview.map(m => `<div class="metric-card glass"><div class="metric-label">${m.l}</div><div class="metric-value"${m.c?' style="color:'+colorMap[m.c]+'"':''}>${m.v}</div></div>`).join('')}</div>
+        ${d.alerts.length ? '<div class="section-label">⚠️ 异常告警</div>' + d.alerts.map(a => `<div class="alert-card glass ${a.level==='danger'?'danger':'warn'}" style="margin-bottom:8px;"><div class="alert-icon">${a.icon}</div><div class="alert-body"><div class="alert-title">${a.name} <span class="dept-tag ${a.dept}">${a.deptLabel}</span></div><div class="alert-desc">${a.desc}</div></div><button class="btn btn-ghost btn-sm">查看</button></div>`).join('') + '<div style="margin-bottom:24px;"></div>' : ''}
+        <div class="section-label">📊 各任务类型效率</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px;">${d.sections.map(s => `<div class="glass" style="border-radius:16px;padding:16px 20px;"><div style="font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px;">${s.icon} ${s.title}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${s.metrics.map(m => `<div><div style="font-size:9px;font-weight:600;color:rgba(0,0,0,0.35);text-transform:uppercase;letter-spacing:.3px;">${m.l}</div><div style="font-size:18px;font-weight:800;color:${m.c?colorMap[m.c]:'rgba(0,0,0,0.7)'};margin-top:2px;">${m.v}</div>${m.s?`<div style="font-size:9px;color:${m.c?colorMap[m.c]:'rgba(0,0,0,0.35)'};margin-top:1px;">${m.s}</div>`:''}</div>`).join('')}</div></div>`).join('')}</div>
+        <div class="section-label">👥 团队成员工作综合详情</div>
+        <div class="glass" style="border-radius:16px;overflow:hidden;margin-bottom:24px;">
+            <table class="team-table"><thead><tr><th>成员</th>${d.memberCols.map(c => `<th>${c}</th>`).join('')}<th>状态</th></tr></thead>
+            <tbody>${d.members.map(m => `<tr><td><strong>${m.n}</strong></td>${m.cols.map(c => `<td>${c}</td>`).join('')}<td><span class="status-badge ${m.s}">${m.sl}</span></td></tr>`).join('')}</tbody></table>
+        </div>`;
+}
+
+/* ===== MAINTAINER (all agents, per character) ===== */
+const wfChats={
+    'daily-dispatch':[{role:'ai',text:'你好！请描述你想创建的工作流。'},{role:'user',text:'设置一个邮件处理流程，每天早上8:30和下午1点拉取所有新邮件，AI分析后把需要人工处理的推给对应执行者。'},{role:'ai',text:'明白了。有几个问题：\n\n1. 邮件分发规则：按什么逻辑匹配执行者？\n2. 自动归档条件：哪些邮件不需要推送？\n3. 应用范围？'},{role:'user',text:'按 P 系统客户负责人关系匹配。纯通知类自动归档。应用到全公司。'},{role:'ai',text:'你在 P 系统中管辖以下团队：'},{role:'scope',tags:['全公司','BD 团队','CS 团队','运营团队','项目管理组'],selected:'全公司'},{role:'ai',text:'已生成工作流配置：'},{role:'summary',data:{name:'每日邮件分发处理',trigger:'定时 · 每日 08:30 / 13:00',scope:'全公司',strategy:'· 纯通知/营销类 → 自动归档\n· 需要回复的 → 按 P 系统客户负责人匹配\n· 包含审批/决策内容 → 推送到决策者',confirm:'推送前无需确认'}},{role:'ai',text:'工作流已成功创建！🎉'}],
+    'ticket-dispatch':[{role:'ai',text:'你好！请描述你想创建的工作流。'},{role:'user',text:'新工单进来时自动分配给最合适的客服专员，按技能匹配和当前负载均衡。'},{role:'summary',data:{name:'工单智能分配',trigger:'实时 · 新工单创建时',scope:'CS 团队',strategy:'· 按专员技能标签匹配工单类型\n· 负载均衡：优先分配给当前处理量最少的专员\n· 紧急工单优先分配给高级专员',confirm:'自动执行'}},{role:'ai',text:'工作流已创建！新工单将自动分配。'}],
+    'contract-expiry':[{role:'ai',text:'你好！请描述你想创建的工作流。'},{role:'user',text:'合同到期前 30 天自动提醒负责人，到期前 7 天升级提醒给总监。'},{role:'summary',data:{name:'合同到期自动提醒',trigger:'每日检查 · 合同到期倒计时',scope:'BD 团队',strategy:'· 到期前 30 天 → 提醒合同负责人\n· 到期前 7 天 → 升级提醒给部门总监\n· 到期当天 → 紧急告警',confirm:'自动执行'}},{role:'ai',text:'工作流已创建！将每日检查合同到期状态。'}],
+    'campaign-daily':[{role:'ai',text:'你好！请描述你想创建的工作流。'},{role:'user',text:'每天早上 9 点自动汇总昨日活动数据，生成日报推送给运营团队。'},{role:'summary',data:{name:'活动数据日报',trigger:'定时 · 每日 09:00',scope:'运营团队',strategy:'· 汇总前日所有活动的 PV/UV/CTR/转化率\n· 与前日环比，标注异常波动\n· 生成结构化日报推送',confirm:'自动执行'}},{role:'ai',text:'工作流已创建！每日 09:00 自动生成。'}],
+    'new':[{role:'ai',text:'你好！请描述你想创建的工作流。\n\n我可以帮你配置：\n· 业务自动化规则（工单、合同、活动等）\n· 邮件监控与自动处理\n· 跨系统联动\n· 定时任务或事件触发\n\n你可以用自然语言描述。'}],
+};
+const agentChats={
+    'email-classifier':[{role:'ai',text:'当前配置：\n· 分析策略：批次分析\n· 优先级：截止日期 ≤ 3 天 / VIP → 紧急\n· 回复语言：自动识别\n· 跨系统联动：已启用\n\n你想修改哪些配置？'},{role:'user',text:'日本客户的回复用正式商务日语，其他用中文。'},{role:'summary',data:{name:'邮件智能分类',trigger:'修改项：回复语言策略',scope:'全公司',strategy:'· 日本客户 → 商务日语\n· 其他 → 中文\n· 署名：公司统一模板',confirm:'即时生效'}},{role:'ai',text:'配置已更新！'}],
+    'ticket-agent':[{role:'ai',text:'当前配置：\n· 分配策略：技能匹配 + 负载均衡\n· 紧急工单：优先高级专员\n· 超时阈值：30 分钟未响应自动转派\n\n你想修改哪些配置？'}],
+    'contract-tracker':[{role:'ai',text:'当前配置：\n· 监控范围：所有 BD 团队合同\n· 提醒节点：到期前 30/7/1 天\n· 提醒方式：Worker 视图推送 + 邮件\n\n你想修改哪些配置？'}],
+    'campaign-agent':[{role:'ai',text:'当前配置：\n· 监控范围：所有活动运营 campaign\n· 日报时间：每日 09:00\n· 异常阈值：CTR 下降 >15% 或转化下降 >20% 触发告警\n\n你想修改哪些配置？'}],
+    'email-monitor':[{role:'ai',text:'当前配置：\n· 拉取模式：定时批量\n· 拉取时间：每日 08:30 / 13:00\n· 监控范围：全公司邮箱\n\n你想修改哪些配置？'}],
+};
+let curWfId=null,curAgentId=null;
+
+function initMaintainer(){
+    const mt=ch().mtData; curWfId=mt.workflows[0]?.id; curAgentId=mt.agents[0]?.id;
+    const mc=document.getElementById('maintainerContent');
+    mc.innerHTML=`<div style="margin-bottom:20px;"><div class="date-main" style="font-size:22px;">Agent & 工作流管理</div><div class="date-sub">管理所有业务 Agent 和自动化工作流 · 管辖范围基于 P 系统所属团队</div></div>
+    <div class="dm-tabs glass" style="margin-bottom:16px;" id="mTabs"><button class="dm-tab active" data-mtab="workflows">工作流</button><button class="dm-tab" data-mtab="agent">Agent 配置</button><button class="dm-tab" data-mtab="logs">执行日志</button></div>
+    <div id="mTabWorkflows"><div class="m-panels"><div class="m-panel-left glass"><div class="m-panel-header"><span style="font-weight:600;font-size:13px;color:rgba(0,0,0,0.6);">工作流列表</span><button class="btn btn-blue btn-sm" id="newWfBtn">+ 新建</button></div><div class="m-panel-body ds3-scrollbar" id="wfList"></div></div><div class="m-panel-right glass"><div class="chat-header"><span class="chat-header-icon">💬</span><span class="chat-header-title" id="wfChatTitle"></span><span class="chat-header-sub" id="wfChatSub"></span></div><div class="chat-messages ds3-scrollbar" id="wfChat"></div><div class="chat-input-area"><input class="chat-input" placeholder="描述你想创建或修改的工作流..." /><button class="chat-send-btn">↑</button></div></div></div></div>
+    <div id="mTabAgent" style="display:none;"><div class="m-panels"><div class="m-panel-left glass"><div class="m-panel-header"><span style="font-weight:600;font-size:13px;color:rgba(0,0,0,0.6);">Agent 列表</span></div><div class="m-panel-body ds3-scrollbar" id="agentList"></div></div><div class="m-panel-right glass"><div class="chat-header"><span class="chat-header-icon">🤖</span><span class="chat-header-title" id="agentChatTitle"></span><span class="chat-header-sub" id="agentChatSub"></span></div><div class="chat-messages ds3-scrollbar" id="agentChat"></div><div class="chat-input-area"><input class="chat-input" placeholder="描述你想修改的 Agent 配置..." /><button class="chat-send-btn">↑</button></div></div></div></div>
+    <div id="mTabLogs" style="display:none;"><div class="section-label">今日执行日志</div><div class="glass" style="border-radius:14px;overflow:hidden;">${[['14:31','邮件分析 → 生成草稿 + A 任务建议'],['14:00','工单分配 → 新工单 #4521 → 分配给赵磊'],['13:00','下午邮件批次拉取 → 全公司 47 封 → 推送 12 封'],['11:00','知识库冲突检测 → 发现 2 条冲突，推送审核'],['09:00','评估任务调度 → 45 组对话分配至 3 名专员'],['08:30','早晨邮件批次拉取 → 全公司 89 封 → 推送 28 封'],['08:30','早晨播报生成 → 推送至各执行者']].map((r,i,a)=>`<div style="display:flex;gap:10px;padding:10px 14px;${i<a.length-1?'border-bottom:1px solid rgba(0,0,0,0.04);':''}font-size:13px;"><span style="color:rgba(0,0,0,0.3);min-width:44px;">${r[0]}</span><span style="flex:1;color:rgba(0,0,0,0.6);">${r[1]}</span><span style="color:var(--ds3-success);font-size:11px;font-weight:600;">完成</span></div>`).join('')}</div></div>`;
+    mc.querySelectorAll('.dm-tab').forEach(tab=>tab.addEventListener('click',()=>{
+        mc.querySelectorAll('.dm-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');
+        ['mTabWorkflows','mTabAgent','mTabLogs'].forEach(id=>document.getElementById(id).style.display='none');
+        document.getElementById({workflows:'mTabWorkflows',agent:'mTabAgent',logs:'mTabLogs'}[tab.dataset.mtab]).style.display='block';
+        if(tab.dataset.mtab==='agent')renderAgentList();
+    }));
+    document.getElementById('newWfBtn').onclick=()=>{curWfId='new';renderWfList();document.getElementById('wfChatTitle').textContent='新建工作流';document.getElementById('wfChatSub').textContent='';renderChat(wfChats['new'],document.getElementById('wfChat'));};
+    renderWfList();selectWf(curWfId);renderAgentList();selectAgent(curAgentId);
+}
+function renderWfList(){const wfs=ch().mtData.workflows,c=document.getElementById('wfList');c.innerHTML=wfs.map(w=>`<div class="wf-item ${w.id===curWfId?'active':''}" data-wf="${w.id}"><div class="wf-dot ${w.on?'on':'off'}"></div><div class="wf-body"><div class="wf-name">${w.name}</div><div class="wf-info">${w.info}</div></div><span class="wf-tag ${w.tagCls}">${w.tag}</span></div>`).join('');c.querySelectorAll('.wf-item').forEach(el=>el.addEventListener('click',()=>selectWf(el.dataset.wf)));}
+function renderAgentList(){const ags=ch().mtData.agents,c=document.getElementById('agentList');c.innerHTML=ags.map(a=>`<div class="wf-item ${a.id===curAgentId?'active':''}" data-agent="${a.id}"><div style="font-size:18px;flex-shrink:0;">${a.icon}</div><div class="wf-body"><div class="wf-name">${a.name}</div><div class="wf-info">${a.desc}</div></div></div>`).join('');c.querySelectorAll('.wf-item').forEach(el=>el.addEventListener('click',()=>selectAgent(el.dataset.agent)));}
+function selectWf(id){curWfId=id;renderWfList();const wf=ch().mtData.workflows.find(w=>w.id===id);document.getElementById('wfChatTitle').textContent=wf?wf.name:'新建工作流';document.getElementById('wfChatSub').textContent=wf?'创建于 03/25':'';renderChat(wfChats[id]||wfChats['new'],document.getElementById('wfChat'));}
+function selectAgent(id){curAgentId=id;renderAgentList();const a=ch().mtData.agents.find(x=>x.id===id);document.getElementById('agentChatTitle').textContent=a?a.name:'';document.getElementById('agentChatSub').textContent='上次修改 03/24';renderChat(agentChats[id]||[{role:'ai',text:`当前「${a?a.name:''}」Agent 运行正常。\n\n你想修改哪些配置？`}],document.getElementById('agentChat'));}
+function renderChat(msgs,container){container.innerHTML='';msgs.forEach(msg=>{if(msg.role==='scope'){const el=document.createElement('div');el.className='chat-msg ai';el.innerHTML=`<div class="chat-av ai">AI</div><div><div class="scope-tags">${msg.tags.map(t=>`<span class="scope-tag ${t===msg.selected?'selected':''}">${t}</span>`).join('')}</div></div>`;container.appendChild(el);}else if(msg.role==='summary'){const d=msg.data,el=document.createElement('div');el.style.cssText='max-width:92%;';el.innerHTML=`<div class="wf-summary"><div class="wf-summary-title">📋 ${d.name}</div><div class="wf-summary-row"><span class="wf-summary-label">触发条件</span><span class="wf-summary-value">${d.trigger}</span></div><div class="wf-summary-row"><span class="wf-summary-label">应用范围</span><span class="wf-summary-value">${d.scope}</span></div><div class="wf-summary-row"><span class="wf-summary-label">执行策略</span><span class="wf-summary-value" style="white-space:pre-line;">${d.strategy}</span></div><div class="wf-summary-row"><span class="wf-summary-label">确认模式</span><span class="wf-summary-value">${d.confirm}</span></div><div class="wf-summary-actions"><button class="btn btn-green btn-sm">✓ 已确认创建</button><button class="btn btn-ghost btn-sm">继续编辑</button></div></div>`;container.appendChild(el);}else{const isAi=msg.role==='ai',el=document.createElement('div');el.className=`chat-msg ${isAi?'ai':'user'}`;el.innerHTML=`<div class="chat-av ${isAi?'ai':'user'}">${isAi?'AI':ch().mt.avatar}</div><div class="chat-bubble ${isAi?'ai':'user'}">${msg.text}</div>`;container.appendChild(el);}});container.scrollTop=container.scrollHeight;}
+
+/* ===== EMAIL PANEL ===== */
+function openPanel(){
+    const p=ch().panelDetail,b=document.getElementById('panelBody');
+    b.innerHTML=`<div class="panel-meta"><div class="panel-meta-row"><span class="panel-meta-label">发件人</span><span class="panel-meta-value">${p.from}</span></div><div class="panel-meta-row"><span class="panel-meta-label">主题</span><span class="panel-meta-value">${p.subject}</span></div><div class="panel-meta-row"><span class="panel-meta-label">时间</span><span class="panel-meta-value">${p.time}</span></div><div class="panel-meta-row"><span class="panel-meta-label">优先级</span><span class="email-inline-tag urgent">紧急</span></div></div><div class="panel-divider"></div><div class="panel-section-label">原始邮件</div><div class="panel-original">${p.original}</div><div class="panel-divider"></div><div class="panel-section-label">AI 生成草稿</div><div class="email-draft-box"><div class="email-draft-label">✦ AI Draft</div><div class="email-draft-text">${p.draft}</div></div>`;
+    document.getElementById('emailPanel').classList.add('show');
+}
+function closePanel(){document.getElementById('emailPanel').classList.remove('show');}
+
+/* ===== STREAM ENGINE ===== */
+const sc=document.getElementById('streamContainer'),ws=document.getElementById('workerScroll');
+let st=null;
+function clearStream(){if(st)clearTimeout(st);sc.innerHTML='';}
+function getDate(){const d=new Date(),days=['日','一','二','三','四','五','六'];return{full:`${d.getFullYear()}年${String(d.getMonth()+1).padStart(2,'0')}月${String(d.getDate()).padStart(2,'0')}日`,weekday:`星期${days[d.getDay()]}`};}
+function addDateHeader(){const{full,weekday}=getDate(),el=document.createElement('div');el.style.marginBottom='24px';el.innerHTML=`<div class="date-main">${full}</div><div class="date-sub">${weekday}</div>`;sc.appendChild(el);}
+function addBatch(text,delay){return new Promise(r=>{st=setTimeout(()=>{const el=document.createElement('div');el.className='batch-badge';el.innerHTML=`⏰ ${text}`;el.style.opacity='0';el.style.animation='slideIn .3s ease forwards';sc.appendChild(el);scrollB();st=setTimeout(r,400);},delay);});}
+function typeT(text,_,delay){return new Promise(r=>{st=setTimeout(()=>{if(!text){const s=document.createElement('div');s.className='stream-text spacer';sc.appendChild(s);scrollB();r();return;}const el=document.createElement('div');el.className='stream-text current';sc.appendChild(el);let i=0;const cur=document.createElement('span');cur.className='cursor-blink';const tick=()=>{i++;el.textContent=text.slice(0,i);el.appendChild(cur);scrollB();if(i<text.length)st=setTimeout(tick,28);else st=setTimeout(()=>{el.className='stream-text done';cur.remove();r();},400);};tick();},delay);});}
+function addCards(cd,delay){return new Promise(r=>{st=setTimeout(()=>{const wrap=document.createElement('div');wrap.className='task-cards';cd.forEach((t,i)=>{const card=document.createElement('div');card.className='task-card glass';card.onclick=t.id==='email'?openPanel:null;const done=t.pending===0;card.innerHTML=`<div class="task-card-icon">${t.icon}</div><div class="task-card-body"><div class="task-card-title ${done?'completed':''}">${t.title}</div><div class="task-card-desc">${t.desc}</div></div><div class="task-card-pending">${done?'<span style="font-size:14px;color:rgba(0,0,0,0.3);">✓</span>':`<div class="task-card-num">${t.pending}</div><div class="task-card-label">待处理</div>`}</div><span class="task-card-arrow">›</span>`;setTimeout(()=>card.classList.add('visible'),150*i);wrap.appendChild(card);});sc.appendChild(wrap);scrollB();st=setTimeout(r,1800);},delay);});}
+function addRef(taskId,delay){return new Promise(r=>{st=setTimeout(()=>{const t=ch().tasks.find(x=>x.id===taskId)||{icon:'📧',title:taskId};const el=document.createElement('div');el.className='task-ref';el.innerHTML=`<span class="task-ref-icon">${t.icon}</span><span class="task-ref-label">${t.title}</span>`;sc.appendChild(el);scrollB();st=setTimeout(r,300);},delay);});}
+function addEmail(email,delay){return new Promise(r=>{st=setTimeout(()=>{const el=document.createElement('div');el.className='email-inline glass';const tc=email.urgent?'urgent':'normal',tt=email.urgent?'紧急':'一般';el.innerHTML=`<div class="email-inline-header"><div class="email-inline-icon">📧</div><span class="email-inline-sender">${email.sender}</span><span class="email-inline-tag ${tc}">${tt}</span><span class="email-inline-time">${email.time}</span></div><div class="email-inline-subject">${email.subject}</div><div class="email-inline-summary">${email.summary}</div><div class="email-draft-box"><div class="email-draft-label">✦ AI 已准备草稿</div><div class="email-draft-text">${email.draft}</div></div><div class="email-inline-actions"><button class="btn btn-primary" onclick="openPanel()">编辑回复</button><button class="btn btn-outline">直接发送</button><button class="btn btn-ghost">稍后处理</button></div>`;sc.appendChild(el);scrollB();st=setTimeout(r,600);},delay);});}
+function addCross(actions,delay){return new Promise(r=>{st=setTimeout(()=>{actions.forEach((a,i)=>{setTimeout(()=>{const el=document.createElement('div');el.className='cross-action';el.innerHTML=`<div class="cross-action-sys ${a.cls}">${a.icon}</div><span class="cross-action-text">${a.text}</span><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-outline btn-sm">确认</button><button class="btn btn-ghost btn-sm">跳过</button></div>`;sc.appendChild(el);scrollB();},i*300);});st=setTimeout(r,actions.length*300+400);},delay);});}
+function scrollB(){requestAnimationFrame(()=>ws.scrollTo({top:ws.scrollHeight,behavior:'smooth'}));}
+
+/* ===== CASES (data-driven) ===== */
+async function runCase(caseId){clearStream();addDateHeader();curCase=caseId;const c=ch();
+    if(caseId==='morning'){
+        await addBatch(c.batchInfo,200);
+        await typeT('早上好 ☀️',1,300);
+        await typeT(c.morningIntro,1,200);
+        await typeT('',0,100);
+        await addCards(c.tasks,200);
+        await typeT('',0,100);
+        await addRef('email',0);
+        await typeT(c.urgentNote,1,200);
+        await typeT('',0,100);
+        await addEmail(c.emails[0],200);
+        await addCross(c.crossActions,200);
+        await typeT('',0,200);
+        for(let i=1;i<c.emails.length;i++) await addEmail(c.emails[i],200);
+        await typeT('',0,200);
+        const otherTasks=c.tasks.filter(t=>t.id!=='email');
+        for(let i=0;i<otherTasks.length;i++){await addRef(otherTasks[i].id,0);await typeT(c.otherTaskNotes[i],1,200);}
+        await typeT('',0,200);
+        await typeT('祝你今天工作顺利！有需要随时告诉我。',1,200);
+    } else if(caseId==='nudge'){
+        await typeT('检测到你已有 30 分钟没有任何操作了。',1,300);
+        await typeT('想确认一下你的工作状况——是遇到了什么困难，还是临时有其他事情？',1,200);
+        await typeT('',0,100);
+        await typeT('以下任务需要抓紧完成：',1,200);
+        await addCards(c.tasks.filter(t=>t.pending>0),200);
+        await addRef('email',0);
+        await typeT(`你有 ${c.tasks[0].pending} 封邮件尚未处理。${c.urgentNote}`,1,200);
+        await typeT('',0,200);
+        await typeT('如果需要帮助或临时调整任务分配，随时告诉我。',1,200);
+        await typeT('请尽快恢复工作 🙏',1,200);
+    } else if(caseId==='complete'){
+        await typeT('太棒了 🎉',1,300);
+        await typeT('你今天的所有任务已经全部完成！',1,200);
+        await addCards(c.tasks.map(t=>({...t,pending:0})),200);
+        await typeT('今日完成情况总结：',1,200);
+        for(let i=0;i<c.tasks.length;i++){await addRef(c.tasks[i].id,0);await typeT(c.completeNotes[i],1,200);}
+        await typeT('',0,200);
+        await typeT('下一个邮件批次将在明天 08:30 拉取。如有紧急邮件，系统会实时通知你。',1,200);
+        await typeT('辛苦了，今天表现很出色 👏',1,200);
+    }
+}
+
+/* ===== INIT ===== */
+renderDropdown();
+runCase('morning');
+</script>
+</body>
+</html>

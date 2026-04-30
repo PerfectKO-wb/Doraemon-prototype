@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BD Developer - Game Integration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #010101;
+            color: #f1f1f1;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1440px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            z-index: 100;
+        }
+        .nav::before {
+            content: '';
+            position: absolute;
+            left: 250px;
+            top: 0;
+            width: 940px;
+            height: 72px;
+            border-bottom: 1px solid rgba(227, 255, 52, 0);
+            opacity: 0.4;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f1f1f1;
+            letter-spacing: -0.5px;
+        }
+        .nav-logo-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .nav-logo-sub-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 16px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 20px;
+        }
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 16px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .nav-tab.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #f1f1f1;
+        }
+        .nav-tab.highlight {
+            border-radius: 16px;
+            color: #f1f1f1;
+        }
+        .nav-user {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+        /* Main Layout */
+        .main {
+            display: flex;
+            justify-content: center;
+            padding-top: 72px;
+            min-height: 100vh;
+        }
+        .container {
+            width: 1440px;
+            display: flex;
+            gap: 16px;
+            padding: 112px 32px 0;
+        }
+
+        /* Left Panel */
+        .left-panel {
+            width: 458px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Card Base */
+        .card {
+            background: transparent;
+            border: 1px solid #363636;
+            border-radius: 12px;
+            box-shadow: 0px 6px 16px 0px rgba(0,0,0,0.08), 0px 3px 6px 0px rgba(0,0,0,0.12), 0px 9px 28px 0px rgba(0,0,0,0.05);
+        }
+
+        /* Game Selection Card */
+        .game-card {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 30px;
+        }
+        .card-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #e3ff34;
+            text-transform: uppercase;
+        }
+        .card-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+        .game-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #181818;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .game-item:hover {
+            background: #222;
+        }
+        .game-icon {
+            width: 48px;
+            height: 48px;
+            background: #010101;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .game-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .game-name {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 24px;
+            letter-spacing: -0.3125px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .game-id {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+        .game-chevron {
+            width: 24px;
+            height: 24px;
+            opacity: 0.5;
+            transition: transform 0.2s;
+        }
+        .game-item.open .game-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Game Dropdown */
+        .game-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #181818;
+            border: 1px solid #363636;
+            border-radius: 8px;
+            margin-top: 4px;
+            overflow: hidden;
+            box-shadow: 0px 20px 80px 0px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+        .game-dropdown.show {
+            display: block;
+        }
+        .game-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .game-dropdown-item:hover {
+            background: #222;
+        }
+        .game-dropdown-item.selected {
+            background: #e3ff34;
+        }
+        .game-dropdown-item.selected .game-icon {
+            background: #010101;
+            color: #f1f1f1;
+        }
+        .game-dropdown-item.selected .game-name,
+        .game-dropdown-item.selected .game-id {
+            color: #181818;
+        }
+        .game-dropdown-item.highlighted {
+            background: rgba(227, 255, 52, 0.1);
+        }
+        .game-item-wrapper {
+            position: relative;
+        }
+
+        /* Progress Card */
+        .progress-card {
+            padding: 16px 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .progress-header {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .progress-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #e3ff34;
+        }
+        .progress-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+        .progress-list {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .progress-num {
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 53px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .progress-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .progress-label svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
+        }
+        .progress-line {
+            width: 30px;
+            height: 25px;
+            position: relative;
+        }
+        .progress-line::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 0;
+            height: 24.72px;
+            border-left: 1px dashed rgba(255, 255, 255, 0.3);
+            transform: translateX(-50%);
+        }
+
+        /* Chat Panel */
+        .chat-panel {
+            width: 902px;
+            flex-shrink: 0;
+            background: #181818;
+            border: 1px solid #363636;
+            border-radius: 24px;
+            box-shadow: 0px 6px 16px 0px rgba(0,0,0,0.08), 0px 3px 6px -4px rgba(0,0,0,0.12), 0px 9px 28px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            height: 650px;
+        }
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #222;
+            gap: 18px;
+        }
+        .chat-title {
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .chat-status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #e3ff34;
+        }
+        .chat-status svg {
+            width: 14px;
+            height: 14px;
+        }
+        .chat-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        .chat-msg {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .chat-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #e3ff34 0%, #b8e600 100%);
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #181818;
+            overflow: hidden;
+        }
+        .chat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .chat-bubble {
+            flex: 1;
+            font-size: 14px;
+            line-height: 22px;
+            padding: 12px 16px;
+            max-width: 70%;
+        }
+        .chat-bubble p {
+            margin-bottom: 6px;
+        }
+        .chat-bubble p:last-child {
+            margin-bottom: 0;
+        }
+        .chat-msg.user-msg {
+            flex-direction: row-reverse;
+        }
+        .chat-bubble.bot-bubble {
+            background: #2c2c2c;
+            color: #f1f1f1;
+            border-radius: 4px 16px 16px 16px;
+        }
+        .chat-bubble.user-bubble {
+            background: #e3ff34;
+            color: #181818;
+            border-radius: 16px 4px 16px 16px;
+            position: relative;
+        }
+        .chat-avatar.user-avatar {
+            background: transparent;
+        }
+        .chat-input-area {
+            padding: 16px;
+            padding-top: 0;
+        }
+        .chat-input-box {
+            background: #202020;
+            border: 1px solid #363636;
+            border-radius: 20px;
+            box-shadow: 0px -24px 32px 4px #181818, 0px 8px 24px 0px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .chat-input-main {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #363636;
+        }
+        .chat-input-main::placeholder {
+            color: #848484;
+        }
+        .chat-input-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+        }
+        .chat-action-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chat-action-btn.attachment {
+            background: transparent;
+        }
+        .chat-action-btn.attachment:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .chat-action-btn.send {
+            background: #e3ff34;
+            cursor: pointer;
+            padding: 0;
+        }
+        .chat-action-btn.send:hover {
+            background: #d4ed2a;
+        }
+        .chat-action-btn.send.disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+        .chat-action-btn.send.disabled svg {
+            stroke: #888;
+        }
+        .chat-textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f1f1f1;
+            font-family: 'Inter', 'Noto Sans JP', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 16px;
+            line-height: 24px;
+            resize: none;
+            min-height: 24px;
+            max-height: 120px;
+        }
+        .chat-textarea::placeholder {
+            color: #848484;
+        }
+        .chat-action-btn .send-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+        .chat-action-btn .send-icon svg {
+            transform: rotate(-90deg);
+            width: 20px;
+            height: 20px;
+        }
+        .chat-action-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            width: 100%;
+            border-top: 1px solid #222;
+            padding: 23px 120px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .footer-logo {
+            height: 27.32px;
+            width: 80px;
+        }
+        .footer-logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f1f1f1;
+            letter-spacing: -0.5px;
+            height: 27.32px;
+        }
+        .footer-text {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 24px;
+        }
+        .footer-nav {
+            display: flex;
+            gap: 24px;
+            padding-top: 0;
+        }
+        .footer-link {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .footer-link:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 2px;
+        }
+
+        /* SVG Icons */
+        .icon-sport {
+            width: 14px;
+            height: 14px;
+        }
+        .icon-check {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-logo">
+            <span class="nav-logo-text">G123</span>
+            <span class="nav-logo-divider"></span>
+            <span class="nav-logo-sub-text">开发者中心</span>
+        </div>
+        <div class="nav-tabs">
+            <div class="nav-tab">首页</div>
+            <div class="nav-tab active">G123</div>
+            <div class="nav-tab">文档</div>
+            <div class="nav-tab highlight">Lagent</div>
+        </div>
+        <div class="nav-user">
+            <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="8" r="4" stroke="#fff" stroke-width="1.5"/>
+                <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Game Selection Card -->
+                <div class="card game-card">
+                    <div class="card-header">
+                        <span class="card-title">选择游戏</span>
+                        <div class="card-badge">
+                            <svg class="icon-sport" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="#e3ff34" stroke-width="2"/>
+                                <path d="M12 2a10 10 0 0 1 0 20" fill="#e3ff34"/>
+                            </svg>
+                            Game
+                        </div>
+                    </div>
+                    <div class="game-item-wrapper">
+                        <div class="game-item" id="gameSelector">
+                            <div class="game-icon">DR</div>
+                            <div class="game-info">
+                                <div class="game-name">Dragon Realm Tactics</div>
+                                <div class="game-id">APP-DRAGON-1188</div>
+                            </div>
+                            <svg class="game-chevron" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="game-dropdown" id="gameDropdown">
+                            <div class="game-dropdown-item selected" data-game="DR" data-name="Dragon Realm Tactics" data-id="APP-DRAGON-1188">
+                                <div class="game-icon">DR</div>
+                                <div class="game-info">
+                                    <div class="game-name">Dragon Realm Tactics</div>
+                                    <div class="game-id">APP-DRAGON-1188</div>
+                                </div>
+                            </div>
+                            <div class="game-dropdown-item" data-game="EA" data-name="Eternal Arena" data-id="APP-Eternal-1188">
+                                <div class="game-icon">EA</div>
+                                <div class="game-info">
+                                    <div class="game-name">Eternal Arena</div>
+                                    <div class="game-id">APP-Eternal-1188</div>
+                                </div>
+                            </div>
+                            <div class="game-dropdown-item" data-game="FG" data-name="D舰队少女" data-id="APP-fleetGiRL-1120">
+                                <div class="game-icon">FG</div>
+                                <div class="game-info">
+                                    <div class="game-name">D舰队少女</div>
+                                    <div class="game-id">APP-fleetGiRL-1120</div>
+                                </div>
+                            </div>
+                            <div class="game-dropdown-item" data-game="VA" data-name="VIVID ARMY" data-id="APP-VIVID-1188">
+                                <div class="game-icon">VA</div>
+                                <div class="game-info">
+                                    <div class="game-name">VIVID ARMY</div>
+                                    <div class="game-id">APP-VIVID-1188</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Card -->
+                <div class="card progress-card">
+                    <div class="progress-header">
+                        <div class="progress-badge">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="3" width="18" height="18" rx="3" fill="#e3ff34"/>
+                                <path d="M9 12l2 2 4-4" stroke="#010101" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Progress
+                        </div>
+                        <span class="card-title">接入进度</span>
+                    </div>
+                    <div class="progress-list">
+                        <div class="progress-item">
+                            <div class="progress-num">1</div>
+                            <div class="progress-label">
+                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg);">
+                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                SDK、登录支付接入
+                            </div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-item">
+                            <div class="progress-num">2</div>
+                            <div class="progress-label">
+                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg);">
+                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                i18n 接入
+                            </div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-item">
+                            <div class="progress-num">3</div>
+                            <div class="progress-label">
+                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg);">
+                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                publisher 接入
+                            </div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-item">
+                            <div class="progress-num">4</div>
+                            <div class="progress-label">
+                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg);">
+                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                提交游戏信息
+                            </div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-item">
+                            <div class="progress-num">5</div>
+                            <div class="progress-label">
+                                <svg viewBox="0 0 24 24" fill="none" style="transform: rotate(-90deg); opacity: 0.3;">
+                                    <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                接入完成
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Panel -->
+            <div class="chat-panel">
+                <div class="chat-header">
+                    <span class="chat-title">小包</span>
+                    <div class="chat-status">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#e3ff34"/>
+                            <circle cx="8" cy="10" r="1.5" fill="#010101"/>
+                            <circle cx="16" cy="10" r="1.5" fill="#010101"/>
+                            <path d="M8 15s1.5 2 4 2 4-2 4-2" stroke="#010101" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        CHATBOX
+                    </div>
+                </div>
+                <div class="chat-body" id="chatBody">
+                    <div class="chat-msg">
+                        <div class="chat-avatar">包</div>
+                        <div class="chat-bubble bot-bubble">
+                            <p>合同已签署成功，接下来开始 Dragon Realm Tactics 的接入任务。</p>
+                            <p>SDK 接入, 请点击下载并使用 G123 ID 登录L-Agent，按提示完成接入；如果过程中有任何疑问，直接在这里问我。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <div class="chat-input-box">
+                        <div class="chat-input-main">
+                            <textarea class="chat-textarea" placeholder="输入消息..." rows="1"></textarea>
+                        </div>
+                        <div class="chat-input-actions">
+                            <div class="chat-action-btn attachment">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5">
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                                </svg>
+                            </div>
+                            <div class="chat-action-btn send" id="sendBtn">
+                                <span class="send-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="#010101" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="22" y1="2" x2="11" y2="13"/>
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-left">
+            <div class="footer-logo-text">G123</div>
+            <p class="footer-text">© CTW Inc. All rights reserved. A Nasdaq-listed company.</p>
+        </div>
+        <div class="footer-nav">
+            <span class="footer-link">G123 Games</span>
+            <span class="footer-link">关于我们</span>
+            <span class="footer-link">服务条款</span>
+            <span class="footer-link">隐私权政策</span>
+        </div>
+    </footer>
+
+    <script>
+        const gameSelector = document.getElementById('gameSelector');
+        const gameDropdown = document.getElementById('gameDropdown');
+        const dropdownItems = document.querySelectorAll('.game-dropdown-item');
+        const chatTextarea = document.querySelector('.chat-textarea');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatBody = document.getElementById('chatBody');
+
+        gameSelector.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.classList.toggle('open');
+            gameDropdown.classList.toggle('show');
+        });
+
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                // Remove selected class from all items
+                dropdownItems.forEach(i => i.classList.remove('selected'));
+                
+                // Add selected class to clicked item
+                this.classList.add('selected');
+                
+                // Update the displayed game info
+                const gameIcon = gameSelector.querySelector('.game-icon');
+                const gameName = gameSelector.querySelector('.game-name');
+                const gameId = gameSelector.querySelector('.game-id');
+                
+                gameIcon.textContent = this.dataset.game;
+                gameName.textContent = this.dataset.name;
+                gameId.textContent = this.dataset.id;
+                
+                // Close dropdown
+                gameSelector.classList.remove('open');
+                gameDropdown.classList.remove('show');
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!gameSelector.contains(e.target) && !gameDropdown.contains(e.target)) {
+                gameSelector.classList.remove('open');
+                gameDropdown.classList.remove('show');
+            }
+        });
+
+        // Send message function
+        function sendMessage() {
+            const message = chatTextarea.value.trim();
+            if (!message) return;
+
+            // Create user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-msg user-msg';
+            userMsg.innerHTML = `
+                <div class="chat-bubble user-bubble">
+                    <p>${escapeHtml(message)}</p>
+                </div>
+                <div class="chat-avatar user-avatar"></div>
+            `;
+            chatBody.appendChild(userMsg);
+
+            // Clear input and reset
+            chatTextarea.value = '';
+            chatTextarea.style.height = 'auto';
+            sendBtn.classList.add('disabled');
+
+            // Scroll to bottom
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // Simulate bot response after delay
+            setTimeout(() => {
+                const botMsg = document.createElement('div');
+                botMsg.className = 'chat-msg';
+                botMsg.innerHTML = `
+                    <div class="chat-avatar">包</div>
+                    <div class="chat-bubble bot-bubble">
+                        <p>收到！如果您在接入过程中遇到任何问题，请随时告诉我。</p>
+                    </div>
+                `;
+                chatBody.appendChild(botMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 1000);
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Textarea auto-resize and send button state
+        chatTextarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            
+            if (this.value.trim()) {
+                sendBtn.classList.remove('disabled');
+            } else {
+                sendBtn.classList.add('disabled');
+            }
+        });
+
+        // Send on button click
+        sendBtn.addEventListener('click', function() {
+            if (!this.classList.contains('disabled')) {
+                sendMessage();
+            }
+        });
+
+        // Send on Enter (Shift+Enter for new line)
+        chatTextarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendBtn.classList.contains('disabled')) {
+                    sendMessage();
+                }
+            }
+        });
+
+        // Initialize send button state
+        if (chatTextarea.value.trim()) {
+            sendBtn.classList.remove('disabled');
+        } else {
+            sendBtn.classList.add('disabled');
+        }
+    </script>
+</body>
+</html>
