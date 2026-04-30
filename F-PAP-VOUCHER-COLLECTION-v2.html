@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F Expert · Voucher Collection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f9fafb;
+            --bg-container: #ffffff;
+            --bg-hover: #f5f5f4;
+            --bg-active: #efefef;
+            --bg-hover2: #e8e8e6;
+            --bg-subtle: #f5f6f7;
+
+            --text-default: #131825;
+            --text-secondary: #73726e;
+            --text-tertiary: #9a9a98;
+            --text-disabled: #ababa9;
+
+            --border-divider: #e5e7eb;
+            --border-default: #d9d9d9;
+            --border-strong: #c7c7c4;
+
+            --button-default: #131825;
+            --white: #ffffff;
+            --primary: #1C64F2;
+
+            --error: #f5222d;
+            --error-bg: #fff1f0;
+            --error-border: #ffa39e;
+
+            --success: #15803d;
+            --success-bg: #ecfdf5;
+            --success-border: #a7f3d0;
+
+            --warn: #d97706;
+            --warn-bg: #fffbeb;
+            --warn-border: #fde68a;
+
+            --teal-grad: linear-gradient(135deg, #5ec6d0 0%, #3ba5b0 100%);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 6px 16px rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.12);
+            --shadow-lg: 0 20px 40px rgba(0,0,0,0.18);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+            font-size: 14px;
+            color: var(--text-default);
+            background: var(--bg-base);
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        button { font-family: inherit; }
+
+        .app { display: flex; width: 100%; height: 100vh; }
+
+        /* ============ Doraemon Sidebar (leftmost) ============ */
+        .sidebar {
+            width: 200px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: var(--bg-container);
+            border-right: 1px solid var(--border-divider);
+        }
+        .sidebar-top {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px 0 16px;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .logo-mark {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: grid; place-items: center;
+            color: #fff;
+        }
+        .logo-mark svg { width: 13px; height: 13px; }
+        .logo-text {
+            font-family: 'Urbanist', sans-serif;
+            font-size: 15px; font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .sidebar-collapse {
+            width: 28px; height: 28px; border: none; background: none;
+            border-radius: 6px; cursor: pointer;
+            display: grid; place-items: center;
+            color: var(--text-secondary);
+        }
+        .sidebar-collapse:hover { background: var(--bg-hover); }
+
+        .sidebar-scroll {
+            flex: 1; overflow-y: auto;
+            padding: 4px 8px 16px;
+        }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 2px; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            height: 34px; padding: 0 10px;
+            border-radius: 8px; cursor: pointer;
+            color: var(--text-default);
+            font-size: 13px;
+        }
+        .nav-item:hover { background: var(--bg-hover); }
+        .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-secondary); }
+        .nav-item .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            margin-left: auto;
+        }
+        .nav-item.active { background: var(--bg-active); }
+        .nav-item .muted-icon { width: 14px; height: 14px; margin-left: auto; color: var(--text-disabled); opacity: 0; }
+        .nav-item:hover .muted-icon { opacity: 1; }
+
+        .nav-section {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 12px 6px;
+            font-size: 11px; font-weight: 500;
+            color: var(--text-disabled);
+            letter-spacing: 0.3px;
+        }
+        .nav-section .section-actions {
+            display: flex; gap: 4px;
+        }
+        .nav-section .section-actions button {
+            width: 18px; height: 18px;
+            display: grid; place-items: center;
+            border: none; background: none; border-radius: 4px;
+            color: var(--text-disabled); cursor: pointer;
+        }
+        .nav-section .section-actions button:hover { background: var(--bg-hover); color: var(--text-secondary); }
+        .nav-section .section-actions svg { width: 13px; height: 13px; }
+
+        .agent-dot {
+            width: 18px; height: 18px; border-radius: 50%;
+            display: grid; place-items: center;
+            color: #fff; font-size: 10px; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .agent-dot.tech { background: #1c64f2; }
+        .agent-dot.f { background: linear-gradient(135deg, #5ec6d0, #3ba5b0); }
+
+        .sidebar-bottom {
+            border-top: 1px solid var(--border-divider);
+            padding: 12px 12px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .user-avatar {
+            width: 28px; height: 28px; border-radius: 14px;
+            overflow: hidden; flex-shrink: 0;
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+            display: grid; place-items: center;
+            color: #fff; font-size: 11px; font-weight: 600;
+        }
+        .user-info { flex: 1; min-width: 0; }
+        .user-name { font-size: 13px; font-weight: 500; line-height: 16px; }
+        .user-role { font-size: 11px; color: var(--text-secondary); line-height: 14px; }
+        .user-more {
+            width: 28px; height: 28px; border: none; background: none;
+            border-radius: 6px; cursor: pointer;
+            display: grid; place-items: center;
+            color: var(--text-secondary);
+        }
+        .user-more:hover { background: var(--bg-hover); }
+
+        /* ============ Middle list panel (F Expert) ============ */
+        .list-panel {
+            width: 340px;
+            flex-shrink: 0;
+            display: flex; flex-direction: column;
+            height: 100vh;
+            background: var(--bg-container);
+            border-right: 1px solid var(--border-divider);
+        }
+        .list-panel-header {
+            padding: 10px 16px 14px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .expert-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 6px 0;
+        }
+        .expert-avatar {
+            width: 44px; height: 44px; border-radius: 14px;
+            background: var(--teal-grad);
+            display: grid; place-items: center;
+            flex-shrink: 0;
+            color: #fff; font-size: 20px; font-weight: 700;
+            font-family: 'Urbanist', sans-serif;
+        }
+        .expert-title-col { flex: 1; min-width: 0; }
+        .expert-title {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 17px; font-weight: 700; line-height: 24px;
+        }
+        .expert-title .info-icon {
+            width: 16px; height: 16px; color: var(--text-disabled); cursor: pointer;
+        }
+        .avatar-stack {
+            display: flex; align-items: center;
+            margin-top: 4px;
+        }
+        .avatar-chip {
+            width: 22px; height: 22px; border-radius: 11px;
+            border: 1.5px solid #fff;
+            margin-left: -6px;
+            display: grid; place-items: center;
+            color: #fff; font-size: 10px; font-weight: 600;
+            flex-shrink: 0;
+        }
+        .avatar-chip:first-child { margin-left: 0; }
+        .avatar-more {
+            height: 22px; min-width: 28px;
+            border-radius: 11px;
+            border: 1.5px solid #fff;
+            margin-left: -6px;
+            background: var(--bg-active);
+            padding: 0 6px;
+            display: grid; place-items: center;
+            font-size: 11px; color: var(--text-secondary); font-weight: 500;
+        }
+        .expert-actions { display: flex; gap: 2px; }
+        .icon-btn {
+            width: 32px; height: 32px;
+            display: grid; place-items: center;
+            border: none; background: none; border-radius: 8px;
+            color: var(--text-secondary); cursor: pointer;
+        }
+        .icon-btn:hover { background: var(--bg-hover); color: var(--text-default); }
+        .icon-btn svg { width: 18px; height: 18px; }
+
+        .list-filter-row {
+            display: flex; align-items: center; gap: 8px;
+            margin-top: 14px;
+        }
+        .chip {
+            height: 32px; padding: 0 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-default);
+            background: var(--bg-container);
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 500;
+            color: var(--text-default);
+            cursor: pointer;
+        }
+        .chip:hover { background: var(--bg-hover); }
+        .chip.solid {
+            background: var(--button-default); color: #fff; border-color: var(--button-default);
+        }
+        .chip svg { width: 12px; height: 12px; }
+
+        .search-row {
+            margin-top: 10px;
+            height: 34px; padding: 0 10px;
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            display: flex; align-items: center; gap: 8px;
+            background: var(--bg-container);
+        }
+        .search-row svg { width: 14px; height: 14px; color: var(--text-disabled); flex-shrink: 0; }
+        .search-row input {
+            flex: 1; border: none; outline: none;
+            font-family: inherit; font-size: 13px;
+            color: var(--text-default);
+            background: transparent;
+        }
+        .search-row input::placeholder { color: var(--text-disabled); }
+
+        .list-count {
+            font-size: 12px; color: var(--text-secondary);
+            padding: 10px 16px 6px;
+        }
+        .list-count strong { color: var(--text-default); font-weight: 700; }
+
+        .list-body { flex: 1; overflow-y: auto; }
+        .list-body::-webkit-scrollbar { width: 4px; }
+        .list-body::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 2px; }
+
+        .list-card {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            position: relative;
+        }
+        .list-card.nav-card { padding: 8px 16px; align-items: center; }
+        .list-card.nav-card .list-card-icon { width: 32px; height: 32px; border-radius: 8px; }
+        .list-card.nav-card .list-card-icon svg { width: 16px; height: 16px; }
+        .list-card.session-card { padding: 16px 16px; }
+        .list-card.session-card .list-card-title { font-size: 14px; font-weight: 700; }
+        .list-card.session-card .list-card-desc { font-size: 12px; margin-top: 4px; }
+        .list-card + .list-card { border-top: 1px solid var(--border-divider); }
+        .list-card:hover { background: var(--bg-hover); }
+        .list-card.active { background: var(--bg-active); }
+        .list-card-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--bg-subtle);
+            display: grid; place-items: center;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        .list-card-icon svg { width: 20px; height: 20px; }
+        .list-card-content { flex: 1; min-width: 0; }
+        .list-card-title {
+            display: flex; align-items: center; gap: 4px;
+            font-size: 14px; font-weight: 600; line-height: 20px;
+            color: var(--text-default);
+        }
+        .list-card-title .chev { width: 14px; height: 14px; color: var(--text-disabled); }
+        .list-card-desc {
+            font-size: 12px; line-height: 18px; color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .list-card-meta {
+            font-size: 11px; color: var(--text-disabled); margin-top: 6px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .list-card-meta svg { width: 12px; height: 12px; }
+        .list-card-dot {
+            position: absolute; top: 18px; right: 16px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .list-empty {
+            flex: 1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 8px;
+            color: var(--text-disabled);
+        }
+        .list-empty .empty-icon {
+            width: 36px; height: 36px;
+            display: grid; place-items: center;
+        }
+        .list-empty .empty-icon svg { width: 26px; height: 26px; color: var(--text-disabled); }
+        .list-empty .empty-text { font-size: 13px; }
+
+        /* ============ Main content ============ */
+        .main {
+            flex: 1;
+            display: flex; flex-direction: column;
+            min-width: 0;
+            height: 100vh;
+            background: var(--bg-container);
+            position: relative;
+        }
+        .main-header {
+            height: 56px;
+            padding: 0 20px 0 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border-divider);
+            flex-shrink: 0;
+        }
+        .main-title { font-size: 15px; font-weight: 600; }
+        .bell-btn {
+            width: 32px; height: 32px; border: none; background: none;
+            border-radius: 8px; display: grid; place-items: center;
+            color: var(--text-secondary); cursor: pointer;
+            position: relative;
+        }
+        .bell-btn:hover { background: var(--bg-hover); color: var(--text-default); }
+        .bell-btn svg { width: 18px; height: 18px; }
+        .bell-badge {
+            position: absolute; top: 2px; right: 2px;
+            min-width: 16px; height: 14px; padding: 0 4px;
+            border-radius: 8px;
+            background: var(--error); color: #fff;
+            font-size: 9px; font-weight: 600; line-height: 14px;
+            display: grid; place-items: center;
+            border: 1.5px solid #fff;
+        }
+
+        .main-toolbar {
+            padding: 14px 20px 14px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .date-select {
+            position: relative;
+            height: 32px; min-width: 220px;
+            padding: 0 10px;
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--bg-container);
+            font-size: 13px; color: var(--text-default);
+            cursor: pointer;
+        }
+        .date-select .ph { color: var(--text-disabled); flex: 1; }
+        .date-select .cal-icon { width: 14px; height: 14px; color: var(--text-secondary); }
+        .date-select:hover { border-color: var(--border-strong); }
+        .date-select.has-val .ph { color: var(--text-default); }
+
+        .toolbar-right {
+            display: flex; align-items: center; gap: 16px;
+        }
+        .toolbar-hint {
+            font-size: 12px; color: var(--text-secondary);
+        }
+        .btn-primary {
+            height: 36px; padding: 0 14px;
+            border-radius: 8px;
+            background: var(--button-default); color: #fff;
+            border: none; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 500;
+        }
+        .btn-primary:hover { background: #000; }
+        .btn-primary svg { width: 14px; height: 14px; }
+
+        /* Upload dropdown */
+        .upload-wrap { position: relative; }
+        .upload-menu {
+            position: absolute; top: calc(100% + 6px); right: 0;
+            width: 180px; padding: 4px;
+            background: #fff; border-radius: 10px;
+            border: 1px solid var(--border-divider);
+            box-shadow: var(--shadow-md);
+            z-index: 30;
+            display: none;
+        }
+        .upload-menu.open { display: block; }
+        .upload-menu-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px; color: var(--text-default);
+            cursor: pointer; border: none; background: none; width: 100%;
+            font-family: inherit;
+        }
+        .upload-menu-item:hover { background: var(--bg-hover); }
+        .upload-menu-item svg { width: 16px; height: 16px; color: var(--text-secondary); }
+        .upload-menu-item .item-desc {
+            font-size: 11px; color: var(--text-secondary); margin-top: 1px;
+        }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex; gap: 0;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-divider);
+            flex-shrink: 0;
+        }
+        .tab-item {
+            padding: 10px 16px;
+            font-size: 13px; font-weight: 500;
+            color: var(--text-secondary);
+            border: none; background: none;
+            cursor: pointer;
+            position: relative;
+            font-family: inherit;
+        }
+        .tab-item:hover { color: var(--text-default); }
+        .tab-item.active {
+            color: var(--text-default); font-weight: 600;
+        }
+        .tab-item.active::after {
+            content: "";
+            position: absolute; bottom: -1px; left: 12px; right: 12px;
+            height: 2px; background: var(--button-default); border-radius: 1px;
+        }
+        .tab-item .tab-count {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 18px; height: 16px; padding: 0 5px;
+            border-radius: 8px;
+            background: var(--bg-active);
+            font-size: 10px; font-weight: 600; color: var(--text-secondary);
+            margin-left: 6px;
+        }
+        .tab-item.active .tab-count {
+            background: var(--button-default); color: #fff;
+        }
+
+        /* Table */
+        .table-wrap {
+            flex: 1;
+            margin: 0 20px 20px 24px;
+            border: 1px solid var(--border-divider);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            min-height: 0;
+        }
+        .table-scroll {
+            flex: 1; overflow-y: auto;
+        }
+        .table-scroll::-webkit-scrollbar { width: 6px; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 3px; }
+
+        .inv-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .inv-table thead th {
+            padding: 11px 16px;
+            background: var(--bg-subtle);
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary);
+            text-align: left;
+            border-bottom: 1px solid var(--border-divider);
+            position: sticky; top: 0; z-index: 1;
+            white-space: nowrap;
+        }
+        .inv-table thead th:not(:last-child)::after {
+            content: "";
+            width: 1px; height: 12px;
+            background: var(--border-divider);
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+        }
+        .inv-table tbody tr {
+            border-bottom: 1px solid var(--border-divider);
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .inv-table tbody tr:last-child { border-bottom: none; }
+        .inv-table tbody tr:hover { background: var(--bg-hover); }
+        .inv-table tbody tr.active { background: #f0f7ff; }
+        .inv-table td {
+            padding: 10px 16px;
+            font-size: 13px;
+            color: var(--text-default);
+            vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .inv-table .col-type { width: 80px; }
+        .inv-table .col-id   { width: 140px; font-variant-numeric: tabular-nums; color: var(--text-secondary); font-size: 12px; }
+        .inv-table .col-title { width: auto; }
+        .inv-table .col-state { width: 140px; }
+        .inv-table .col-time { width: 180px; }
+        .inv-table .col-ops { width: 110px; }
+        .inv-table td.col-time { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+        .file-cell {
+            display: inline-flex; align-items: center; gap: 10px;
+            min-width: 0;
+        }
+        .file-cell .fname {
+            color: var(--text-default);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        .tag {
+            display: inline-flex; align-items: center;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 12px; font-weight: 500;
+            letter-spacing: 0.2px;
+            line-height: 18px;
+            white-space: nowrap;
+        }
+        .tag.denied { color: var(--error); background: var(--error-bg); border: 1px solid var(--error-border); }
+        .tag.checked { color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
+        .tag.unconfirmed { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
+        .tag.parsing { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
+        .tag.pending { color: #0e7490; background: #ecfeff; border: 1px solid #a5f3fc; }
+        .tag.pending_init { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
+        .tag.oa-draft   { color: #7c3aed; background: #f5f3ff; border: 1px solid #ddd6fe; }
+        .tag.in_review  { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
+        .tag.oa-approved{ color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
+        .tag.not_required{ color: var(--text-tertiary); background: var(--bg-subtle); border: 1px solid var(--border-divider); }
+
+        .ops-row { display: inline-flex; align-items: center; gap: 2px; }
+        .ops-btn {
+            width: 28px; height: 28px; border: none; background: none;
+            border-radius: 6px; cursor: pointer;
+            color: var(--text-secondary);
+            display: grid; place-items: center;
+        }
+        .ops-btn:hover { background: var(--bg-active); color: var(--text-default); }
+        .ops-btn.danger:hover { color: var(--error); background: var(--error-bg); }
+        .ops-btn svg { width: 16px; height: 16px; }
+
+        .table-empty {
+            flex: 1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 12px;
+            color: var(--text-disabled);
+            background: var(--bg-container);
+            padding: 40px 20px;
+        }
+        .table-empty .icon-box {
+            width: 56px; height: 56px;
+            border-radius: 14px;
+            background: var(--bg-subtle);
+            display: grid; place-items: center;
+            color: var(--text-disabled);
+        }
+        .table-empty .icon-box svg { width: 30px; height: 30px; }
+        .table-empty .zh-hint {
+            font-size: 13px; color: var(--text-secondary);
+        }
+
+        /* ============ Month-picker popover ============ */
+        .month-pop {
+            position: absolute;
+            top: 60px; left: 24px;
+            width: 284px;
+            padding: 12px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-divider);
+            z-index: 40;
+            display: none;
+        }
+        .month-pop.open { display: block; }
+        .year-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 4px 10px;
+        }
+        .year-nav .year {
+            font-size: 14px; font-weight: 600; color: var(--text-default);
+        }
+        .year-nav-btns { display: flex; gap: 2px; }
+        .year-nav button {
+            width: 24px; height: 24px;
+            border: none; background: none; border-radius: 4px;
+            color: var(--text-secondary); cursor: pointer;
+            display: grid; place-items: center;
+        }
+        .year-nav button:hover { background: var(--bg-hover); color: var(--text-default); }
+        .year-nav button svg { width: 12px; height: 12px; }
+
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+        .month-cell {
+            height: 40px;
+            display: grid; place-items: center;
+            font-size: 13px; color: var(--text-default);
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-family: inherit;
+        }
+        .month-cell:hover { background: var(--bg-hover); }
+        .month-cell.selected {
+            background: var(--button-default); color: #fff;
+        }
+
+        /* ============ Invoice viewer drawer (right side) ============ */
+        .viewer-mask {
+            position: fixed; inset: 0;
+            background: rgba(17,17,17,0.35);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .viewer-mask.open { opacity: 1; pointer-events: auto; }
+        .viewer {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: min(720px, 92vw);
+            background: #fff;
+            box-shadow: -12px 0 32px rgba(0,0,0,0.12);
+            z-index: 101;
+            display: flex; flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .viewer.open { transform: translateX(0); }
+        .viewer-top {
+            height: 52px;
+            border-bottom: 1px solid var(--border-divider);
+            display: flex; align-items: center; padding: 0 16px;
+            gap: 12px;
+            background: #fff;
+            flex-shrink: 0;
+        }
+        .viewer-close {
+            width: 28px; height: 28px; border: none; background: none;
+            border-radius: 6px; cursor: pointer;
+            color: var(--text-secondary);
+            display: grid; place-items: center;
+        }
+        .viewer-close:hover { background: var(--bg-hover); color: var(--text-default); }
+        .viewer-close svg { width: 16px; height: 16px; }
+        .viewer-filename { font-size: 14px; font-weight: 500; color: var(--text-default); }
+        .viewer-top .tag { margin-left: 4px; }
+        .viewer-zoom {
+            margin-left: auto;
+            display: flex; align-items: center; gap: 2px;
+            color: var(--text-secondary);
+        }
+        .viewer-zoom button {
+            width: 28px; height: 28px; border: none; background: none;
+            border-radius: 6px; cursor: pointer;
+            color: var(--text-secondary);
+            display: grid; place-items: center;
+        }
+        .viewer-zoom button:hover { background: var(--bg-hover); color: var(--text-default); }
+        .viewer-zoom button svg { width: 14px; height: 14px; }
+        .viewer-zoom .level { font-size: 13px; min-width: 44px; text-align: center; color: var(--text-default); }
+
+        .viewer-body {
+            flex: 1; overflow: auto;
+            background: #f3f3f1;
+            display: flex; align-items: flex-start; justify-content: center;
+            padding: 24px;
+        }
+        .viewer-body::-webkit-scrollbar { width: 8px; height: 8px; }
+        .viewer-body::-webkit-scrollbar-thumb { background: #cfcfcd; border-radius: 4px; }
+        .invoice-paper {
+            width: 780px; max-width: 100%;
+            min-height: 100%;
+            background: #fff;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            padding: 40px 44px 60px;
+            transform-origin: top center;
+            transition: transform 0.15s ease;
+            color: #111;
+            font-size: 13px;
+        }
+        .invoice-paper .h1 {
+            text-align: center;
+            font-size: 24px; font-weight: 700; letter-spacing: 12px;
+            padding: 4px 0;
+            border-top: 2px solid #111; border-bottom: 2px solid #111;
+            margin: 0 80px 16px;
+        }
+        .invoice-paper .row { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 10px; }
+        .invoice-paper .muted { color: #444; }
+        .invoice-paper .biller-col { flex: 1; }
+        .invoice-paper .meta-col { width: 260px; font-size: 12px; line-height: 18px; }
+        .invoice-paper .meta-col .k { color: #666; margin-right: 4px; }
+        .invoice-paper .amount-box {
+            margin-top: 12px;
+            border: 1.5px solid #111;
+            display: flex;
+        }
+        .invoice-paper .amount-box .lbl {
+            flex: 0 0 120px; padding: 8px 10px;
+            background: #f4ecdf;
+            border-right: 1.5px solid #111;
+            font-weight: 600;
+        }
+        .invoice-paper .amount-box .val {
+            flex: 1; padding: 8px 12px;
+            font-weight: 700; text-align: right;
+        }
+        .invoice-paper .breakdown {
+            display: grid;
+            grid-template-columns: max-content 1fr max-content;
+            gap: 4px 12px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #333;
+        }
+        .invoice-paper .breakdown .pair {
+            display: contents;
+        }
+        .invoice-paper .inv-table2 {
+            width: 100%; border-collapse: collapse;
+            margin-top: 24px;
+            font-size: 12px;
+        }
+        .invoice-paper .inv-table2 thead th {
+            background: #e3edf3;
+            border: 1px solid #111;
+            padding: 6px 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .invoice-paper .inv-table2 tbody td {
+            border: 1px solid #111;
+            padding: 6px 10px;
+            background: #fbfbec;
+        }
+        .invoice-paper .inv-table2 tbody tr:nth-child(odd) td { background: #f3efe3; }
+        .invoice-paper .inv-table2 .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+        .stamp {
+            display: inline-block;
+            width: 52px; height: 52px;
+            border: 2px solid #b94545;
+            border-radius: 50%;
+            color: #b94545;
+            font-size: 9px; font-weight: 600;
+            display: grid; place-items: center;
+            transform: rotate(-8deg);
+            text-align: center; line-height: 10px;
+            padding: 2px;
+        }
+
+        /* Voucher drawer — wide split layout */
+        .voucher-drawer {
+            position: fixed; top: 0; right: 0; bottom: 0;
+            width: min(960px, 94vw);
+            background: #fff;
+            box-shadow: -12px 0 32px rgba(0,0,0,0.12);
+            z-index: 101;
+            display: flex; flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .voucher-drawer.open { transform: translateX(0); }
+        .voucher-top {
+            height: 52px; flex-shrink: 0;
+            border-bottom: 1px solid var(--border-divider);
+            display: flex; align-items: center; padding: 0 16px; gap: 12px;
+        }
+        .voucher-split {
+            flex: 1; display: flex; min-height: 0;
+        }
+        .voucher-preview {
+            flex: 1; min-width: 0;
+            background: #f3f3f1;
+            display: flex; align-items: flex-start; justify-content: center;
+            overflow: auto; padding: 20px;
+            position: relative;
+        }
+        .voucher-preview::-webkit-scrollbar { width: 6px; height: 6px; }
+        .voucher-preview::-webkit-scrollbar-thumb { background: #cfcfcd; border-radius: 3px; }
+        .voucher-preview iframe,
+        .voucher-preview object {
+            width: 100%; height: 100%;
+            border: none; border-radius: 6px;
+            background: #fff;
+        }
+        .voucher-preview-placeholder {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 12px; color: var(--text-disabled);
+            width: 100%; height: 100%;
+        }
+        .voucher-preview-placeholder svg { width: 48px; height: 48px; }
+
+        .voucher-form-panel {
+            width: 340px; flex-shrink: 0;
+            border-left: 1px solid var(--border-divider);
+            display: flex; flex-direction: column;
+            overflow-y: auto;
+        }
+        .voucher-form-panel::-webkit-scrollbar { width: 5px; }
+        .voucher-form-panel::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 3px; }
+
+        .parsing-placeholder {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 16px; padding: 60px 20px;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .parsing-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid var(--border-divider);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .parsing-placeholder .parsing-text {
+            font-size: 14px; font-weight: 500;
+        }
+        .parsing-placeholder .parsing-sub {
+            font-size: 12px; color: var(--text-disabled); text-align: center;
+        }
+
+        .voucher-form {
+            display: flex; flex-direction: column; gap: 0;
+            padding: 16px 20px 24px;
+        }
+        .voucher-form .form-section-title {
+            font-size: 13px; font-weight: 600; color: var(--text-default);
+            padding-bottom: 12px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .voucher-form .label-hint {
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--text-tertiary);
+            font-size: 11px;
+        }
+        .form-row {
+            display: flex; flex-direction: column; gap: 3px;
+            padding: 8px 0;
+        }
+        .form-row + .form-row { border-top: 1px solid #f3f4f6; }
+        .form-row label {
+            font-size: 11px; font-weight: 500; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .form-row input, .form-row select, .form-row textarea {
+            height: 34px; padding: 0 10px;
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            font-size: 13px; color: var(--text-default);
+            font-family: inherit;
+            background: var(--bg-container);
+            outline: none;
+        }
+        .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 2px rgba(28,100,242,0.12);
+        }
+        .form-row input[readonly] {
+            background: var(--bg-subtle); color: var(--text-secondary);
+            cursor: default; border-color: transparent;
+        }
+        .form-row input[readonly]:focus { border-color: transparent; box-shadow: none; }
+        .form-row select { cursor: pointer; appearance: auto; }
+        .form-row textarea {
+            height: 60px; padding: 8px 10px;
+            resize: vertical;
+        }
+        .form-actions {
+            display: flex; justify-content: flex-end; gap: 10px;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-divider);
+            flex-shrink: 0;
+        }
+        .btn-outline {
+            height: 36px; padding: 0 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-default);
+            background: #fff; color: var(--text-default);
+            font-size: 13px; font-weight: 500;
+            cursor: pointer; font-family: inherit;
+        }
+        .btn-outline:hover { background: var(--bg-hover); }
+        .btn-confirm-voucher {
+            height: 36px; padding: 0 20px;
+            border-radius: 8px;
+            border: none;
+            background: var(--button-default); color: #fff;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer; font-family: inherit;
+        }
+        .btn-confirm-voucher:hover { background: #000; }
+        .btn-confirm-voucher:disabled {
+            background: var(--bg-active); color: var(--text-disabled);
+            cursor: not-allowed;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            padding: 10px 18px;
+            background: var(--button-default); color: #fff;
+            border-radius: 10px;
+            font-size: 13px; font-weight: 500;
+            box-shadow: var(--shadow-md);
+            opacity: 0; pointer-events: none;
+            transition: all 0.25s ease;
+            z-index: 200;
+        }
+        .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Hidden file input */
+        .hidden-input { display: none; }
+
+        @media (max-width: 1200px) {
+            .list-panel { width: 300px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- ========== Doraemon Sidebar ========== -->
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="logo">
+                <div class="logo-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <span class="logo-text">Doraemon</span>
+            </div>
+            <button class="sidebar-collapse" title="Collapse">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+            </button>
+        </div>
+
+        <div class="sidebar-scroll">
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>New Chat</span>
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                <span>Work Space</span>
+            </div>
+
+            <div class="nav-section">
+                <span>Expert agent</span>
+            </div>
+            <div class="nav-item">
+                <span class="agent-dot tech">T</span>
+                <span>Tech</span>
+            </div>
+            <div class="nav-item">
+                <span class="agent-dot tech">T</span>
+                <span>Tech</span>
+            </div>
+            <div class="nav-item active">
+                <span class="agent-dot f">F</span>
+                <span>F Expert</span>
+            </div>
+
+            <div class="nav-section">
+                <span>AI U</span>
+                <div class="section-actions">
+                    <button title="New"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                    <button title="More"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+                </div>
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>AI Research</span>
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+                <span>Product Launch</span>
+            </div>
+
+            <div class="nav-section">
+                <span>Today</span>
+            </div>
+            <div class="nav-item">
+                <span style="color:var(--text-secondary);font-size:13px;">Tech</span>
+                <button class="icon-btn" style="width:20px;height:20px;margin-left:auto;" title="More">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></svg>
+                </button>
+            </div>
+            <div class="nav-item">
+                <span style="color:var(--text-secondary);font-size:13px;">Tech</span>
+                <svg style="margin-left:auto;width:12px;height:12px;color:var(--text-disabled);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="nav-item">
+                <span style="color:var(--text-secondary);font-size:13px;">Tech</span>
+                <span class="dot" style="background:var(--primary);"></span>
+                <button class="icon-btn" style="width:20px;height:20px;margin-left:4px;" title="More">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></svg>
+                </button>
+            </div>
+
+            <div class="nav-section"><span>Today</span></div>
+            <div class="nav-item">
+                <span style="color:var(--text-secondary);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Marketing Campaign Id…</span>
+                <button class="icon-btn" style="width:20px;height:20px;margin-left:auto;" title="More">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="user-avatar">DC</div>
+            <div class="user-info">
+                <div class="user-name">David chen</div>
+                <div class="user-role">Data Analyst</div>
+            </div>
+            <button class="user-more" title="Menu">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ========== Middle list panel ========== -->
+    <section class="list-panel">
+        <div class="list-panel-header">
+            <div class="expert-row">
+                <div class="expert-avatar">F</div>
+                <div class="expert-title-col">
+                    <div class="expert-title">
+                        F Expert
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    </div>
+                    <div class="avatar-stack">
+                        <div class="avatar-chip" style="background:#1C64F2;">i</div>
+                        <div class="avatar-chip" style="background:#F59E0B;">A</div>
+                        <div class="avatar-chip" style="background:#8B5CF6;">S</div>
+                        <div class="avatar-chip" style="background:#EC4899;">D</div>
+                        <div class="avatar-chip" style="background:#10B981;">L</div>
+                        <div class="avatar-more">+99</div>
+                    </div>
+                </div>
+                <div class="expert-actions">
+                    <button class="icon-btn" title="Tasks">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
+                    </button>
+                    <button class="icon-btn" title="Knowledge base">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="list-filter-row">
+                <button class="chip solid">Waiting</button>
+            </div>
+            <div class="search-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="search">
+            </div>
+        </div>
+
+        <div class="list-count"><strong>103</strong> total</div>
+
+        <div class="list-body" id="listBody"></div>
+
+        <div class="list-empty">
+            <div class="empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="empty-text">No consultations found</div>
+        </div>
+    </section>
+
+    <!-- ========== Main content ========== -->
+    <main class="main">
+        <div class="main-header">
+            <span class="main-title" id="mainTitle">Voucher list</span>
+            <button class="bell-btn" title="Notifications">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span class="bell-badge">23</span>
+            </button>
+        </div>
+
+        <div class="main-toolbar">
+            <div class="date-select" id="dateSelect" aria-haspopup="dialog">
+                <span class="ph" id="dateLabel">Please select a month</span>
+                <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+
+                <!-- Month Picker Popover -->
+                <div class="month-pop" id="monthPop" onclick="event.stopPropagation();">
+                    <div class="year-nav">
+                        <div class="year-nav-btns">
+                            <button title="Previous decade" id="prevDecade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
+                            <button title="Previous year" id="prevYear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+                        </div>
+                        <div class="year" id="yearLabel">2026</div>
+                        <div class="year-nav-btns">
+                            <button title="Next year" id="nextYear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>
+                            <button title="Next decade" id="nextDecade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="month-grid" id="monthGrid"></div>
+                </div>
+            </div>
+
+            <div class="toolbar-right">
+                <span class="toolbar-hint">JPG / PNG / PDF</span>
+                <button class="btn-primary" id="uploadBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Upload Voucher
+                </button>
+                <input type="file" id="voucherFileInput" class="hidden-input" multiple accept=".jpg,.jpeg,.png,.pdf">
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <div class="table-scroll" id="tableScroll">
+                <table class="inv-table">
+                    <colgroup>
+                        <col class="col-type">
+                        <col class="col-title">
+                        <col class="col-state">
+                        <col class="col-time">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="col-type">Type</th>
+                            <th class="col-id">ID</th>
+                            <th class="col-title">Voucher Title</th>
+                            <th class="col-state">State</th>
+                            <th class="col-oa" style="width:130px;">OA Status</th>
+                            <th class="col-time">Upload time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+                <div class="table-empty" id="emptyState" style="display:none;">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </div>
+                    <div class="zh-hint">No vouchers yet — upload one to get started</div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ========== Voucher drawer (right side, split layout) ========== -->
+<div class="viewer-mask" id="voucherMask"></div>
+<aside class="voucher-drawer" id="voucherDrawer" role="dialog" aria-label="Voucher details">
+    <div class="voucher-top">
+        <button class="viewer-close" id="voucherClose" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <span class="viewer-filename" id="voucherName">voucher.pdf</span>
+        <span class="tag parsing" id="voucherTag">Parsing</span>
+    </div>
+    <div class="voucher-split">
+        <!-- Left: PDF preview -->
+        <div class="voucher-preview" id="voucherPreview">
+            <div class="voucher-preview-placeholder" id="previewPlaceholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span style="font-size:13px;">No preview available</span>
+            </div>
+        </div>
+        <!-- Right: form panel -->
+        <div class="voucher-form-panel" id="voucherFormPanel">
+            <!-- Parsing state (full-panel) -->
+            <div class="parsing-placeholder" id="parsingState">
+                <div class="parsing-spinner"></div>
+                <div class="parsing-text">Parsing voucher…</div>
+                <div class="parsing-sub">AI is extracting fields from your document.<br>This usually takes a few seconds.</div>
+            </div>
+            <!-- Parsed form -->
+            <div class="voucher-form" id="voucherForm" style="display:none;">
+                <div class="form-section-title">Parsed Fields — Please verify</div>
+                <div class="form-row">
+                    <label>Region</label>
+                    <select id="rfRegion">
+                        <option value="CN">CN</option>
+                        <option value="TW" selected>TW</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Currency</label>
+                    <select id="rfCurrency">
+                        <option value="RMB">RMB</option>
+                        <option value="TWD" selected>TWD</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Payment Type</label>
+                    <select id="rfPaymentType">
+                        <option value="admin" selected>Administrative</option>
+                        <option value="business">Business</option>
+                        <option value="project">Project</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Payment Bank</label>
+                    <select id="rfPaymentBank">
+                        <option value="fubon">富邦銀行 (Taipei)</option>
+                        <option value="cmb">招商银行 (Shanghai)</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Payee Name</label>
+                    <input type="text" id="rfPayee" placeholder="Payee name">
+                </div>
+                <div class="form-row">
+                    <label>Bank Name</label>
+                    <input type="text" id="rfBankName" placeholder="Bank name">
+                </div>
+                <div class="form-row">
+                    <label>Amount</label>
+                    <input type="text" id="rfAmount" placeholder="0.00">
+                </div>
+                <div class="form-row">
+                    <label>Purpose</label>
+                    <input type="text" id="rfPurpose" placeholder="Payment purpose">
+                </div>
+                <div class="form-row">
+                    <label>MEMO</label>
+                    <textarea id="rfMemo" placeholder="Additional notes..."></textarea>
+                </div>
+                <div class="form-row">
+                    <label>Applicant <span class="label-hint">· Uploader email (read-only)</span></label>
+                    <input type="email" id="rfApplicant" readonly inputmode="email" autocomplete="off" placeholder="name@ctw.inc" aria-readonly="true" title="Uploader email from your account; cannot be edited">
+                </div>
+            </div>
+            <div class="form-actions" id="voucherActions" style="display:none;">
+                <button class="btn-outline" id="voucherCancelBtn">Cancel</button>
+                <button class="btn-confirm-voucher" id="voucherConfirmBtn">Confirm &amp; Submit</button>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // ========== Data ==========
+    const listItems = [
+        {
+            key: 'collection',
+            title: 'Invoice Collection',
+            desc: 'Submit payment request',
+            meta: 'Pending · 26 invoices',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+            dot: true,
+            href: 'F-PAP-PAYMENT-REQUEST-v2.html'
+        },
+        {
+            key: 'review',
+            title: 'Invoice Review',
+            desc: 'Review and approve invoices',
+            meta: 'Pending · 18 invoices',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>',
+            dot: true,
+            href: 'F-PAP-PAYMENT-REVIEW-v2.html'
+        },
+        {
+            key: 'voucher',
+            title: 'Voucher Collection',
+            desc: 'Upload reimbursement vouchers',
+            meta: 'Parsing · 4 vouchers',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="9" y1="12" x2="15" y2="12"/></svg>',
+            dot: true,
+            href: 'F-PAP-VOUCHER-COLLECTION-v2.html',
+            active: true
+        },
+        {
+            key: 'oa-confirm',
+            title: 'OA-2026-0410',
+            desc: 'OA confirm',
+            meta: '1 draft · Pending confirm',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="12" y2="14"/></svg>',
+            dot: true,
+            href: 'F-PAP-OA-CHAT-CONFIRM.html'
+        },
+    ];
+
+    let voucherFiles = [
+        { id: 1, name: '台北國稅局_薪資所得扣繳稅額202601_繳款書Voucher1.pdf', type: 'pdf', state: 'checked', time: '2026-04-10 09:15', month: 4, year: 2026, oaState: 'pending_init', activeOaId: null,
+          file: '静态文件/台北國稅局_薪資所得扣繳稅額202601_繳款書Receipt1.pdf',
+          parsed: { region: 'TW', payee: '台北國稅局', bankName: '台灣銀行', amount: '35,720', currency: 'TWD', purpose: '薪資所得扣繳稅額', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '2026年01月薪資所得扣繳' } },
+        { id: 2, name: '台北健保費用_2026.01月薪資Voucher2.pdf', type: 'pdf', state: 'pending', time: '2026-04-15 14:30', month: 4, year: 2026, oaState: 'pending_init', activeOaId: null,
+          file: '静态文件/台北健保費用_2026.01月薪資Receipt2.pdf',
+          parsed: { region: 'TW', payee: '衛生福利部中央健康保險署', bankName: '台灣銀行', amount: '28,460', currency: 'TWD', purpose: '健保費用 2026年01月', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '台北辦公室1月份健保費' } },
+        { id: 3, name: '上海李永亮费用报销单单据Voucher3.pdf', type: 'pdf', state: 'unconfirmed', time: '2026-04-18 11:00', month: 4, year: 2026, oaState: 'pending_init', activeOaId: null,
+          file: '静态文件/上海李永亮费用报销单单据Receipt3.pdf',
+          parsed: { region: 'CN', payee: '李永亮', bankName: '中国银行', amount: '4,580.00', currency: 'RMB', purpose: '费用报销', paymentBank: 'cmb', paymentType: 'admin', applicant: 'yongliang.li@ctw.inc', memo: '上海办公室费用报销' } },
+        { id: 4, name: 'new_voucher_uploading.pdf', type: 'pdf', state: 'parsing', time: '2026-04-21 16:20', month: 4, year: 2026, oaState: 'pending_init', activeOaId: null,
+          file: null,
+          parsed: null },
+    ];
+
+    let nextId = 200;
+    let selectedMonth = null;
+    let selectedYear = 2026;
+    let viewerYear = selectedYear;
+
+    const monthsEN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    const STATE_LABELS = {
+        unconfirmed: 'Unconfirmed', denied: 'Denied', checked: 'Checked',
+        parsing: 'Parsing', pending: 'Pending'
+    };
+
+    // ========== Render helpers ==========
+    const ICON_PDF = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="2.5" width="14" height="19" rx="2" fill="#ffeded" stroke="#f87171"/><text x="10.5" y="16" font-size="6" font-weight="700" fill="#dc2626" text-anchor="middle" font-family="Inter">PDF</text></svg>`;
+    const ICON_IMG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="17" height="17" rx="2" fill="#eff6ff" stroke="#60a5fa"/><circle cx="9" cy="10" r="1.5" fill="#60a5fa"/><path d="M4 18l5-5 4 4 3-3 4 4" stroke="#60a5fa" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+    function fileIcon(type) { return type === 'img' ? ICON_IMG : ICON_PDF; }
+
+    function renderList() {
+        const body = document.getElementById('listBody');
+        body.innerHTML = listItems.map(it => {
+            const isOa = it.key === 'oa-confirm';
+            return `
+            <div class="list-card ${isOa ? 'session-card' : 'nav-card'} ${it.active ? 'active' : ''}" data-key="${it.key}">
+                ${!isOa ? `<div class="list-card-icon">${it.icon}</div>` : ''}
+                <div class="list-card-content">
+                    <div class="list-card-title">${it.title}${!isOa ? ` <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>` : ''}</div>
+                    <div class="list-card-desc">${it.desc}</div>
+                    ${!isOa ? `<div class="list-card-meta">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        ${it.meta}
+                    </div>` : ''}
+                </div>
+                ${it.dot ? '<span class="list-card-dot"></span>' : ''}
+            </div>
+        `}).join('');
+        body.querySelectorAll('.list-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const it = listItems.find(x => x.key === card.dataset.key);
+                if (it && it.href && !it.active) window.location.href = it.href;
+            });
+        });
+    }
+
+    function filteredFiles() {
+        if (selectedMonth == null) return voucherFiles;
+        return voucherFiles.filter(f => f.month === (selectedMonth + 1) && f.year === selectedYear);
+    }
+
+    // ========== Table rendering ==========
+    function renderTable() {
+        const tbody = document.getElementById('tbody');
+        const emptyEl = document.getElementById('emptyState');
+        const list = filteredFiles();
+
+        if (!list.length) {
+            tbody.innerHTML = '';
+            emptyEl.style.display = 'flex';
+            return;
+        }
+        emptyEl.style.display = 'none';
+
+        const OA_STATE_LABELS_V = {
+            pending_init: 'Pending OA', 'oa-draft': 'Draft', in_review: 'In Review',
+            approved: 'OA Approved', rejected: 'OA Rejected', not_required: 'Not Required'
+        };
+        const OA_STATE_CSS_V = {
+            pending_init: 'pending_init', 'oa-draft': 'oa-draft', in_review: 'in_review',
+            approved: 'oa-approved', rejected: 'rejected', not_required: 'not_required'
+        };
+        function vOaTag(f) {
+            if (!f.oaState) return '<span style="color:var(--text-tertiary);font-size:12px;">—</span>';
+            const label = OA_STATE_LABELS_V[f.oaState] || f.oaState;
+            const cls   = OA_STATE_CSS_V[f.oaState]   || f.oaState;
+            return `<span class="tag ${cls}">${label}</span>`;
+        }
+
+        tbody.innerHTML = list.map(f => `
+            <tr data-id="${f.id}">
+                <td class="col-type">${fileIcon(f.type)}</td>
+                <td class="col-id">${`VCH-${f.year}${String(f.month).padStart(2,'0')}-${String(f.id).padStart(4,'0')}`}</td>
+                <td class="col-title">
+                    <span class="file-cell">
+                        <span class="fname">${f.name}</span>
+                    </span>
+                </td>
+                <td class="col-state"><span class="tag ${f.state === 'parsing' ? 'unconfirmed' : f.state}">${f.state === 'parsing' ? 'Unconfirmed' : (STATE_LABELS[f.state] || f.state)}</span></td>
+                <td class="col-oa">${vOaTag(f)}</td>
+                <td class="col-time">${f.time}</td>
+            </tr>
+        `).join('');
+
+        tbody.querySelectorAll('tr').forEach(tr => {
+            const id = Number(tr.dataset.id);
+            tr.addEventListener('click', () => openVoucherDrawer(id));
+        });
+    }
+
+    function addVoucherFiles(list) {
+        const stamp = nowStamp();
+        const now = new Date();
+        const blocked = [];
+        let added = 0;
+        Array.from(list).forEach(f => {
+            const approved = voucherFiles.find(x => x.name === f.name && x.state === 'checked');
+            if (approved) { blocked.push(f.name); return; }
+            const deniedIdx = voucherFiles.findIndex(x => x.name === f.name && x.state === 'denied');
+            if (deniedIdx !== -1) voucherFiles.splice(deniedIdx, 1);
+            const lower = f.name.toLowerCase();
+            const type = (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg')) ? 'img' : 'pdf';
+            voucherFiles.unshift({ id: nextId++, name: f.name, type, state: 'parsing', time: stamp, month: now.getMonth() + 1, year: now.getFullYear(), file: null, parsed: null });
+            added++;
+        });
+        renderTable();
+        const msgs = [];
+        if (added) msgs.push(`${added} voucher${added === 1 ? '' : 's'} uploaded — parsing started`);
+        if (blocked.length) msgs.push(`${blocked.length} file${blocked.length === 1 ? '' : 's'} already approved — cannot re-upload`);
+        if (msgs.length) showToast(msgs.join(' · '));
+        if (added) simulateParsing();
+    }
+
+    function nowStamp() {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+
+    function simulateParsing() {
+        const parsingItems = voucherFiles.filter(f => f.state === 'parsing' && !f.parsed);
+        parsingItems.forEach(f => {
+            setTimeout(() => {
+                f.state = 'unconfirmed';
+                const regions = ['TWD', 'RMB'];
+                const cur = regions[Math.floor(Math.random() * 2)];
+                f.parsed = {
+                    region: cur === 'TWD' ? 'TW' : 'CN',
+                    payee: 'Sample Vendor Co.',
+                    bankName: cur === 'TWD' ? '台灣銀行' : '中国银行',
+                    amount: (Math.floor(Math.random() * 50000) + 1000).toLocaleString(),
+                    currency: cur,
+                    purpose: 'Office expense',
+                    paymentBank: cur === 'TWD' ? 'fubon' : 'cmb',
+                    paymentType: 'admin',
+                    applicant: 'uploader@ctw.inc',
+                    memo: ''
+                };
+                renderTable();
+                if (currentVoucherId === f.id) openVoucherDrawer(f.id);
+            }, 2500 + Math.random() * 2000);
+        });
+    }
+
+    // ========== Month picker ==========
+    function renderMonthGrid() {
+        const grid = document.getElementById('monthGrid');
+        document.getElementById('yearLabel').textContent = viewerYear;
+        grid.innerHTML = monthsEN.map((m, i) => `
+            <button type="button" class="month-cell ${(selectedYear === viewerYear && selectedMonth === i) ? 'selected' : ''}" data-i="${i}">${m}</button>
+        `).join('');
+        grid.querySelectorAll('.month-cell').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedMonth = Number(btn.dataset.i);
+                selectedYear = viewerYear;
+                applyDateLabel();
+                closeMonthPop();
+                renderTable();
+            });
+        });
+    }
+    function applyDateLabel() {
+        const el = document.getElementById('dateSelect');
+        const lbl = document.getElementById('dateLabel');
+        if (selectedMonth != null) {
+            lbl.textContent = `${monthsEN[selectedMonth]} ${selectedYear}`;
+            el.classList.add('has-val');
+        } else {
+            lbl.textContent = 'Please select a month';
+            el.classList.remove('has-val');
+        }
+    }
+    function openMonthPop() {
+        viewerYear = selectedYear;
+        renderMonthGrid();
+        document.getElementById('monthPop').classList.add('open');
+    }
+    function closeMonthPop() {
+        document.getElementById('monthPop').classList.remove('open');
+    }
+
+    // ========== Voucher Drawer ==========
+    let currentVoucherId = null;
+    let drawerParsingTimer = null;
+    function openVoucherDrawer(id) {
+        const f = voucherFiles.find(x => x.id === id);
+        if (!f) return;
+        currentVoucherId = id;
+        if (drawerParsingTimer) { clearTimeout(drawerParsingTimer); drawerParsingTimer = null; }
+
+        document.getElementById('voucherName').textContent = f.name;
+        const tag = document.getElementById('voucherTag');
+        tag.className = `tag ${f.state === 'parsing' ? 'unconfirmed' : f.state}`;
+        tag.textContent = f.state === 'parsing' ? 'Unconfirmed' : (STATE_LABELS[f.state] || f.state);
+
+        const parsingEl = document.getElementById('parsingState');
+        const formEl = document.getElementById('voucherForm');
+        const actionsEl = document.getElementById('voucherActions');
+        const confirmBtn = document.getElementById('voucherConfirmBtn');
+        const previewEl = document.getElementById('voucherPreview');
+        const placeholder = document.getElementById('previewPlaceholder');
+
+        renderVoucherPreview(f, previewEl, placeholder);
+
+        if (f.state === 'parsing') {
+            parsingEl.style.display = 'flex';
+            formEl.style.display = 'none';
+            actionsEl.style.display = 'none';
+            drawerParsingTimer = setTimeout(() => {
+                if (currentVoucherId !== f.id) return;
+                f.state = 'unconfirmed';
+                if (!f.file) f.file = '静态文件/台北Voucher.pdf';
+                f.parsed = f.parsed || {
+                    region: 'TW',
+                    payee: 'Sample Vendor Co.',
+                    bankName: '台灣銀行',
+                    amount: '12,800',
+                    currency: 'TWD',
+                    purpose: 'Office expense',
+                    paymentBank: 'fubon',
+                    paymentType: 'admin',
+                    applicant: 'uploader@ctw.inc',
+                    memo: ''
+                };
+                renderTable();
+                openVoucherDrawer(f.id);
+                showToast('Voucher parsed successfully');
+                drawerParsingTimer = null;
+            }, 2000);
+        } else {
+            parsingEl.style.display = 'none';
+            formEl.style.display = 'flex';
+            populateVoucherForm(f);
+            const isLocked = f.state === 'pending' || f.state === 'checked';
+            actionsEl.style.display = isLocked ? 'none' : 'flex';
+            confirmBtn.disabled = isLocked;
+            confirmBtn.textContent = isLocked ? 'Pending' : 'Confirm & Submit';
+            setFormEditable(!isLocked);
+        }
+
+        document.getElementById('voucherMask').classList.add('open');
+        document.getElementById('voucherDrawer').classList.add('open');
+        document.querySelectorAll('#tbody tr').forEach(tr => {
+            tr.classList.toggle('active', Number(tr.dataset.id) === id);
+        });
+    }
+
+    function renderVoucherPreview(f, container, placeholder) {
+        const existing = container.querySelector('iframe');
+        if (existing) existing.remove();
+
+        if (f.file) {
+            placeholder.style.display = 'none';
+            const iframe = document.createElement('iframe');
+            iframe.src = f.file;
+            iframe.title = f.name;
+            container.appendChild(iframe);
+        } else if (f.state === 'parsing') {
+            placeholder.innerHTML = `
+                <div class="parsing-spinner" style="width:36px;height:36px;border-width:3px;"></div>
+                <span style="font-size:13px;color:var(--text-secondary);">Uploading & parsing…</span>`;
+            placeholder.style.display = 'flex';
+        } else {
+            placeholder.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span style="font-size:13px;">No preview available</span>`;
+            placeholder.style.display = 'flex';
+        }
+    }
+
+    function closeVoucherDrawer() {
+        document.getElementById('voucherMask').classList.remove('open');
+        document.getElementById('voucherDrawer').classList.remove('open');
+        currentVoucherId = null;
+        if (drawerParsingTimer) { clearTimeout(drawerParsingTimer); drawerParsingTimer = null; }
+        document.querySelectorAll('#tbody tr.active').forEach(tr => tr.classList.remove('active'));
+        const iframe = document.querySelector('#voucherPreview iframe');
+        if (iframe) iframe.remove();
+    }
+
+    function inferRegionFromParsed(p) {
+        if (p.region === 'CN' || p.region === 'TW') return p.region;
+        if (p.currency === 'RMB') return 'CN';
+        return 'TW';
+    }
+
+    function populateVoucherForm(f) {
+        const p = f.parsed || {};
+        document.getElementById('rfRegion').value = inferRegionFromParsed(p);
+        document.getElementById('rfCurrency').value = p.currency || 'TWD';
+        document.getElementById('rfPaymentType').value = p.paymentType || 'admin';
+        document.getElementById('rfPaymentBank').value = p.paymentBank || 'fubon';
+        document.getElementById('rfPayee').value = p.payee || '';
+        document.getElementById('rfBankName').value = p.bankName || '';
+        document.getElementById('rfAmount').value = p.amount || '';
+        document.getElementById('rfPurpose').value = p.purpose || '';
+        document.getElementById('rfMemo').value = p.memo || '';
+        document.getElementById('rfApplicant').value = p.applicant || '';
+        syncBankWithCurrency();
+    }
+
+    function setFormEditable(editable) {
+        const form = document.getElementById('voucherForm');
+        form.querySelectorAll('input:not([readonly]), select, textarea').forEach(el => {
+            el.disabled = !editable;
+            el.style.opacity = editable ? '1' : '0.7';
+        });
+    }
+
+    function syncBankWithCurrency() {
+        const cur = document.getElementById('rfCurrency').value;
+        const bankSel = document.getElementById('rfPaymentBank');
+        bankSel.value = cur === 'RMB' ? 'cmb' : 'fubon';
+        const regionSel = document.getElementById('rfRegion');
+        regionSel.value = cur === 'RMB' ? 'CN' : 'TW';
+    }
+
+    function syncCurrencyAndBankFromRegion() {
+        const reg = document.getElementById('rfRegion').value;
+        const curSel = document.getElementById('rfCurrency');
+        curSel.value = reg === 'CN' ? 'RMB' : 'TWD';
+        syncBankWithCurrency();
+    }
+
+    function saveVoucherFormToData() {
+        const f = voucherFiles.find(x => x.id === currentVoucherId);
+        if (!f) return;
+        f.parsed = {
+            region: document.getElementById('rfRegion').value,
+            payee: document.getElementById('rfPayee').value,
+            bankName: document.getElementById('rfBankName').value,
+            amount: document.getElementById('rfAmount').value,
+            currency: document.getElementById('rfCurrency').value,
+            purpose: document.getElementById('rfPurpose').value,
+            paymentBank: document.getElementById('rfPaymentBank').value,
+            paymentType: document.getElementById('rfPaymentType').value,
+            applicant: document.getElementById('rfApplicant').value,
+            memo: document.getElementById('rfMemo').value,
+        };
+    }
+
+    function confirmVoucher() {
+        const f = voucherFiles.find(x => x.id === currentVoucherId);
+        if (!f || f.state === 'pending' || f.state === 'checked') return;
+        saveVoucherFormToData();
+        f.state = 'pending';
+        renderTable();
+        openVoucherDrawer(f.id);
+        showToast('Voucher submitted — ready for finance review');
+    }
+
+    // ========== Toast ==========
+    let toastTimer = null;
+    function showToast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('visible');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('visible'), 1800);
+    }
+
+    // ========== Wire events ==========
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+        document.getElementById('voucherFileInput').click();
+    });
+    document.getElementById('voucherFileInput').addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length) addVoucherFiles(e.target.files);
+        e.target.value = '';
+    });
+
+    document.getElementById('dateSelect').addEventListener('click', () => {
+        const pop = document.getElementById('monthPop');
+        if (pop.classList.contains('open')) closeMonthPop();
+        else openMonthPop();
+    });
+    document.getElementById('prevYear').addEventListener('click', () => { viewerYear--; renderMonthGrid(); });
+    document.getElementById('nextYear').addEventListener('click', () => { viewerYear++; renderMonthGrid(); });
+    document.getElementById('prevDecade').addEventListener('click', () => { viewerYear -= 10; renderMonthGrid(); });
+    document.getElementById('nextDecade').addEventListener('click', () => { viewerYear += 10; renderMonthGrid(); });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#dateSelect')) closeMonthPop();
+    });
+
+    document.getElementById('voucherClose').addEventListener('click', closeVoucherDrawer);
+    document.getElementById('voucherCancelBtn').addEventListener('click', closeVoucherDrawer);
+    document.getElementById('voucherMask').addEventListener('click', closeVoucherDrawer);
+    document.getElementById('voucherConfirmBtn').addEventListener('click', confirmVoucher);
+    document.getElementById('rfCurrency').addEventListener('change', syncBankWithCurrency);
+    document.getElementById('rfRegion').addEventListener('change', syncCurrencyAndBankFromRegion);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeVoucherDrawer();
+            closeMonthPop();
+        }
+    });
+
+    // ========== Init ==========
+    renderList();
+    renderTable();
+    applyDateLabel();
+</script>
+</body>
+</html>

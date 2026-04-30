@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F Expert · OA Confirmation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #f9fafb;
+    --bg-container: #ffffff;
+    --bg-hover: #f5f5f4;
+    --bg-active: #efefef;
+    --bg-subtle: #f5f6f7;
+    --border-divider: #e5e7eb;
+    --border-default: #d9d9d9;
+    --text-default: #131825;
+    --text-secondary: #73726e;
+    --text-tertiary: #9a9a98;
+    --text-disabled: #ababa9;
+    --white: #ffffff;
+    --primary: #1c64f2;
+    --error: #f5222d;
+    --error-bg: #fff1f0;
+    --error-border: #ffa39e;
+    --success: #15803d;
+    --success-bg: #ecfdf5;
+    --success-border: #a7f3d0;
+    --warn: #d97706;
+    --warn-bg: #fffbeb;
+    --warn-border: #fde68a;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; color: var(--text-default); background: var(--bg-base); -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; cursor: pointer; }
+
+  .app { display: flex; width: 100vw; height: 100vh; }
+
+  /* ===== LEFT NAV SIDEBAR (matches F-PAP-PAYMENT-REVIEW-v2) ===== */
+  .sidebar {
+    width: 200px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    height: 100vh;
+    background: var(--bg-container);
+    border-right: 1px solid var(--border-divider);
+  }
+  .sidebar-top {
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 12px 0 16px;
+    border-bottom: 1px solid var(--border-divider);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; }
+  .logo-mark {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    display: grid; place-items: center; color: #fff;
+  }
+  .logo-mark svg { width: 13px; height: 13px; }
+  .logo-text { font-family: 'Urbanist', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.3px; }
+  .sidebar-collapse {
+    width: 28px; height: 28px; border: none; background: none;
+    border-radius: 6px; cursor: pointer;
+    display: grid; place-items: center; color: var(--text-secondary);
+  }
+  .sidebar-collapse:hover { background: var(--bg-hover); }
+  .sidebar-scroll { flex: 1; overflow-y: auto; padding: 4px 8px 16px; }
+  .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+  .sidebar-scroll::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    height: 34px; padding: 0 10px;
+    border-radius: 8px; cursor: pointer;
+    color: var(--text-default); font-size: 13px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg-hover); }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-secondary); }
+  .nav-item .dot { width: 8px; height: 8px; border-radius: 50%; margin-left: auto; }
+  .nav-item.active { background: var(--bg-active); }
+  .nav-section {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 12px 6px;
+    font-size: 11px; font-weight: 500; color: var(--text-disabled); letter-spacing: 0.3px;
+  }
+  .nav-section .section-actions { display: flex; gap: 4px; }
+  .nav-section .section-actions button {
+    width: 18px; height: 18px; display: grid; place-items: center;
+    border: none; background: none; border-radius: 4px;
+    color: var(--text-disabled); cursor: pointer;
+  }
+  .nav-section .section-actions button:hover { background: var(--bg-hover); color: var(--text-secondary); }
+  .nav-section .section-actions svg { width: 13px; height: 13px; }
+  .agent-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+  .agent-dot.tech { background: #1c64f2; }
+  .agent-dot.f { background: linear-gradient(135deg, #5ec6d0 0%, #3ba5b0 100%); }
+  .sidebar-bottom {
+    border-top: 1px solid var(--border-divider); padding: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 28px; height: 28px; border-radius: 14px;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    display: grid; place-items: center;
+    color: #fff; font-size: 11px; font-weight: 600; flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 500; line-height: 16px; }
+  .user-role { font-size: 11px; color: var(--text-secondary); line-height: 14px; }
+  .user-more {
+    width: 28px; height: 28px; border: none; background: none;
+    border-radius: 6px; cursor: pointer;
+    display: grid; place-items: center; color: var(--text-secondary);
+  }
+  .user-more:hover { background: var(--bg-hover); }
+
+  /* ===== MIDDLE LIST PANEL (matches F-PAP-PAYMENT-REVIEW-v2) ===== */
+  .list-panel {
+    width: 340px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    height: 100vh;
+    background: var(--bg-container);
+    border-right: 1px solid var(--border-divider);
+  }
+  .list-panel-header { padding: 10px 16px 14px; border-bottom: 1px solid var(--border-divider); }
+  .expert-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
+  .expert-avatar {
+    width: 44px; height: 44px; border-radius: 14px;
+    background: linear-gradient(135deg, #5ec6d0 0%, #3ba5b0 100%);
+    display: grid; place-items: center; flex-shrink: 0;
+    color: #fff; font-size: 20px; font-weight: 700; font-family: 'Urbanist', sans-serif;
+  }
+  .expert-title-col { flex: 1; min-width: 0; }
+  .expert-title { display: flex; align-items: center; gap: 6px; font-size: 17px; font-weight: 700; line-height: 24px; }
+  .expert-title .info-icon { width: 16px; height: 16px; color: var(--text-disabled); cursor: pointer; }
+  .avatar-stack { display: flex; align-items: center; margin-top: 4px; }
+  .avatar-chip {
+    width: 22px; height: 22px; border-radius: 11px;
+    border: 1.5px solid #fff; margin-left: -6px;
+    display: grid; place-items: center;
+    color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0;
+  }
+  .avatar-chip:first-child { margin-left: 0; }
+  .avatar-more {
+    height: 22px; min-width: 28px; border-radius: 11px;
+    border: 1.5px solid #fff; margin-left: -6px;
+    background: var(--bg-active); padding: 0 6px;
+    display: grid; place-items: center;
+    font-size: 11px; color: var(--text-secondary); font-weight: 500;
+  }
+  .expert-actions { display: flex; gap: 2px; }
+  .icon-btn {
+    width: 32px; height: 32px; display: grid; place-items: center;
+    border: none; background: none; border-radius: 8px;
+    color: var(--text-secondary); cursor: pointer;
+  }
+  .icon-btn:hover { background: var(--bg-hover); color: var(--text-default); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .list-filter-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+  .chip {
+    height: 32px; padding: 0 12px; border-radius: 8px;
+    border: 1px solid var(--border-default); background: var(--bg-container);
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 500; color: var(--text-default); cursor: pointer;
+  }
+  .chip:hover { background: var(--bg-hover); }
+  .chip.solid { background: var(--bg-active); border-color: var(--border-default); font-weight: 600; }
+  .search-row {
+    margin-top: 10px; height: 34px; padding: 0 10px;
+    border: 1px solid var(--border-default); border-radius: 8px;
+    display: flex; align-items: center; gap: 8px; background: var(--bg-container);
+  }
+  .search-row svg { width: 14px; height: 14px; color: var(--text-disabled); flex-shrink: 0; }
+  .search-row input {
+    flex: 1; border: none; outline: none; font-family: inherit;
+    font-size: 13px; color: var(--text-default); background: transparent;
+  }
+  .search-row input::placeholder { color: var(--text-disabled); }
+  .list-count { font-size: 12px; color: var(--text-secondary); padding: 10px 16px 6px; }
+  .list-count strong { color: var(--text-default); font-weight: 700; }
+  .list-body { flex: 1; overflow-y: auto; }
+  .list-body::-webkit-scrollbar { width: 4px; }
+  .list-body::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 2px; }
+  .list-card {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; cursor: pointer; position: relative;
+  }
+  .list-card.nav-card {
+    padding: 8px 16px;
+    align-items: center;
+  }
+  .list-card.nav-card .list-card-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+  }
+  .list-card.nav-card .list-card-icon svg { width: 16px; height: 16px; }
+  .list-card.session-card {
+    padding: 16px 16px;
+  }
+  .list-card.session-card .list-card-title { font-size: 14px; font-weight: 700; }
+  .list-card.session-card .list-card-desc { font-size: 12px; margin-top: 4px; }
+  .list-card + .list-card { border-top: 1px solid var(--border-divider); }
+  .list-card:hover { background: var(--bg-hover); }
+  .list-card.active { background: var(--bg-active); }
+  .list-card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--bg-subtle); display: grid; place-items: center;
+    color: var(--text-secondary); flex-shrink: 0;
+  }
+  .list-card-icon svg { width: 20px; height: 20px; }
+  .list-card-content { flex: 1; min-width: 0; }
+  .list-card-title {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 14px; font-weight: 600; line-height: 20px;
+  }
+  .list-card-title .chev { width: 14px; height: 14px; color: var(--text-disabled); }
+  .list-card-desc { font-size: 12px; line-height: 18px; color: var(--text-secondary); margin-top: 2px; }
+  .list-card-meta {
+    font-size: 11px; color: var(--text-disabled); margin-top: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .list-card-meta svg { width: 12px; height: 12px; }
+  .list-card-dot {
+    position: absolute; top: 18px; right: 16px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--primary);
+  }
+  .list-empty {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: var(--text-disabled);
+  }
+  .list-empty .empty-icon { width: 36px; height: 36px; display: grid; place-items: center; }
+  .list-empty .empty-icon svg { width: 26px; height: 26px; color: var(--text-disabled); }
+  .list-empty .empty-text { font-size: 13px; }
+
+  /* OA section label inside list panel */
+  .list-section-label {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px 6px;
+    font-size: 11px; font-weight: 600;
+    color: var(--text-disabled); letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border-divider);
+    margin-top: 4px;
+  }
+  .list-section-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--primary); color: #fff;
+    border-radius: 8px; font-size: 10px; font-weight: 700;
+  }
+  .oa-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 1px 7px; border-radius: 5px;
+    font-size: 11px; font-weight: 500; line-height: 16px;
+  }
+  .oa-tag.draft { color: #7c3aed; background: #f5f3ff; border: 1px solid #ddd6fe; }
+  .oa-tag.in_review { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
+  .oa-tag.approved { color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
+  .oa-tag.rejected { color: var(--error); background: var(--error-bg); border: 1px solid var(--error-border); }
+  .oa-tag.pending { color: var(--warn); background: var(--warn-bg); border: 1px solid var(--warn-border); }
+  .unread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); margin-left: auto; flex-shrink: 0; }
+
+  /* ===== MAIN CHAT AREA ===== */
+  .chat-main { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100vh; }
+  .chat-header {
+    height: 52px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border-divider);
+    background: var(--bg-container);
+  }
+  .chat-header-badge {
+    flex-shrink: 0;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 3px 8px; border-radius: 4px;
+    border: 1.5px solid #d97706; color: #d97706;
+    background: transparent;
+    text-transform: uppercase;
+  }
+  .chat-header-info { flex: 1; min-width: 0; }
+  .chat-header-title { font-size: 14px; font-weight: 700; color: var(--text-default); text-align: center; }
+  .chat-header-actions { display: flex; gap: 6px; align-items: center; }
+  .chat-header-notify {
+    position: relative; width: 32px; height: 32px;
+    display: grid; place-items: center; cursor: pointer; color: var(--text-secondary);
+    border-radius: 6px;
+  }
+  .chat-header-notify:hover { background: var(--bg-hover); }
+  .chat-header-notify svg { width: 18px; height: 18px; }
+  .chat-header-notify-dot {
+    position: absolute; top: 4px; right: 4px;
+    min-width: 16px; height: 16px; border-radius: 8px;
+    background: #ef4444; color: #fff;
+    font-size: 10px; font-weight: 700; line-height: 16px; text-align: center;
+    padding: 0 3px;
+  }
+  .hdr-btn {
+    height: 30px; padding: 0 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--border-default); background: #fff; color: var(--text-secondary);
+  }
+  .hdr-btn:hover { background: var(--bg-hover); color: var(--text-default); }
+  .hdr-btn svg { width: 13px; height: 13px; }
+  .hdr-btn.primary { background: #131825; color: #fff; border-color: #131825; }
+  .hdr-btn.primary:hover { background: #2d3748; }
+
+  /* ===== CHAT THREAD ===== */
+  .chat-thread { flex: 1; overflow-y: auto; padding: 16px 28px 24px; display: flex; flex-direction: column; gap: 0; }
+  .chat-thread::-webkit-scrollbar { width: 6px; }
+  .chat-thread::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 3px; }
+
+  /* System divider */
+  .msg-divider {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 11px; color: var(--text-tertiary); font-weight: 500;
+    letter-spacing: 0.3px; margin: 8px 0;
+  }
+  .msg-divider::before, .msg-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border-divider);
+  }
+
+  /* Bot / Assistant message — no bubble, flat layout */
+  .msg-bot { display: flex; align-items: flex-start; gap: 10px; padding: 14px 0; }
+  .msg-bot + .msg-bot { border-top: none; }
+  .msg-bot-avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #5ec6d0 0%, #3ba5b0 100%);
+    display: grid; place-items: center; color: #fff;
+    margin-top: 1px;
+  }
+  .msg-bot-avatar svg { width: 17px; height: 17px; }
+  .msg-bot-body { flex: 1; min-width: 0; max-width: 660px; }
+  .msg-bot-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .msg-bot-name { font-size: 13px; font-weight: 700; color: var(--text-default); }
+  .msg-time { font-size: 12px; color: var(--text-tertiary); }
+  .msg-bubble {
+    font-size: 13.5px; line-height: 1.7; color: var(--text-default);
+    word-break: break-word;
+  }
+  .msg-bubble p { margin: 0 0 6px; }
+  .msg-bubble p:last-child { margin-bottom: 0; }
+  .msg-bubble ul { margin: 4px 0 4px 0; padding: 0; list-style: none; }
+  .msg-bubble ul li::before { content: '• '; }
+  .md-heading { font-size: 13.5px; font-weight: 700; margin: 0 0 8px; color: var(--text-default); }
+  .md-hr { border: none; border-top: 1px solid var(--border-divider); margin: 8px 0; }
+  .md-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 6px 0 10px; }
+  .md-table th { text-align: left; padding: 4px 10px 4px 0; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-divider); white-space: nowrap; }
+  .md-table td { padding: 5px 10px 5px 0; vertical-align: top; border-bottom: 1px solid var(--bg-hover); }
+  .md-table tr:last-child td { border-bottom: none; }
+  .md-table .col-id { color: var(--text-tertiary); font-weight: 500; width: 72px; }
+  .md-table .col-amt { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; width: 110px; }
+  .md-tag { display: inline-block; font-size: 11px; background: var(--bg-subtle); border: 1px solid var(--border-divider); border-radius: 4px; padding: 1px 6px; font-family: monospace; }
+  .msg-bubble ul li { margin-bottom: 2px; }
+
+  /* Message action icon row (reply / comment / translate) */
+  .msg-icon-row {
+    display: flex; align-items: center; gap: 2px;
+    margin-top: 8px;
+  }
+  .msg-icon-btn {
+    width: 26px; height: 26px; border: none; background: none;
+    border-radius: 6px; cursor: pointer; display: grid; place-items: center;
+    color: var(--text-tertiary); transition: background 0.12s, color 0.12s;
+  }
+  .msg-icon-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
+  .msg-icon-btn svg { width: 14px; height: 14px; }
+  .msg-icon-btn .icon-label { font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif; line-height: 1; }
+
+  /* OA Draft card inside chat */
+  .oa-draft-msg {
+    border: 1px solid var(--border-divider); border-radius: 10px;
+    overflow: hidden; margin-top: 10px;
+    background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .oa-draft-msg-head {
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #5ec6d0 0%, #3ba5b0 100%);
+    display: flex; align-items: center; gap: 8px; color: #fff;
+  }
+  .oa-draft-msg-head svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .oa-draft-msg-head-title { font-size: 13px; font-weight: 600; }
+  .oa-draft-msg-head-id { font-size: 11px; opacity: 0.85; margin-left: auto; }
+  .oa-draft-stats {
+    display: flex; padding: 10px 14px; gap: 0;
+    border-bottom: 1px solid var(--border-divider);
+  }
+  .oa-stat { flex: 1; }
+  .oa-stat + .oa-stat { border-left: 1px solid var(--border-divider); padding-left: 14px; }
+  .oa-stat-label { font-size: 11px; color: var(--text-tertiary); margin-bottom: 2px; }
+  .oa-stat-val { font-size: 13px; font-weight: 600; color: var(--text-default); }
+  .oa-items-table { width: 100%; }
+  .oa-items-table-head {
+    display: flex; padding: 6px 14px;
+    background: var(--bg-subtle); border-bottom: 1px solid var(--border-divider);
+    font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .oa-items-table-row {
+    display: flex; padding: 8px 14px; align-items: center;
+    border-bottom: 1px solid var(--border-divider); gap: 0;
+    font-size: 12px;
+  }
+  .oa-items-table-row:last-child { border-bottom: none; }
+  .oa-col-id { width: 80px; flex-shrink: 0; color: var(--text-tertiary); font-weight: 500; }
+  .oa-col-payee { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .oa-col-amt { width: 110px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .oa-draft-footer {
+    padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-subtle);
+  }
+  .oa-footer-mention { font-size: 12px; color: var(--primary); font-weight: 500; }
+  .oa-footer-total { font-size: 13px; font-weight: 700; color: var(--text-default); }
+
+  /* Confirm / action row inside chat */
+  .msg-actions-row {
+    display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .msg-quick-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border-default); background: #fff;
+    color: var(--text-default); transition: all 0.15s; cursor: pointer;
+  }
+  .msg-quick-btn:hover { background: var(--bg-hover); border-color: #999; }
+  .msg-quick-btn.confirm-btn { background: #131825; color: #fff; border-color: #131825; }
+  .msg-quick-btn.confirm-btn:hover { background: #2d3748; }
+  .msg-quick-btn svg { width: 12px; height: 12px; }
+
+  /* User message */
+  .msg-user {
+    display: flex; justify-content: flex-end; align-items: flex-end; gap: 8px; padding: 10px 0;
+  }
+  .msg-user-bubble {
+    max-width: 520px; padding: 10px 14px;
+    background: #131825; color: #fff;
+    border-radius: 12px 4px 12px 12px;
+    font-size: 13.5px; line-height: 1.6;
+  }
+  .msg-user-time { font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px; text-align: right; }
+
+  /* System message (confirmation, action result) */
+  .msg-system {
+    display: flex; justify-content: center; padding: 6px 0;
+  }
+  .msg-system-bubble {
+    padding: 5px 14px; border-radius: 8px;
+    background: var(--success-bg); border: 1px solid var(--success-border);
+    color: var(--success); font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .msg-system-bubble svg { width: 13px; height: 13px; }
+  .msg-system-bubble.warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn); }
+  .msg-system-bubble.info { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+
+  /* mention highlight */
+  .mention { color: var(--primary); font-weight: 500; }
+  .inline-code { font-family: monospace; background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+  /* ===== CHAT INPUT ===== */
+  .chat-input-wrap {
+    flex-shrink: 0;
+    padding: 12px 24px 20px;
+    background: var(--bg-container);
+  }
+  .chat-input-box {
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--bg-subtle);
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .chat-input-box:focus-within {
+    border-color: #131825;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(19,24,37,0.06);
+  }
+  .chat-input-textarea {
+    width: 100%; resize: none; border: none; outline: none;
+    background: transparent;
+    padding: 12px 16px 0;
+    font-size: 14px; font-family: inherit; line-height: 1.5;
+    color: var(--text-default); min-height: 44px; max-height: 140px;
+  }
+  .chat-input-textarea::placeholder { color: var(--text-disabled); }
+  .chat-input-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px 10px 16px;
+  }
+  .chat-input-hints { display: flex; gap: 6px; flex-wrap: wrap; }
+  .hint-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 9px; border-radius: 10px;
+    font-size: 11px; font-weight: 500;
+    background: #fff; border: 1px solid var(--border-default);
+    color: var(--text-secondary); cursor: pointer;
+    transition: all 0.12s;
+  }
+  .hint-pill:hover { background: var(--bg-active); color: var(--text-default); border-color: #999; }
+  .hint-pill svg { width: 11px; height: 11px; }
+  .input-send-btn {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    background: var(--bg-active); border: none; color: var(--text-tertiary);
+    display: grid; place-items: center; transition: all 0.15s;
+  }
+  .input-send-btn.active { background: #131825; color: #fff; }
+  .input-send-btn svg { width: 15px; height: 15px; }
+
+  /* ===== RIGHT DETAIL PANEL ===== */
+  .detail-panel {
+    width: 280px; flex-shrink: 0;
+    background: var(--bg-container);
+    border-left: 1px solid var(--border-divider);
+    display: flex; flex-direction: column; height: 100vh;
+    overflow-y: auto;
+  }
+  .detail-panel::-webkit-scrollbar { width: 4px; }
+  .detail-panel::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 2px; }
+  .detail-panel-head {
+    height: 56px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border-divider);
+    font-size: 13px; font-weight: 600; color: var(--text-default);
+  }
+  .detail-section { padding: 14px 16px; border-bottom: 1px solid var(--border-divider); }
+  .detail-section-title {
+    font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+  }
+  .detail-field { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .detail-field:last-child { margin-bottom: 0; }
+  .detail-field-label { font-size: 12px; color: var(--text-secondary); min-width: 74px; flex-shrink: 0; }
+  .detail-field-val { font-size: 12px; color: var(--text-default); font-weight: 500; }
+  .detail-amount-big { font-size: 20px; font-weight: 700; color: var(--text-default); margin-bottom: 2px; }
+  .detail-amount-cur { font-size: 12px; color: var(--text-secondary); }
+  .detail-items-list { display: flex; flex-direction: column; gap: 6px; }
+  .detail-item-card {
+    padding: 8px 10px; border-radius: 8px;
+    border: 1px solid var(--border-divider); background: var(--bg-subtle);
+  }
+  .detail-item-id { font-size: 10px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 2px; }
+  .detail-item-name { font-size: 12px; font-weight: 500; color: var(--text-default); margin-bottom: 2px; }
+  .detail-item-amt { font-size: 12px; color: var(--text-secondary); }
+  .detail-item-remove {
+    width: 18px; height: 18px; border: none; background: none;
+    border-radius: 4px; color: var(--text-tertiary); margin-left: auto;
+    display: grid; place-items: center; float: right; cursor: pointer;
+  }
+  .detail-item-remove:hover { background: var(--error-bg); color: var(--error); }
+  .detail-item-remove svg { width: 11px; height: 11px; }
+  .detail-reviewers { display: flex; flex-wrap: wrap; gap: 6px; }
+  .reviewer-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 20px;
+    background: var(--bg-subtle); border: 1px solid var(--border-divider);
+    font-size: 11px; color: var(--text-secondary);
+  }
+  .reviewer-avatar-sm {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: grid; place-items: center; color: #fff;
+    font-size: 8px; font-weight: 700; flex-shrink: 0;
+  }
+  .confirm-big-btn {
+    margin: 14px 16px;
+    height: 40px; width: calc(100% - 32px);
+    border-radius: 10px; border: none;
+    background: #131825; color: #fff;
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .confirm-big-btn:hover { background: #2d3748; }
+  .confirm-big-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+  .confirm-big-btn svg { width: 14px; height: 14px; }
+  .submitted-banner {
+    margin: 14px 16px; padding: 10px 14px; border-radius: 10px;
+    background: var(--success-bg); border: 1px solid var(--success-border);
+    font-size: 12px; color: var(--success); font-weight: 500;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .submitted-banner svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* typing indicator */
+  .typing-dots { display: flex; align-items: center; gap: 4px; padding: 12px 14px; }
+  .typing-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-tertiary); animation: bounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ========== Doraemon Sidebar ========== -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <span class="logo-text">Doraemon</span>
+      </div>
+      <button class="sidebar-collapse" title="Collapse">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-scroll">
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>New Chat</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        <span>Work Space</span>
+      </div>
+
+      <div class="nav-section"><span>Expert agent</span></div>
+      <div class="nav-item"><span class="agent-dot tech">T</span><span>Tech</span></div>
+      <div class="nav-item"><span class="agent-dot tech">T</span><span>Tech</span></div>
+      <div class="nav-item active"><span class="agent-dot f">F</span><span>F Expert</span></div>
+
+      <div class="nav-section">
+        <span>AI U</span>
+        <div class="section-actions">
+          <button title="New"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button title="More"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+        </div>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>AI Research</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        <span>Product Launch</span>
+      </div>
+
+      <div class="nav-section"><span>Today</span></div>
+      <div class="nav-item"><span style="color:var(--text-secondary);font-size:13px;">Tech</span>
+        <button class="icon-btn" style="width:20px;height:20px;margin-left:auto;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></svg></button>
+      </div>
+      <div class="nav-item"><span style="color:var(--text-secondary);font-size:13px;">Tech</span>
+        <svg style="margin-left:auto;width:12px;height:12px;color:var(--text-disabled);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="nav-item"><span style="color:var(--text-secondary);font-size:13px;">Tech</span>
+        <span class="dot" style="background:var(--primary);"></span>
+        <button class="icon-btn" style="width:20px;height:20px;margin-left:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></svg></button>
+      </div>
+
+      <div class="nav-section"><span>Today</span></div>
+      <div class="nav-item">
+        <span style="color:var(--text-secondary);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Marketing Campaign Id…</span>
+        <button class="icon-btn" style="width:20px;height:20px;margin-left:auto;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></svg></button>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-avatar">DC</div>
+      <div class="user-info">
+        <div class="user-name">David chen</div>
+        <div class="user-role">Data Analyst</div>
+      </div>
+      <button class="user-more" title="Menu">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========== Middle list panel ========== -->
+  <section class="list-panel">
+    <div class="list-panel-header">
+      <div class="expert-row">
+        <div class="expert-avatar">F</div>
+        <div class="expert-title-col">
+          <div class="expert-title">
+            F Expert
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="avatar-stack">
+            <div class="avatar-chip" style="background:#1C64F2;">i</div>
+            <div class="avatar-chip" style="background:#F59E0B;">A</div>
+            <div class="avatar-chip" style="background:#8B5CF6;">S</div>
+            <div class="avatar-chip" style="background:#EC4899;">D</div>
+            <div class="avatar-chip" style="background:#10B981;">L</div>
+            <div class="avatar-more">+99</div>
+          </div>
+        </div>
+        <div class="expert-actions">
+          <button class="icon-btn" title="Tasks">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
+          </button>
+          <button class="icon-btn" title="Knowledge base">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="list-filter-row">
+        <button class="chip solid">Waiting</button>
+      </div>
+      <div class="search-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="search">
+      </div>
+    </div>
+    <div class="list-count" id="listCount"><strong>4</strong> total</div>
+    <div class="list-body" id="listBody"></div>
+  </section>
+
+  <!-- ===== MAIN CHAT AREA ===== -->
+  <div class="chat-main">
+    <div class="chat-header">
+      <div class="chat-header-badge" id="chatBadge">PENDING</div>
+      <div class="chat-header-info">
+        <div class="chat-header-title" id="chatTitle">OA-2026-0410</div>
+      </div>
+      <div class="chat-header-actions">
+        <div class="chat-header-notify">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div class="chat-header-notify-dot">6</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-thread" id="chatThread"></div>
+
+    <div class="chat-input-wrap">
+      <div class="chat-input-box" id="inputBox">
+        <textarea class="chat-input-textarea" id="chatInput" rows="1"
+          placeholder="Type a message… e.g. 「把 INV-202604-0006 移出」「confirm」「OA 类型改成 IT 外部サービス」"></textarea>
+        <div class="chat-input-footer">
+          <div class="chat-input-hints">
+          </div>
+          <button class="input-send-btn" id="sendBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RIGHT DETAIL PANEL ===== -->
+  <div class="detail-panel">
+    <div class="detail-panel-head">
+      OA Details
+    </div>
+    <div id="detailContent"></div>
+  </div>
+
+</div>
+
+<script>
+// ========== DATA ==========
+const oaSessions = [
+  {
+    id: 'OA-2026-0410',
+    paymentType: 'Non-Administrative',
+    region: 'JP', currency: 'JPY',
+    oaType: '共通経費',
+    office: 'Tokyo',
+    department: 'Management-Finance',
+    createdAt: '2026-05-05 10:00',
+    estPayDay: '2026/04/10',
+    state: 'draft',
+    reviewers: ['王喆'],
+    items: [
+      { docType: 'invoice', id: 6, payeeName: 'クラウドワークス株式会社', amount: '128,500', currency: 'JPY', purpose: 'クラウドインフラ利用料', bankName: '三井住友銀行', ym: '202604' },
+      { docType: 'invoice', id: 8, payeeName: '戦略コンサル合同会社',    amount: '320,000', currency: 'JPY', purpose: '戦略コンサルティング費用', bankName: 'みずほ銀行', ym: '202604' },
+    ],
+    messages: [
+      {
+        role: 'bot', time: '2026-05-05 10:00',
+        type: 'oa-draft-card'
+      }
+    ]
+  }
+];
+
+let activeSessionId = oaSessions[0].id;
+
+// ========== HELPERS ==========
+function nowStr() {
+  return new Date().toISOString().slice(0, 16).replace('T', ' ');
+}
+function calcTotal(items) {
+  const sum = items.reduce((s, it) => s + parseFloat((it.amount || '0').replace(/,/g, '')) , 0);
+  return sum.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+function itemLabel(it) {
+  const prefix = it.docType === 'invoice' ? 'INV' : 'VCH';
+  const ym = it.ym || '202604';
+  return `${prefix}-${ym}-${String(it.id).padStart(4, '0')}`;
+}
+function activeSession() {
+  return oaSessions.find(s => s.id === activeSessionId);
+}
+
+// ========== LIST ITEMS (navigation cards — no OA Confirmation fixed entry) ==========
+const listItems = [
+  {
+    id: 'invoice-collection',
+    title: 'Invoice Collection',
+    desc: 'Submit payment request',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+    href: 'F-PAP-PAYMENT-REQUEST-v2.html',
+    meta: 'Pending · 26 invoices',
+    dot: true
+  },
+  {
+    id: 'invoice-review',
+    title: 'Invoice Review',
+    desc: 'Review and approve invoices',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>`,
+    href: 'F-PAP-PAYMENT-REVIEW-v2.html',
+    meta: 'Pending · 18 invoices',
+    dot: true
+  },
+  {
+    id: 'voucher-collection',
+    title: 'Voucher Collection',
+    desc: 'Upload reimbursement vouchers',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="9" y1="12" x2="15" y2="12"/></svg>`,
+    href: 'F-PAP-VOUCHER-COLLECTION-v2.html',
+    meta: 'Parsing · 4 vouchers',
+    dot: true
+  }
+];
+
+const OA_SESSION_STATUS = {
+  draft:     { label: 'Pending confirm', cls: 'draft' },
+  in_review: { label: 'Submitted',       cls: 'in_review' },
+  approved:  { label: 'Approved',        cls: 'approved' },
+  rejected:  { label: 'Rejected',        cls: 'rejected' },
+};
+
+function renderList() {
+  const body = document.getElementById('listBody');
+
+  // ── 3 nav cards ──
+  const navHtml = listItems.map(item => `
+    <div class="list-card nav-card" onclick="window.location='${item.href}'" style="cursor:pointer;">
+      <div class="list-card-icon">${item.icon}</div>
+      <div class="list-card-content">
+        <div class="list-card-title">
+          ${item.title}
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="list-card-desc">${item.desc}</div>
+        <div class="list-card-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${item.meta}
+        </div>
+      </div>
+      ${item.dot ? '<div class="list-card-dot"></div>' : ''}
+    </div>`).join('');
+
+  // ── OA session cards (no section label) ──
+  const sessionHtml = oaSessions.map(s => {
+    const isActive = s.id === activeSessionId;
+    return `
+    <div class="list-card session-card${isActive ? ' active' : ''}" data-sid="${s.id}" style="cursor:pointer;">
+      <div class="list-card-content">
+        <div class="list-card-title">${s.id}</div>
+        <div class="list-card-desc">OA confirm</div>
+      </div>
+      ${s.state === 'draft' ? '<div class="list-card-dot"></div>' : ''}
+    </div>`;
+  }).join('');
+
+  body.innerHTML = navHtml + sessionHtml;
+
+  // bind session click
+  body.querySelectorAll('[data-sid]').forEach(el => {
+    el.addEventListener('click', () => switchSession(el.dataset.sid));
+  });
+}
+
+// ========== RENDER SESSION LIST ==========
+function renderSessionList() {
+  renderList();
+  const total = listItems.length + oaSessions.length;
+  document.getElementById('listCount').innerHTML = `<strong>${total}</strong> total`;
+}
+
+// ========== RENDER CHAT THREAD ==========
+function renderThread() {
+  const s = activeSession();
+  const thread = document.getElementById('chatThread');
+  thread.innerHTML = '';
+
+  // Date divider removed
+
+  s.messages.forEach(m => {
+    if (m.type === 'oa-draft-card') {
+      thread.appendChild(buildDraftCardMsg(s, m.time, m.prefixText, m.itemsSnapshot, m.oaTypeSnapshot));
+    } else if (m.role === 'bot') {
+      thread.appendChild(buildBotMsg(m.text, m.time));
+    } else if (m.role === 'user') {
+      thread.appendChild(buildUserMsg(m.text, m.time));
+    } else if (m.role === 'system') {
+      thread.appendChild(buildSystemMsg(m.text, m.type || 'success', m.time));
+    }
+  });
+
+  // Typing indicator placeholder (hidden)
+  const typing = document.createElement('div');
+  typing.className = 'msg-bot'; typing.id = 'typingIndicator'; typing.style.display = 'none';
+  typing.innerHTML = `<div class="msg-bot-avatar">D</div>
+    <div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  thread.appendChild(typing);
+
+  thread.scrollTop = thread.scrollHeight;
+}
+
+const BOT_AVATAR = `<div class="msg-bot-avatar">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="8" width="18" height="12" rx="3"/>
+    <path d="M8 8V6a4 4 0 0 1 8 0v2"/>
+    <circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="14" r="1" fill="currentColor" stroke="none"/>
+    <path d="M9 18h6"/>
+  </svg>
+</div>`;
+
+const MSG_ICON_ROW = ``;
+
+function buildDraftCardMsg(s, time, prefixText, itemsSnapshot, oaTypeSnapshot) {
+  const items = itemsSnapshot || s.items;
+  const oaType = oaTypeSnapshot || s.oaType;
+  const mentionStr = s.reviewers.map(r => `<span class="mention">@${r}</span>`).join(' ');
+  const introLine = prefixText
+    ? `${prefixText}<br>生成以下 OA 草稿，请核对后确认提交。`
+    : `${mentionStr} 系统已自动扫描符合条件的记录，生成以下 OA 草稿，请核对后确认提交。`;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-bot';
+  wrap.innerHTML = `
+    ${BOT_AVATAR}
+    <div class="msg-bot-body">
+      <div class="msg-bot-meta">
+        <span class="msg-bot-name">Xiaobao</span>
+        <span class="msg-time">${time}</span>
+      </div>
+      <div class="msg-bubble">
+        <p>${introLine}</p>
+        <hr class="md-hr">
+        <p class="md-heading">[OA Draft] <span class="md-tag">${s.id}</span></p>
+        <table class="md-table">
+          <tr><th>Type</th><td>${oaType}</td></tr>
+          <tr><th>Office</th><td>${s.office || 'Tokyo'}</td></tr>
+          <tr><th>Content</th><td>
+            <table class="md-table" style="margin:0;">
+              <thead><tr><th>ID</th><th>Currency</th><th>Amount</th><th>Payee Name</th><th>Bank Name</th></tr></thead>
+              <tbody>${items.map(it =>
+                `<tr><td>${itemLabel(it)}</td><td>${it.currency}</td><td>${it.amount}</td><td>${it.payeeName}</td><td>${it.bankName || '—'}</td></tr>`
+              ).join('')}</tbody>
+            </table>
+          </td></tr>
+          <tr><th>Currency</th><td>${s.currency}</td></tr>
+          <tr><th>Amount</th><td><strong>${calcTotal(items)} ${s.currency}</strong></td></tr>
+          <tr><th>Estimated Payment Date</th><td>${s.estPayDay}</td></tr>
+          <tr><th>所在部门</th><td>${s.department || 'Management-Finance'}</td></tr>
+        </table>
+      </div>
+      ${MSG_ICON_ROW}
+    </div>`;
+
+  return wrap;
+}
+
+function buildBotMsg(text, time) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-bot';
+  const htmlText = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>')
+    .replace(/@([\w.@+\u3040-\u30ff\u4e00-\u9fa5 ]+?)(\([^)]*\))?(?=\s|$)/g, (_, name, email) =>
+      `<span class="mention">@${name}${email ? `<span style="font-weight:400;opacity:0.75;">${email}</span>` : ''}</span>`)
+    .replace(/`([^`]+)`/g, '<span class="inline-code">$1</span>');
+  wrap.innerHTML = `${BOT_AVATAR}
+    <div class="msg-bot-body">
+      <div class="msg-bot-meta"><span class="msg-bot-name">Xiaobao</span><span class="msg-time">${time}</span></div>
+      <div class="msg-bubble">${htmlText}</div>
+      ${MSG_ICON_ROW}
+    </div>`;
+  return wrap;
+}
+
+function buildUserMsg(text, time) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-user';
+  const htmlText = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  wrap.innerHTML = `<div>
+    <div class="msg-user-time">${time}</div>
+    <div class="msg-user-bubble">${htmlText}</div>
+  </div>`;
+  return wrap;
+}
+
+function buildSystemMsg(text, type, time) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-system';
+  const iconMap = {
+    success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    warn: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>`,
+    info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`
+  };
+  const htmlText = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  wrap.innerHTML = `<div class="msg-system-bubble ${type !== 'success' ? type : ''}">
+    ${iconMap[type] || iconMap.success} ${htmlText}
+  </div>`;
+  return wrap;
+}
+
+// ========== RENDER DETAIL PANEL ==========
+function renderDetailPanel() {
+  const s = activeSession();
+  const total = calcTotal(s.items);
+  const submitted = s.state !== 'draft';
+  const el = document.getElementById('detailContent');
+
+  const itemsHtml = s.items.map(it => `
+    <div class="detail-item-card" data-doctype="${it.docType}" data-id="${it.id}">
+      <div style="display:flex;align-items:flex-start;">
+        <div style="flex:1;">
+          <div class="detail-item-id">${itemLabel(it)} · ${it.docType.toUpperCase()}</div>
+          <div class="detail-item-name">${it.payeeName}</div>
+          <div class="detail-item-amt">${it.amount} ${it.currency}</div>
+        </div>
+        ${!submitted ? `<button class="detail-item-remove" data-doctype="${it.docType}" data-id="${it.id}" title="Remove">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>` : ''}
+      </div>
+    </div>`).join('');
+
+  const reviewersHtml = s.reviewers.map(r =>
+    `<div class="reviewer-chip">
+      <div class="reviewer-avatar-sm">${r[0].toUpperCase()}</div>
+      ${r}
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">Summary</div>
+      <div class="detail-amount-big" id="detailTotal">${total}</div>
+      <div class="detail-amount-cur">${s.currency}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">OA Info</div>
+      <div class="detail-field"><span class="detail-field-label">OA ID</span><span class="detail-field-val">${s.id}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Type</span><span class="detail-field-val" id="detailOaType">${s.oaType}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Office</span><span class="detail-field-val">${s.office || '—'}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Currency</span><span class="detail-field-val">${s.currency}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Amount</span><span class="detail-field-val"><strong>${total}</strong></span></div>
+      <div class="detail-field"><span class="detail-field-label">Est. Pay</span><span class="detail-field-val">${s.estPayDay}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Department</span><span class="detail-field-val">${s.department || '—'}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Status</span>
+        <span class="oa-tag ${s.state === 'draft' ? 'draft' : s.state === 'in_review' ? 'in_review' : s.state}">
+          ${s.state === 'draft' ? 'Draft' : s.state === 'in_review' ? 'In Review' : s.state}
+        </span>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Items (${s.items.length})</div>
+      <div class="detail-items-list" id="detailItemsList">${itemsHtml}</div>
+    </div>`;
+
+  // Confirm / submitted button
+  if (submitted) {
+    const banner = document.createElement('div');
+    banner.className = 'submitted-banner';
+    banner.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> OA submitted · In Review`;
+    el.appendChild(banner);
+  }
+
+  // Bind remove buttons in detail panel
+  el.querySelectorAll('.detail-item-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const docType = btn.dataset.doctype;
+      const id = Number(btn.dataset.id);
+      sendMessage(`把 ${docType === 'invoice' ? 'INV' : 'VCH'}-${id} 移出`);
+    });
+  });
+}
+
+// ========== SWITCH SESSION ==========
+function switchSession(id) {
+  activeSessionId = id;
+  const s = activeSession();
+  document.getElementById('chatTitle').textContent = s.id;
+  const badge = document.getElementById('chatBadge');
+  if (badge) badge.textContent = s.state === 'draft' ? 'PENDING' : s.state === 'in_review' ? 'IN REVIEW' : s.state.toUpperCase();
+  renderSessionList();
+  renderThread();
+  renderDetailPanel();
+}
+
+// ========== AI PARSER ==========
+function parseAndExecute(text) {
+  const s = activeSession();
+  const lower = text.toLowerCase().trim();
+
+  // Confirm
+  if (/^(confirm|lgtm|没问题|提交|确认|ok$|好的|approve$)/i.test(lower) ||
+      lower.includes('confirm') || lower.includes('提交') || lower.includes('没问题') || lower.includes('确认提交')) {
+    return doConfirm(s);
+  }
+
+  // Remove
+  const removeMatch = text.match(/(?:把|移出|移除|remove|delete)\s*(?:#)?(inv|vch|invoice|voucher)[^\d]*(\d+)/i);
+  if (removeMatch) {
+    const docType = removeMatch[1].toLowerCase().startsWith('inv') ? 'invoice' : 'voucher';
+    const id = Number(removeMatch[2]);
+    return doRemove(s, docType, id);
+  }
+
+  // Add
+  const addMatch = text.match(/(?:加|补充|加入|加进来|add|include)\s*(?:#)?(inv|vch|invoice|voucher)[^\d]*(\d+)/i);
+  if (addMatch) {
+    const docType = addMatch[1].toLowerCase().startsWith('inv') ? 'invoice' : 'voucher';
+    const id = Number(addMatch[2]);
+    return doAdd(s, docType, id);
+  }
+
+  // Change OA type
+  if (text.includes('共通経費') || text.includes('共通')) return doChangeType(s, '共通経費');
+  if (text.includes('IT 外部') || text.includes('IT外部') || text.includes('外部サービス')) return doChangeType(s, 'IT 外部サービス');
+  if (text.includes('総務') || text.includes('备品') || text.includes('備品')) return doChangeType(s, '総務備品購入');
+
+  // List items
+  if (lower.includes('包含') || lower.includes('有哪些') || lower.includes('list') || lower.includes('show') || lower.includes('查看')) {
+    return doListItems(s);
+  }
+
+  // Default
+  return `收到。我支持以下操作：\n• 移除条目：「把 INV-202604-0006 移出」\n• 补充条目：「把 INV-202604-0011 加进来」\n• 修改类型：「OA 类型改成 IT 外部サービス」\n• 查看明细：「现在包含哪些」\n• 确认提交：「confirm」`;
+}
+
+function doConfirm(s) {
+  if (s.items.length === 0) return { systemMsg: '⚠ 当前 OA 无有效条目，无法提交。', type: 'warn' };
+  s.state = 'in_review';
+  return { systemMsg: `✓ OA ${s.id} 已于 ${nowStr()} 正式提交，状态变更为 In Review。` , type: 'success', refresh: true };
+}
+
+function doRemove(s, docType, id) {
+  if (s.state !== 'draft') return `OA 已提交，无法修改。`;
+  const idx = s.items.findIndex(it => it.docType === docType && it.id === id);
+  if (idx === -1) return `找不到 #${docType === 'invoice' ? 'INV' : 'VCH'}-${id}，请检查 ID。`;
+  s.items.splice(idx, 1);
+  if (s.items.length === 0) return { updateMsg: `已将 #${docType === 'invoice' ? 'INV' : 'VCH'}-${id} 移出。\n⚠ 当前 OA 已无条目，请补充或不要提交。`, refresh: true };
+  return { updateMsg: `已将 #${docType === 'invoice' ? 'INV' : 'VCH'}-${id} 从本 OA 中移除。`, refresh: true };
+}
+
+function doAdd(s, docType, id) {
+  if (s.state !== 'draft') return 'OA 已提交，无法修改。';
+  if (s.items.find(it => it.docType === docType && it.id === id))
+    return `#${docType === 'invoice' ? 'INV' : 'VCH'}-${id} 已在本 OA 中。`;
+  const mockItems = {
+    invoice: { 11: { payeeName: 'サブスクリプションサービス株式会社', amount: '98,000', currency: 'JPY' } },
+    voucher: {}
+  };
+  const mock = mockItems[docType]?.[id];
+  if (!mock) return `找不到 #${docType === 'invoice' ? 'INV' : 'VCH'}-${id}，请先确认该条目已审核通过（state = checked）。`;
+  if (mock.currency !== s.currency) return `币种不匹配（${mock.currency} ≠ ${s.currency}），不允许跨币种合并。`;
+  s.items.push({ docType, id, payeeName: mock.payeeName, amount: mock.amount, currency: mock.currency, purpose: '' });
+  return { updateMsg: `已将 #${docType === 'invoice' ? 'INV' : 'VCH'}-${id}（${mock.payeeName}）加入本 OA。`, refresh: true };
+}
+
+function doChangeType(s, newType) {
+  if (s.state !== 'draft') return 'OA 已提交，无法修改。';
+  const old = s.oaType;
+  s.oaType = newType;
+  return { updateMsg: `OA 类型已从「${old}」更新为「${newType}」。`, refresh: true };
+}
+
+function doListItems(s) {
+  const lines = s.items.map(it => `• ${itemLabel(it)}  ${it.payeeName}  ${it.amount} ${it.currency}`).join('\n');
+  const total = calcTotal(s.items);
+  return `当前 OA ${s.id} 包含 ${s.items.length} 条：\n${lines}\n\n合计：${total} ${s.currency}`;
+}
+
+// ========== SEND MESSAGE ==========
+function sendMessage(text) {
+  if (!text.trim()) return;
+  const s = activeSession();
+
+  // Add user message
+  s.messages.push({ role: 'user', text, time: nowStr() });
+  renderThread();
+
+  // Show typing
+  setTimeout(() => {
+    document.getElementById('typingIndicator').style.display = 'flex';
+    document.getElementById('chatThread').scrollTop = 99999;
+  }, 100);
+
+  setTimeout(() => {
+    document.getElementById('typingIndicator').style.display = 'none';
+    const result = parseAndExecute(text);
+
+    if (typeof result === 'string') {
+      s.messages.push({ role: 'bot', text: result, time: nowStr() });
+    } else if (result) {
+      if (result.updateMsg && result.refresh && s.state === 'draft') {
+        // combine update notice + new OA draft into one message, snapshot current state
+        s.messages.push({ role: 'bot', type: 'oa-draft-card', prefixText: result.updateMsg, time: nowStr(), itemsSnapshot: JSON.parse(JSON.stringify(s.items)), oaTypeSnapshot: s.oaType });
+      } else {
+        if (result.botMsg) s.messages.push({ role: 'bot', text: result.botMsg, time: nowStr() });
+        if (result.systemMsg) s.messages.push({ role: 'system', text: result.systemMsg, type: result.type || 'success', time: nowStr() });
+        if (result.refresh && s.state === 'draft') {
+          s.messages.push({ role: 'bot', type: 'oa-draft-card', time: nowStr() });
+        }
+      }
+    }
+
+    renderThread();
+    if (result?.refresh) {
+      renderDetailPanel();
+      renderSessionList();
+    }
+  }, 900);
+}
+
+// ========== EVENT BINDING ==========
+const inputEl = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+
+inputEl.addEventListener('input', () => {
+  sendBtn.classList.toggle('active', inputEl.value.trim().length > 0);
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + 'px';
+});
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    const val = inputEl.value.trim();
+    if (val) { sendMessage(val); inputEl.value = ''; sendBtn.classList.remove('active'); inputEl.style.height = 'auto'; }
+  }
+});
+sendBtn.addEventListener('click', () => {
+  const val = inputEl.value.trim();
+  if (val) { sendMessage(val); inputEl.value = ''; sendBtn.classList.remove('active'); inputEl.style.height = 'auto'; }
+});
+
+document.querySelectorAll('.hint-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    inputEl.value = btn.dataset.msg;
+    inputEl.dispatchEvent(new Event('input'));
+    inputEl.focus();
+  });
+});
+
+// ========== INIT ==========
+switchSession(activeSessionId);
+</script>
+</body>
+</html>
