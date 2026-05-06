@@ -166,6 +166,26 @@ html,body{width:100%;height:100%;overflow:hidden;}
   margin-bottom:10px;padding-left:2px;
 }
 
+/* ── ALERTS SECTION ── */
+.alerts-sec-label{
+  display:flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:700;
+  color:#c0392b;
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:10px;padding-left:2px;
+}
+.alerts-pulse-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#ff3b30;flex-shrink:0;
+  box-shadow:0 0 0 0 rgba(255,59,48,.5);
+  animation:alertDotPulse 1.8s ease-in-out infinite;
+}
+@keyframes alertDotPulse{
+  0%{box-shadow:0 0 0 0 rgba(255,59,48,.5);}
+  60%{box-shadow:0 0 0 6px rgba(255,59,48,0);}
+  100%{box-shadow:0 0 0 0 rgba(255,59,48,0);}
+}
+
 /* ── QUICK PICK COLLAPSED CARD ── */
 .qp-card{
   background:rgba(255,255,255,.55);
@@ -396,57 +416,131 @@ html,body{width:100%;height:100%;overflow:hidden;}
 .todo-overdue{font-size:11px;font-weight:700;color:#ff3b30;letter-spacing:.5px;}
 
 /* ── URGENT COLLAPSE ENTRY ── */
+/* ── COLLAPSED ENTRY CARD ── */
 .urgent-entry-card{
-  background:rgba(255,255,255,.55);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);
-  backdrop-filter:blur(20px) saturate(180%);
-  border:1px solid rgba(255,255,255,.6);
-  border-left:2.5px solid rgba(255,59,48,.5);
+  background:rgba(211,47,47,.08);
+  border:1.5px solid #d32f2f;
   border-radius:14px;
   padding:13px 16px;
   cursor:pointer;
   transition:all .2s ease;
-  box-shadow:0 4px 16px rgba(255,59,48,.07), inset 0 1px 0 rgba(255,255,255,.5);
+  box-shadow:0 4px 20px rgba(211,47,47,.15);
   margin-bottom:8px;
   user-select:none;
 }
 .urgent-entry-card:hover{
-  background:rgba(255,255,255,.7);
-  box-shadow:0 8px 24px rgba(255,59,48,.1), inset 0 1px 0 rgba(255,255,255,.6);
+  background:rgba(211,47,47,.13);
+  box-shadow:0 6px 28px rgba(211,47,47,.22);
 }
 .urgent-entry-row{display:flex;align-items:center;gap:10px;}
 .urgent-entry-left{flex:1;min-width:0;}
 .urgent-entry-title{
-  display:flex;align-items:center;gap:8px;
-  font-size:13px;font-weight:700;color:rgba(0,0,0,.8);line-height:1.4;
+  display:flex;align-items:center;gap:9px;
+  font-size:13.5px;font-weight:800;color:#b71c1c;line-height:1.4;
 }
 .urgent-entry-badge{
   display:inline-flex;align-items:center;justify-content:center;
-  min-width:20px;height:18px;padding:0 6px;
-  border-radius:9px;font-size:11px;font-weight:700;
-  background:rgba(255,59,48,.12);color:#c0392b;border:1px solid rgba(255,59,48,.22);
+  min-width:22px;height:20px;padding:0 7px;
+  border-radius:10px;font-size:11px;font-weight:800;
+  background:#d32f2f;color:#fff;border:none;
+  animation:badgePulse 1.6s ease-in-out infinite;
 }
-.urgent-entry-sub{margin-top:3px;font-size:11.5px;color:rgba(0,0,0,.45);line-height:1.4;}
+@keyframes badgePulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(211,47,47,.6);}
+  50%{box-shadow:0 0 0 5px rgba(211,47,47,0);}
+}
+.urgent-entry-icon{
+  font-size:16px;flex-shrink:0;
+  animation:iconFlash 2s ease-in-out infinite;
+}
+@keyframes iconFlash{
+  0%,100%{opacity:1;}
+  45%{opacity:1;}
+  50%{opacity:.3;}
+  55%{opacity:1;}
+}
+.urgent-entry-sub{
+  margin-top:3px;font-size:11.5px;
+  color:#c62828;font-weight:600;line-height:1.4;
+}
 .urgent-entry-chevron{
-  width:24px;height:24px;border-radius:12px;
+  width:26px;height:26px;border-radius:13px;
   display:flex;align-items:center;justify-content:center;
-  color:rgba(0,0,0,.35);transition:transform .22s ease;flex-shrink:0;
+  background:rgba(211,47,47,.12);
+  color:#d32f2f;transition:transform .22s ease;flex-shrink:0;
 }
 .urgent-entry-chevron.open{transform:rotate(180deg);}
-/* Expanded header bar (no outer box) */
+
+/* ── EXPANDED HEADER BAR ── */
 .urgent-expanded-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:2px 4px 8px;
+  padding:2px 4px 10px;
   cursor:pointer;user-select:none;
 }
 .urgent-expanded-header-label{
-  display:flex;align-items:center;gap:7px;
-  font-size:12px;font-weight:700;color:#c0392b;letter-spacing:.03em;
+  display:flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:800;color:#b71c1c;letter-spacing:.04em;
+  text-transform:uppercase;
 }
 .urgent-expanded-collapse{
   display:flex;align-items:center;gap:4px;
-  font-size:11px;color:rgba(0,0,0,.35);
+  font-size:11px;font-weight:600;color:#d32f2f;
 }
+
+/* ── EXPANDED ALERT CARDS ── */
+.alert-card-view{
+  background:#fff;
+  border:1px solid rgba(211,47,47,.18);
+  border-left:5px solid #d32f2f;
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:8px;
+  cursor:pointer;
+  transition:box-shadow .18s, border-color .18s;
+  box-shadow:0 2px 8px rgba(211,47,47,.07);
+  position:relative;
+}
+.alert-card-view:hover{
+  box-shadow:0 4px 16px rgba(211,47,47,.14);
+  border-color:rgba(211,47,47,.35);
+}
+.alert-card-type-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:800;letter-spacing:.06em;
+  padding:2px 8px;border-radius:5px;
+  background:#d32f2f;color:#fff;
+  margin-bottom:7px;text-transform:uppercase;
+}
+.alert-card-title{
+  font-size:13px;font-weight:700;color:rgba(0,0,0,.85);
+  line-height:1.4;margin-bottom:6px;
+}
+.alert-card-title em{
+  font-style:normal;font-weight:800;color:rgba(0,0,0,.9);
+}
+.alert-card-error-type{
+  font-family:'SF Mono','Fira Code',monospace;
+  font-size:11.5px;font-weight:700;
+  color:#c62828;
+  background:rgba(211,47,47,.08);
+  padding:0 5px;border-radius:4px;
+}
+.alert-card-ddl{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;color:#b71c1c;margin-bottom:6px;
+}
+.alert-card-desc{
+  font-size:12px;color:rgba(0,0,0,.55);line-height:1.5;
+}
+.alert-card-action{
+  position:absolute;top:50%;right:14px;transform:translateY(-50%);
+  font-size:11px;font-weight:700;
+  padding:5px 11px;border-radius:8px;
+  background:rgba(211,47,47,.1);color:#c62828;
+  border:1px solid rgba(211,47,47,.22);cursor:pointer;
+  transition:background .15s;white-space:nowrap;
+}
+.alert-card-action:hover{background:rgba(211,47,47,.2);}
 
 /* ── TODO CARD HOVER BUTTON ── */
 .g-card.todo-card{position:relative;}
@@ -664,6 +758,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
 .greeting{font-size:17px;font-weight:700;color:rgba(0,0,0,.85);margin-bottom:4px;}
 .greeting-sub{font-size:13px;color:rgba(0,0,0,.45);margin-bottom:20px;}
 
+
 /* ── VIEWS ── */
 .view{display:none;}
 .view.active{display:block;}
@@ -728,6 +823,8 @@ html,body{width:100%;height:100%;overflow:hidden;}
 
     <!-- SCROLLABLE MAIN -->
     <div class="ds3-scrollbar">
+
+
       <div class="ds3-content">
 
         <!-- DATE -->
@@ -740,6 +837,16 @@ html,body{width:100%;height:100%;overflow:hidden;}
 
         <!-- ══ PDM ══ -->
         <div class="view" id="view-pdm">
+
+          <!-- URGENT ALERTS -->
+          <div class="section" id="urgentSection" style="display:none;">
+            <div class="alerts-sec-label">
+              <span class="alerts-pulse-dot"></span>
+              Alerts
+            </div>
+            <div id="urgentTopList"></div>
+          </div>
+
           <div class="section">
             <div class="sec-label">Quick pick</div>
             <!-- Collapsed row -->
@@ -1175,56 +1282,88 @@ let urgentCollapsed = true;
 
 function toggleUrgentCollapse(){
   urgentCollapsed = !urgentCollapsed;
-  renderPdmTodo();
+  renderUrgentTop();
 }
 
-function renderPdmTodo(){
-  const todos = pdmTasks.filter((_,i)=> pdmDoingIdx < 0 || i !== pdmDoingIdx);
-  const todoATickets = (typeof aTickets === 'undefined')
-    ? []
-    : aTickets.filter((_, i) => i !== aTicketDoingIdx);
-  const totalCount = todos.length + todoATickets.length;
-  const overdueCount = todos.filter(t=>t.overdue).length + todoATickets.length;
-  document.getElementById('pdmTodoCount').textContent = totalCount + ' ·';
-  document.getElementById('pdmTodoOverdue').textContent = overdueCount + ' OVERDUE';
-
+// shared: build individual urgent A-ticket cards
+// showBtn: whether to show the ▶ switch-to-Doing button (To Do section)
+// when showBtn=false, use the richer alert-card-view style (Alerts section)
+function makeUrgentCards(tickets, showBtn = true){
   const urgentTag = `<span style="flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
     padding:2px 7px;border-radius:6px;
     background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">⚠ Urgent</span>`;
 
-  const needCollapse = todoATickets.length > 2;
-
-  // individual cards html (used in both paths)
-  const makeCards = (tickets) => tickets.map((at) => {
+  return tickets.map((at) => {
     const realIdx = aTickets.indexOf(at);
     const desc = at.label.replace(/^\[WARNING\]\s+\S+\s+—\s+/, '');
-    return `
-    <div class="g-card todo-card urgent-border" style="background:rgba(255,255,255,.5);">
-      <div class="card-title" style="padding-right:36px;display:flex;align-items:center;gap:6px;">${urgentTag}<span>${at.title}</span></div>
-      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${at.ddl} · 今日必处理</div>
-      <div class="card-desc"><div style="color:rgba(0,0,0,.6);font-size:12px;line-height:1.5;">${desc}</div></div>
+
+    if(!showBtn){
+      // Alerts section — rich card style
+      // parse title: "[system] service — error_type"
+      const titleMatch = at.title.match(/^\[([^\]]+)\]\s+(.+?)\s+—\s+(.+)$/);
+      const system    = titleMatch ? titleMatch[1] : '';
+      const service   = titleMatch ? titleMatch[2] : at.title;
+      const errorType = titleMatch ? titleMatch[3] : '';
+      return `
+      <div class="alert-card-view" onclick="window.location.href='chat_urgent_warning.html?scene=publisher-alert'">
+        <div class="alert-card-type-tag">⚠ Urgent · ${system}</div>
+        <div class="alert-card-title">
+          <em>${service}</em>
+          ${errorType ? `<span class="alert-card-error-type">${errorType}</span>` : ''}
+        </div>
+        <div class="alert-card-ddl">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#b71c1c" stroke-width="1.6"/><path d="M8 5v3.5l2 1.5" stroke="#b71c1c" stroke-width="1.5" stroke-linecap="round"/></svg>
+          DDL ${at.ddl} · 已逾期
+        </div>
+        <div class="alert-card-desc">${desc}</div>
+        <button class="alert-card-action" onclick="event.stopPropagation();window.location.href='chat_urgent_warning.html?scene=publisher-alert'">View Details →</button>
+      </div>`;
+    }
+
+    // To Do section — standard card style
+    const btn = `
       <button class="todo-start-btn" onclick="event.stopPropagation();window.switchToDoing(-1,${realIdx})" title="切换为 Doing">
         <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6-10 6V0z"/></svg>
-      </button>
+      </button>`;
+    return `
+    <div class="g-card todo-card" style="background:rgba(255,255,255,.5);">
+      <div class="card-title" style="padding-right:36px;display:flex;align-items:center;gap:6px;">${urgentTag}<span>${at.title}</span></div>
+      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${at.ddl}</div>
+      <div class="card-desc"><div style="color:rgba(0,0,0,.6);font-size:12px;line-height:1.5;">${desc}</div></div>
+      ${btn}
     </div>`;
   }).join('');
+}
 
-  let urgentHtml = '';
-  if (!needCollapse) {
-    // ≤1 card: render directly
-    urgentHtml = makeCards(todoATickets);
-  } else if (urgentCollapsed) {
-    // Collapsed: single entry card
-    const titles = todoATickets.map(at => at.title.replace(/^\[.*?\]\s*/, '')).join('、');
-    urgentHtml = `
+// render urgent section above Quick pick
+function renderUrgentTop(){
+  if(typeof aTickets === 'undefined') return;
+  const todoUrgent = aTickets.filter((_,i) => i !== aTicketDoingIdx);
+  const section = document.getElementById('urgentSection');
+  if(!section) return;
+
+  if(todoUrgent.length === 0){
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+
+  const needCollapse = todoUrgent.length > 2;
+  let html = '';
+
+  if(!needCollapse){
+    html = makeUrgentCards(todoUrgent, false);
+  } else if(urgentCollapsed){
+    html = `
     <div class="urgent-entry-card ds3-task-appear" onclick="toggleUrgentCollapse()">
       <div class="urgent-entry-row">
+        <span class="urgent-entry-icon">🚨</span>
         <div class="urgent-entry-left">
           <div class="urgent-entry-title">
-            ⚠ Urgent 告警
-            <span class="urgent-entry-badge">${todoATickets.length}</span>
+            Urgent Alerts
+            <span class="urgent-entry-badge">${todoUrgent.length}</span>
           </div>
-          <div class="urgent-entry-sub">今日 DDL · 点击展开处理</div>
+          <div class="urgent-entry-sub">Requires immediate attention!</div>
         </div>
         <div class="urgent-entry-chevron">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1232,20 +1371,35 @@ function renderPdmTodo(){
       </div>
     </div>`;
   } else {
-    // Expanded: lightweight header bar + cards directly (no outer wrapper)
-    urgentHtml = `
+    html = `
     <div class="urgent-expanded-header ds3-task-appear" onclick="toggleUrgentCollapse()">
       <div class="urgent-expanded-header-label">
-        ⚠ Urgent 告警
-        <span class="urgent-entry-badge">${todoATickets.length}</span>
+        🚨 Urgent Alerts
+        <span class="urgent-entry-badge">${todoUrgent.length}</span>
       </div>
       <span class="urgent-expanded-collapse">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 8l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         收起
       </span>
     </div>
-    ${makeCards(todoATickets)}`;
+    ${makeUrgentCards(todoUrgent, false)}`;
   }
+
+  document.getElementById('urgentTopList').innerHTML = html;
+}
+
+function renderPdmTodo(){
+  const todos = pdmTasks.filter((_,i)=> pdmDoingIdx < 0 || i !== pdmDoingIdx);
+  const todoATickets = (typeof aTickets === 'undefined')
+    ? []
+    : aTickets.filter((_,i) => i !== aTicketDoingIdx);
+  const totalCount = todos.length + todoATickets.length;
+  const overdueCount = todos.filter(t=>t.overdue).length + todoATickets.length;
+  document.getElementById('pdmTodoCount').textContent = totalCount + ' ·';
+  document.getElementById('pdmTodoOverdue').textContent = overdueCount + ' OVERDUE';
+
+  // urgent A-tickets: flat display, no collapse
+  const urgentHtml = makeUrgentCards(todoATickets);
 
   document.getElementById('pdmTodoList').innerHTML = urgentHtml + todos.map((t, listIdx)=>{
     const realIdx = pdmTasks.indexOf(t);
@@ -1265,6 +1419,7 @@ function switchToDoing(newDoingIdx){
   pdmDoingIdx = newDoingIdx;
   renderPdmDoing();
   renderPdmTodo();
+  renderUrgentTop();
   // Scroll doing card into view smoothly
   const card = document.getElementById('pdmDoingCard');
   if(card) card.scrollIntoView({behavior:'smooth', block:'nearest'});
@@ -1305,39 +1460,6 @@ const aTickets = [
     label: '[WARNING] publisher — production 回滚验证超时',
     url: 'chat_urgent_warning.html?scene=publisher-alert'
   },
-  {
-    id: 'A-004',
-    title: '[cs-gateway] auth-service — service_down',
-    severity: 'Urgent',
-    owner: '王彬-Wang Bin',
-    ddl: '2026-04-30',
-    type: 'bug',
-    dept: 'Tech',
-    label: '[WARNING] cs-gateway — auth-service 认证接口连续 5xx，错误率 38%',
-    url: 'chat_urgent_warning.html?scene=publisher-alert'
-  },
-  {
-    id: 'A-005',
-    title: '[data-pipeline] etl-worker — queue_backlog',
-    severity: 'Urgent',
-    owner: '王彬-Wang Bin',
-    ddl: '2026-04-30',
-    type: 'bug',
-    dept: 'Tech',
-    label: '[WARNING] data-pipeline — ETL 队列积压超 10k，消费延迟 > 15min',
-    url: 'chat_urgent_warning.html?scene=publisher-alert'
-  },
-  {
-    id: 'A-006',
-    title: '[payment] checkout-api — high_latency',
-    severity: 'Urgent',
-    owner: '王彬-Wang Bin',
-    ddl: '2026-04-30',
-    type: 'bug',
-    dept: 'Tech',
-    label: '[WARNING] payment — checkout-api P99 延迟从 180ms 飙升至 2.4s',
-    url: 'chat_urgent_warning.html?scene=publisher-alert'
-  }
 ];
 let aTicketDoingIdx = 0; // index in aTickets currently in Doing; -1 = none
 
@@ -1346,14 +1468,14 @@ function renderATicketDoing() {
   // strip "[WARNING] system — " prefix from label for cleaner display
   const desc = at.label.replace(/^\[WARNING\]\s+\S+\s+—\s+/, '');
   document.getElementById('pdmDoingCard').innerHTML = `
-    <div class="g-card doing ds3-card-appear doing-card-anim" style="cursor:pointer;" onclick="window.location.href='${at.url}'">
+    <div class="g-card doing ds3-card-appear doing-card-anim">
       <div class="card-title" style="display:flex;align-items:center;gap:6px;">
         <span style="flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
           padding:2px 7px;border-radius:6px;
           background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">⚠ Urgent</span>
         <span>${at.title}</span>
       </div>
-      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${at.ddl} · 今日必处理</div>
+      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${at.ddl}</div>
       <div class="doing-card-desc">${desc}</div>
     </div>`;
   const ref = document.getElementById('pdmDoingBodyRef');
@@ -1368,6 +1490,7 @@ window.switchToDoing = function(newDoingIdx, aIdx){
     pdmDoingIdx = -1;
     renderATicketDoing();
     renderPdmTodo();
+    renderUrgentTop();
     document.getElementById('pdmDoingCard').scrollIntoView({behavior:'smooth', block:'nearest'});
   } else {
     aTicketDoingIdx = -1; // no A-ticket in Doing when a regular task takes over
@@ -1377,7 +1500,8 @@ window.switchToDoing = function(newDoingIdx, aIdx){
 };
 
 if(user.view==='pdm'){
-  window.switchToDoing(-1, 0);
+  window.switchToDoing(0); // default Doing: 智能客服周会纪要 + Action 同步
+  renderUrgentTop();
 }
 
 /* ── DOING INPUT ── */
