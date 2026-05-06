@@ -701,6 +701,8 @@
                 <div class="sidebar-item" data-scene="create-je"><span class="sidebar-item-text">创建 JE 凭证</span></div>
                 <div class="sidebar-item" data-scene="delete-je"><span class="sidebar-item-text">删除 JE 凭证</span></div>
                 <div class="sidebar-item" data-scene="delete-je-blocked"><span class="sidebar-item-text">删除 JE — F 系统创建</span></div>
+                <div class="sidebar-item" data-scene="edit-je"><span class="sidebar-item-text">编辑 JE 凭证</span></div>
+                <div class="sidebar-item" data-scene="edit-je-blocked"><span class="sidebar-item-text">编辑 JE — F 系统创建</span></div>
                 <div class="sidebar-item"><span class="sidebar-item-text">咨询D系统分组功能改进</span></div>
                 <div class="sidebar-item"><span class="sidebar-item-text">定时发送os系统消息提醒...</span></div>
                 <div class="sidebar-item"><span class="sidebar-item-text">查询D系统邮箱可用操作</span></div>
@@ -1125,6 +1127,106 @@
             }
         },
 
+        'edit-je': {
+            title: '编辑 JE 凭证',
+            placeholder: '提供 JE 编号及需要修改的字段…',
+            messages: [
+                { role: 'user', text: '帮我修改一条JE的信息' },
+                { role: 'ai',   text: '请提供 JE 编号以及需要修改的字段。' },
+                { role: 'user', text: 'JE-2026-043-0012，备注改为「四月服务费结算」，金额改为 60000' },
+                {
+                    role: 'ai', html: true,
+                    text: `<details class="ai-thinking">
+  <summary>
+    <div class="thinking-hdr-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6.5" r="2.5" fill="#fff"/><path d="M3 13c0-2.761 2.239-4 5-4s5 1.239 5 4" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+    <span class="thinking-hdr-text">Thinking Complete</span>
+    <span class="thinking-chevron"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="#9ca3af" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+  </summary>
+  <div class="ai-thinking-body"><div class="thinking-steps">
+    <div class="thinking-step">
+      <div class="thinking-step-check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#6b7280" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="thinking-step-content">
+        <div class="thinking-step-row"><div class="thinking-agent-icon" style="background:#52c41a;">F</div><span class="thinking-step-label">查询 JE-2026-043-0012</span></div>
+        <details class="tool-call-details" style="margin-top:8px;width:100%;">
+          <summary>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;color:var(--text-secondary);"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 6h6M4 8.5h3.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+            <span class="tool-call-fn">get_journal_entry</span>
+            <span class="tool-call-status done"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#52c41a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Done</span>
+            <span class="tool-call-chevron"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </summary>
+          <div class="tool-call-body">
+            <div class="tool-call-params"><div class="tool-call-param"><span class="tool-call-param-key">je_number</span><span class="tool-call-param-val">"JE-2026-043-0012"</span></div></div>
+            <div class="tool-call-divider"></div>
+            <div class="tool-call-result">{"je_number":"JE-2026-043-0012","source":"manual","region":"JP","accounting_date":"2026-04-30","memo":"四月服务费核销","amount":50000,"debit_account":"1002","credit_account":"2001"}</div>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="thinking-step">
+      <div class="thinking-step-check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#6b7280" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="thinking-step-content">
+        <div class="thinking-step-row"><span class="thinking-step-label">检查编辑权限</span></div>
+        <div class="thinking-chip" style="background:#f6ffed;color:#389e0d;">source = manual · 允许编辑</div>
+      </div>
+    </div>
+  </div></div>
+</details>
+已找到该凭证，以下是修改内容，请确认：<table class="md-table"><thead><tr><th>字段</th><th>当前值</th><th>修改后</th></tr></thead><tbody><tr><td>备注</td><td style="color:var(--text-secondary);text-decoration:line-through;">四月服务费核销</td><td style="color:#1C64F2;font-weight:500;">四月服务费结算</td></tr><tr><td>金额</td><td style="color:var(--text-secondary);text-decoration:line-through;">¥50,000.00</td><td style="color:#1C64F2;font-weight:500;">¥60,000.00</td></tr></tbody></table><button class="je-confirm-btn" onclick="confirmEditJE(this)" style="margin-top:10px;">确认</button>`
+                }
+            ],
+            responses: { '为什么': '仅人工录入的 JE 支持编辑，F 系统自动同步的凭证需在 F 系统中修改以保证数据一致性。' }
+        },
+
+        'edit-je-blocked': {
+            title: '编辑 JE — F 系统创建',
+            placeholder: '提供 JE 编号及需要修改的字段…',
+            messages: [
+                { role: 'user', text: '帮我修改一条JE的信息' },
+                { role: 'ai',   text: '请提供 JE 编号以及需要修改的字段。' },
+                { role: 'user', text: 'JE-2026-031-0088，备注改为「ENEOS 三月结算」' },
+                {
+                    role: 'ai', html: true,
+                    text: `<details class="ai-thinking">
+  <summary>
+    <div class="thinking-hdr-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6.5" r="2.5" fill="#fff"/><path d="M3 13c0-2.761 2.239-4 5-4s5 1.239 5 4" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+    <span class="thinking-hdr-text">Thinking Complete</span>
+    <span class="thinking-chevron"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="#9ca3af" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+  </summary>
+  <div class="ai-thinking-body"><div class="thinking-steps">
+    <div class="thinking-step">
+      <div class="thinking-step-check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#6b7280" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="thinking-step-content">
+        <div class="thinking-step-row"><div class="thinking-agent-icon" style="background:#52c41a;">F</div><span class="thinking-step-label">查询 JE-2026-031-0088</span></div>
+        <details class="tool-call-details" style="margin-top:8px;width:100%;">
+          <summary>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;color:var(--text-secondary);"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 6h6M4 8.5h3.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+            <span class="tool-call-fn">get_journal_entry</span>
+            <span class="tool-call-status done"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#52c41a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Done</span>
+            <span class="tool-call-chevron"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </summary>
+          <div class="tool-call-body">
+            <div class="tool-call-params"><div class="tool-call-param"><span class="tool-call-param-key">je_number</span><span class="tool-call-param-val">"JE-2026-031-0088"</span></div></div>
+            <div class="tool-call-divider"></div>
+            <div class="tool-call-result">{"je_number":"JE-2026-031-0088","source":"system","created_by":"F-System","region":"JP","accounting_date":"2026-03-15","memo":"ENEOS-SS 系统自动同步"}</div>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="thinking-step">
+      <div class="thinking-step-check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#6b7280" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="thinking-step-content">
+        <div class="thinking-step-row"><span class="thinking-step-label">检查编辑权限</span></div>
+        <div class="thinking-chip" style="background:#fff1f0;color:#cf1322;">source = system · 不可编辑</div>
+      </div>
+    </div>
+  </div></div>
+</details>
+已找到该凭证：<table class="md-table"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>备注</th><th>科目代码</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="2">JP</td><td rowspan="2" style="color:var(--text-secondary);">JE-2026-031-0088</td><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>6602</td><td style="font-weight:600;">8,200.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>1111</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">8,200.00</td></tr></tbody></table>该凭证由 F 系统自动创建（非人工录入），不支持在 D 系统中编辑。`
+                }
+            ],
+            responses: { '为什么': '仅人工录入的 JE 支持编辑，F 系统自动同步的凭证需在 F 系统中修改以保证数据一致性。' }
+        },
+
         'email-reply-3': {
             title: '邮件回复 — 铃木预算审批',
             placeholder: '编辑回复内容…',
@@ -1381,6 +1483,59 @@ JE-2026-043-0012 已删除。`;
         }, 800);
     };
 
+    const JE_EDIT_SUCCESS_HTML = `<details class="ai-thinking">
+  <summary>
+    <div class="thinking-hdr-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6.5" r="2.5" fill="#fff"/><path d="M3 13c0-2.761 2.239-4 5-4s5 1.239 5 4" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+    <span class="thinking-hdr-text">Thinking Complete</span>
+    <span class="thinking-chevron"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="#9ca3af" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+  </summary>
+  <div class="ai-thinking-body"><div class="thinking-steps">
+    <div class="thinking-step">
+      <div class="thinking-step-check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#6b7280" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="thinking-step-content">
+        <div class="thinking-step-row"><span class="thinking-step-label">用户已确认，提交修改</span></div>
+        <div class="thinking-chip">备注 · 金额 2 个字段</div>
+      </div>
+    </div>
+    <div class="thinking-step">
+      <div class="thinking-step-check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#6b7280" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="thinking-step-content">
+        <div class="thinking-step-row"><div class="thinking-agent-icon" style="background:#52c41a;">F</div><span class="thinking-step-label">调用 update_journal_entry</span></div>
+        <details class="tool-call-details" style="margin-top:8px;width:100%;">
+          <summary>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;color:var(--text-secondary);"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 6h6M4 8.5h3.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+            <span class="tool-call-fn">update_journal_entry</span>
+            <span class="tool-call-status done"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#52c41a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Done</span>
+            <span class="tool-call-chevron"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </summary>
+          <div class="tool-call-body">
+            <div class="tool-call-params">
+              <div class="tool-call-param"><span class="tool-call-param-key">je_number</span><span class="tool-call-param-val">"JE-2026-043-0012"</span></div>
+              <div class="tool-call-param"><span class="tool-call-param-key">memo</span><span class="tool-call-param-val">"四月服务费结算"</span></div>
+              <div class="tool-call-param"><span class="tool-call-param-key">amount</span><span class="tool-call-param-val">60000.00</span></div>
+            </div>
+            <div class="tool-call-divider"></div>
+            <div class="tool-call-result">{"status":"success","je_number":"JE-2026-043-0012","updated_at":"2026-05-06T16:45:22+08:00"}</div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div></div>
+</details>
+JE 凭证修改成功。<table class="md-table" style="width:100%;"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>备注</th><th>科目代码</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="2">JP</td><td rowspan="2" style="color:var(--text-secondary);">JE-2026-043-0012</td><td>2026-04-30</td><td>四月服务费结算</td><td>1002</td><td style="font-weight:600;">60,000.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-04-30</td><td>四月服务费结算</td><td>2001</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">60,000.00</td></tr></tbody></table>`;
+
+    window.confirmEditJE = function(btn) {
+        btn.style.minWidth = btn.offsetWidth + 'px';
+        btn.disabled = true;
+        btn.textContent = '已完成';
+        chatArea.appendChild(createUserMsg('确认'));
+        chatArea.scrollTop = chatArea.scrollHeight;
+        setTimeout(() => {
+            chatArea.appendChild(createAiMsg(JE_EDIT_SUCCESS_HTML, true));
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }, 800);
+    };
+
     window.confirmCreateJE = function(btn) {
         btn.style.minWidth = btn.offsetWidth + 'px';
         btn.disabled = true;
@@ -1430,7 +1585,7 @@ JE-2026-043-0012 已删除。`;
         transition: max-width 0.25s ease, opacity 0.2s ease;
     }
     #testCapsule:hover .tc-buttons {
-        max-width: 300px; opacity: 1;
+        max-width: 500px; opacity: 1;
     }
     .tc-btn {
         padding: 4px 10px; border-radius: 12px; border: none; cursor: pointer;
@@ -1444,15 +1599,17 @@ JE-2026-043-0012 已删除。`;
 <div id="testCapsule">
     <span class="tc-label">TEST</span>
     <div class="tc-buttons">
-        <button onclick="switchScene('create-je')"          id="tc-create"  class="tc-btn">创建 JE</button>
-        <button onclick="switchScene('delete-je')"          id="tc-delete"  class="tc-btn">删除 JE</button>
-        <button onclick="switchScene('delete-je-blocked')"  id="tc-blocked" class="tc-btn">F系统创建</button>
+        <button onclick="switchScene('create-je')"          id="tc-create"       class="tc-btn">创建 JE</button>
+        <button onclick="switchScene('delete-je')"          id="tc-delete"       class="tc-btn">删除 JE-1</button>
+        <button onclick="switchScene('delete-je-blocked')"  id="tc-blocked"      class="tc-btn">删除 JE-2</button>
+        <button onclick="switchScene('edit-je')"            id="tc-edit"         class="tc-btn">编辑 JE-1</button>
+        <button onclick="switchScene('edit-je-blocked')"    id="tc-edit-blocked" class="tc-btn">编辑 JE-2</button>
     </div>
 </div>
 <script>
     (function initTestCapsule() {
         const scene = new URLSearchParams(window.location.search).get('scene') || '';
-        const map = { 'create-je': 'tc-create', 'delete-je': 'tc-delete', 'delete-je-blocked': 'tc-blocked' };
+        const map = { 'create-je': 'tc-create', 'delete-je': 'tc-delete', 'delete-je-blocked': 'tc-blocked', 'edit-je': 'tc-edit', 'edit-je-blocked': 'tc-edit-blocked' };
         if (map[scene]) document.getElementById(map[scene])?.classList.add('tc-active');
     })();
     function switchScene(scene) {
