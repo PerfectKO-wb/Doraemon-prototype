@@ -1018,7 +1018,7 @@
                 {
                     role: 'ai',
                     html: true,
-                    text: `信息已收集完整，请核对以下凭证信息：<table class="md-table"><thead><tr><th>字段</th><th>值</th></tr></thead><tbody><tr><td>会计日期</td><td>2026-04-30</td></tr><tr><td>描述</td><td>四月服务费核销</td></tr><tr><td>地区</td><td>JP</td></tr></tbody></table><br>凭证分录：<table class="md-table"><thead><tr><th>方向</th><th>科目代码</th><th>科目名称</th><th>金额</th></tr></thead><tbody><tr><td>借方</td><td>1002</td><td>银行存款</td><td>¥50,000.00</td></tr><tr><td>贷方</td><td>2001</td><td>应付账款</td><td>¥30,000.00</td></tr><tr><td>贷方</td><td>2002</td><td>预提费用</td><td>¥20,000.00</td></tr></tbody></table><button class="je-confirm-btn" id="jeConfirmBtn" onclick="confirmCreateJE(this)" style="margin-top:10px;">确认</button>`
+                    text: `信息已收集完整，请核对以下凭证信息：<table class="md-table" style="width:100%;"><thead><tr><th>地区</th><th>会计日期</th><th>描述</th><th>科目代码</th><th>科目名称</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="3">JP</td><td>2026-04-30</td><td>四月服务费核销</td><td>1002</td><td>银行存款</td><td style="font-weight:600;">50,000.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-04-30</td><td>四月服务费核销</td><td>2001</td><td>应付账款</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">30,000.00</td></tr><tr><td>2026-04-30</td><td>四月服务费核销</td><td>2002</td><td>预提费用</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">20,000.00</td></tr></tbody></table><button class="je-confirm-btn" id="jeConfirmBtn" onclick="confirmCreateJE(this)" style="margin-top:10px;">确认</button>`
                 }
             ],
             responses: {
