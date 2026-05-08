@@ -1000,7 +1000,7 @@
                 },
                 {
                     role: 'ai',
-                    text: '好的，我来帮你创建一条 JE 凭证。请提供以下信息：\n\n• 会计日期 — 例如 2026-04-30\n• 备注 — 本次凭证说明\n• 地区 — 例如 JP / CN\n• 凭证分录 — 至少一条借方、一条贷方，支持多条；借贷合计须相等\n  每条格式：借方 / 贷方 · 科目代码 · 金额\n\n例如：「会计日期 2026-04-30，备注：四月服务费，地区 JP，借方 1002 50000，贷方 2001 30000，贷方 2002 20000」'
+                    text: '好的，我来帮你创建一条 JE 分录。请提供以下信息：\n\n• 会计日期 — 例如 2026-04-30\n• 描述 — 本次分录说明\n• 地区 — 例如 JP / CN\n• 凭证分录 — 至少一条借方、一条贷方，支持多条；借贷合计须相等\n  每条格式：借方 / 贷方 · 科目代码 · 科目名称 · 金额\n\n例如：「会计日期 2026-04-30，描述：四月服务费，地区 JP，借方 1002 银行存款 50000，贷方 2001 应付账款 30000，贷方 2002 预提费用 20000」'
                 },
                 {
                     role: 'user',
@@ -1009,21 +1009,21 @@
                 {
                     role: 'ai',
                     html: true,
-                    text: `收到分录信息，还需补充 <strong style="color:var(--text-default);">3 个必填字段</strong>才能创建：<table class="md-table"><thead><tr><th>状态</th><th>字段</th><th>值</th></tr></thead><tbody><tr><td style="color:#52c41a;font-weight:600;">✓</td><td>凭证分录</td><td>3 条（借 ¥50,000 / 贷 ¥50,000 · 已平衡）</td></tr><tr><td style="color:#f5222d;font-weight:600;">✗</td><td>会计日期</td><td style="color:var(--text-disabled);font-style:italic;">未填写</td></tr><tr><td style="color:#f5222d;font-weight:600;">✗</td><td>备注</td><td style="color:var(--text-disabled);font-style:italic;">未填写</td></tr><tr><td style="color:#f5222d;font-weight:600;">✗</td><td>地区</td><td style="color:var(--text-disabled);font-style:italic;">未填写</td></tr></tbody></table>请补充会计日期、备注和地区。`
+                    text: `收到分录信息，还需补充 <strong style="color:var(--text-default);">3 个必填字段</strong>才能创建：<table class="md-table"><thead><tr><th>状态</th><th>字段</th><th>值</th></tr></thead><tbody><tr><td style="color:#52c41a;font-weight:600;">✓</td><td>凭证分录</td><td>3 条（借 ¥50,000 / 贷 ¥50,000 · 已平衡）</td></tr><tr><td style="color:#f5222d;font-weight:600;">✗</td><td>会计日期</td><td style="color:var(--text-disabled);font-style:italic;">未填写</td></tr><tr><td style="color:#f5222d;font-weight:600;">✗</td><td>描述</td><td style="color:var(--text-disabled);font-style:italic;">未填写</td></tr><tr><td style="color:#f5222d;font-weight:600;">✗</td><td>地区</td><td style="color:var(--text-disabled);font-style:italic;">未填写</td></tr></tbody></table>请补充会计日期、描述和地区。`
                 },
                 {
                     role: 'user',
-                    text: '会计日期 2026-04-30，备注 四月服务费核销，地区 JP'
+                    text: '会计日期 2026-04-30，描述 四月服务费核销，地区 JP'
                 },
                 {
                     role: 'ai',
                     html: true,
-                    text: `信息已收集完整，请核对以下凭证信息：<table class="md-table"><thead><tr><th>字段</th><th>值</th></tr></thead><tbody><tr><td>会计日期</td><td>2026-04-30</td></tr><tr><td>备注</td><td>四月服务费核销</td></tr><tr><td>地区</td><td>JP</td></tr></tbody></table><br>凭证分录：<table class="md-table"><thead><tr><th>方向</th><th>科目代码</th><th>金额</th></tr></thead><tbody><tr><td>借方</td><td>1002</td><td>¥50,000.00</td></tr><tr><td>贷方</td><td>2001</td><td>¥30,000.00</td></tr><tr><td>贷方</td><td>2002</td><td>¥20,000.00</td></tr></tbody></table><button class="je-confirm-btn" id="jeConfirmBtn" onclick="confirmCreateJE(this)" style="margin-top:10px;">确认</button>`
+                    text: `信息已收集完整，请核对以下凭证信息：<table class="md-table"><thead><tr><th>字段</th><th>值</th></tr></thead><tbody><tr><td>会计日期</td><td>2026-04-30</td></tr><tr><td>描述</td><td>四月服务费核销</td></tr><tr><td>地区</td><td>JP</td></tr></tbody></table><br>凭证分录：<table class="md-table"><thead><tr><th>方向</th><th>科目代码</th><th>科目名称</th><th>金额</th></tr></thead><tbody><tr><td>借方</td><td>1002</td><td>银行存款</td><td>¥50,000.00</td></tr><tr><td>贷方</td><td>2001</td><td>应付账款</td><td>¥30,000.00</td></tr><tr><td>贷方</td><td>2002</td><td>预提费用</td><td>¥20,000.00</td></tr></tbody></table><button class="je-confirm-btn" id="jeConfirmBtn" onclick="confirmCreateJE(this)" style="margin-top:10px;">确认</button>`
                 }
             ],
             responses: {
                 '查看': '已为你打开 JE-2026-043-0012 的凭证详情页面。',
-                '再创建': '好的，请提供新凭证的信息。需要：会计日期、借方科目代码、贷方科目代码、金额、备注。',
+                '再创建': '好的，请提供新凭证的信息。需要：会计日期、描述、地区、凭证分录（科目代码、科目名称、金额）。',
                 '删除': '删除凭证需要财务主管审批，我可以帮你提交删除申请。确认要删除 JE-2026-043-0012 吗？',
                 '审批': '已为你提交 JE-2026-043-0012 的审批请求，审批人：财务主管 李华。通常 1 个工作日内完成审批。'
             }
@@ -1048,7 +1048,7 @@
                 {
                     role: 'ai',
                     html: true,
-                    text: `已找到该凭证，请确认是否删除：<table class="md-table"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>备注</th><th>科目代码</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="2">JP</td><td rowspan="2" style="color:var(--text-secondary);">JE-2026-043-0012</td><td>2026-04-30</td><td>四月服务费核销</td><td>1002</td><td style="font-weight:600;">50,000.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-04-30</td><td>四月服务费核销</td><td>2001</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">50,000.00</td></tr></tbody></table><button class="je-confirm-btn" onclick="confirmDeleteJE(this)" style="margin-top:10px;">确认</button>`
+                    text: `已找到该凭证，请确认是否删除：<table class="md-table"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>描述</th><th>科目代码</th><th>科目名称</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="2">JP</td><td rowspan="2" style="color:var(--text-secondary);">JE-2026-043-0012</td><td>2026-04-30</td><td>四月服务费核销</td><td>1002</td><td>银行存款</td><td style="font-weight:600;">50,000.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-04-30</td><td>四月服务费核销</td><td>2001</td><td>应付账款</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">50,000.00</td></tr></tbody></table><button class="je-confirm-btn" onclick="confirmDeleteJE(this)" style="margin-top:10px;">确认</button>`
                 }
             ],
             responses: {
@@ -1104,7 +1104,7 @@
                 <div class="tool-call-param"><span class="tool-call-param-key">je_number</span><span class="tool-call-param-val">"JE-2026-031-0088"</span></div>
               </div>
               <div class="tool-call-divider"></div>
-              <div class="tool-call-result">{"je_number":"JE-2026-031-0088","source":"system","created_by":"F-System","region":"JP","accounting_date":"2026-03-15","memo":"ENEOS-SS 系统自动同步","lines":[{"account":"6602","debit":8200,"credit":0},{"account":"1111","debit":0,"credit":8200}]}</div>
+              <div class="tool-call-result">{"je_number":"JE-2026-031-0088","source":"system","created_by":"F-System","region":"JP","accounting_date":"2026-03-15","description":"ENEOS-SS 系统自动同步","lines":[{"account":"6602","account_name":"销售费用","debit":8200,"credit":0},{"account":"1111","account_name":"现金","debit":0,"credit":8200}]}</div>
             </div>
           </details>
         </div>
@@ -1119,7 +1119,7 @@
     </div>
   </div>
 </details>
-已找到该凭证：<table class="md-table"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>备注</th><th>科目代码</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="2">JP</td><td rowspan="2" style="color:var(--text-secondary);">JE-2026-031-0088</td><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>6602</td><td style="font-weight:600;">8,200.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>1111</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">8,200.00</td></tr></tbody></table>该凭证由 F 系统自动创建（非人工录入），不支持在 D 系统中删除。`
+已找到该凭证：<table class="md-table"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>描述</th><th>科目代码</th><th>科目名称</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="2">JP</td><td rowspan="2" style="color:var(--text-secondary);">JE-2026-031-0088</td><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>6602</td><td>销售费用</td><td style="font-weight:600;">8,200.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>1111</td><td>现金</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">8,200.00</td></tr></tbody></table>该凭证由 F 系统自动创建（非人工录入），不支持在 D 系统中删除。`
                 }
             ],
             responses: {
@@ -1133,7 +1133,7 @@
             messages: [
                 { role: 'user', text: '帮我修改一条JE的信息' },
                 { role: 'ai',   text: '请提供 JE 编号以及需要修改的字段。' },
-                { role: 'user', text: 'JE-2026-043-0012，备注改为「四月服务费结算」，借方 1002 金额改为 60000，贷方 2001 金额改为 40000' },
+                { role: 'user', text: 'JE-2026-043-0012，描述改为「四月服务费结算」，借方 1002 金额改为 60000，贷方 2001 金额改为 40000' },
                 {
                     role: 'ai', html: true,
                     text: `<details class="ai-thinking">
@@ -1157,7 +1157,7 @@
           <div class="tool-call-body">
             <div class="tool-call-params"><div class="tool-call-param"><span class="tool-call-param-key">je_number</span><span class="tool-call-param-val">"JE-2026-043-0012"</span></div></div>
             <div class="tool-call-divider"></div>
-            <div class="tool-call-result">{"je_number":"JE-2026-043-0012","source":"manual","region":"JP","accounting_date":"2026-04-30","memo":"四月服务费核销","lines":[{"account":"1002","debit":50000,"credit":0},{"account":"2001","debit":0,"credit":30000},{"account":"2002","debit":0,"credit":20000}]}</div>
+            <div class="tool-call-result">{"je_number":"JE-2026-043-0012","source":"manual","region":"JP","accounting_date":"2026-04-30","description":"四月服务费核销","lines":[{"account":"1002","account_name":"银行存款","debit":50000,"credit":0},{"account":"2001","account_name":"应付账款","debit":0,"credit":30000},{"account":"2002","account_name":"预提费用","debit":0,"credit":20000}]}</div>
           </div>
         </details>
       </div>
@@ -1172,7 +1172,7 @@
     </div>
   </div></div>
 </details>
-已找到该凭证，以下是修改内容，请确认：<br><br>基本信息：<table class="md-table"><thead><tr><th>字段</th><th>当前值</th><th>修改后</th></tr></thead><tbody><tr><td>备注</td><td style="color:var(--text-secondary);text-decoration:line-through;">四月服务费核销</td><td style="color:#1C64F2;font-weight:500;">四月服务费结算</td></tr></tbody></table><br>分录变更：<table class="md-table"><thead><tr><th>方向</th><th>科目代码</th><th>当前金额</th><th>修改后金额</th></tr></thead><tbody><tr><td>借方</td><td>1002</td><td style="color:var(--text-secondary);text-decoration:line-through;">¥50,000.00</td><td style="color:#1C64F2;font-weight:500;">¥60,000.00</td></tr><tr><td>贷方</td><td>2001</td><td style="color:var(--text-secondary);text-decoration:line-through;">¥30,000.00</td><td style="color:#1C64F2;font-weight:500;">¥40,000.00</td></tr><tr><td>贷方</td><td>2002</td><td colspan="2" style="color:var(--text-disabled);font-style:italic;">无变更（¥20,000.00）</td></tr></tbody></table><button class="je-confirm-btn" onclick="confirmEditJE(this)" style="margin-top:10px;">确认</button>`
+已找到该凭证，以下是修改内容，请确认：<br><br>基本信息：<table class="md-table"><thead><tr><th>字段</th><th>当前值</th><th>修改后</th></tr></thead><tbody><tr><td>描述</td><td style="color:var(--text-secondary);text-decoration:line-through;">四月服务费核销</td><td style="color:#1C64F2;font-weight:500;">四月服务费结算</td></tr></tbody></table><br>分录变更：<table class="md-table"><thead><tr><th>方向</th><th>科目代码</th><th>科目名称</th><th>当前金额</th><th>修改后金额</th></tr></thead><tbody><tr><td>借方</td><td>1002</td><td>银行存款</td><td style="color:var(--text-secondary);text-decoration:line-through;">¥50,000.00</td><td style="color:#1C64F2;font-weight:500;">¥60,000.00</td></tr><tr><td>贷方</td><td>2001</td><td>应付账款</td><td style="color:var(--text-secondary);text-decoration:line-through;">¥30,000.00</td><td style="color:#1C64F2;font-weight:500;">¥40,000.00</td></tr><tr><td>贷方</td><td>2002</td><td>预提费用</td><td colspan="2" style="color:var(--text-disabled);font-style:italic;">无变更（¥20,000.00）</td></tr></tbody></table><button class="je-confirm-btn" onclick="confirmEditJE(this)" style="margin-top:10px;">确认</button>`
                 }
             ],
             responses: { '为什么': '仅人工录入的 JE 支持编辑，F 系统自动同步的凭证需在 F 系统中修改以保证数据一致性。' }
@@ -1184,7 +1184,7 @@
             messages: [
                 { role: 'user', text: '帮我修改一条JE的信息' },
                 { role: 'ai',   text: '请提供 JE 编号以及需要修改的字段。' },
-                { role: 'user', text: 'JE-2026-031-0088，备注改为「ENEOS 三月结算」' },
+                { role: 'user', text: 'JE-2026-031-0088，描述改为「ENEOS 三月结算」' },
                 {
                     role: 'ai', html: true,
                     text: `<details class="ai-thinking">
@@ -1208,7 +1208,7 @@
           <div class="tool-call-body">
             <div class="tool-call-params"><div class="tool-call-param"><span class="tool-call-param-key">je_number</span><span class="tool-call-param-val">"JE-2026-031-0088"</span></div></div>
             <div class="tool-call-divider"></div>
-            <div class="tool-call-result">{"je_number":"JE-2026-031-0088","source":"system","created_by":"F-System","region":"JP","accounting_date":"2026-03-15","memo":"ENEOS-SS 系统自动同步"}</div>
+            <div class="tool-call-result">{"je_number":"JE-2026-031-0088","source":"system","created_by":"F-System","region":"JP","accounting_date":"2026-03-15","description":"ENEOS-SS 系统自动同步"}</div>
           </div>
         </details>
       </div>
@@ -1222,7 +1222,7 @@
     </div>
   </div></div>
 </details>
-已找到该凭证：<table class="md-table"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>备注</th><th>科目代码</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="2">JP</td><td rowspan="2" style="color:var(--text-secondary);">JE-2026-031-0088</td><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>6602</td><td style="font-weight:600;">8,200.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>1111</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">8,200.00</td></tr></tbody></table>该凭证由 F 系统自动创建（非人工录入），不支持在 D 系统中编辑。`
+已找到该凭证：<table class="md-table"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>描述</th><th>科目代码</th><th>科目名称</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="2">JP</td><td rowspan="2" style="color:var(--text-secondary);">JE-2026-031-0088</td><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>6602</td><td>销售费用</td><td style="font-weight:600;">8,200.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-03-15</td><td>ENEOS-SS 系统自动同步</td><td>1111</td><td>现金</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">8,200.00</td></tr></tbody></table>该凭证由 F 系统自动创建（非人工录入），不支持在 D 系统中编辑。`
                 }
             ],
             responses: { '为什么': '仅人工录入的 JE 支持编辑，F 系统自动同步的凭证需在 F 系统中修改以保证数据一致性。' }
@@ -1409,9 +1409,9 @@
             <div class="tool-call-body">
               <div class="tool-call-params">
                 <div class="tool-call-param"><span class="tool-call-param-key">accounting_date</span><span class="tool-call-param-val">"2026-04-30"</span></div>
-                <div class="tool-call-param"><span class="tool-call-param-key">memo</span><span class="tool-call-param-val">"四月服务费核销"</span></div>
+                <div class="tool-call-param"><span class="tool-call-param-key">description</span><span class="tool-call-param-val">"四月服务费核销"</span></div>
                 <div class="tool-call-param"><span class="tool-call-param-key">region</span><span class="tool-call-param-val">"JP"</span></div>
-                <div class="tool-call-param"><span class="tool-call-param-key">lines</span><span class="tool-call-param-val">[{"account":"1002","debit":50000,"credit":0},{"account":"2001","debit":0,"credit":30000},{"account":"2002","debit":0,"credit":20000}]</span></div>
+                <div class="tool-call-param"><span class="tool-call-param-key">lines</span><span class="tool-call-param-val">[{"account":"1002","account_name":"银行存款","debit":50000,"credit":0},{"account":"2001","account_name":"应付账款","debit":0,"credit":30000},{"account":"2002","account_name":"预提费用","debit":0,"credit":20000}]</span></div>
               </div>
               <div class="tool-call-divider"></div>
               <div class="tool-call-result">{"status":"success","je_number":"JE-2026-043-0012","created_at":"2026-04-30T13:52:14+08:00"}</div>
@@ -1422,7 +1422,7 @@
     </div>
   </div>
 </details>
-JE 凭证创建成功。<table class="md-table" style="width:100%;"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>备注</th><th>科目代码</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="3">JP</td><td rowspan="3" style="color:var(--text-secondary);">JE-2026-043-0012</td><td>2026-04-30</td><td>四月服务费核销</td><td>1002</td><td style="font-weight:600;">50,000.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-04-30</td><td>四月服务费核销</td><td>2001</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">30,000.00</td></tr><tr><td>2026-04-30</td><td>四月服务费核销</td><td>2002</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">20,000.00</td></tr></tbody></table><div style="margin-top:10px;font-size:14px;line-height:22px;">链接：<a href="https://f.g123.jp/je?filters=%7B%22je_id_in%22%3A%5B%22JE-2026-043-0012%22%5D%7D" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 5px;border:1px solid var(--border-divider);border-radius:6px;text-decoration:none;color:var(--text-default);font-size:13px;background:var(--bg-container);vertical-align:middle;transition:background 0.15s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='var(--bg-container)'"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0;"><defs><linearGradient id="fLogoGrad" x1="0" y1="0" x2="0" y2="18" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1677FF"/><stop offset="100%" stop-color="#36CFC9"/></linearGradient></defs><rect x="2" y="2" width="14" height="2.8" rx="0.6" fill="url(#fLogoGrad)"/><rect x="2" y="6.6" width="9" height="2.8" rx="0.6" fill="url(#fLogoGrad)"/><rect x="2" y="11.2" width="2.8" height="4.8" rx="0.6" fill="url(#fLogoGrad)"/></svg>G123 - F</a></div>`;
+JE 凭证创建成功。<table class="md-table" style="width:100%;"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>描述</th><th>科目代码</th><th>科目名称</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="3">JP</td><td rowspan="3" style="color:var(--text-secondary);">JE-2026-043-0012</td><td>2026-04-30</td><td>四月服务费核销</td><td>1002</td><td>银行存款</td><td style="font-weight:600;">50,000.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-04-30</td><td>四月服务费核销</td><td>2001</td><td>应付账款</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">30,000.00</td></tr><tr><td>2026-04-30</td><td>四月服务费核销</td><td>2002</td><td>预提费用</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">20,000.00</td></tr></tbody></table><div style="margin-top:10px;font-size:14px;line-height:22px;">链接：<a href="https://f.g123.jp/je?filters=%7B%22je_id_in%22%3A%5B%22JE-2026-043-0012%22%5D%7D" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 5px;border:1px solid var(--border-divider);border-radius:6px;text-decoration:none;color:var(--text-default);font-size:13px;background:var(--bg-container);vertical-align:middle;transition:background 0.15s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='var(--bg-container)'"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0;"><defs><linearGradient id="fLogoGrad" x1="0" y1="0" x2="0" y2="18" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1677FF"/><stop offset="100%" stop-color="#36CFC9"/></linearGradient></defs><rect x="2" y="2" width="14" height="2.8" rx="0.6" fill="url(#fLogoGrad)"/><rect x="2" y="6.6" width="9" height="2.8" rx="0.6" fill="url(#fLogoGrad)"/><rect x="2" y="11.2" width="2.8" height="4.8" rx="0.6" fill="url(#fLogoGrad)"/></svg>G123 - F</a></div>`;
 
     const JE_DELETE_SUCCESS_HTML = `<details class="ai-thinking">
   <summary>
@@ -1493,7 +1493,7 @@ JE-2026-043-0012 已删除。`;
       <div class="thinking-step-check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#6b7280" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="thinking-step-content">
         <div class="thinking-step-row"><span class="thinking-step-label">用户已确认，提交修改</span></div>
-        <div class="thinking-chip">备注 · 分录 2 条变更</div>
+        <div class="thinking-chip">描述 · 分录 2 条变更</div>
       </div>
     </div>
     <div class="thinking-step">
@@ -1510,8 +1510,8 @@ JE-2026-043-0012 已删除。`;
           <div class="tool-call-body">
               <div class="tool-call-params">
               <div class="tool-call-param"><span class="tool-call-param-key">je_number</span><span class="tool-call-param-val">"JE-2026-043-0012"</span></div>
-              <div class="tool-call-param"><span class="tool-call-param-key">memo</span><span class="tool-call-param-val">"四月服务费结算"</span></div>
-              <div class="tool-call-param"><span class="tool-call-param-key">lines</span><span class="tool-call-param-val">[{"account":"1002","debit":60000,"credit":0},{"account":"2001","debit":0,"credit":40000},{"account":"2002","debit":0,"credit":20000}]</span></div>
+              <div class="tool-call-param"><span class="tool-call-param-key">description</span><span class="tool-call-param-val">"四月服务费结算"</span></div>
+              <div class="tool-call-param"><span class="tool-call-param-key">lines</span><span class="tool-call-param-val">[{"account":"1002","account_name":"银行存款","debit":60000,"credit":0},{"account":"2001","account_name":"应付账款","debit":0,"credit":40000},{"account":"2002","account_name":"预提费用","debit":0,"credit":20000}]</span></div>
             </div>
             <div class="tool-call-divider"></div>
             <div class="tool-call-result">{"status":"success","je_number":"JE-2026-043-0012","updated_at":"2026-05-07T10:14:00+08:00"}</div>
@@ -1521,7 +1521,7 @@ JE-2026-043-0012 已删除。`;
     </div>
   </div></div>
 </details>
-JE 凭证修改成功。<table class="md-table" style="width:100%;"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>备注</th><th>科目代码</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="3">JP</td><td rowspan="3" style="color:var(--text-secondary);">JE-2026-043-0012</td><td>2026-04-30</td><td>四月服务费结算</td><td>1002</td><td style="font-weight:600;">60,000.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-04-30</td><td>四月服务费结算</td><td>2001</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">40,000.00</td></tr><tr><td>2026-04-30</td><td>四月服务费结算</td><td>2002</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">20,000.00</td></tr></tbody></table>`;
+JE 凭证修改成功。<table class="md-table" style="width:100%;"><thead><tr><th>地区</th><th>JE-ID</th><th>会计日期</th><th>描述</th><th>科目代码</th><th>科目名称</th><th>借方</th><th>贷方</th></tr></thead><tbody><tr><td rowspan="3">JP</td><td rowspan="3" style="color:var(--text-secondary);">JE-2026-043-0012</td><td>2026-04-30</td><td>四月服务费结算</td><td>1002</td><td>银行存款</td><td style="font-weight:600;">60,000.00</td><td style="color:var(--text-disabled);">—</td></tr><tr><td>2026-04-30</td><td>四月服务费结算</td><td>2001</td><td>应付账款</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">40,000.00</td></tr><tr><td>2026-04-30</td><td>四月服务费结算</td><td>2002</td><td>预提费用</td><td style="color:var(--text-disabled);">—</td><td style="font-weight:600;">20,000.00</td></tr></tbody></table>`;
 
     window.confirmEditJE = function(btn) {
         btn.style.minWidth = btn.offsetWidth + 'px';
