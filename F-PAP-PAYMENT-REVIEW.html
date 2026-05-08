@@ -1003,24 +1003,6 @@
         .depreciation-block .dep-control .dep-sep {
             font-size: 12px; color: var(--text-secondary); flex-shrink: 0;
         }
-        .depreciation-method-tabs {
-            display: flex; gap: 6px; margin-bottom: 4px;
-        }
-        .dep-method-btn {
-            padding: 4px 14px;
-            border: 1px solid var(--border-default);
-            border-radius: 6px;
-            font-size: 12px; font-weight: 500;
-            cursor: pointer; background: #fff;
-            color: var(--text-secondary);
-            font-family: inherit;
-            transition: all 0.15s;
-        }
-        .dep-method-btn.active {
-            background: var(--button-default); color: #fff;
-            border-color: var(--button-default);
-        }
-
         /* Region-hidden rows */
         .invoice-summary .form-row.hidden-row { display: none; }
 
@@ -1616,7 +1598,7 @@
                         <div class="form-row" data-region="all">
                             <div class="form-label">One-time Expense :</div>
                             <div class="radio-group" id="ivOneTimeGroup">
-                                <label><input type="radio" name="ivOneTime" value="yes" onchange="toggleDepreciation(this)"> Yes</label>
+                                <label><input type="radio" name="ivOneTime" value="yes" onchange="toggleDepreciation(this)" checked> Yes</label>
                                 <label><input type="radio" name="ivOneTime" value="no" onchange="toggleDepreciation(this)"> No</label>
                             </div>
                         </div>
@@ -1625,10 +1607,12 @@
                         <div class="form-row" data-region="all" id="ivDepreciationRow" style="display:none; flex-direction:column; gap:8px;">
                             <div class="form-label" style="margin-bottom:2px;">Depreciation :</div>
 
-                            <!-- Method tabs -->
-                            <div class="depreciation-method-tabs">
-                                <button type="button" class="dep-method-btn active" id="depBtnStraight" onclick="switchDepMethod('straight')">Straight-line (定額法)</button>
-                                <button type="button" class="dep-method-btn" id="depBtnDeclining" onclick="switchDepMethod('declining')">Declining Balance (定率法)</button>
+                            <!-- Method dropdown -->
+                            <div style="margin-bottom:4px;">
+                                <select id="depMethodSelect" onchange="switchDepMethod(this.value)" style="border:1px solid var(--border-default);border-radius:6px;padding:6px 10px;font:inherit;font-size:13px;color:var(--text-default);background:#fff;outline:none;width:100%;">
+                                    <option value="straight">Straight-line (定額法)</option>
+                                    <option value="declining">Declining Balance (定率法)</option>
+                                </select>
                             </div>
 
                             <!-- Straight-line fields -->
@@ -1642,7 +1626,7 @@
                                     </div>
                                 </div>
                                 <div class="dep-row">
-                                    <div class="dep-label">Salvage Value (残值)</div>
+                                    <div class="dep-label">Salvage Value (残値)</div>
                                     <div class="dep-control">
                                         <input type="number" id="depStraightSalvage" min="0" step="0.01" placeholder="0.00">
                                     </div>
@@ -2183,8 +2167,8 @@
             (applicant && applicant[0]) ? applicant[0].toUpperCase() : '—';
         document.getElementById('ivApplicationDate').textContent = f.applicationDate || '—';
 
-        // Reset depreciation fields when loading a new invoice
-        document.querySelectorAll('input[name="ivOneTime"]').forEach(r => r.checked = false);
+        // Reset depreciation: default One-time = Yes, hide depreciation block
+        document.querySelectorAll('input[name="ivOneTime"]').forEach(r => { r.checked = (r.value === 'yes'); });
         document.getElementById('ivDepreciationRow').style.display = 'none';
         switchDepMethod('straight');
     }
@@ -2197,18 +2181,14 @@
     function switchDepMethod(method) {
         const straight = document.getElementById('depBlockStraight');
         const declining = document.getElementById('depBlockDeclining');
-        const btnS = document.getElementById('depBtnStraight');
-        const btnD = document.getElementById('depBtnDeclining');
+        const sel = document.getElementById('depMethodSelect');
+        if (sel && sel.value !== method) sel.value = method;
         if (method === 'straight') {
             straight.classList.add('show');
             declining.classList.remove('show');
-            btnS.classList.add('active');
-            btnD.classList.remove('active');
         } else {
             declining.classList.add('show');
             straight.classList.remove('show');
-            btnD.classList.add('active');
-            btnS.classList.remove('active');
         }
     }
 
