@@ -1604,15 +1604,16 @@
                         </div>
 
                         <!-- Depreciation block (shown when No) -->
-                        <div class="form-row" data-region="all" id="ivDepreciationRow" style="display:none; flex-direction:column; gap:8px;">
-                            <div class="form-label" style="margin-bottom:2px;">Depreciation :</div>
-
-                            <!-- Method dropdown -->
-                            <div style="margin-bottom:4px;">
-                                <select id="depMethodSelect" onchange="switchDepMethod(this.value)" style="border:1px solid var(--border-default);border-radius:6px;padding:6px 10px;font:inherit;font-size:13px;color:var(--text-default);background:#fff;outline:none;width:100%;">
-                                    <option value="straight">Straight-line (定額法)</option>
-                                    <option value="declining">Declining Balance (定率法)</option>
-                                </select>
+                        <div data-region="all" id="ivDepreciationRow" style="display:none; flex-direction:column; gap:0;">
+                            <!-- Label + dropdown on same line -->
+                            <div class="form-row" style="margin-bottom:8px;">
+                                <div class="form-label">Depreciation :</div>
+                                <div class="form-control">
+                                    <select id="depMethodSelect" onchange="switchDepMethod(this.value)" style="border:1px solid var(--border-default);border-radius:6px;padding:6px 10px;font:inherit;font-size:13px;color:var(--text-default);background:#fff;outline:none;width:100%;">
+                                        <option value="straight">Straight-line (定額法)</option>
+                                        <option value="declining">Declining Balance (定率法)</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <!-- Straight-line fields -->
