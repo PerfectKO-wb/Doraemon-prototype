@@ -962,6 +962,65 @@
         .radio-group.disabled label { cursor: not-allowed; color: var(--text-secondary); }
         .radio-group.disabled input[type="radio"] { cursor: not-allowed; }
 
+        /* Depreciation sub-fields */
+        .depreciation-block {
+            display: none;
+            flex-direction: column;
+            gap: 0;
+            margin-top: 4px;
+            padding: 10px 12px;
+            background: var(--bg-subtle, #f9fafb);
+            border: 1px solid var(--border-divider);
+            border-radius: 8px;
+        }
+        .depreciation-block.show { display: flex; }
+        .depreciation-block .dep-row {
+            display: flex; flex-direction: column;
+            gap: 5px; padding: 8px 0;
+        }
+        .depreciation-block .dep-row + .dep-row { border-top: 1px solid var(--border-divider); }
+        .depreciation-block .dep-label {
+            font-size: 11px; font-weight: 500; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .depreciation-block .dep-control {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        }
+        .depreciation-block .dep-control input[type="number"],
+        .depreciation-block .dep-control input[type="text"],
+        .depreciation-block .dep-control input[type="month"],
+        .depreciation-block .dep-control textarea,
+        .depreciation-block .dep-control select {
+            flex: 1; min-width: 0;
+            border: 1px solid var(--border-default);
+            border-radius: 6px;
+            padding: 6px 10px;
+            background: #fff;
+            font: inherit; font-size: 13px; color: var(--text-default);
+            outline: none;
+        }
+        .depreciation-block .dep-control textarea { min-height: 52px; resize: vertical; }
+        .depreciation-block .dep-control .dep-sep {
+            font-size: 12px; color: var(--text-secondary); flex-shrink: 0;
+        }
+        .depreciation-method-tabs {
+            display: flex; gap: 6px; margin-bottom: 4px;
+        }
+        .dep-method-btn {
+            padding: 4px 14px;
+            border: 1px solid var(--border-default);
+            border-radius: 6px;
+            font-size: 12px; font-weight: 500;
+            cursor: pointer; background: #fff;
+            color: var(--text-secondary);
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .dep-method-btn.active {
+            background: var(--button-default); color: #fff;
+            border-color: var(--button-default);
+        }
+
         /* Region-hidden rows */
         .invoice-summary .form-row.hidden-row { display: none; }
 
@@ -1553,14 +1612,75 @@
                             <div class="readonly-text" id="ivApplicationDate">—</div>
                         </div>
 
-                        <!-- Payout required (yes / no) -->
+                        <!-- Is One-time Expense -->
                         <div class="form-row" data-region="all">
-                            <div class="form-label">Payout required :</div>
-                            <div class="radio-group" id="ivPayoutGroup">
-                                <label><input type="radio" name="ivPayout" value="yes"> Yes</label>
-                                <label><input type="radio" name="ivPayout" value="no"> No</label>
+                            <div class="form-label">One-time Expense :</div>
+                            <div class="radio-group" id="ivOneTimeGroup">
+                                <label><input type="radio" name="ivOneTime" value="yes" onchange="toggleDepreciation(this)"> Yes</label>
+                                <label><input type="radio" name="ivOneTime" value="no" onchange="toggleDepreciation(this)"> No</label>
                             </div>
                         </div>
+
+                        <!-- Depreciation block (shown when No) -->
+                        <div class="form-row" data-region="all" id="ivDepreciationRow" style="display:none; flex-direction:column; gap:8px;">
+                            <div class="form-label" style="margin-bottom:2px;">Depreciation :</div>
+
+                            <!-- Method tabs -->
+                            <div class="depreciation-method-tabs">
+                                <button type="button" class="dep-method-btn active" id="depBtnStraight" onclick="switchDepMethod('straight')">Straight-line (定額法)</button>
+                                <button type="button" class="dep-method-btn" id="depBtnDeclining" onclick="switchDepMethod('declining')">Declining Balance (定率法)</button>
+                            </div>
+
+                            <!-- Straight-line fields -->
+                            <div class="depreciation-block show" id="depBlockStraight">
+                                <div class="dep-row">
+                                    <div class="dep-label">Depreciation Period</div>
+                                    <div class="dep-control">
+                                        <input type="month" id="depStraightStart" placeholder="Start month">
+                                        <span class="dep-sep">→</span>
+                                        <input type="month" id="depStraightEnd" placeholder="End month">
+                                    </div>
+                                </div>
+                                <div class="dep-row">
+                                    <div class="dep-label">Salvage Value (残值)</div>
+                                    <div class="dep-control">
+                                        <input type="number" id="depStraightSalvage" min="0" step="0.01" placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div class="dep-row">
+                                    <div class="dep-label">Description</div>
+                                    <div class="dep-control">
+                                        <textarea id="depStraightDesc" placeholder="Describe the depreciation project (e.g. Office equipment — 3F renovation)"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Declining balance fields -->
+                            <div class="depreciation-block" id="depBlockDeclining">
+                                <div class="dep-row">
+                                    <div class="dep-label">Depreciation Period</div>
+                                    <div class="dep-control">
+                                        <input type="month" id="depDecliningStart" placeholder="Start month">
+                                        <span class="dep-sep">→</span>
+                                        <input type="month" id="depDecliningEnd" placeholder="End month">
+                                    </div>
+                                </div>
+                                <div class="dep-row">
+                                    <div class="dep-label">Depreciation Rate (折旧率)</div>
+                                    <div class="dep-control">
+                                        <input type="number" id="depDecliningRate" min="0" max="100" step="0.01" placeholder="e.g. 20">
+                                        <span class="dep-sep">%</span>
+                                    </div>
+                                </div>
+                                <div class="dep-row">
+                                    <div class="dep-label">Description</div>
+                                    <div class="dep-control">
+                                        <textarea id="depDecliningDesc" placeholder="Describe the depreciation project (e.g. Server equipment — main rack)"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div><!-- /.invoice-summary -->
 
                     <div class="voucher-summary" id="voucherSummary" style="display:none;">
@@ -1586,13 +1706,6 @@
                         </div>
                         <div class="form-row"><label class="form-label" for="rsApplicant">Applicant <span class="label-hint">· Uploader email (read-only)</span></label><input class="rs-input" id="rsApplicant" type="email" inputmode="email" autocomplete="off" readonly placeholder="name@ctw.inc" title="Uploader email; cannot be edited"></div>
                         <div class="form-row"><label class="form-label" for="rsMemo">Memo</label><textarea class="rs-textarea" id="rsMemo" readonly placeholder="—"></textarea></div>
-                        <div class="form-row">
-                            <label class="form-label">Payout Required</label>
-                            <div class="radio-group" id="rsPayoutGroup">
-                                <label><input type="radio" name="rsPayout" value="yes"> Yes</label>
-                                <label><input type="radio" name="rsPayout" value="no"> No</label>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -2070,11 +2183,33 @@
             (applicant && applicant[0]) ? applicant[0].toUpperCase() : '—';
         document.getElementById('ivApplicationDate').textContent = f.applicationDate || '—';
 
-        // Payout required radio
-        const payout = f.payoutRequired || 'yes';
-        document.querySelectorAll('input[name="ivPayout"]').forEach(r => {
-            r.checked = (r.value === payout);
-        });
+        // Reset depreciation fields when loading a new invoice
+        document.querySelectorAll('input[name="ivOneTime"]').forEach(r => r.checked = false);
+        document.getElementById('ivDepreciationRow').style.display = 'none';
+        switchDepMethod('straight');
+    }
+
+    function toggleDepreciation(radio) {
+        const row = document.getElementById('ivDepreciationRow');
+        row.style.display = (radio.value === 'no') ? 'flex' : 'none';
+    }
+
+    function switchDepMethod(method) {
+        const straight = document.getElementById('depBlockStraight');
+        const declining = document.getElementById('depBlockDeclining');
+        const btnS = document.getElementById('depBtnStraight');
+        const btnD = document.getElementById('depBtnDeclining');
+        if (method === 'straight') {
+            straight.classList.add('show');
+            declining.classList.remove('show');
+            btnS.classList.add('active');
+            btnD.classList.remove('active');
+        } else {
+            declining.classList.add('show');
+            straight.classList.remove('show');
+            btnD.classList.add('active');
+            btnS.classList.remove('active');
+        }
     }
 
     function applyInvoiceRegion(region) {
