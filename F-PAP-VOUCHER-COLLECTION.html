@@ -1329,13 +1329,13 @@
     let voucherFiles = [
         { id: 101, name: '台北國稅局_薪資所得扣繳稅額202601_繳款書Voucher1.pdf', type: 'pdf', state: 'checked', time: '2026-04-10 09:15', month: 4, year: 2026,
           file: '静态文件/台北國稅局_薪資所得扣繳稅額202601_繳款書Receipt1.pdf',
-          parsed: { region: 'TW', payee: '台北國稅局', bankName: '台灣銀行', amount: '35,720', currency: 'TWD', purpose: '薪資所得扣繳稅額', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '2026年01月薪資所得扣繳' } },
+          parsed: { region: 'TW', company: 'AINEKOX CO LTD.', payee: '台北國稅局', bankName: '台灣銀行', accountNo: '10204567890', amount: '35,720', currency: 'TWD', purpose: '薪資所得扣繳稅額', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '2026年01月薪資所得扣繳' } },
         { id: 102, name: '台北健保費用_2026.01月薪資Voucher2.pdf', type: 'pdf', state: 'pending', time: '2026-04-15 14:30', month: 4, year: 2026,
           file: '静态文件/台北健保費用_2026.01月薪資Receipt2.pdf',
-          parsed: { region: 'TW', payee: '衛生福利部中央健康保險署', bankName: '台灣銀行', amount: '28,460', currency: 'TWD', purpose: '健保費用 2026年01月', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '台北辦公室1月份健保費' } },
+          parsed: { region: 'TW', company: 'AINEKOX CO LTD.', payee: '衛生福利部中央健康保險署', bankName: '台灣銀行', accountNo: '20312345678', amount: '28,460', currency: 'TWD', purpose: '健保費用 2026年01月', paymentBank: 'fubon', paymentType: 'admin', applicant: 'david.chen@ctw.inc', memo: '台北辦公室1月份健保費' } },
         { id: 103, name: '上海李永亮费用报销单单据Voucher3.pdf', type: 'pdf', state: 'unconfirmed', time: '2026-04-18 11:00', month: 4, year: 2026,
           file: '静态文件/上海李永亮费用报销单单据Receipt3.pdf',
-          parsed: { region: 'CN', payee: '李永亮', bankName: '中国银行', amount: '4,580.00', currency: 'RMB', purpose: '费用报销', paymentBank: 'cmb', paymentType: 'admin', applicant: 'yongliang.li@ctw.inc', memo: '上海办公室费用报销' } },
+          parsed: { region: 'CN', company: '', payee: '李永亮', bankName: '中国银行', accountNo: '62234567890123456', amount: '4,580.00', currency: 'RMB', purpose: '费用报销', paymentBank: 'cmb', paymentType: 'admin', applicant: 'yongliang.li@ctw.inc', memo: '上海办公室费用报销' } },
         { id: 104, name: 'new_voucher_uploading.pdf', type: 'pdf', state: 'parsing', time: '2026-04-21 16:20', month: 4, year: 2026,
           file: null,
           parsed: null },
@@ -1619,11 +1619,13 @@
     function populateVoucherForm(f) {
         const p = f.parsed || {};
         document.getElementById('rfRegion').value = inferRegionFromParsed(p);
+        document.getElementById('rfCompany').value = p.company || '';
         document.getElementById('rfCurrency').value = p.currency || 'TWD';
         document.getElementById('rfPaymentType').value = p.paymentType || 'admin';
         document.getElementById('rfPaymentBank').value = p.paymentBank || 'fubon';
         document.getElementById('rfPayee').value = p.payee || '';
         document.getElementById('rfBankName').value = p.bankName || '';
+        document.getElementById('rfAccountNo').value = p.accountNo || '';
         document.getElementById('rfAmount').value = p.amount || '';
         document.getElementById('rfPurpose').value = p.purpose || '';
         document.getElementById('rfMemo').value = p.memo || '';
@@ -1652,6 +1654,10 @@
         const curSel = document.getElementById('rfCurrency');
         curSel.value = reg === 'CN' ? 'RMB' : 'TWD';
         syncBankWithCurrency();
+        // Auto-fill Company based on region (CN: no auto-fill)
+        const companyMap = { TW: 'AINEKOX CO LTD.', JP: 'CTW INC', US: 'CTW US INC', SG: 'CTW G123 SINGAPORE PTE LTD' };
+        const companySel = document.getElementById('rfCompany');
+        if (companyMap[reg]) companySel.value = companyMap[reg];
     }
 
     function saveVoucherFormToData() {
@@ -1659,8 +1665,10 @@
         if (!f) return;
         f.parsed = {
             region: document.getElementById('rfRegion').value,
+            company: document.getElementById('rfCompany').value,
             payee: document.getElementById('rfPayee').value,
             bankName: document.getElementById('rfBankName').value,
+            accountNo: document.getElementById('rfAccountNo').value,
             amount: document.getElementById('rfAmount').value,
             currency: document.getElementById('rfCurrency').value,
             purpose: document.getElementById('rfPurpose').value,

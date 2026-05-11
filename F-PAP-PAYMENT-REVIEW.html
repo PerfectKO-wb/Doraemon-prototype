@@ -1448,7 +1448,15 @@
                         <!-- Common: always visible -->
                         <div class="form-row" data-region="all">
                             <div class="form-label">Company :</div>
-                            <div class="form-control"><input id="ivCompany"></div>
+                            <select class="form-control" id="ivCompany">
+                                <option value="">— Select —</option>
+                                <option value="AINEKOX CO LTD.">AINEKOX CO LTD.</option>
+                                <option value="SHANGHAI WEIYOUYI CHUXIN TECH CO LTD">SHANGHAI WEIYOUYI CHUXIN TECH CO LTD</option>
+                                <option value="CTW G123 SINGAPORE PTE LTD">CTW G123 SINGAPORE PTE LTD</option>
+                                <option value="CTW INC">CTW INC</option>
+                                <option value="CTW US INC">CTW US INC</option>
+                                <option value="CTW CAYMAN">CTW CAYMAN</option>
+                            </select>
                         </div>
                         <div class="form-row" data-region="all">
                             <div class="form-label">Region :</div>
@@ -2577,6 +2585,12 @@
             if (newRegion === 'JP') cur.value = 'JPY';
             else if (newRegion === 'US') cur.value = 'USD';
             else if (newRegion === 'SG') cur.value = 'SGD';
+        }
+        // Auto-fill Company based on region (CN: no auto-fill)
+        const companyMap = { JP: 'CTW INC', US: 'CTW US INC', SG: 'CTW G123 SINGAPORE PTE LTD', TW: 'AINEKOX CO LTD.' };
+        const companySel = document.getElementById('ivCompany');
+        if (companySel && !companySel.disabled && companyMap[newRegion]) {
+            companySel.value = companyMap[newRegion];
         }
     });
 
