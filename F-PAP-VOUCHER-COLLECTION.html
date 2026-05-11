@@ -1616,10 +1616,17 @@
         return 'TW';
     }
 
+    const COMPANY_BY_REGION = { JP: 'CTW INC', US: 'CTW US INC', SG: 'CTW G123 SINGAPORE PTE LTD', TW: 'AINEKOX CO LTD.' };
+    function syncCompanyFromRegion(regionId, companyId) {
+        const reg = document.getElementById(regionId).value;
+        if (COMPANY_BY_REGION[reg]) document.getElementById(companyId).value = COMPANY_BY_REGION[reg];
+    }
+
     function populateVoucherForm(f) {
         const p = f.parsed || {};
         document.getElementById('rfRegion').value = inferRegionFromParsed(p);
         document.getElementById('rfCompany').value = p.company || '';
+        syncCompanyFromRegion('rfRegion', 'rfCompany');
         document.getElementById('rfCurrency').value = p.currency || 'TWD';
         document.getElementById('rfPaymentType').value = p.paymentType || 'admin';
         document.getElementById('rfPaymentBank').value = p.paymentBank || 'fubon';
@@ -1654,10 +1661,7 @@
         const curSel = document.getElementById('rfCurrency');
         curSel.value = reg === 'CN' ? 'RMB' : 'TWD';
         syncBankWithCurrency();
-        // Auto-fill Company based on region (CN: no auto-fill)
-        const companyMap = { TW: 'AINEKOX CO LTD.', JP: 'CTW INC', US: 'CTW US INC', SG: 'CTW G123 SINGAPORE PTE LTD' };
-        const companySel = document.getElementById('rfCompany');
-        if (companyMap[reg]) companySel.value = companyMap[reg];
+        syncCompanyFromRegion('rfRegion', 'rfCompany');
     }
 
     function saveVoucherFormToData() {

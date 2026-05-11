@@ -2180,6 +2180,14 @@
         document.querySelectorAll('input[name="ivOneTime"]').forEach(r => { r.checked = (r.value === 'yes'); });
         document.getElementById('ivDepreciationRow').style.display = 'none';
         switchDepMethod('straight');
+        // Auto-fill Company from Region
+        syncIvCompanyFromRegion();
+    }
+
+    const IV_COMPANY_BY_REGION = { JP: 'CTW INC', US: 'CTW US INC', SG: 'CTW G123 SINGAPORE PTE LTD', TW: 'AINEKOX CO LTD.' };
+    function syncIvCompanyFromRegion() {
+        const reg = document.getElementById('ivRegion').value;
+        if (IV_COMPANY_BY_REGION[reg]) document.getElementById('ivCompany').value = IV_COMPANY_BY_REGION[reg];
     }
 
     function toggleDepreciation(radio) {
@@ -2587,11 +2595,7 @@
             else if (newRegion === 'SG') cur.value = 'SGD';
         }
         // Auto-fill Company based on region (CN: no auto-fill)
-        const companyMap = { JP: 'CTW INC', US: 'CTW US INC', SG: 'CTW G123 SINGAPORE PTE LTD', TW: 'AINEKOX CO LTD.' };
-        const companySel = document.getElementById('ivCompany');
-        if (companySel && !companySel.disabled && companyMap[newRegion]) {
-            companySel.value = companyMap[newRegion];
-        }
+        syncIvCompanyFromRegion();
     });
 
     document.getElementById('detailBack').addEventListener('click', closeDetail);
