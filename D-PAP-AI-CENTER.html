@@ -308,6 +308,172 @@ html,body{width:100%;height:100%;overflow:hidden;}
 }
 .qp-img-card.selected .qp-img-lbl{color:#007aff;}
 
+/* Video card thumb */
+.qp-video-thumb{
+  width:100%;aspect-ratio:3/2;
+  border-radius:10px 10px 0 0;
+  overflow:hidden;position:relative;
+  background:#111;
+}
+.qp-video-thumb video{
+  width:100%;height:100%;object-fit:cover;display:block;
+  border-radius:10px 10px 0 0;
+  pointer-events:none;
+}
+.qp-video-overlay{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.3);
+  transition:background .2s;
+}
+.qp-img-card:hover .qp-video-overlay{background:rgba(0,0,0,.1);}
+.qp-play-icon{
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,.25);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .2s;
+}
+.qp-img-card:hover .qp-play-icon{opacity:0;}
+
+/* Carousel nav arrows */
+.qp-carousel-prev,.qp-carousel-next{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:24px;height:24px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.45);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .15s;z-index:3;
+}
+.qp-carousel-prev{left:7px;}
+.qp-carousel-next{right:7px;}
+.qp-img-card:hover .qp-carousel-prev,
+.qp-img-card:hover .qp-carousel-next{opacity:1;}
+/* hide nav when only 1 video */
+.qp-carousel-prev[hidden],.qp-carousel-next[hidden]{display:none!important;}
+
+/* Carousel dots */
+.qp-carousel-dots{
+  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  display:flex;gap:4px;z-index:3;
+}
+.qp-carousel-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:rgba(255,255,255,.45);
+  transition:background .15s, transform .15s;
+  cursor:pointer;
+}
+.qp-carousel-dot.active{background:#fff;transform:scale(1.25);}
+
+/* Play button (bottom-right) */
+.qp-play-btn{
+  position:absolute;bottom:7px;right:7px;
+  width:26px;height:26px;border-radius:8px;
+  background:rgba(0,0,0,.45);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;opacity:0;transition:opacity .15s;
+  z-index:2;
+}
+.qp-img-card:hover .qp-play-btn{opacity:1;}
+
+/* Video player modal */
+.qp-video-modal{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.82);
+  align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);
+}
+.qp-video-modal.open{display:flex;}
+.qp-vm-box{
+  position:relative;border-radius:14px;overflow:hidden;
+  max-width:560px;width:92%;
+  background:#1a1a1a;
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
+}
+.qp-vm-box video{width:100%;display:block;max-height:55vh;background:#000;}
+.qp-vm-close{
+  position:absolute;top:10px;right:10px;
+  width:30px;height:30px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.55);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;z-index:2;
+}
+/* Video list (no thumbnails) */
+.qp-vm-list{
+  padding:10px 14px 14px;
+  display:flex;flex-direction:column;gap:4px;
+  max-height:180px;overflow-y:auto;
+}
+.qp-vm-list-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;
+  transition:background .15s;
+  color:rgba(255,255,255,.65);font-size:13px;
+}
+.qp-vm-list-item:hover{background:rgba(255,255,255,.08);}
+.qp-vm-list-item.active{
+  background:rgba(255,255,255,.12);
+  color:#fff;font-weight:600;
+}
+.qp-vm-list-num{
+  flex-shrink:0;width:18px;height:18px;border-radius:50%;
+  background:rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:rgba(255,255,255,.5);
+}
+.qp-vm-list-item.active .qp-vm-list-num{
+  background:#007aff;color:#fff;
+}
+.qp-vm-now-playing{
+  display:flex;align-items:center;gap:5px;
+  padding:0 14px 8px;font-size:11px;color:rgba(255,255,255,.4);
+}
+.qp-vm-now-playing-dot{
+  width:6px;height:6px;border-radius:50%;background:#007aff;
+  animation:nmPulse 1.2s ease-in-out infinite;
+}
+@keyframes nmPulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* Zoom button on image thumb */
+.qp-zoom-btn{
+  position:absolute;bottom:7px;right:7px;
+  width:26px;height:26px;border-radius:8px;
+  background:rgba(0,0,0,.45);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;line-height:1;
+  opacity:0;transition:opacity .15s;
+  z-index:2;
+}
+.qp-img-card:hover .qp-zoom-btn{opacity:1;}
+
+/* Lightbox */
+.qp-lightbox{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.75);
+  align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.qp-lightbox.open{display:flex;}
+.qp-lb-box{
+  position:relative;border-radius:16px;overflow:hidden;
+  max-width:480px;width:90%;
+  box-shadow:0 24px 80px rgba(0,0,0,.5);
+}
+.qp-lb-thumb{
+  width:100%;aspect-ratio:3/2;
+}
+.qp-lb-caption{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:12px 16px;
+  background:linear-gradient(transparent,rgba(0,0,0,.65));
+  color:#fff;font-size:14px;font-weight:700;text-align:center;
+}
+.qp-lb-close{
+  position:absolute;top:10px;right:10px;
+  width:30px;height:30px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.5);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;line-height:1;
+}
+
 .qp-done{text-align:center;padding:20px 0 8px;}
 .qp-done-icon{font-size:32px;margin-bottom:8px;}
 .qp-done-title{font-size:16px;font-weight:700;color:rgba(0,0,0,.8);margin-bottom:4px;}
@@ -1156,6 +1322,23 @@ function toggleCases(){
 /* ── QUICK PICK ── */
 const PAIRS=[
   {
+    q:'Which video do you prefer?',
+    type:'video',
+    a:{
+      videos:[
+        {src:'https://www.w3schools.com/html/mov_bbb.mp4', label:'Big Buck Bunny — Trailer'},
+        {src:'https://www.w3schools.com/html/movie.mp4',   label:'Big Buck Bunny — Clip 2'},
+      ]
+    },
+    b:{
+      videos:[
+        {src:'https://www.w3schools.com/html/movie.mp4',   label:'Sample Reel A'},
+        {src:'https://www.w3schools.com/html/mov_bbb.mp4', label:'Sample Reel B'},
+        {src:'https://www.w3schools.com/html/movie.mp4',   label:'Sample Reel C'},
+      ]
+    }
+  },
+  {
     q:'Vibes-only — which one?',
     a:{g:'g1a', title:'情だはなる'},
     b:{g:'g1b', title:'贝世物じゃねと\n英勇者の戦いは', dark:true}
@@ -1178,36 +1361,156 @@ const PAIRS=[
 ];
 
 let qpOpen=false;
-const qpPicks={};  // {pairIdx: 'A'|'B'}
+const qpPicks={};     // {pairIdx: 'A'|'B'}
+const qpVidIdx={};    // {'0A': currentVideoIndex, ...}
+
+function makeVideoCard(p, i, slot){
+  const opt = p[slot === 'A' ? 'a' : 'b'];
+  const videos = opt.videos;
+  const picked = qpPicks[i];
+  const cls = picked === slot ? ' selected' : picked && picked !== slot ? ' dimmed' : '';
+  const cardKey = `${i}${slot}`;
+  const curIdx = qpVidIdx[cardKey] || 0;
+  const vid_id = `qpVid${cardKey}`;
+  const multi = videos.length > 1;
+
+  const dots = multi ? `<div class="qp-carousel-dots">${
+    videos.map((_,di)=>`<div class="qp-carousel-dot${di===curIdx?' active':''}"
+      onclick="event.stopPropagation();qpVidNav('${cardKey}',${di})"></div>`).join('')
+  }</div>` : '';
+
+  const arrows = multi ? `
+    <button class="qp-carousel-prev" onclick="event.stopPropagation();qpVidNav('${cardKey}',${(curIdx-1+videos.length)%videos.length})"${curIdx===0?' style="opacity:.3"':''}>
+      <svg width="8" height="12" viewBox="0 0 8 12" fill="white"><path d="M7 1L1 6l6 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    </button>
+    <button class="qp-carousel-next" onclick="event.stopPropagation();qpVidNav('${cardKey}',${(curIdx+1)%videos.length})"${curIdx===videos.length-1?' style="opacity:.3"':''}>
+      <svg width="8" height="12" viewBox="0 0 8 12" fill="white"><path d="M1 1l6 5-6 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    </button>` : '';
+
+  const videosJson = JSON.stringify(videos).replace(/"/g,'&quot;');
+
+  return `
+    <div class="qp-img-card${cls}" id="qpP${cardKey}" onclick="pickImg(${i},'${slot}')"
+         onmouseenter="qpVideoPlay('${vid_id}')" onmouseleave="qpVideoStop('${vid_id}')">
+      <div class="qp-video-thumb">
+        <video id="${vid_id}" src="${videos[curIdx].src}" muted playsinline loop preload="metadata"></video>
+        <div class="qp-video-overlay">
+          <div class="qp-play-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="white"><path d="M4 2.5l9 5.5-9 5.5V2.5z"/></svg>
+          </div>
+        </div>
+        ${arrows}
+        ${dots}
+        <button class="qp-play-btn" onclick="event.stopPropagation();openQpVideoModal(${i},'${slot}')">
+          <svg width="11" height="13" viewBox="0 0 11 13" fill="white"><path d="M1 1l9 5.5L1 12V1z"/></svg>
+        </button>
+      </div>
+      <div class="qp-img-lbl">${slot}${multi ? ` <span style="font-size:10px;opacity:.5;">(${curIdx+1}/${videos.length})</span>` : ''}</div>
+    </div>`;
+}
+
+function qpVidNav(cardKey, newIdx){
+  qpVidIdx[cardKey] = newIdx;
+  renderAllPairs();
+  // re-attach hover state if was playing
+}
+
+function makeImageCard(p, i, slot){
+  const opt = slot === 'A' ? p.a : p.b;
+  const picked = qpPicks[i];
+  const cls = picked === slot ? ' selected' : picked && picked !== slot ? ' dimmed' : '';
+  return `
+    <div class="qp-img-card${cls}" id="qpP${i}${slot}" onclick="pickImg(${i},'${slot}')">
+      <div class="qp-img-thumb ${opt.g}">
+        <div class="qp-thumb-inner">
+          <div class="qp-thumb-title${opt.kawaii?' kawaii':''}">${opt.title.replace(/\n/g,'<br>')}</div>
+        </div>
+        <button class="qp-zoom-btn" onclick="event.stopPropagation();openQpLightbox('${opt.g}','${opt.title.replace(/\n/g,' ')}')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="white" stroke-width="1.6"/><path d="M10 10l3.5 3.5" stroke="white" stroke-width="1.6" stroke-linecap="round"/><path d="M5 6.5h3M6.5 5v3" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="qp-img-lbl">${slot}</div>
+    </div>`;
+}
 
 function renderAllPairs(){
   const list = document.getElementById('qpPairsList');
-  list.innerHTML = PAIRS.map((p,i)=>`
+  list.innerHTML = PAIRS.map((p,i)=>{
+    const cardA = p.type==='video' ? makeVideoCard(p,i,'A') : makeImageCard(p,i,'A');
+    const cardB = p.type==='video' ? makeVideoCard(p,i,'B') : makeImageCard(p,i,'B');
+    return `
     <div class="qp-pair">
       <div class="qp-pair-q">${p.q}</div>
-      <div class="qp-img-opts">
-        <div class="qp-img-card${qpPicks[i]==='A'?' selected':qpPicks[i]==='B'?' dimmed':''}"
-             id="qpP${i}A" onclick="pickImg(${i},'A')">
-          <div class="qp-img-thumb ${p.a.g}">
-            <div class="qp-thumb-inner">
-              <div class="qp-thumb-title${p.a.kawaii?' kawaii':''}">${p.a.title.replace(/\n/g,'<br>')}</div>
-            </div>
-          </div>
-          <div class="qp-img-lbl">A</div>
-        </div>
-        <div class="qp-img-card${qpPicks[i]==='B'?' selected':qpPicks[i]==='A'?' dimmed':''}"
-             id="qpP${i}B" onclick="pickImg(${i},'B')">
-          <div class="qp-img-thumb ${p.b.g}">
-            <div class="qp-thumb-inner">
-              <div class="qp-thumb-title${p.b.kawaii?' kawaii':''}">${p.b.title.replace(/\n/g,'<br>')}</div>
-            </div>
-          </div>
-          <div class="qp-img-lbl">B</div>
-        </div>
-      </div>
-    </div>
-  `).join('');
+      <div class="qp-img-opts">${cardA}${cardB}</div>
+    </div>`;
+  }).join('');
 }
+
+function qpVideoPlay(id){
+  const v = document.getElementById(id);
+  if(v) v.play();
+}
+function qpVideoStop(id){
+  const v = document.getElementById(id);
+  if(v){ v.pause(); v.currentTime=0; }
+}
+
+// Quick Pick video modal
+let _qpVmVideos = [];
+let _qpVmCurIdx = 0;
+
+function openQpVideoModal(pairIdx, slot){
+  const p = PAIRS[pairIdx];
+  const opt = p[slot === 'A' ? 'a' : 'b'];
+  _qpVmVideos = opt.videos;
+  // start from current carousel position
+  _qpVmCurIdx = qpVidIdx[`${pairIdx}${slot}`] || 0;
+  _renderQpVmModal();
+  document.getElementById('qpVideoModal').classList.add('open');
+}
+
+function _renderQpVmModal(){
+  const player = document.getElementById('qpVmPlayer');
+  const label  = document.getElementById('qpVmNowLabel');
+  const list   = document.getElementById('qpVmList');
+
+  const cur = _qpVmVideos[_qpVmCurIdx];
+  player.src = cur.src;
+  player.play();
+  label.textContent = cur.label;
+
+  list.innerHTML = _qpVmVideos.map((v, i) => `
+    <div class="qp-vm-list-item${i===_qpVmCurIdx?' active':''}" onclick="qpVmPlayIdx(${i})">
+      <div class="qp-vm-list-num">${i+1}</div>
+      <span>${v.label}</span>
+    </div>`).join('');
+}
+
+function qpVmPlayIdx(idx){
+  _qpVmCurIdx = idx;
+  _renderQpVmModal();
+}
+
+function closeQpVideoModal(){
+  const player = document.getElementById('qpVmPlayer');
+  player.pause();
+  player.src = '';
+  document.getElementById('qpVideoModal').classList.remove('open');
+}
+
+// Quick Pick lightbox
+function openQpLightbox(gradientClass, caption){
+  const lb = document.getElementById('qpLightbox');
+  const thumb = document.getElementById('qpLbThumb');
+  const cap = document.getElementById('qpLbCaption');
+  thumb.className = 'qp-lb-thumb ' + gradientClass;
+  cap.textContent = caption;
+  lb.classList.add('open');
+}
+function closeQpLightbox(){
+  document.getElementById('qpLightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeQpLightbox(); closeQpVideoModal(); } });
 
 function pickImg(pairIdx, choice){
   if(qpPicks[pairIdx]) return;
@@ -1512,5 +1815,26 @@ function clearDoingInput(){
   el.value = ''; el.focus(); onDoingInput(el);
 }
 </script>
+<!-- Quick Pick Video Modal -->
+<div class="qp-video-modal" id="qpVideoModal" onclick="closeQpVideoModal()">
+  <div class="qp-vm-box" onclick="event.stopPropagation()">
+    <button class="qp-vm-close" onclick="closeQpVideoModal()">✕</button>
+    <video id="qpVmPlayer" controls autoplay style="width:100%;display:block;max-height:55vh;background:#000;"></video>
+    <div class="qp-vm-now-playing">
+      <div class="qp-vm-now-playing-dot"></div>
+      <span id="qpVmNowLabel">Playing</span>
+    </div>
+    <div class="qp-vm-list" id="qpVmList"></div>
+  </div>
+</div>
+
+<!-- Quick Pick Lightbox -->
+<div class="qp-lightbox" id="qpLightbox" onclick="closeQpLightbox()">
+  <div class="qp-lb-box" onclick="event.stopPropagation()">
+    <div class="qp-lb-thumb" id="qpLbThumb"></div>
+    <div class="qp-lb-caption" id="qpLbCaption"></div>
+    <button class="qp-lb-close" onclick="closeQpLightbox()">✕</button>
+  </div>
+</div>
 </body>
 </html>

@@ -436,6 +436,40 @@
         .send-btn.active svg path { stroke: var(--white); }
         .send-btn.stop { background: var(--button-default); }
 
+        /* A-ticket reference tag */
+        .aticket-ref {
+            display: none;
+            align-items: center; gap: 8px;
+            max-width: 800px; margin: 0 auto 8px;
+        }
+        .aticket-ref.visible { display: flex; }
+        .aticket-tag {
+            flex: 1; min-width: 0;
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 10px 5px 0;
+            background: transparent;
+            border-left: 2px solid #a0aec0;
+            padding-left: 10px;
+        }
+        .aticket-label {
+            font-size: 12px; color: #6b7280;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            line-height: 18px;
+        }
+        .aticket-label a {
+            color: #6b7280; text-decoration: none;
+        }
+        .aticket-label a:hover { text-decoration: underline; }
+        .aticket-close {
+            flex-shrink: 0;
+            width: 16px; height: 16px; border-radius: 50%; border: none;
+            background: transparent; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #9ca3af; padding: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+        .aticket-close:hover { background: var(--bg-active); color: #374151; }
+
     </style>
 </head>
 <body>
@@ -631,6 +665,17 @@
 
         <!-- Input -->
         <div class="chat-input-wrapper">
+            <!-- A-ticket reference tag (shown for alert scenes) -->
+            <div class="aticket-ref" id="aticketRef">
+                <div class="aticket-tag">
+                    <span class="aticket-label" id="aticketLabel"></span>
+                </div>
+                    <button class="aticket-close" id="aticketClose" title="完成A票">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6.5l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
             <div class="chat-input">
                 <div class="chat-input-text">
                     <textarea id="chatTextarea" rows="1" placeholder="Create an expense claim for $120..."></textarea>
@@ -922,6 +967,30 @@
             if (lower.includes(key.toLowerCase())) return currentResponses[key];
         }
         return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    }
+
+    // A-ticket reference tag
+    const ATICKET_MAP = {
+        'publisher-alert': '[vividarmy-game-server] deploy_failed 处理'
+    };
+    const aticketRef   = document.getElementById('aticketRef');
+    const aticketLabel = document.getElementById('aticketLabel');
+    const aticketClose = document.getElementById('aticketClose');
+    if (false && aticketRef && ATICKET_MAP[sceneName]) {
+        aticketLabel.textContent = '关联的A票：' + ATICKET_MAP[sceneName];
+        aticketRef.classList.add('visible');
+        aticketClose.addEventListener('click', () => {
+            // Auto-send completion message
+            const completionText = '@A A票状态修改为completed，outputs：已完成';
+            chatArea.appendChild(createUserMsg(completionText));
+            chatArea.scrollTop = chatArea.scrollHeight;
+            setTimeout(() => {
+                chatArea.appendChild(createAiMsg('已收到，A票「' + ATICKET_MAP[sceneName] + '」状态已更新为 completed，outputs 已记录。'));
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }, 600);
+            // Hide the tag
+            aticketRef.classList.remove('visible');
+        });
     }
 
     // Show alert header for alert scenes
