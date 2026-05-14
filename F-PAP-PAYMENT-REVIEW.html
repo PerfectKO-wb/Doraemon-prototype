@@ -1621,21 +1621,23 @@
                         </div>
                         <div class="form-row" data-region="all">
                             <div class="form-label">Application Date :</div>
-                            <div class="readonly-text" id="ivApplicationDate">—</div>
+                            <div class="form-control">
+                                <input type="date" id="ivApplicationDate" style="font:inherit;font-size:13px;border:1px solid var(--border-default);border-radius:6px;padding:6px 10px;background:#fff;color:var(--text-default);outline:none;width:100%;">
+                            </div>
                         </div>
 
                         <!-- Accounting date fields -->
                         <div class="form-row" data-region="all">
                             <div class="form-label">Invoice Date :</div>
-                            <div class="readonly-text-row">
-                                <div class="readonly-text" id="ivInvoiceDate">—</div>
+                            <div class="readonly-text-row" style="flex:1;">
+                                <input type="date" id="ivInvoiceDate" style="font:inherit;font-size:13px;border:1px solid var(--border-default);border-radius:6px;padding:6px 10px;background:#fff;color:var(--text-default);outline:none;flex:1;min-width:0;">
                                 <span class="ai-badge">AI</span>
                             </div>
                         </div>
                         <div class="form-row" data-region="all">
                             <div class="form-label">Transaction Date :</div>
-                            <div class="readonly-text-row">
-                                <div class="readonly-text" id="ivTransactionDate">—</div>
+                            <div class="readonly-text-row" style="flex:1;">
+                                <input type="date" id="ivTransactionDate" style="font:inherit;font-size:13px;border:1px solid var(--border-default);border-radius:6px;padding:6px 10px;background:#fff;color:var(--text-default);outline:none;flex:1;min-width:0;">
                                 <span class="ai-badge">AI</span>
                             </div>
                         </div>
@@ -2241,11 +2243,12 @@
         document.getElementById('ivApplicant').textContent = applicant;
         document.getElementById('ivApplicantAvatar').textContent =
             (applicant && applicant[0]) ? applicant[0].toUpperCase() : '—';
-        document.getElementById('ivApplicationDate').textContent = f.applicationDate || '—';
+        const toDateVal = s => (s ? s.split(' ')[0] : '');
+        document.getElementById('ivApplicationDate').value = toDateVal(f.applicationDate);
 
-        // Accounting date fields (AI-filled: readonly display; accountingDate: editable)
-        document.getElementById('ivInvoiceDate').textContent = f.invoiceDate || '—';
-        document.getElementById('ivTransactionDate').textContent = f.transactionDate || '—';
+        // Accounting date fields
+        document.getElementById('ivInvoiceDate').value = toDateVal(f.invoiceDate);
+        document.getElementById('ivTransactionDate').value = toDateVal(f.transactionDate);
         document.getElementById('ivServicePeriodStart').value = f.servicePeriodStart || '';
         document.getElementById('ivServicePeriodEnd').value = f.servicePeriodEnd || '';
         document.getElementById('ivAccountingDate').value = f.accountingDate || '';
@@ -2512,8 +2515,8 @@
             amount: v('ivAmount'),
             purpose: v('ivPurpose'),
             memo: v('ivMemo'),
-            invoiceDate: document.getElementById('ivInvoiceDate').textContent.trim(),
-            transactionDate: document.getElementById('ivTransactionDate').textContent.trim(),
+            invoiceDate: v('ivInvoiceDate'),
+            transactionDate: v('ivTransactionDate'),
             servicePeriodStart: v('ivServicePeriodStart'),
             servicePeriodEnd: v('ivServicePeriodEnd'),
             accountingDate: v('ivAccountingDate'),
