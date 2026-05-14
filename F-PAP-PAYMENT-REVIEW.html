@@ -1625,8 +1625,6 @@
                         </div>
 
                         <!-- Accounting date fields -->
-                        <div class="date-section-label" data-region="all">Accounting Dates</div>
-
                         <div class="form-row" data-region="all">
                             <div class="form-label">Invoice Date :</div>
                             <div class="readonly-text-row">
@@ -1643,13 +1641,10 @@
                         </div>
                         <div class="form-row" data-region="all">
                             <div class="form-label">Service Period :</div>
-                            <div class="readonly-text-row">
-                                <div class="date-period-row">
-                                    <div class="readonly-text" id="ivServicePeriodStart">—</div>
-                                    <span class="date-period-sep">→</span>
-                                    <div class="readonly-text" id="ivServicePeriodEnd">—</div>
-                                </div>
-                                <span class="ai-badge">AI</span>
+                            <div class="date-period-row">
+                                <input type="date" id="ivServicePeriodStart" style="font:inherit;font-size:13px;border:1px solid var(--border-default);border-radius:6px;padding:6px 8px;background:#fff;color:var(--text-default);outline:none;flex:1;min-width:0;">
+                                <span class="date-period-sep">→</span>
+                                <input type="date" id="ivServicePeriodEnd" style="font:inherit;font-size:13px;border:1px solid var(--border-default);border-radius:6px;padding:6px 8px;background:#fff;color:var(--text-default);outline:none;flex:1;min-width:0;">
                             </div>
                         </div>
                         <div class="form-row" data-region="all">
@@ -2251,8 +2246,8 @@
         // Accounting date fields (AI-filled: readonly display; accountingDate: editable)
         document.getElementById('ivInvoiceDate').textContent = f.invoiceDate || '—';
         document.getElementById('ivTransactionDate').textContent = f.transactionDate || '—';
-        document.getElementById('ivServicePeriodStart').textContent = f.servicePeriodStart || '—';
-        document.getElementById('ivServicePeriodEnd').textContent = f.servicePeriodEnd || '—';
+        document.getElementById('ivServicePeriodStart').value = f.servicePeriodStart || '';
+        document.getElementById('ivServicePeriodEnd').value = f.servicePeriodEnd || '';
         document.getElementById('ivAccountingDate').value = f.accountingDate || '';
 
         // Reset depreciation: default One-time = Yes, hide depreciation block
@@ -2519,8 +2514,8 @@
             memo: v('ivMemo'),
             invoiceDate: document.getElementById('ivInvoiceDate').textContent.trim(),
             transactionDate: document.getElementById('ivTransactionDate').textContent.trim(),
-            servicePeriodStart: document.getElementById('ivServicePeriodStart').textContent.trim(),
-            servicePeriodEnd: document.getElementById('ivServicePeriodEnd').textContent.trim(),
+            servicePeriodStart: v('ivServicePeriodStart'),
+            servicePeriodEnd: v('ivServicePeriodEnd'),
             accountingDate: v('ivAccountingDate'),
             payoutRequired: selectedRadio ? selectedRadio.value : 'yes'
         };
