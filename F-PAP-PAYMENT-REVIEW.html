@@ -1621,9 +1621,7 @@
                         </div>
                         <div class="form-row" data-region="all">
                             <div class="form-label">Application Date :</div>
-                            <div class="form-control">
-                                <input type="date" id="ivApplicationDate" style="font:inherit;font-size:13px;border:1px solid var(--border-default);border-radius:6px;padding:6px 10px;background:#fff;color:var(--text-default);outline:none;width:100%;">
-                            </div>
+                            <div class="readonly-text" id="ivApplicationDate">—</div>
                         </div>
 
                         <!-- Accounting date fields -->
@@ -2242,7 +2240,7 @@
         document.getElementById('ivApplicantAvatar').textContent =
             (applicant && applicant[0]) ? applicant[0].toUpperCase() : '—';
         const toDateVal = s => (s ? s.split(' ')[0] : '');
-        document.getElementById('ivApplicationDate').value = toDateVal(f.applicationDate);
+        document.getElementById('ivApplicationDate').textContent = f.applicationDate || '—';
 
         // Accounting date fields
         document.getElementById('ivInvoiceDate').value = toDateVal(f.invoiceDate);
