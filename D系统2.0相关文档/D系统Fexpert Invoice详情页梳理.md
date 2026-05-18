@@ -24,13 +24,13 @@ Invoice 详情页字段共 37 个，分为四个区块：
 
 | # | 字段名（英文） | 字段名（中文） | 字段 ID | 类型 | 地区 | 说明 |
 |---|---|---|---|---|---|---|
-| 1 | Description | 费用名 | `ivDescription` | 文本输入 | 全部 | 费用简要名称，置于详情页最顶部，例：`マーケティング費用 4月分` |
-| 2 | Company | 付款公司主体 | `ivCompany` | 下拉选择 | 全部 | 与 Region 联动自动填充（见下方联动规则） |
-| 3 | Region | 地区 | `ivRegion` | 下拉选择 | 全部 | JP / US / SG，决定后续银行字段显示范围，并联动 Currency 默认值 |
-| 4 | Currency | 币种 | `ivCurrency` | 下拉选择 | 全部 | JPY / USD / SGD，随 Region 变更自动切换 |
-| 5 | Payment Type | 打款类型 | `ivPaymentType` | 下拉选择 | 全部 | Administrative（行政类）/ Non-Administrative（非行政类） |
-| 6 | Payment Bank | 打款银行 | `ivPaymentBank` | 文本输入 | 全部 | 付款方出账银行名称 |
-| 7 | Payment Account Name | 付款账户名称 | `ivPaymentAccountName` | 文本输入 | 全部 | 付款方账户名称 |
+| 1 | Description | 费用名 | `description` | 文本输入 | 全部 | 费用简要名称，置于详情页最顶部，例：`マーケティング費用 4月分` |
+| 2 | Company | 付款公司主体 | `company` | 下拉选择 | 全部 | 与 Region 联动自动填充（见下方联动规则） |
+| 3 | Region | 地区 | `region` | 下拉选择 | 全部 | JP / US / SG，决定后续银行字段显示范围，并联动 Currency 默认值 |
+| 4 | Currency | 币种 | `currency` | 下拉选择 | 全部 | JPY / USD / SGD，随 Region 变更自动切换 |
+| 5 | Payment Type | 打款类型 | `payment_type` | 下拉选择 | 全部 | Administrative（行政类）/ Non-Administrative（非行政类） |
+| 6 | Payment Bank | 打款银行 | `payment_bank` | 文本输入 | 全部 | 付款方出账银行名称 |
+| 7 | Payment Account Name | 付款账户名称 | `payment_account_name` | 文本输入 | 全部 | 付款方账户名称 |
 
 ### Company ↔ Region 联动规则
 
@@ -51,19 +51,19 @@ Invoice 详情页字段共 37 个，分为四个区块：
 
 | # | 字段名（英文） | 字段名（中文） | 字段 ID | JP | US | SG | 说明 |
 |---|---|---|---|:---:|:---:|:---:|---|
-| 8 | Payee Name | 收款人名称 | `ivPayeeName` | ✅ | ✅ | ✅ | 收款方完整名称 |
-| 9 | Account Holder (Kana) | 账户名（片假名） | `ivAccountHolderKana` | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
-| 10 | Bank Name | 银行名称 | `ivBankName` | ✅ | ✅ | ✅ | 收款方银行名称 |
-| 11 | Bank Name (Kana) | 银行名（片假名） | `ivBankNameKana` | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
-| 12 | Bank Code | 银行代码 | `ivBankCode` | ✅ | ❌ | ✅ | 日本金融机构代码 / SG bank code |
-| 13 | Branch Name (Kana) | 支店名（片假名） | `ivBranchNameKana` | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
-| 14 | Branch Code | 支店代码 | `ivBranchCode` | ✅ | ❌ | ✅ | 日本支店番号 / SG branch code |
-| 15 | Account Type | 账户类型 | `ivAccountType` | ✅ | ❌ | ❌ | Normal（普通）/ Current（活期），日本专用 |
-| 16 | Account No. | 银行账号 | `ivAccountNo` | ✅ | ✅ | ✅ | 收款方银行账号 |
-| 17 | SWIFT Code | 国际汇款代码 | `ivSwiftCode` | ❌ | ✅ | ✅ | 美国、新加坡使用 |
-| 18 | ACH Routing | ACH 路由号 | `ivAchRouting` | ❌ | ✅ | ❌ | 美国 ACH 转账路由号，默认走 ACH |
-| 19 | Wire Routing | Wire 路由号 | `ivWireRouting` | ❌ | ✅ | ❌ | 美国 Wire 汇款路由号，可选 |
-| 20 | PayNow UEN | PayNow 企业编号 | `ivPayNowUen` | ❌ | ❌ | ✅ | 新加坡 PayNow 企业注册编号，可选 |
+| 8 | Payee Name | 收款人名称 | `payee_name` | ✅ | ✅ | ✅ | 收款方完整名称 |
+| 9 | Account Holder (Kana) | 账户名（片假名） | `account_holder_kana` | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
+| 10 | Bank Name | 银行名称 | `bank_name` | ✅ | ✅ | ✅ | 收款方银行名称 |
+| 11 | Bank Name (Kana) | 银行名（片假名） | `bank_name_kana` | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
+| 12 | Bank Code | 银行代码 | `bank_code` | ✅ | ❌ | ✅ | 日本金融机构代码 / SG bank code |
+| 13 | Branch Name (Kana) | 支店名（片假名） | `branch_name_kana` | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
+| 14 | Branch Code | 支店代码 | `branch_code` | ✅ | ❌ | ✅ | 日本支店番号 / SG branch code |
+| 15 | Account Type | 账户类型 | `account_type` | ✅ | ❌ | ❌ | Normal（普通）/ Current（活期），日本专用 |
+| 16 | Account No. | 银行账号 | `account_no` | ✅ | ✅ | ✅ | 收款方银行账号 |
+| 17 | SWIFT Code | 国际汇款代码 | `swift_code` | ❌ | ✅ | ✅ | 美国、新加坡使用 |
+| 18 | ACH Routing | ACH 路由号 | `ach_routing` | ❌ | ✅ | ❌ | 美国 ACH 转账路由号，默认走 ACH |
+| 19 | Wire Routing | Wire 路由号 | `wire_routing` | ❌ | ✅ | ❌ | 美国 Wire 汇款路由号，可选 |
+| 20 | PayNow UEN | PayNow 企业编号 | `paynow_uen` | ❌ | ❌ | ✅ | 新加坡 PayNow 企业注册编号，可选 |
 
 ---
 
@@ -71,11 +71,11 @@ Invoice 详情页字段共 37 个，分为四个区块：
 
 | # | 字段名（英文） | 字段名（中文） | 字段 ID | 类型 | 地区 | 说明 |
 |---|---|---|---|---|---|---|
-| 21 | Amount | 金额 | `ivAmount` | 文本输入 | 全部 | 发票总金额，带千分位格式，例：`250,000` |
-| 22 | Tax Rate | 税费率 | `ivTaxRate` | 数字输入（%） | 全部 | 发票适用税率，百分比，例：`10`（表示 10%） |
-| 23 | Detail | 费用内容明细 | `ivPayloadWrap` | 只读动态表格 | 全部 | AI 从发票中解析的费用行，通用结构见下方说明 |
-| 24 | Purpose | 打款用途 | `ivPurpose` | 文本输入 | 全部 | 打款用途描述，用于银行备注 |
-| 25 | Memo | 备注 | `ivMemo` | 多行文本 | 全部 | 补充备注信息 |
+| 21 | Amount | 金额 | `amount` | 文本输入 | 全部 | 发票总金额，带千分位格式，例：`250,000` |
+| 22 | Tax Rate | 税费率 | `tax_rate` | 数字输入（%） | 全部 | 发票适用税率，百分比，例：`10`（表示 10%） |
+| 23 | Detail | 费用内容明细 | `invoice_detail_payload` | 只读动态表格 | 全部 | AI 从发票中解析的费用行，通用结构见下方说明 |
+| 24 | Purpose | 打款用途 | `purpose` | 文本输入 | 全部 | 打款用途描述，用于银行备注 |
+| 25 | Memo | 备注 | `memo` | 多行文本 | 全部 | 补充备注信息 |
 
 ### Detail 字段（invoice_detail_payload）数据结构
 
@@ -106,12 +106,12 @@ Invoice 详情页字段共 37 个，分为四个区块：
 
 | # | 字段名（英文） | 字段名（中文） | 字段 ID | 类型 | 可编辑 | 说明 |
 |---|---|---|---|---|:---:|---|
-| 26 | Applicant | 申请人 | `ivApplicant` | 只读文本 | ❌ | 发票上传人邮箱账号 |
-| 27 | Application Date | 上传时间 | `ivApplicationDate` | 只读文本 | ❌ | 发票上传至系统的时间，格式：`YYYY-MM-DD HH:mm` |
-| 28 | Invoice Date | 发票开具日期 | `ivInvoiceDate` | 日期选择器 | ✅ | 供应商开票日期（請求書発行日），格式：`YYYY-MM-DD` |
-| 29 | Transaction Date | 交易发生日 | `ivTransactionDate` | 日期选择器 | ✅ | 业务真实发生日期，货交当天 / 服务提供日（取引日 / 納品日） |
-| 30 | Service Period | 服务期间 | `ivServicePeriodStart` / `ivServicePeriodEnd` | 日期选择器（Start → End） | ✅ | 服务合同有效期，用于按月摊销计算 |
-| 31 | Accounting Date | 入账日期 | `ivAccountingDate` | 日期选择器 | ✅ | JE Posting Date，决定进哪个月报表，财务手动选择 |
+| 26 | Applicant | 申请人 | `applicant` | 只读文本 | ❌ | 发票上传人邮箱账号 |
+| 27 | Application Date | 上传时间 | `application_date` | 只读文本 | ❌ | 发票上传至系统的时间，格式：`YYYY-MM-DD HH:mm` |
+| 28 | Invoice Date | 发票开具日期 | `invoice_date` | 日期选择器 | ✅ | 供应商开票日期（請求書発行日），格式：`YYYY-MM-DD` |
+| 29 | Transaction Date | 交易发生日 | `transaction_date` | 日期选择器 | ✅ | 业务真实发生日期，货交当天 / 服务提供日（取引日 / 納品日） |
+| 30 | Service Period | 服务期间 | `service_period_start` / `service_period_end` | 日期选择器（Start → End） | ✅ | 服务合同有效期，用于按月摊销计算 |
+| 31 | Accounting Date | 入账日期 | `accounting_date` | 日期选择器 | ✅ | JE Posting Date，决定进哪个月报表，财务手动选择 |
 
 ### 四个业务日期的含义对比
 
@@ -130,12 +130,12 @@ Invoice 详情页字段共 37 个，分为四个区块：
 
 | # | 字段名 | 字段 ID | 类型 | 说明 |
 |---|---|---|---|---|
-| 32 | One-time Expense（是否一次性费用） | `ivOneTime` | 单选 Yes / No | 默认 **Yes**；选 No 时展开折旧区 |
-| 33 | Depreciation Method（折旧方法） | `depMethodSelect` | 下拉选择 | Straight-line（定額法）/ Declining Balance（定率法） |
-| 34 | Depreciation Period（折旧期间） | `dep[Method]Start` / `dep[Method]End` | Month 选择器（Start → End） | 折旧开始月和结束月 |
-| 35 | Salvage Value（残值） | `depStraightSalvage` | 数字输入 | **仅定額法**，资产残余价值 |
-| 36 | Depreciation Rate（折旧率） | `depDecliningRate` | 数字输入（%） | **仅定率法**，年折旧率 |
-| 37 | Description（折旧描述） | `dep[Method]Desc` | 多行文本 | 描述具体折旧项目，例：`オフィス設備 — 3F改装費用` |
+| 32 | One-time Expense（是否一次性费用） | `one_time_expense` | 单选 Yes / No | 默认 **Yes**；选 No 时展开折旧区 |
+| 33 | Depreciation Method（折旧方法） | `depreciation_method` | 下拉选择 | Straight-line（定額法）/ Declining Balance（定率法） |
+| 34 | Depreciation Period（折旧期间） | `depreciation_start` / `depreciation_end` | Month 选择器（Start → End） | 折旧开始月和结束月 |
+| 35 | Salvage Value（残值） | `salvage_value` | 数字输入 | **仅定額法**，资产残余价值 |
+| 36 | Depreciation Rate（折旧率） | `depreciation_rate` | 数字输入（%） | **仅定率法**，年折旧率 |
+| 37 | Description（折旧描述） | `depreciation_description` | 多行文本 | 描述具体折旧项目，例：`オフィス設備 — 3F改装費用` |
 
 ### 两种折旧方法字段对比
 
