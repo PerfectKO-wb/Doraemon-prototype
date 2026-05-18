@@ -19,6 +19,8 @@ Invoice 详情页字段共 37 个，分为四个区块：
 4. **日期字段** — 上传时间（只读）+ 四个业务日期（可编辑）+ 折旧字段
 
 > **必填图例：** ✅ 必填 　⬜ 选填 　— 系统自动带入（不可编辑）
+>
+> ⚠️ 标注的字段为**接口待新增字段**，现有接口中尚未包含，需评估后补充。
 
 ---
 
@@ -26,11 +28,11 @@ Invoice 详情页字段共 37 个，分为四个区块：
 
 | # | 字段名（英文） | 字段名（中文） | 字段 ID | 类型 | 必填 | 地区 | 说明 |
 |---|---|---|---|---|:---:|---|---|
-| 1 | Description | 费用名 | `description` | 文本输入 | ✅ | 全部 | 费用简要名称，置于详情页最顶部，例：`マーケティング費用 4月分` |
-| 2 | Company | 付款公司主体 | `company` | 下拉选择 | ✅ | 全部 | 与 Region 联动自动填充（见下方联动规则） |
-| 3 | Region | 地区 | `region` | 下拉选择 | ✅ | 全部 | JP / US / SG，决定后续银行字段显示范围，并联动 Currency 默认值 |
+| 1 | Description | 费用名 | `description` ⚠️ | 文本输入 | ✅ | 全部 | 费用简要名称，置于详情页最顶部，例：`マーケティング費用 4月分` |
+| 2 | Company | 付款公司主体 | `company_name` | 下拉选择 | ✅ | 全部 | 与 Region 联动自动填充（见下方联动规则） |
+| 3 | Region | 地区 | `region_code` | 下拉选择 | ✅ | 全部 | JP / US / SG，决定后续银行字段显示范围，并联动 Currency 默认值 |
 | 4 | Currency | 币种 | `currency` | 下拉选择 | ✅ | 全部 | JPY / USD / SGD，随 Region 变更自动切换 |
-| 5 | Payment Type | 打款类型 | `payment_type` | 下拉选择 | ✅ | 全部 | Administrative（行政类）/ Non-Administrative（非行政类） |
+| 5 | Payment Type | 打款类型 | `payment_type` | 下拉选择 | ✅ | 全部 | ADMINISTRATIVE（行政类）/ NON_ADMINISTRATIVE（非行政类） |
 | 6 | Payment Bank | 打款银行 | `payment_bank` | 文本输入 | ✅ | 全部 | 付款方出账银行名称 |
 | 7 | Payment Account Name | 付款账户名称 | `payment_account_name` | 文本输入 | ⬜ | 全部 | 付款方账户名称 |
 
@@ -54,18 +56,18 @@ Invoice 详情页字段共 37 个，分为四个区块：
 | # | 字段名（英文） | 字段名（中文） | 字段 ID | 必填 | JP | US | SG | 说明 |
 |---|---|---|---|:---:|:---:|:---:|:---:|---|
 | 8 | Payee Name | 收款人名称 | `payee_name` | ✅ | ✅ | ✅ | ✅ | 收款方完整名称 |
-| 9 | Account Holder (Kana) | 账户名（片假名） | `account_holder_kana` | ✅ | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
-| 10 | Bank Name | 银行名称 | `bank_name` | ✅ | ✅ | ✅ | ✅ | 收款方银行名称 |
-| 11 | Bank Name (Kana) | 银行名（片假名） | `bank_name_kana` | ✅ | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
-| 12 | Bank Code | 银行代码 | `bank_code` | ✅ | ✅ | ❌ | ✅ | 日本金融机构代码 / SG bank code |
-| 13 | Branch Name (Kana) | 支店名（片假名） | `branch_name_kana` | ✅ | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
-| 14 | Branch Code | 支店代码 | `branch_code` | ✅ | ✅ | ❌ | ✅ | 日本支店番号 / SG branch code |
-| 15 | Account Type | 账户类型 | `account_type` | ✅ | ✅ | ❌ | ❌ | Normal（普通）/ Current（活期），日本专用 |
-| 16 | Account No. | 银行账号 | `account_no` | ✅ | ✅ | ✅ | ✅ | 收款方银行账号 |
-| 17 | SWIFT Code | 国际汇款代码 | `swift_code` | ✅ | ❌ | ✅ | ✅ | 美国、新加坡使用 |
-| 18 | ACH Routing | ACH 路由号 | `ach_routing` | ⬜ | ❌ | ✅ | ❌ | 美国 ACH 转账路由号，可选（默认走 ACH） |
-| 19 | Wire Routing | Wire 路由号 | `wire_routing` | ⬜ | ❌ | ✅ | ❌ | 美国 Wire 汇款路由号，可选 |
-| 20 | PayNow UEN | PayNow 企业编号 | `paynow_uen` | ⬜ | ❌ | ❌ | ✅ | 新加坡 PayNow 企业注册编号，可选 |
+| 9 | Account Holder (Kana) | 账户名（片假名） | `ext_data.jp_account_holder_kana` | ✅ | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
+| 10 | Bank Name | 银行名称 | `payee_bank_name` | ✅ | ✅ | ✅ | ✅ | 收款方银行名称 |
+| 11 | Bank Name (Kana) | 银行名（片假名） | `ext_data.jp_bank_name_kana` | ✅ | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
+| 12 | Bank Code | 银行代码 | `ext_data.jp_bank_code` / `ext_data.sg_bank_code` | ✅ | ✅ | ❌ | ✅ | 日本金融机构代码 / SG bank code |
+| 13 | Branch Name (Kana) | 支店名（片假名） | `ext_data.jp_branch_name` | ✅ | ✅ | ❌ | ❌ | 半角片假名，日本专用 |
+| 14 | Branch Code | 支店代码 | `ext_data.jp_branch_code` / `ext_data.sg_branch_code` | ✅ | ✅ | ❌ | ✅ | 日本支店番号 / SG branch code |
+| 15 | Account Type | 账户类型 | `ext_data.jp_account_type` | ✅ | ✅ | ❌ | ❌ | 1=普通 / 2=当座，日本专用 |
+| 16 | Account No. | 银行账号 | `payee_account_no` | ✅ | ✅ | ✅ | ✅ | 收款方银行账号 |
+| 17 | SWIFT Code | 国际汇款代码 | `ext_data.us_swift_code` / `ext_data.sg_swift_code` | ✅ | ❌ | ✅ | ✅ | 美国、新加坡使用 |
+| 18 | ACH Routing | ACH 路由号 | `ext_data.us_ach_routing` | ⬜ | ❌ | ✅ | ❌ | 美国 ACH 转账路由号，可选（默认走 ACH） |
+| 19 | Wire Routing | Wire 路由号 | `ext_data.us_wire_routing` | ⬜ | ❌ | ✅ | ❌ | 美国 Wire 汇款路由号，可选 |
+| 20 | PayNow UEN | PayNow 企业编号 | `ext_data.sg_paynow_uen` | ⬜ | ❌ | ❌ | ✅ | 新加坡 PayNow 企业注册编号，可选 |
 
 ---
 
@@ -74,9 +76,9 @@ Invoice 详情页字段共 37 个，分为四个区块：
 | # | 字段名（英文） | 字段名（中文） | 字段 ID | 类型 | 必填 | 地区 | 说明 |
 |---|---|---|---|---|:---:|---|---|
 | 21 | Amount | 金额 | `amount` | 文本输入 | ✅ | 全部 | 发票总金额，带千分位格式，例：`250,000` |
-| 22 | Tax Rate | 税费率 | `tax_rate` | 数字输入（%） | ⬜ | 全部 | 发票适用税率，百分比，例：`10`（表示 10%） |
-| 23 | Detail | 费用内容明细 | `invoice_detail_payload` | 只读动态表格 | ⬜ | 全部 | AI 从发票中解析的费用行，通用结构见下方说明 |
-| 24 | Purpose | 打款用途 | `purpose` | 文本输入 | ✅ | 全部 | 打款用途描述，用于银行备注 |
+| 22 | Tax Rate | 税费率 | `tax_rate` ⚠️ | 数字输入（%） | ⬜ | 全部 | 发票适用税率，百分比，例：`10`（表示 10%） |
+| 23 | Detail | 费用内容明细 | `invoice_detail_payload` ⚠️ | 只读动态表格 | ⬜ | 全部 | AI 从发票中解析的费用行，通用结构见下方说明 |
+| 24 | Purpose | 打款用途 | `payment_purpose` | 文本输入 | ✅ | 全部 | 打款用途描述，用于银行备注 |
 | 25 | Memo | 备注 | `memo` | 多行文本 | ⬜ | 全部 | 补充备注信息 |
 
 ### Detail 字段（invoice_detail_payload）数据结构
@@ -110,10 +112,10 @@ Invoice 详情页字段共 37 个，分为四个区块：
 |---|---|---|---|---|:---:|:---:|---|
 | 26 | Applicant | 申请人 | `applicant` | 只读文本 | — | ❌ | 发票上传人邮箱账号，系统自动带入 |
 | 27 | Application Date | 上传时间 | `application_date` | 只读文本 | — | ❌ | 发票上传至系统的时间，格式：`YYYY-MM-DD HH:mm`，系统自动带入 |
-| 28 | Invoice Date | 发票开具日期 | `invoice_date` | 日期选择器 | ✅ | ✅ | 供应商开票日期（請求書発行日），格式：`YYYY-MM-DD` |
-| 29 | Transaction Date | 交易发生日 | `transaction_date` | 日期选择器 | ✅ | ✅ | 业务真实发生日期，货交当天 / 服务提供日（取引日 / 納品日） |
-| 30 | Service Period | 服务期间 | `service_period_start` / `service_period_end` | 日期选择器（Start → End） | ⬜ | ✅ | 服务合同有效期，用于按月摊销计算 |
-| 31 | Accounting Date | 入账日期 | `accounting_date` | 日期选择器 | ✅ | ✅ | JE Posting Date，决定进哪个月报表，财务必须手动填写 |
+| 28 | Invoice Date | 发票开具日期 | `invoice_date` ⚠️ | 日期选择器 | ✅ | ✅ | 供应商开票日期（請求書発行日），格式：`YYYY-MM-DD` |
+| 29 | Transaction Date | 交易发生日 | `transaction_date` ⚠️ | 日期选择器 | ✅ | ✅ | 业务真实发生日期，货交当天 / 服务提供日（取引日 / 納品日） |
+| 30 | Service Period | 服务期间 | `service_period_start` / `service_period_end` ⚠️ | 日期选择器（Start → End） | ⬜ | ✅ | 服务合同有效期，用于按月摊销计算 |
+| 31 | Accounting Date | 入账日期 | `accounting_date` ⚠️ | 日期选择器 | ✅ | ✅ | JE Posting Date，决定进哪个月报表，财务必须手动填写 |
 
 ### 四个业务日期的含义对比
 
