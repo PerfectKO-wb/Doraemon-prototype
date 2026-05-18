@@ -962,6 +962,45 @@
         .radio-group.disabled label { cursor: not-allowed; color: var(--text-secondary); }
         .radio-group.disabled input[type="radio"] { cursor: not-allowed; }
 
+        /* Payload table (invoice line items) */
+        .payload-wrap {
+            width: 100%; overflow-x: auto;
+            border: 1px solid var(--border-divider);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        .payload-wrap table {
+            width: 100%; border-collapse: collapse; white-space: nowrap;
+        }
+        .payload-wrap th {
+            background: var(--bg-subtle, #f9fafb);
+            color: var(--text-secondary);
+            font-weight: 600; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 0.3px;
+            padding: 7px 10px;
+            border-bottom: 1px solid var(--border-divider);
+            text-align: left;
+        }
+        .payload-wrap th:last-child, .payload-wrap td:last-child { text-align: right; }
+        .payload-wrap td {
+            padding: 6px 10px;
+            color: var(--text-default);
+            border-bottom: 1px solid var(--border-divider);
+            max-width: 280px; overflow: hidden; text-overflow: ellipsis;
+        }
+        .payload-wrap tr:last-child td { border-bottom: none; }
+        .payload-wrap tr.payload-footer td {
+            font-weight: 600;
+            background: var(--bg-subtle, #f9fafb);
+            border-top: 1px solid var(--border-divider);
+        }
+        .payload-empty { font-size: 12px; color: var(--text-secondary); padding: 4px 2px; }
+        /* payload full-width row */
+        .form-row.payload-row {
+            flex-direction: column; align-items: flex-start; gap: 6px;
+        }
+        .form-row.payload-row .form-label { margin-bottom: 0; }
+
         /* Depreciation sub-fields */
         .depreciation-block {
             display: none;
@@ -1468,6 +1507,13 @@
 
                     <div class="invoice-summary" id="invoiceSummary">
                         <!-- Common: always visible -->
+
+                        <!-- Invoice Description (费用名) — always first -->
+                        <div class="form-row" data-region="all">
+                            <div class="form-label">Description :</div>
+                            <div class="form-control"><input id="ivDescription" placeholder="e.g. Marketing expenses · Apr"></div>
+                        </div>
+
                         <div class="form-row" data-region="all">
                             <div class="form-label">Company :</div>
                             <select class="form-control" id="ivCompany">
@@ -1598,6 +1644,20 @@
                             <div class="form-label">Amount :</div>
                             <div class="form-control"><input id="ivAmount"></div>
                         </div>
+                        <div class="form-row" data-region="all">
+                            <div class="form-label">Tax Rate :</div>
+                            <div class="form-control" style="display:flex;align-items:center;gap:6px;">
+                                <input id="ivTaxRate" type="number" min="0" max="100" step="0.1" placeholder="e.g. 10" style="width:80px;">
+                                <span style="font-size:13px;color:var(--text-secondary);">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Invoice detail payload (费用内容) — dynamic line-item table -->
+                        <div class="form-row payload-row" data-region="all">
+                            <div class="form-label">Detail :</div>
+                            <div id="ivPayloadWrap" style="width:100%;"></div>
+                        </div>
+
                         <div class="form-row" data-region="all">
                             <div class="form-label">Purpose :</div>
                             <div class="form-control"><input id="ivPurpose"></div>
@@ -1853,8 +1913,8 @@
             currency: 'JPY',
             paymentType: 'Non-Administrative',
             paymentBank: '三井住友銀行',
-            smbc: 'SMBC-001',
             paymentAccountName: 'CTW Japan Corporate',
+            description: 'マーケティング費用 4月分',
             payeeName: '株式会社サンプル',
             accountHolderKana: 'カ) サンプル',
             bankName: '三井住友銀行',
@@ -1866,6 +1926,19 @@
             accountNo: '1234567',
             swiftCode: '', achRouting: '', wireRouting: '', payNowUen: '',
             amount: '250,000',
+            taxRate: '10',
+            detailPayload: {
+                headers: ['内容（実施日・委託業務）', '請求額'],
+                rows: [
+                    ['1 終日業務（¥30,000×18日）', '¥540,000'],
+                    ['2 終日業務（¥30,000×18日）', '¥540,000'],
+                    ['3 終日業務（¥30,000×18日）', '¥540,000'],
+                    ['4 終日業務（¥40,000×22日）', '¥880,000'],
+                    ['5 時間外運行（¥2,000×21H）', '¥42,000'],
+                    ['6 タクシー代', '¥3,363'],
+                ],
+                footer: [['合計', '¥2,545,363']]
+            },
             purpose: 'マーケティング費用 4月分',
             memo: '',
             applicant: 'tanaka@g123.jp',
@@ -1885,8 +1958,8 @@
             currency: 'USD',
             paymentType: 'Non-Administrative',
             paymentBank: 'JPMorgan Chase',
-            smbc: '',
             paymentAccountName: 'CTW USA Operating',
+            description: 'Q2 SaaS subscription',
             payeeName: 'Acme Services LLC',
             accountHolderKana: '', bankNameKana: '', bankCode: '', branchNameKana: '', branchCode: '', accountType: '',
             bankName: 'Wells Fargo Bank',
@@ -1896,6 +1969,20 @@
             wireRouting: '121000248',
             payNowUen: '',
             amount: '12,450.00',
+            taxRate: '',
+            detailPayload: {
+                headers: ['Line#', 'Description', 'Campaign Label', 'Total'],
+                rows: [
+                    ['1', 'Instagram - shinchan_en_NewDisplayFirstPayAdvantageMovie_adn_all', '', '136.68'],
+                    ['2', 'Instagram - shinchan_en_NewDisplayFirstPayAdvantagePartner_adn_all', '', '694.54'],
+                    ['3', 'Instagram - shinchan_en_NewDisplayFirstPayAdvantagev3_adn_all', '', '3,462.63'],
+                    ['4', 'Instagram - shinchan_en_NewDisplayFirstPayAdvantagev4_adn_all', '', '148.60'],
+                    ['5', 'Instagram - shinchan_en_NewDisplayFirstPayAdvantagev5_adn_all', '', '1,256.60'],
+                    ['6', 'Instagram - shinchan_ja_NewDisplayFirstPayAdvantagev3_adn_all', '', '61,093.51'],
+                    ['7', 'Instagram - shinchan_ko_NewDisplayFirstPayAdvantagev2_adn_all', '', '61,062.88'],
+                ],
+                footer: [['', '', 'Subtotal', '78,537.26']]
+            },
             purpose: 'Q2 SaaS subscription',
             memo: '',
             applicant: 'olivia@g123.us',
@@ -1915,8 +2002,8 @@
             currency: 'SGD',
             paymentType: 'Administrative',
             paymentBank: 'DBS Bank',
-            smbc: '',
             paymentAccountName: 'CTW SG Operating',
+            description: 'Office utilities · Apr',
             payeeName: 'Lion Vendor Pte Ltd',
             accountHolderKana: '', bankNameKana: '', branchNameKana: '', accountType: '',
             bankName: 'DBS Bank Ltd',
@@ -1927,6 +2014,19 @@
             achRouting: '', wireRouting: '',
             payNowUen: '201812345K',
             amount: '4,820.00',
+            taxRate: '9',
+            detailPayload: {
+                headers: ['商品名', 'コード', '数量', '単価', '金額'],
+                rows: [
+                    ['ヤクルト400マルチ7(バラ)', '24398', '100', '72.00', '7,200'],
+                    ['Yakult1000マルチ7(バラ)', '20453', '420', '117.00', '49,140'],
+                    ['RジョアにちCa&VDPL', '20695', '32', '99.00', '3,168'],
+                    ['ソフールプレーン　10', '20941', '32', '90.00', '2,880'],
+                    ['RヴァマンスーパーＰ', '20582', '64', '145.00', '9,280'],
+                    ['クロズドリンク　125', '20727', '12', '88.00', '1,056'],
+                ],
+                footer: [['商品売上合計', '', '', '', '72,724']]
+            },
             purpose: 'Office utilities · Apr',
             memo: '',
             applicant: 'kevin@g123.sg',
@@ -2198,6 +2298,22 @@
         document.getElementById('detailView').classList.add('open');
     }
 
+    function renderPayload(payload) {
+        const wrap = document.getElementById('ivPayloadWrap');
+        if (!payload || !payload.headers || !payload.rows || payload.rows.length === 0) {
+            wrap.innerHTML = '<div class="payload-empty">No detail available</div>';
+            return;
+        }
+        const th = payload.headers.map(h => `<th>${h}</th>`).join('');
+        const bodyRows = payload.rows.map(row =>
+            `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`
+        ).join('');
+        const footerRows = (payload.footer || []).map(row =>
+            `<tr class="payload-footer">${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`
+        ).join('');
+        wrap.innerHTML = `<div class="payload-wrap"><table><thead><tr>${th}</tr></thead><tbody>${bodyRows}${footerRows}</tbody></table></div>`;
+    }
+
     function populateInvoiceSummary(inv) {
         const f = inv.fields || {};
         const setVal = (id, v) => {
@@ -2206,6 +2322,7 @@
             if (el.tagName === 'SELECT') el.value = v || '';
             else el.value = v != null ? String(v) : '';
         };
+        setVal('ivDescription', f.description);
         setVal('ivCompany', f.company);
         setVal('ivRegion', f.region || inv.region);
         setVal('ivCurrency', f.currency);
@@ -2227,6 +2344,8 @@
         setVal('ivWireRouting', f.wireRouting);
         setVal('ivPayNowUen', f.payNowUen);
         setVal('ivAmount', f.amount);
+        setVal('ivTaxRate', f.taxRate);
+        renderPayload(f.detailPayload);
         setVal('ivPurpose', f.purpose);
         setVal('ivMemo', f.memo);
 
@@ -2484,6 +2603,7 @@
         const v = id => (document.getElementById(id)?.value ?? '').trim();
         const selectedRadio = document.querySelector('input[name="ivPayout"]:checked');
         return {
+            description: v('ivDescription'),
             company: v('ivCompany'),
             region: document.getElementById('ivRegion').value,
             currency: document.getElementById('ivCurrency').value,
@@ -2505,6 +2625,7 @@
             wireRouting: v('ivWireRouting'),
             payNowUen: v('ivPayNowUen'),
             amount: v('ivAmount'),
+            taxRate: v('ivTaxRate'),
             purpose: v('ivPurpose'),
             memo: v('ivMemo'),
             invoiceDate: v('ivInvoiceDate'),
