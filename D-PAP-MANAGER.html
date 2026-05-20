@@ -797,6 +797,31 @@
   .mt-esc-btn.already-done:hover:not(:disabled) { background: #f5f5f2; }
   .mt-esc-btn.chat { margin-left: auto; background: transparent; color: #555; border: 1px solid #e0ddd8; }
   .mt-esc-btn.chat:hover:not(:disabled) { background: #f5f5f2; }
+  .mt-esc-done-panel {
+    display: none; flex-direction: column; gap: 8px;
+    padding: 12px 14px; background: #fafaf8; border: 1px solid #eeecea;
+    border-radius: 10px; margin-top: 4px;
+  }
+  .mt-esc-done-panel.show { display: flex; }
+  .mt-esc-done-panel-label { font-size: 12px; color: #888; }
+  .mt-esc-done-panel textarea {
+    width: 100%; box-sizing: border-box; border: 1px solid #e0ddd8;
+    border-radius: 7px; padding: 8px 10px; font-size: 13px;
+    font-family: inherit; resize: none; background: #fff; color: #1a1a1a;
+    outline: none;
+  }
+  .mt-esc-done-panel textarea:focus { border-color: #aaa; }
+  .mt-esc-done-panel-actions { display: flex; gap: 8px; }
+  .mt-esc-done-confirm {
+    padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+    background: #1a1a1a; color: #fff; border: none; cursor: pointer; font-family: inherit;
+  }
+  .mt-esc-done-confirm:hover { background: #333; }
+  .mt-esc-done-cancel {
+    padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+    background: transparent; color: #888; border: 1px solid #e0ddd8; cursor: pointer; font-family: inherit;
+  }
+  .mt-esc-done-cancel:hover { background: #f5f5f2; }
 
   /* ─── Chat History Panel ─── */
   .chat-history {
@@ -1851,8 +1876,16 @@ function openDrawer(type) {
 
             <div class="mt-esc-actions" id="mtEscActionBar${i}">
               <button class="mt-esc-btn execute" id="mtEscApproveBtn${i}" onclick="handleEscApprove(${i})">Execute</button>
-              <button class="mt-esc-btn already-done" onclick="handleEscAlreadyDone(${i})">Already Done</button>
-              <button class="mt-esc-btn chat" onclick="startEscChatMock('@[${d.ref}] ')">Chat to Adjust</button>
+              <button class="mt-esc-btn already-done" id="mtEscAlreadyDoneBtn${i}" onclick="openEscDonePanel(${i})">Already Done</button>
+              <button class="mt-esc-btn chat" id="mtEscChatBtn${i}" onclick="startEscChatMock('@[${d.ref}] ')">Chat to Adjust</button>
+            </div>
+            <div class="mt-esc-done-panel" id="mtEscDonePanel${i}">
+              <div class="mt-esc-done-panel-label">向 Agent 反馈此次处理情况（可选，有助于提升下次决策准确性）</div>
+              <textarea id="mtEscDoneFeedback${i}" rows="2" placeholder="例：已通过其他渠道处理完毕，技术组排查中…"></textarea>
+              <div class="mt-esc-done-panel-actions">
+                <button class="mt-esc-done-confirm" onclick="confirmEscDone(${i})">确认完成</button>
+                <button class="mt-esc-done-cancel" onclick="closeEscDonePanel(${i})">取消</button>
+              </div>
             </div>
 
             </div><!-- /mt-esc-detail -->
@@ -2007,10 +2040,41 @@ function handleEscApprove(escIdx) {
   }, delay);
 }
 
-function handleEscAlreadyDone(idx) {
+function openEscDonePanel(idx) {
+  // hide Execute / Already Done / Chat buttons
+  ['mtEscApproveBtn','mtEscAlreadyDoneBtn','mtEscChatBtn'].forEach(prefix => {
+    const el = document.getElementById(prefix + idx);
+    if(el) el.style.display = 'none';
+  });
+  const panel = document.getElementById('mtEscDonePanel' + idx);
+  if(panel) {
+    panel.classList.add('show');
+    const fb = document.getElementById('mtEscDoneFeedback' + idx);
+    if(fb) fb.focus();
+  }
+}
+
+function closeEscDonePanel(idx) {
+  const panel = document.getElementById('mtEscDonePanel' + idx);
+  if(panel) panel.classList.remove('show');
+  const fb = document.getElementById('mtEscDoneFeedback' + idx);
+  if(fb) fb.value = '';
+  // restore buttons
+  ['mtEscApproveBtn','mtEscAlreadyDoneBtn','mtEscChatBtn'].forEach(prefix => {
+    const el = document.getElementById(prefix + idx);
+    if(el) el.style.display = '';
+  });
+}
+
+function confirmEscDone(idx) {
+  const fb = document.getElementById('mtEscDoneFeedback' + idx);
+  const feedback = fb ? fb.value.trim() : '';
+  const msg = feedback
+    ? '✓ 已完成 · 反馈「' + feedback.slice(0, 28) + (feedback.length > 28 ? '…' : '') + '」已喂给 Agent'
+    : '✓ 已标记完成 · 结果将同步至 Memory';
   _dismissEscItem(idx);
   closeModal();
-  showSnack('已标记完成 · 结果将同步至 Memory');
+  showSnack(msg);
 }
 
 
