@@ -924,6 +924,167 @@ html,body{width:100%;height:100%;overflow:hidden;}
 .greeting{font-size:17px;font-weight:700;color:rgba(0,0,0,.85);margin-bottom:4px;}
 .greeting-sub{font-size:13px;color:rgba(0,0,0,.45);margin-bottom:20px;}
 
+/* PDM brief */
+.pdm-brief{
+  font-size:14px;line-height:1.75;color:rgba(0,0,0,.5);
+  margin:-8px 0 22px;padding-left:2px;
+}
+.pdm-brief strong{font-weight:600;color:rgba(0,0,0,.78);}
+
+/* ── Agent task card (Case 2) ── */
+.pdm-agent-card{
+  background:#fff5f5;
+  border:1px solid #ffcdd2;
+  border-radius:16px;
+  padding:16px 16px 14px;
+  margin-bottom:8px;
+}
+.pdm-ac-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.pdm-ac-title-row{display:flex;align-items:flex-start;gap:6px;flex:1;min-width:0;}
+.pdm-ac-emoji{font-size:15px;line-height:1.45;flex-shrink:0;}
+.pdm-ac-title{font-size:15px;font-weight:700;line-height:1.45;color:rgba(0,0,0,.88);}
+.pdm-ac-chev{flex-shrink:0;color:rgba(0,0,0,.3);font-size:18px;line-height:1;margin-top:1px;}
+.pdm-ac-ddl{font-size:12px;font-weight:600;color:#e53935;margin-bottom:14px;display:flex;align-items:center;gap:4px;}
+.pdm-ac-sep{border:none;border-top:1px solid rgba(255,205,210,.7);margin:0 0 14px;}
+.pdm-ac-block{margin-bottom:14px;}
+.pdm-ac-block-hd{font-size:12px;font-weight:600;color:rgba(0,0,0,.65);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.pdm-tri-list{list-style:none;display:flex;flex-direction:column;gap:6px;padding-left:2px;}
+.pdm-tri-list li{font-size:13px;line-height:1.65;color:rgba(0,0,0,.55);padding-left:14px;position:relative;}
+.pdm-tri-list li::before{content:"";position:absolute;left:0;top:8px;border:4px solid transparent;border-left:5px solid #bdbdbd;}
+.pdm-mem-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.pdm-mem-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;font-size:13px;line-height:1.6;color:rgba(0,0,0,.55);}
+.pdm-mem-row strong{font-weight:600;color:rgba(0,0,0,.75);}
+.pdm-mem-tag{flex-shrink:0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:#e8f4fd;color:#1565c0;white-space:nowrap;margin-top:2px;}
+.pdm-rec-box{background:#fff8f0;border:1px solid rgba(255,152,0,.22);border-left:3px solid #ff9800;border-radius:8px;padding:10px 12px;}
+.pdm-rec-hd{font-size:11px;font-weight:600;color:#bf6000;margin-bottom:8px;letter-spacing:.01em;}
+.pdm-rec-list{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.pdm-rec-item{font-size:13px;line-height:1.55;color:rgba(0,0,0,.82);display:flex;align-items:flex-start;gap:6px;border-radius:6px;padding:4px 5px;transition:background .12s;}
+/* skipped state — muted, no strikethrough */
+.pdm-rec-item--skip .pdm-rec-item-text{color:rgba(0,0,0,.3);}
+.pdm-rec-item--skip .pdm-rec-exec{opacity:.35;}
+/* escalated state */
+.pdm-rec-item--esc{background:rgba(255,152,0,.07);}
+.pdm-rec-item--esc .pdm-rec-item-text{color:rgba(0,0,0,.45);}
+/* escalate badge */
+.pdm-rec-esc-badge{display:none;flex-shrink:0;align-items:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 6px;border-radius:4px;background:rgba(255,152,0,.18);color:#bf6000;margin-top:2px;white-space:nowrap;}
+.pdm-rec-item--esc .pdm-rec-esc-badge{display:inline-flex;}
+/* per-action right-side buttons */
+.pdm-rec-actions{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0;}
+.pdm-rec-esc-btn,.pdm-rec-skip-btn{
+  background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;
+  font-size:11px;font-weight:500;line-height:1.4;white-space:nowrap;
+  transition:color .12s,background .12s;
+}
+.pdm-rec-esc-btn{color:rgba(0,0,0,.22);}
+.pdm-rec-esc-btn:hover{color:#bf6000;background:rgba(255,152,0,.1);}
+.pdm-rec-item--esc .pdm-rec-esc-btn{color:#bf6000;background:rgba(255,152,0,.12);}
+.pdm-rec-skip-btn{color:rgba(0,0,0,.22);}
+.pdm-rec-skip-btn:hover{color:rgba(0,0,0,.55);background:rgba(0,0,0,.05);}
+.pdm-rec-item--skip .pdm-rec-skip-btn{color:rgba(0,0,0,.4);background:rgba(0,0,0,.06);}
+/* skip badge inside the row */
+.pdm-rec-skip-badge{display:none;flex-shrink:0;align-items:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.07);color:rgba(0,0,0,.4);margin-top:2px;white-space:nowrap;}
+.pdm-rec-item--skip .pdm-rec-skip-badge{display:inline-flex;}
+/* Executor badges */
+.pdm-rec-exec{display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 5px;border-radius:4px;flex-shrink:0;margin-top:2px;transition:background .3s,color .3s;}
+.pdm-rec-exec.ai{background:rgba(0,0,0,.07);color:rgba(0,0,0,.45);}
+.pdm-rec-exec.hu{background:#e8f4ff;border:1px solid #b3d9ff;color:#1565c0;}
+/* Execution state transitions */
+.pdm-rec-list li.exec-running .pdm-rec-exec.ai{background:rgba(255,152,0,.15);color:#bf6000;animation:execPulse 1s ease-in-out infinite;}
+.pdm-rec-list li.exec-done .pdm-rec-exec.ai{background:rgba(76,175,80,.12);color:#2e7d32;}
+.pdm-rec-list li.exec-assigned .pdm-rec-exec.hu{background:rgba(21,101,192,.12);color:#1565c0;}
+@keyframes execPulse{0%,100%{opacity:1}50%{opacity:.45}}
+/* Done feedback panel */
+.pdm-done-panel{display:none;flex-direction:column;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,.1);}
+.pdm-done-panel.show{display:flex;}
+.pdm-done-panel-label{font-size:11px;color:rgba(0,0,0,.45);letter-spacing:.01em;}
+.pdm-done-panel textarea{width:100%;box-sizing:border-box;border:1px solid rgba(0,0,0,.14);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;color:rgba(0,0,0,.8);background:rgba(255,255,255,.7);resize:none;outline:none;line-height:1.6;}
+.pdm-done-panel textarea:focus{border-color:rgba(0,0,0,.3);background:#fff;}
+.pdm-done-panel-actions{display:flex;gap:8px;align-items:center;}
+.pdm-btn-done-confirm{background:rgba(0,0,0,.88);color:#fff;padding:0 14px;border:none;}
+.pdm-btn-done-confirm:hover{opacity:.85;}
+.pdm-btn-done-cancel{background:transparent;border:1px solid rgba(0,0,0,.15);color:rgba(0,0,0,.6);padding:0 12px;}
+.pdm-btn-done-cancel:hover{background:rgba(0,0,0,.04);}
+/* Action row + buttons */
+.pdm-action-row{display:flex;align-items:center;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(229,57,53,.12);}
+.pdm-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:36px;padding:0 16px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid transparent;transition:opacity .15s;}
+.pdm-btn:disabled{opacity:.4;cursor:not-allowed;}
+.pdm-btn-execute{background:rgba(0,0,0,.88);color:#fff;}
+.pdm-btn-execute:hover:not(:disabled){opacity:.85;}
+.pdm-btn-done-inline{background:transparent;border:1px solid rgba(0,0,0,.14);color:rgba(0,0,0,.55);}
+.pdm-btn-done-inline:hover:not(:disabled){background:rgba(76,175,80,.06);border-color:rgba(76,175,80,.35);color:#2e7d32;}
+.pdm-agent-status{display:none;font-size:13px;line-height:1.55;padding:10px 12px;border-radius:10px;margin-bottom:10px;}
+.pdm-agent-status.show{display:block;}
+.pdm-agent-status.ok{background:#f6ffed;border:1px solid #b7eb8f;color:#389e0d;}
+.pdm-agent-status.warn{background:#fff5f5;border:1px solid #ffcdd2;color:#c62828;}
+.pdm-agent-status.info{background:#f0f7ff;border:1px solid #90caf9;color:#1565c0;}
+/* Agent section badge & animation */
+.pdm-agent-badge{
+  display:inline-flex;align-items:center;
+  font-size:10px;font-weight:700;letter-spacing:.02em;
+  padding:2px 8px;border-radius:20px;
+  background:rgba(229,57,53,.1);color:#c62828;
+  border:1px solid rgba(229,57,53,.18);
+}
+.pdm-agent-card{transition:opacity .35s ease, transform .35s ease;}
+.pdm-agent-card.resolving{opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;}
+.pdm-agent-card.resolved-msg{
+  background:rgba(240,255,244,.9);
+  border-color:#b7eb8f;
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;font-size:13px;color:#389e0d;font-weight:500;
+}
+/* section label row */
+.sec-label-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+/* Request source tag */
+.pdm-src-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:600;letter-spacing:.02em;
+  padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;
+}
+.pdm-src-dingtalk{background:#e6f0ff;color:#1254a0;border:1px solid rgba(18,84,160,.15);}
+.pdm-src-alert{background:#fff3e0;color:#bf5800;border:1px solid rgba(191,88,0,.18);}
+/* Brain-doc block */
+.pdm-braindoc-hd{cursor:pointer;user-select:none;justify-content:space-between !important;}
+.pdm-braindoc-hd:hover{opacity:.8;}
+.pdm-braindoc-ref{
+  font-size:10px;font-weight:700;letter-spacing:.04em;
+  padding:2px 7px;border-radius:8px;margin-left:4px;
+  background:rgba(99,102,241,.1);color:#4338ca;border:1px solid rgba(99,102,241,.18);
+  flex-shrink:0;
+}
+.pdm-braindoc-chev{font-size:12px;color:rgba(0,0,0,.35);transition:transform .2s;flex-shrink:0;}
+.pdm-braindoc-chev.open{transform:rotate(180deg);}
+.pdm-braindoc-preview{
+  display:flex;flex-direction:column;gap:3px;
+  margin-top:6px;padding:7px 10px;
+  background:rgba(99,102,241,.04);
+  border:1px solid rgba(99,102,241,.12);
+  border-radius:7px;
+}
+.pdm-braindoc-preview-text{font-size:12px;line-height:1.6;color:rgba(0,0,0,.55);}
+.pdm-braindoc-preview.hidden{display:none;}
+.pdm-braindoc-body{
+  margin-top:10px;
+  border:1px solid rgba(99,102,241,.15);
+  border-radius:10px;
+  overflow:hidden;
+}
+.pdm-bd-row{
+  padding:9px 12px;
+  border-bottom:1px solid rgba(99,102,241,.1);
+  display:grid;grid-template-columns:82px 1fr;gap:8px;
+  align-items:baseline;
+}
+.pdm-bd-row:last-child{border-bottom:none;}
+.pdm-bd-label{
+  font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:rgba(67,56,202,.7);
+}
+.pdm-bd-val{font-size:12px;line-height:1.65;color:rgba(0,0,0,.65);}
+.pdm-bd-val ul{list-style:none;display:flex;flex-direction:column;gap:4px;padding:0;}
+.pdm-bd-val ul li{padding-left:12px;position:relative;}
+.pdm-bd-val ul li::before{content:"→";position:absolute;left:0;color:rgba(99,102,241,.6);font-size:11px;}
+
 
 /* ── VIEWS ── */
 .view{display:none;}
@@ -979,6 +1140,11 @@ html,body{width:100%;height:100%;overflow:hidden;}
           <div class="drop-meta"><div class="drop-meta-name">陈思远</div><div class="drop-meta-role">高级游戏美术师</div></div>
           <span class="drop-uid">u3</span>
         </a>
+        <a class="drop-link" href="D-PAP-WORKER.html?user=u4">
+          <span class="drop-av" style="background:rgba(28,100,242,.12);color:#1C64F2;">ZY</span>
+          <div class="drop-meta"><div class="drop-meta-name">张悦</div><div class="drop-meta-role">运营专员 · 普通员工</div></div>
+          <span class="drop-uid">u4</span>
+        </a>
         <a class="drop-link" href="?role=pdm&user=u5">
           <span class="drop-av" style="background:rgba(255,45,85,.12);color:#ff2d55;">CX</span>
           <div class="drop-meta"><div class="drop-meta-name">林晨曦</div><div class="drop-meta-role">产品经理</div></div>
@@ -1004,13 +1170,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
         <!-- ══ PDM ══ -->
         <div class="view" id="view-pdm">
 
-          <!-- URGENT ALERTS -->
-          <div class="section" id="urgentSection" style="display:none;">
-            <div class="alerts-sec-label">
-              Alerts 🚨
-            </div>
-            <div id="urgentTopList"></div>
-          </div>
+          <p class="pdm-brief" id="pdmBrief"></p>
 
           <div class="section">
             <div class="sec-label">Quick pick</div>
@@ -1040,29 +1200,155 @@ html,body{width:100%;height:100%;overflow:hidden;}
             </div>
           </div>
 
-          <!-- DOING -->
+          <!-- AGENT TASKS: Pending (Case 2, inserted above Doing) -->
+          <div id="pdmAgentSection" class="section" style="display:none;">
+            <div class="sec-label-row">
+              <span class="sec-label" style="margin:0;">AI Task</span>
+              <span class="pdm-agent-badge" id="pdmAgentBadge">1 Agent Task</span>
+            </div>
+            <div class="pdm-agent-status" id="pdmAgentStatus"></div>
+            <div class="pdm-agent-card" id="pdmAgentCard">
+              <div class="pdm-ac-head">
+                <div class="pdm-ac-title-row">
+                  <span class="pdm-ac-emoji">🚨</span>
+                  <span class="pdm-ac-title">CP「逃离校园」紧急道具补偿</span>
+                </div>
+                <span class="pdm-ac-chev">›</span>
+              </div>
+              <div class="pdm-ac-ddl">
+                <span style="font-size:8px;">●</span> DDL · Today 18:00 · 5h overdue
+              </div>
+              <hr class="pdm-ac-sep"/>
+              <div class="pdm-ac-block">
+                <div class="pdm-ac-block-hd">
+                  <span>📎</span> CP Request
+                  <span class="pdm-src-tag pdm-src-dingtalk">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 7.5h-3V8a1.5 1.5 0 00-3 0v1.5h-3a1 1 0 000 2h3V13a1.5 1.5 0 003 0v-1.5h3a1 1 0 000-2z"/></svg>
+                    DingTalk Group
+                  </span>
+                </div>
+                <ul class="pdm-tri-list">
+                  <li>「校园合成」Lv.7 与 Lv.11 成就无法生效</li>
+                  <li>受影响玩家 ≈ 153 名，待补 70 张「合成卡」</li>
+                  <li>活动今日 23:59 结束，需先补偿后查 bug</li>
+                </ul>
+              </div>
+              <div class="pdm-ac-block">
+                <div class="pdm-ac-block-hd"><span>🧠</span> Related Memory</div>
+                <ul class="pdm-mem-list">
+                  <li class="pdm-mem-row">
+                    <span><strong>5/12</strong> 同 CP 类似成就 bug (×2 人报告)</span>
+                    <span class="pdm-mem-tag">memory · DingTalk</span>
+                  </li>
+                  <li class="pdm-mem-row">
+                    <span><strong>4/28</strong> CS 处理过同游戏成就补偿</span>
+                    <span class="pdm-mem-tag">memory · CS-Agent</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="pdm-ac-block">
+                <div class="pdm-braindoc-hd" onclick="togglePdmBrainDoc()" style="cursor:pointer;user-select:none;">
+                  <div class="pdm-ac-block-hd" style="margin-bottom:0;pointer-events:none;">
+                    <span style="display:flex;align-items:center;gap:5px;flex:1;">
+                      <span>📘</span> Related Brain-doc
+                      <span class="pdm-braindoc-ref">CS-PB-014</span>
+                    </span>
+                    <span class="pdm-braindoc-chev" id="pdmBrainDocChev">▾</span>
+                  </div>
+                  <!-- Always-visible When to apply preview -->
+                  <div class="pdm-braindoc-preview" id="pdmBrainDocPreview">
+                    <span class="pdm-bd-label" style="font-size:9px;">WHEN TO APPLY</span>
+                    <span class="pdm-braindoc-preview-text">CP 反映游戏内成就或道具类 bug，影响活动正常进程，需在活动截止前完成批量补偿时</span>
+                  </div>
+                </div>
+                <div class="pdm-braindoc-body" id="pdmBrainDocBody" style="display:none;">
+                  <div class="pdm-bd-row">
+                    <span class="pdm-bd-label">When to apply</span>
+                    <span class="pdm-bd-val">CP 反映游戏内成就或道具类 bug，影响活动正常进程，需在活动截止前完成批量补偿时</span>
+                  </div>
+                  <div class="pdm-bd-row">
+                    <span class="pdm-bd-label">Scope</span>
+                    <span class="pdm-bd-val">CS 运营类问题；批量用户道具补偿；成就修复补发；受影响人数 ≥ 10</span>
+                  </div>
+                  <div class="pdm-bd-row">
+                    <span class="pdm-bd-label">KPI</span>
+                    <span class="pdm-bd-val">补偿完成率 ≥ 95% · 响应时效 ≤ 2h · 用户满意度 ≥ 4.2 / 5</span>
+                  </div>
+                  <div class="pdm-bd-row">
+                    <span class="pdm-bd-label">Actions</span>
+                    <span class="pdm-bd-val">
+                      <ul>
+                        <li>CS 工具批量发放道具，优先级 P0</li>
+                        <li>同步技术组排查根本原因</li>
+                        <li>官方渠道发布补偿公告，附预计修复时间</li>
+                        <li>决策结果记录为新 Memory，标注有效性评分</li>
+                      </ul>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="pdm-rec-box">
+                <div class="pdm-rec-hd">Recommended Action · Ref. BRAIN-DOC CS-PB-014</div>
+                <ul class="pdm-rec-list" id="pdmRecList">
+                  <li class="pdm-rec-item" id="pdmRecItem0">
+                    <span class="pdm-rec-exec ai" id="pdmRecExec0">AI</span>
+                    <span class="pdm-rec-item-text">批准 CS 工具向 153 名玩家批量发放 70 张「合成卡」</span>
+                    <span class="pdm-rec-skip-badge" id="pdmRecSkipBadge0">Skipped</span>
+                    <span class="pdm-rec-esc-badge" id="pdmRecEscBadge0">↑ Escalate</span>
+                    <span class="pdm-rec-actions">
+                      <button class="pdm-rec-skip-btn" id="pdmRecSkipBtn0" onclick="toggleRecSkip(0)" title="不采纳此建议">Skip</button>
+                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn0" onclick="toggleRecEsc(0)" title="升级此 Action 给决策者">↑</button>
+                    </span>
+                  </li>
+                  <li class="pdm-rec-item" id="pdmRecItem1">
+                    <span class="pdm-rec-exec hu" id="pdmRecExec1">HU</span>
+                    <span class="pdm-rec-item-text">同步技术组排查成就触发逻辑（需技术组负责人确认）</span>
+                    <span class="pdm-rec-skip-badge" id="pdmRecSkipBadge1">Skipped</span>
+                    <span class="pdm-rec-esc-badge" id="pdmRecEscBadge1">↑ Escalate</span>
+                    <span class="pdm-rec-actions">
+                      <button class="pdm-rec-skip-btn" id="pdmRecSkipBtn1" onclick="toggleRecSkip(1)" title="不采纳此建议">Skip</button>
+                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn1" onclick="toggleRecEsc(1)" title="升级此 Action 给决策者">↑</button>
+                    </span>
+                  </li>
+                  <li class="pdm-rec-item" id="pdmRecItem2">
+                    <span class="pdm-rec-exec ai" id="pdmRecExec2">AI</span>
+                    <span class="pdm-rec-item-text">官方渠道发布补偿公告，附预计修复时间</span>
+                    <span class="pdm-rec-skip-badge" id="pdmRecSkipBadge2">Skipped</span>
+                    <span class="pdm-rec-esc-badge" id="pdmRecEscBadge2">↑ Escalate</span>
+                    <span class="pdm-rec-actions">
+                      <button class="pdm-rec-skip-btn" id="pdmRecSkipBtn2" onclick="toggleRecSkip(2)" title="不采纳此建议">Skip</button>
+                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn2" onclick="toggleRecEsc(2)" title="升级此 Action 给决策者">↑</button>
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <div class="pdm-action-row" id="pdmActionRow">
+                <button type="button" class="pdm-btn pdm-btn-execute" id="pdmAgentYes">Execute</button>
+                <button type="button" class="pdm-btn pdm-btn-done-inline" id="pdmAgentDone">Already Done</button>
+              <!-- Done feedback panel -->
+              <div class="pdm-done-panel" id="pdmDonePanel">
+                <div class="pdm-done-panel-label">向 Agent 反馈此次处理情况（可选，有助于提升下次决策准确性）</div>
+                <textarea id="pdmDoneFeedback" rows="2" placeholder="例：技术组确认是服务器缓存问题，补偿已先发出，修复预计明日完成…"></textarea>
+                <div class="pdm-done-panel-actions">
+                  <button type="button" class="pdm-btn pdm-btn-done-confirm" id="pdmDoneConfirm">确认完成</button>
+                  <button type="button" class="pdm-btn pdm-btn-done-cancel" onclick="closePdmDonePanel()">取消</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DOING（A票执行层，始终存在） -->
           <div class="section">
             <div class="sec-label">Doing</div>
 
             <!-- Part 1: Task card (JS-rendered) -->
             <div id="pdmDoingCard"></div>
 
-            <!-- Part 2: Plain text description -->
-            <div class="doing-body">
-              <p>△ To do 里已有 4 项逾期（最紧：「Q2 客服 AI 上线评审 deck」逾期 6 day）。腾出手就先清这批，避免继续堆积。</p>
-              <div class="doing-warn">
-                <span class="doing-warn-icon">❗</span>
-                <span id="pdmDoingBodyRef">「智能客服周会纪要 + Action 同步」</span>已逾期 6 day —— 评审窗口随时会被取消，立刻把当前 output 先交出来止血，哪怕 80% 版本也先给我；剩下两条动作并行收口：
-              </div>
-              <ol>
-                <li>Action 项格式统一为「[owner] @[ddl] — 具体动作」，便于自动跟进</li>
-                <li>只摘录决策与 Action，会上讨论过程不展开，控制阅读时长 ≤ 3 分钟</li>
-              </ol>
-              <p class="doing-cta">做完后点右边的 ➤ 把 output 抓紧交我，自动接下一个任务。</p>
-            </div>
+            <!-- Part 2: AI coach (JS-rendered) -->
+            <div class="doing-body" id="pdmDoingBody"></div>
 
             <!-- Part 3: Input box -->
-            <div class="doing-input">
+            <div class="doing-input" id="pdmDoingInput">
               <div class="doing-input-icon">
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M14 10v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2M8 2v8M5 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
@@ -1171,25 +1457,13 @@ html,body{width:100%;height:100%;overflow:hidden;}
     <!-- CASES DOCK -->
     <div class="ds3-case-dock">
       <div id="casesMenu" class="ds3-case-menu" style="display:none;">
-        <button class="ds3-case-option is-active" type="button">
-          <span class="ds3-case-option-label">AB-2026-041</span>
-          <span class="ds3-case-option-title">首页推荐文案 A/B 测试 — 游戏活动版</span>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(1)">
+          <span class="ds3-case-option-label">Case 1</span>
+          <span class="ds3-case-option-title">日常任务</span>
         </button>
-        <button class="ds3-case-option" type="button">
-          <span class="ds3-case-option-label">AB-2026-038</span>
-          <span class="ds3-case-option-title">Push 通知点击率优化实验</span>
-        </button>
-        <button class="ds3-case-option" type="button">
-          <span class="ds3-case-option-label">AB-2026-035</span>
-          <span class="ds3-case-option-title">新用户引导页文案对比</span>
-        </button>
-        <button class="ds3-case-option" type="button">
-          <span class="ds3-case-option-label">AB-2026-032</span>
-          <span class="ds3-case-option-title">商城促销 Banner 点击偏好</span>
-        </button>
-        <button class="ds3-case-option" type="button">
-          <span class="ds3-case-option-label">AB-2026-029</span>
-          <span class="ds3-case-option-title">客服快捷回复语气测试</span>
+        <button class="ds3-case-option is-active" type="button" onclick="switchPdmCase(2)" id="pdmCaseBtn2">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:6px;">Case 2 <span class="pdm-agent-badge" id="pdmCaseBadge" style="font-size:9px;padding:1px 6px;">1</span></span>
+          <span class="ds3-case-option-title">收到小秘 Agent 任务</span>
         </button>
       </div>
       <button class="ds3-case-trigger" type="button" id="casesTrigger" onclick="toggleCases()">
@@ -1268,10 +1542,13 @@ const user   = USERS[userId]||USERS.u5;
 
 /* Date */
 const now  = new Date();
-const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-document.getElementById('heroDate').textContent =
-  now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
-document.getElementById('heroDay').textContent = days[now.getDay()];
+const daysEn = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const daysZh = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+const isPdmView = (USERS[userId]||USERS.u5).view === 'pdm';
+document.getElementById('heroDate').textContent = isPdmView
+  ? `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日`
+  : now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+document.getElementById('heroDay').textContent = isPdmView ? daysZh[now.getDay()] : daysEn[now.getDay()];
 
 /* Badge */
 const av = document.getElementById('badgeAvatar');
@@ -1537,35 +1814,174 @@ function toggleQP(){
 
 if(user.view==='pdm'){/* no-op: pairs render on expand */}
 
-/* ── PDM TASKS ── */
+/* ── PDM MOCK (林晨曦) ── */
+const PDM_CASES = [
+  { id:'AB-2026-041', title:'首页推荐文案 A/B 测试 — 游戏活动版' },
+  { id:'AB-2026-038', title:'Push 通知点击率优化实验' },
+  { id:'AB-2026-035', title:'新用户引导页文案对比' },
+  { id:'AB-2026-032', title:'商城促销 Banner 点击偏好' },
+  { id:'AB-2026-029', title:'客服快捷回复语气测试' },
+  { id:'AB-2026-026', title:'赛季 Pass 主视觉偏好测试' },
+  { id:'AB-2026-023', title:'Loading 页文案长度对比' },
+  { id:'AB-2026-020', title:'成就弹窗 CTA 按钮文案' },
+];
+
 const pdmTasks = [
   {
-    title: '智能客服周会纪要 + Action 同步',
-    ddlLabel: 'DDL 2026-04-22 · 已逾期', overdue: true,
-    desc: '会后 2 小时内同步纪要到 Notion，并把 Action 项录入 Linear；@ 相关人确认 owner。'
+    title:'智能客服周会纪要 + Action 同步',
+    ddlLabel:'DDL 2026-05-12 · 已逾期 6 day', overdue:true, overdueDays:6,
+    desc:'会后 2 小时内同步纪要到 Notion，并把 Action 项录入 Linear；@ 相关人确认 owner。',
+    coach:{ case:'overdue', overdueDays:6, suggestions:[
+      'Action 项格式统一为「[owner] @[ddl] — 具体动作」，便于自动跟进',
+      '只摘录决策与 Action，会上讨论过程不展开，控制阅读时长 ≤ 3 分钟',
+      '纪要发出后在周会群置顶链接并 @ 所有 Action owner',
+    ]},
   },
   {
-    title: 'Q2 客服 AI 上线评审 deck',
-    ddlLabel: 'DDL 2026-04-22 · 已逾期', overdue: true,
-    desc: '汇总三条管线灰度数据 + 各业务线 checklist + P0/P1 降级预案，准备运营 VP 评审 deck（≤ 8 页）。'
+    title:'Q2 客服 AI 上线评审 deck',
+    ddlLabel:'DDL 2026-05-12 · 已逾期 6 day', overdue:true, overdueDays:6,
+    desc:'汇总三条管线灰度数据 + 各业务线 checklist + P0/P1 降级预案，准备运营 VP 评审 deck（≤ 8 页）。',
+    coach:{ case:'overdue', overdueDays:6, suggestions:[
+      '砍掉 roadmap 附录，只保留里程碑与风险矩阵',
+      '用上周灰度结论直接出一版决策摘要，附 1 页数据截图',
+      '今晚 20:00 前发评审群预热并锁定会议时段',
+    ]},
   },
   {
-    title: 'Q2 留存项目 PRD v0.3',
-    ddlLabel: 'DDL 2026-04-24 · 已逾期', overdue: true,
-    desc: '在 v0.2 基础上补充：召回推送频控规则、跨语言文案降级方案，以及与游戏内活动的冲突避让逻辑。'
+    title:'Q2 留存项目 PRD v0.3',
+    ddlLabel:'DDL 2026-05-14 · 已逾期 4 day', overdue:true, overdueDays:4,
+    desc:'补充召回推送频控、跨语言文案降级、与游戏内活动冲突避让逻辑。',
+    coach:{ case:'overdue', overdueDays:4, suggestions:[
+      '频控规则先写默认值表，边界 case 标 TBD 不阻塞评审',
+      '活动冲突章节引用运营日历截图即可',
+      'v0.3 只改第 3、5 章，其余章节标注「无变更」',
+    ]},
   },
   {
-    title: '日本市场用户访谈纪要',
-    ddlLabel: 'DDL 2026-04-25 · 已逾期', overdue: true,
-    desc: '整理本周与 6 位日本玩家的访谈录音，输出主题归类的洞察清单（建议 ≤ 8 条核心洞察）。'
+    title:'日本市场用户访谈纪要',
+    ddlLabel:'DDL 2026-05-15 · 已逾期 3 day', overdue:true, overdueDays:3,
+    desc:'整理 6 位日本玩家访谈录音，输出 ≤ 8 条主题洞察清单。',
+    coach:{ case:'overdue', overdueDays:3, suggestions:[
+      '按「付费动机 / 社交 / 挫败点」三桶归类即可',
+      '每条洞察附 1 句原话引用，不展开全文转录',
+      '洞察清单发出后同步给日区运营负责人',
+    ]},
   },
   {
-    title: 'PWA 安装率数据复盘',
-    ddlLabel: 'DDL 2026-04-26 · 已逾期', overdue: true,
-    desc: '近 30 天 PWA 安装率从 28% → 32%，但 7 日留存掉了 2pp，需要拆分原因并给出下一阶段的实验方案。'
-  }
+    title:'PWA 安装率数据复盘',
+    ddlLabel:'DDL 2026-05-16 · 已逾期 2 day', overdue:true, overdueDays:2,
+    desc:'安装率 28%→32%，7 日留存 -2pp；需拆分原因并给出下阶段实验方案。',
+    coach:{ case:'overdue', overdueDays:2, suggestions:[
+      '先画漏斗：曝光 → 点击安装 → 完成安装 → D7 留存',
+      '按渠道 / 机型拆一层，定位掉点环节',
+      '实验方案只列 2 个可本周启动的项',
+    ]},
+  },
+  {
+    title:'Creator Console 需求澄清文档',
+    ddlLabel:'DDL 2026-05-17 · 已逾期 1 day', overdue:true, overdueDays:1,
+    desc:'对齐研发与运营对 Console 权限模型、审计日志、灰度开关的共识。',
+    coach:{ case:'overdue', overdueDays:1, suggestions:[
+      '先把已定稿的 3 个模块发出，剩余标 TBD',
+      '拉 15 分钟 sync 逐条关掉 open question',
+      '今晚同步到 Jira，避免下游再等',
+    ]},
+  },
+  {
+    title:'Payment SDK 对接反馈汇总',
+    ddlLabel:'DDL 2026-05-15 · 已逾期 3 day', overdue:true, overdueDays:3,
+    desc:'汇总各游戏线 SDK 对接阻塞项，输出优先级与责任人矩阵。',
+    coach:{ case:'overdue', overdueDays:3, suggestions:[
+      '阻塞项按 P0/P1 分两表，P0 必须今日有 owner',
+      '已关闭项移到附录，正文只保留未决',
+      '矩阵发出后钉钉群 @ 各线技术负责人',
+    ]},
+  },
+  {
+    title:'Season Pass 文档 · 合规审阅版',
+    ddlLabel:'DDL 2026-05-20 · 剩余 2 day', overdue:false,
+    desc:'输出目录 + 核心章节骨架，关键截图今日内敲定，预留半天给 legal review。',
+    coach:{ case:'burndown', elapsedPct:82, daysLeft:2, suggestions:[
+      '先出目录 + 核心章节骨架',
+      '关键截图今天内敲定',
+      '预留半天给 legal review',
+    ]},
+  },
+  {
+    title:'跨端账号体系 PRD · 评审预读包',
+    ddlLabel:'DDL 2026-05-22 · 剩余 4 day', overdue:false,
+    desc:'整理背景、方案对比、迁移风险与灰度计划，供架构评审预读。',
+    coach:{ case:'normal', daysLeft:4, suggestions:[
+      '背景 1 页、方案对比 1 页、风险与灰度各半页',
+      '预读包周五 18:00 前发出即可，不必等全文档定稿',
+      'open question 单独列表，会上只讨论未决项',
+    ]},
+  },
 ];
-let pdmDoingIdx = -1; // -1 = A-ticket is Doing by default
+
+let pdmDoingIdx = -1;
+
+function getDoingTitle(){
+  if(pdmDoingIdx >= 0) return pdmTasks[pdmDoingIdx].title;
+  if(aTicketDoingIdx >= 0 && aTickets[aTicketDoingIdx]) return aTickets[aTicketDoingIdx].title;
+  return '';
+}
+function getDoingCoach(){
+  if(pdmDoingIdx >= 0) return pdmTasks[pdmDoingIdx].coach;
+  if(aTicketDoingIdx >= 0 && aTickets[aTicketDoingIdx]) return aTickets[aTicketDoingIdx].coach;
+  return null;
+}
+function getTodoOverduePdm(){
+  const list = [];
+  pdmTasks.forEach((t,i) => { if(t.overdue && i !== pdmDoingIdx) list.push(t); });
+  aTickets.forEach((t,i) => {
+    if(i !== aTicketDoingIdx) list.push({ title:t.title, overdueDays: i < 3 ? 3 - i : 1 });
+  });
+  return list.sort((a,b) => (b.overdueDays||0) - (a.overdueDays||0));
+}
+function renderPdmBrief(){
+  const el = document.getElementById('pdmBrief');
+  if(!el) return;
+  const h = now.getHours();
+  const greet = h < 12 ? '上午好' : h < 18 ? '下午好' : '晚上好';
+  const todoN = pdmTasks.filter((_,i) => i !== pdmDoingIdx).length + aTickets.filter((_,i) => i !== aTicketDoingIdx).length;
+  const overdueN = pdmTasks.filter((t,i) => t.overdue && i !== pdmDoingIdx).length + aTickets.filter((_,i) => i !== aTicketDoingIdx).length;
+  el.innerHTML = `${greet}，<strong>林晨曦</strong>。今日共 <strong>${1 + todoN}</strong> 项任务在跟进，To do 中 <strong>${overdueN}</strong> 项已逾期；请优先完成当前 Doing 的 output。`;
+}
+function renderPdmCoach(){
+  const body = document.getElementById('pdmDoingBody');
+  if(!body) return;
+  const title = getDoingTitle();
+  const coach = getDoingCoach();
+  if(!coach || !title){ body.innerHTML = ''; return; }
+  const overdueTodos = getTodoOverduePdm();
+  let html = '';
+  if(overdueTodos.length > 0 && coach.case !== 'overdue'){
+    const top = overdueTodos[0];
+    const topTitle = (top.title || '').length > 28 ? top.title.slice(0,28) + '…' : top.title;
+    html += `<p>⚠ To do 里已有 ${overdueTodos.length} 项逾期（最紧：「${topTitle}」逾期 ${top.overdueDays || 3} day）。腾出手就先清这批。</p>`;
+  }
+  if(coach.case === 'overdue'){
+    html += `<div class="doing-warn"><span class="doing-warn-icon">❗</span><span>「${title}」已逾期 ${coach.overdueDays} day —— 立刻把当前 output 先交出来止血，哪怕 80% 版本也先给我：</span></div>`;
+  } else if(coach.case === 'burndown'){
+    html += `<p>「${title}」已消耗 ${coach.elapsedPct}% 的计划时间，只剩 ${coach.daysLeft} day。按下面顺序收口：</p>`;
+  } else {
+    html += `<p>离 DDL 还有 ${coach.daysLeft} day，节奏稳。建议按下面顺序推进：</p>`;
+  }
+  if(coach.suggestions?.length) html += '<ol>' + coach.suggestions.map(s => `<li>${s}</li>`).join('') + '</ol>';
+  html += '<p class="doing-cta">做完后点右边的 ➤ 把 output 抓紧交我，自动接下一个任务。</p>';
+  body.innerHTML = html;
+}
+function renderPdmCasesDock(){
+  if(user.view !== 'pdm') return;
+  const menu = document.getElementById('casesMenu');
+  if(!menu) return;
+  menu.innerHTML = PDM_CASES.map((c,i) => `
+    <button class="ds3-case-option${i===0?' is-active':''}" type="button">
+      <span class="ds3-case-option-label">${c.id}</span>
+      <span class="ds3-case-option-title">${c.title}</span>
+    </button>`).join('');
+}
 
 function renderPdmDoing(){
   if(pdmDoingIdx < 0) return; // A-ticket doing is handled separately
@@ -1576,21 +1992,11 @@ function renderPdmDoing(){
       <div class="ddl-row"><span class="ddl-dot"></span>${t.ddlLabel}</div>
       <div class="doing-card-desc">${t.desc}</div>
     </div>`;
-  const ref = document.getElementById('pdmDoingBodyRef');
-  if(ref) ref.textContent = `「${t.title}」`;
+  renderPdmCoach();
+  renderPdmBrief();
 }
 
-let urgentCollapsed = true;
-
-function toggleUrgentCollapse(){
-  urgentCollapsed = !urgentCollapsed;
-  renderUrgentTop();
-}
-
-// shared: build individual urgent A-ticket cards
-// showBtn: whether to show the ▶ switch-to-Doing button (To Do section)
-// when showBtn=false, use the richer alert-card-view style (Alerts section)
-function makeUrgentCards(tickets, showBtn = true){
+function makeUrgentCards(tickets){
   const urgentTag = `<span style="flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
     padding:2px 7px;border-radius:6px;
     background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">⚠ Urgent</span>`;
@@ -1598,31 +2004,6 @@ function makeUrgentCards(tickets, showBtn = true){
   return tickets.map((at) => {
     const realIdx = aTickets.indexOf(at);
     const desc = at.label.replace(/^\[WARNING\]\s+\S+\s+—\s+/, '');
-
-    if(!showBtn){
-      // Alerts section — rich card style
-      // parse title: "[system] service — error_type"
-      const titleMatch = at.title.match(/^\[([^\]]+)\]\s+(.+?)\s+—\s+(.+)$/);
-      const system    = titleMatch ? titleMatch[1] : '';
-      const service   = titleMatch ? titleMatch[2] : at.title;
-      const errorType = titleMatch ? titleMatch[3] : '';
-      return `
-      <div class="alert-card-view" onclick="window.location.href='chat_urgent_warning.html?scene=publisher-alert'">
-        <div class="alert-card-type-tag">⚠ Urgent · ${system}</div>
-        <div class="alert-card-title">
-          <em>${service}</em>
-          ${errorType ? `<span class="alert-card-error-type">${errorType}</span>` : ''}
-        </div>
-        <div class="alert-card-ddl">
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#b71c1c" stroke-width="1.6"/><path d="M8 5v3.5l2 1.5" stroke="#b71c1c" stroke-width="1.5" stroke-linecap="round"/></svg>
-          DDL ${at.ddl} · 已逾期
-        </div>
-        <div class="alert-card-desc">${desc}</div>
-        <button class="alert-card-action" onclick="event.stopPropagation();window.location.href='chat_urgent_warning.html?scene=publisher-alert'">View Details →</button>
-      </div>`;
-    }
-
-    // To Do section — standard card style
     const btn = `
       <button class="todo-start-btn" onclick="event.stopPropagation();window.switchToDoing(-1,${realIdx})" title="切换为 Doing">
         <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6-10 6V0z"/></svg>
@@ -1635,57 +2016,6 @@ function makeUrgentCards(tickets, showBtn = true){
       ${btn}
     </div>`;
   }).join('');
-}
-
-// render urgent section above Quick pick
-function renderUrgentTop(){
-  if(typeof aTickets === 'undefined') return;
-  const todoUrgent = aTickets.filter((_,i) => i !== aTicketDoingIdx);
-  const section = document.getElementById('urgentSection');
-  if(!section) return;
-
-  if(todoUrgent.length === 0){
-    section.style.display = 'none';
-    return;
-  }
-  section.style.display = 'block';
-
-  const needCollapse = todoUrgent.length > 2;
-  let html = '';
-
-  if(!needCollapse){
-    html = makeUrgentCards(todoUrgent, false);
-  } else if(urgentCollapsed){
-    html = `
-    <div class="urgent-entry-card ds3-task-appear" onclick="toggleUrgentCollapse()">
-      <div class="urgent-entry-row">
-        <div class="urgent-entry-left">
-          <div class="urgent-entry-title">
-            Urgent Alerts
-            <span class="urgent-entry-badge">${todoUrgent.length}</span>
-          </div>
-          <div class="urgent-entry-sub">Requires immediate attention!</div>
-        </div>
-        <div class="urgent-entry-chevron">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-      </div>
-    </div>`;
-  } else {
-    html = `
-    <div class="urgent-expanded-header ds3-task-appear" onclick="toggleUrgentCollapse()">
-      <div class="urgent-expanded-header-label">
-        Urgent Alerts
-        <span class="urgent-entry-badge">${todoUrgent.length}</span>
-      </div>
-      <span class="urgent-expanded-collapse">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 8l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-    </div>
-    ${makeUrgentCards(todoUrgent, false)}`;
-  }
-
-  document.getElementById('urgentTopList').innerHTML = html;
 }
 
 function renderPdmTodo(){
@@ -1719,7 +2049,7 @@ function switchToDoing(newDoingIdx){
   pdmDoingIdx = newDoingIdx;
   renderPdmDoing();
   renderPdmTodo();
-  renderUrgentTop();
+  renderPdmBrief();
   // Scroll doing card into view smoothly
   const card = document.getElementById('pdmDoingCard');
   if(card) card.scrollIntoView({behavior:'smooth', block:'nearest'});
@@ -1732,36 +2062,81 @@ const aTickets = [
     title: '[publisher] vividarmy-game-server — deploy_failed',
     severity: 'Urgent',
     owner: '王彬-Wang Bin',
-    ddl: '2026-04-30',
+    ddl: '2026-05-18 · 今日 18:00',
     type: 'bug',
     dept: 'Tech',
-    label: '[WARNING] publisher — npm install timeout 导致部署失败',
-    url: 'chat_urgent_warning.html?scene=publisher-alert'
+    label: '[WARNING] publisher — npm install timeout 导致部署失败，TW 区发布阻断',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'overdue', overdueDays:1, suggestions:[
+      '在 Publisher 控制台确认失败阶段与 commit hash，截图附 A 票 Output',
+      '钉钉 @ 王彬 同步 npm registry 超时日志，请求 30min 内给 ETA',
+      '若 18:00 前无法恢复，执行回滚预案并在 CP 群公告',
+    ]},
   },
   {
     id: 'A-002',
     title: '[publisher] vividarmy-game-server — service_down',
     severity: 'Urgent',
     owner: '王彬-Wang Bin',
-    ddl: '2026-04-30',
+    ddl: '2026-05-18 · 已逾期',
     type: 'bug',
     dept: 'Tech',
-    label: '[WARNING] publisher — vividarmy-game-server 内存超限重启',
-    url: 'chat_urgent_warning.html?scene=publisher-alert'
+    label: '[WARNING] publisher — vividarmy-game-server 内存超限 OOM 重启',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'overdue', overdueDays:2, suggestions:[
+      '拉取近 1h 内存曲线与 GC 日志，确认是否新版本引入',
+      '临时扩容实例并观察 15min，稳定后回复 CP',
+      '创建 follow-up A 票跟踪根因修复',
+    ]},
   },
   {
     id: 'A-003',
     title: '[publisher] production — rollback_timeout',
     severity: 'Urgent',
     owner: '王彬-Wang Bin',
-    ddl: '2026-04-30',
+    ddl: '2026-05-17 · 已逾期',
     type: 'bug',
     dept: 'Tech',
-    label: '[WARNING] publisher — production 回滚验证超时',
-    url: 'chat_urgent_warning.html?scene=publisher-alert'
+    label: '[WARNING] publisher — production 回滚验证超时，灰度未收敛',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'overdue', overdueDays:3, suggestions:[
+      '列出回滚检查项完成度，未完成项标红并指派 owner',
+      '与 QA 开 10min 对齐，确认可强制关闭灰度的条件',
+      '今日内输出一页回滚结论给运营 VP',
+    ]},
+  },
+  {
+    id: 'A-004',
+    title: '[gateway] api-core — error_rate_spike',
+    severity: 'Urgent',
+    owner: '李航-Li Hang',
+    ddl: '2026-05-18 · 今日 20:00',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] gateway — 502 错误率 12% 持续 8min，影响登录接口',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'overdue', overdueDays:0, suggestions:[
+      '确认是否单 AZ 故障，必要时切换流量',
+      '同步客服准备标准话术',
+    ]},
+  },
+  {
+    id: 'A-005',
+    title: '[data] player-db — connection_pool_exhausted',
+    severity: 'Urgent',
+    owner: '赵敏-Zhao Min',
+    ddl: '2026-05-19 · 明日 10:00',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] data — 连接池打满，部分查询排队 > 3s',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'normal', daysLeft:1, suggestions:[
+      '收集慢查询 TOP5 与对应业务方',
+      '评估临时升配 vs 限流方案',
+    ]},
   },
 ];
-let aTicketDoingIdx = 0; // index in aTickets currently in Doing; -1 = none
+let aTicketDoingIdx = 0;
 
 function renderATicketDoing() {
   const at = aTickets[aTicketDoingIdx];
@@ -1778,8 +2153,8 @@ function renderATicketDoing() {
       <div class="ddl-row"><span class="ddl-dot"></span>DDL ${at.ddl}</div>
       <div class="doing-card-desc">${desc}</div>
     </div>`;
-  const ref = document.getElementById('pdmDoingBodyRef');
-  if(ref) ref.textContent = `「${at.title}」`;
+  renderPdmCoach();
+  renderPdmBrief();
 }
 
 /* Override switchToDoing to handle A-tickets (idx = -1, aIdx = which aTicket) */
@@ -1790,7 +2165,7 @@ window.switchToDoing = function(newDoingIdx, aIdx){
     pdmDoingIdx = -1;
     renderATicketDoing();
     renderPdmTodo();
-    renderUrgentTop();
+    renderPdmBrief();
     document.getElementById('pdmDoingCard').scrollIntoView({behavior:'smooth', block:'nearest'});
   } else {
     aTicketDoingIdx = -1; // no A-ticket in Doing when a regular task takes over
@@ -1799,9 +2174,283 @@ window.switchToDoing = function(newDoingIdx, aIdx){
   }
 };
 
+/* ── PDM CASE SWITCHING ── */
+let pdmCase = 1;
+let pdmAgentPending = 1; // count of pending agent tasks
+
+function _dismissAgentCard(msgText, msgClass, afterMs){
+  // Animate card out
+  const card = document.getElementById('pdmAgentCard');
+  card.classList.add('resolving');
+  setTimeout(() => {
+    card.style.display = 'none';
+    // Update badge → 0
+    pdmAgentPending = 0;
+    const badge = document.getElementById('pdmAgentBadge');
+    if(badge){ badge.textContent = '0 Pending'; badge.style.background = 'rgba(0,0,0,.05)'; badge.style.color = 'rgba(0,0,0,.35)'; badge.style.borderColor = 'rgba(0,0,0,.08)'; }
+    const caseBadge = document.getElementById('pdmCaseBadge');
+    if(caseBadge){ caseBadge.style.display = 'none'; }
+    // Show result status
+    const st = document.getElementById('pdmAgentStatus');
+    st.className = 'pdm-agent-status ' + msgClass + ' show';
+    st.textContent = msgText;
+    // After 2s auto-collapse section and show normal brief
+    setTimeout(() => {
+      document.getElementById('pdmAgentSection').style.display = 'none';
+      // Restore brief to normal
+      renderPdmBrief();
+    }, afterMs);
+  }, 350);
+}
+
+function switchPdmCase(n){
+  pdmCase = n;
+  document.querySelectorAll('#casesMenu .ds3-case-option').forEach((el, i) => {
+    el.classList.toggle('is-active', i === n - 1);
+  });
+  // Close menu
+  casesOpen = false;
+  document.getElementById('casesMenu').style.display = 'none';
+  document.getElementById('casesTrigger').classList.remove('is-open');
+  document.getElementById('casesChev').classList.remove('is-open');
+
+  const agentSec = document.getElementById('pdmAgentSection');
+  const brief    = document.getElementById('pdmBrief');
+
+  if(n === 1){
+    // 日常任务：隐藏 agent 区
+    if(agentSec) agentSec.style.display = 'none';
+    if(brief)    brief.style.display    = '';
+    renderPdmBrief();
+  } else {
+    // 收到 Agent 任务：展示 agent 区，Doing 和 To Do 原封不动保留
+    if(agentSec) agentSec.style.display = '';
+    if(brief)    brief.style.display    = '';
+    // Set agent-context brief
+    brief.innerHTML = '下午好，<strong>林晨曦</strong>。Agent 刚在运营群中拆解完今日可执行任务，结合 memory + brain-doc 交叉比对后识别出 <strong>2 项任务</strong>，其中 <strong>1 项</strong>需你在今日优先确认。';
+    // Reset card state when re-entering
+    const card = document.getElementById('pdmAgentCard');
+    card.style.display = '';
+    card.classList.remove('resolving','resolved-msg');
+    const st = document.getElementById('pdmAgentStatus');
+    st.className = 'pdm-agent-status'; st.textContent = '';
+    ['pdmAgentYes','pdmAgentDone'].forEach(id => {
+      const b = document.getElementById(id); if(b) b.disabled = false;
+    });
+    // Reset rec-list: execution states + skip + escalated
+    [0,1,2].forEach(i => {
+      const row = document.getElementById('pdmRecItem' + i);
+      if(row){ row.classList.remove('exec-running','exec-done','exec-assigned','pdm-rec-item--skip','pdm-rec-item--esc'); }
+      const escBtn  = document.getElementById('pdmRecEscBtn'  + i);
+      if(escBtn){  escBtn.textContent  = '↑'; escBtn.disabled  = false; }
+      const skipBtn = document.getElementById('pdmRecSkipBtn' + i);
+      if(skipBtn){ skipBtn.textContent = 'Skip'; skipBtn.disabled = false; }
+      const escBadge = document.getElementById('pdmRecEscBadge' + i);
+      if(escBadge) escBadge.textContent = '↑ Escalate';
+    });
+    const e0 = document.getElementById('pdmRecExec0'); if(e0) e0.textContent = 'AI';
+    const e1 = document.getElementById('pdmRecExec1'); if(e1) e1.textContent = 'HU';
+    const e2 = document.getElementById('pdmRecExec2'); if(e2) e2.textContent = 'AI';
+    closePdmDonePanel();
+    // Reset Execute button text
+    const yesBtn = document.getElementById('pdmAgentYes'); if(yesBtn) yesBtn.textContent = 'Execute';
+    // Badge restore
+    if(pdmAgentPending > 0){
+      const badge = document.getElementById('pdmAgentBadge');
+      if(badge){ badge.textContent = pdmAgentPending + ' Agent Task'; badge.style.cssText=''; }
+    }
+  }
+}
+
+function togglePdmBrainDoc(){
+  const body    = document.getElementById('pdmBrainDocBody');
+  const chev    = document.getElementById('pdmBrainDocChev');
+  const preview = document.getElementById('pdmBrainDocPreview');
+  const open    = body.style.display === 'none';
+  body.style.display    = open ? 'block' : 'none';
+  preview.classList.toggle('hidden', open);
+  chev.classList.toggle('open', open);
+}
+
+
+// Per-action skip toggle
+function toggleRecSkip(idx){
+  const row = document.getElementById('pdmRecItem' + idx);
+  const btn = document.getElementById('pdmRecSkipBtn' + idx);
+  if(!row) return;
+  // can't skip an escalated item
+  if(row.classList.contains('pdm-rec-item--esc')) return;
+  const isSkip = row.classList.toggle('pdm-rec-item--skip');
+  if(btn) btn.textContent = isSkip ? 'Undo' : 'Skip';
+  _updateExecBtn();
+}
+
+// Per-action escalate toggle
+function toggleRecEsc(idx){
+  const row = document.getElementById('pdmRecItem' + idx);
+  const btn = document.getElementById('pdmRecEscBtn' + idx);
+  if(!row) return;
+  const isEsc = row.classList.toggle('pdm-rec-item--esc');
+  if(btn) btn.textContent = isEsc ? '×' : '↑';
+  // escalated items are also removed from skip state
+  if(isEsc){
+    row.classList.remove('pdm-rec-item--skip');
+    const skipBtn = document.getElementById('pdmRecSkipBtn' + idx);
+    if(skipBtn) skipBtn.textContent = 'Skip';
+  }
+  _updateExecBtn();
+}
+
+// Recompute Execute button enabled state
+function _updateExecBtn(){
+  const ALL_ITEMS = [
+    { idx: 0 }, { idx: 1 }, { idx: 2 },
+  ];
+  const anyExecute = ALL_ITEMS.some(it => {
+    const row = document.getElementById('pdmRecItem' + it.idx);
+    return row && !row.classList.contains('pdm-rec-item--skip') && !row.classList.contains('pdm-rec-item--esc');
+  });
+  const anyEsc = ALL_ITEMS.some(it => {
+    const row = document.getElementById('pdmRecItem' + it.idx);
+    return row && row.classList.contains('pdm-rec-item--esc');
+  });
+  const execBtn = document.getElementById('pdmAgentYes');
+  if(execBtn) execBtn.disabled = !anyExecute && !anyEsc;
+}
+
+// Legacy alias (called nowhere now but kept for safety)
+function onRecCbChange(){ _updateExecBtn(); }
+
+function closePdmDonePanel(){
+  const panel = document.getElementById('pdmDonePanel');
+  if(panel) panel.classList.remove('show');
+  const fb = document.getElementById('pdmDoneFeedback');
+  if(fb) fb.value = '';
+}
+
+
 if(user.view==='pdm'){
-  window.switchToDoing(0); // default Doing: 智能客服周会纪要 + Action 同步
-  renderUrgentTop();
+  aTicketDoingIdx = 0;
+  pdmDoingIdx = -1;
+  renderATicketDoing();
+  renderPdmTodo();
+  renderPdmBrief();
+
+  // Default to Case 2
+  switchPdmCase(2);
+
+  // ── Agent card action helpers ──────────────────────────────────────────────
+
+  // Action-level items config: { idx, type: 'ai'|'hu' }
+  const REC_ITEMS = [
+    { idx: 0, type: 'ai' },
+    { idx: 1, type: 'hu' },
+    { idx: 2, type: 'ai' },
+  ];
+
+  function _getCheckedItems(){
+    // items that are neither skipped nor escalated
+    return REC_ITEMS.filter(it => {
+      const row = document.getElementById('pdmRecItem' + it.idx);
+      return row && !row.classList.contains('pdm-rec-item--skip') && !row.classList.contains('pdm-rec-item--esc');
+    });
+  }
+
+  function _getEscalatedItems(){
+    return REC_ITEMS.filter(it => {
+      const row = document.getElementById('pdmRecItem' + it.idx);
+      return row && row.classList.contains('pdm-rec-item--esc');
+    });
+  }
+
+  function _setAllAgentBtns(disabled){
+    ['pdmAgentYes','pdmAgentDone'].forEach(id=>{
+      const el = document.getElementById(id); if(el) el.disabled = disabled;
+    });
+    // lock per-action buttons while executing
+    REC_ITEMS.forEach(it => {
+      const escBtn  = document.getElementById('pdmRecEscBtn'  + it.idx);
+      const skipBtn = document.getElementById('pdmRecSkipBtn' + it.idx);
+      if(escBtn)  escBtn.disabled  = disabled;
+      if(skipBtn) skipBtn.disabled = disabled;
+    });
+  }
+
+  // Execute: run checked actions + send escalated actions to decision-maker
+  document.getElementById('pdmAgentYes').addEventListener('click', function(){
+    if(this.disabled) return;
+    const checked   = _getCheckedItems();
+    const escalated = _getEscalatedItems();
+    if(!checked.length && !escalated.length) return;
+    _setAllAgentBtns(true);
+
+    const btn = this;
+    btn.textContent = '执行中…';
+
+    const checkedAI = checked.filter(it => it.type === 'ai').map(it => it.idx);
+    const checkedHU = checked.filter(it => it.type === 'hu').map(it => it.idx);
+
+    // Step 1: animate AI actions as running
+    checkedAI.forEach(i => {
+      document.getElementById('pdmRecItem' + i).classList.add('exec-running');
+      document.getElementById('pdmRecExec' + i).textContent = '⟳ AI';
+    });
+
+    // Step 2: after 1.2s mark AI done, mark escalated as sent
+    setTimeout(() => {
+      checkedAI.forEach(i => {
+        const row = document.getElementById('pdmRecItem' + i);
+        row.classList.remove('exec-running');
+        row.classList.add('exec-done');
+        document.getElementById('pdmRecExec' + i).textContent = '✓ AI';
+      });
+      escalated.forEach(it => {
+        const badge = document.getElementById('pdmRecEscBadge' + it.idx);
+        if(badge) badge.textContent = '↑ 已升级';
+      });
+    }, 1200);
+
+    // Step 3: after 1.8s assign HU actions
+    setTimeout(() => {
+      checkedHU.forEach(i => {
+        document.getElementById('pdmRecItem' + i).classList.add('exec-assigned');
+        document.getElementById('pdmRecExec' + i).textContent = '→ HU';
+      });
+    }, 1800);
+
+    // Step 4: after 2.8s dismiss with combined summary
+    setTimeout(() => {
+      const skipped = REC_ITEMS.length - checked.length - escalated.length;
+      let msg = '';
+      if(checked.length && escalated.length){
+        msg = `✓ 已执行 ${checked.length} 条 Action · ${escalated.length} 条已升级给决策者，结果将记录为新 Memory。`;
+      } else if(escalated.length){
+        msg = `↑ ${escalated.length} 条 Action 已升级给决策者处理。`;
+      } else {
+        msg = skipped > 0
+          ? `✓ 已执行 ${checked.length} 条 Action（${skipped} 条已跳过），结果将记录为新 Memory。`
+          : '✓ AI 已完成自动执行 · 人工任务已指派，结果将记录为新 Memory。';
+      }
+      _dismissAgentCard(msg, escalated.length && !checked.length ? 'info' : 'ok', 3200);
+    }, 2800);
+  });
+
+  // Done: show feedback panel
+  document.getElementById('pdmAgentDone').addEventListener('click', function(){
+    if(this.disabled) return;
+    document.getElementById('pdmDonePanel').classList.add('show');
+    document.getElementById('pdmDoneFeedback').focus();
+  });
+
+  // Done confirm: feed back to agent if content exists, then dismiss
+  document.getElementById('pdmDoneConfirm').addEventListener('click', function(){
+    const feedback = document.getElementById('pdmDoneFeedback').value.trim();
+    const msg = feedback
+      ? '✓ 已完成 · 反馈「' + feedback.slice(0, 28) + (feedback.length > 28 ? '…' : '') + '」已喂给 Agent，将提升下次决策准确性。'
+      : '✓ 已标记完成 · 结果将同步至 Memory。';
+    document.getElementById('pdmDonePanel').classList.remove('show');
+    _dismissAgentCard(msg, 'ok', 3500);
+  });
 }
 
 /* ── DOING INPUT ── */

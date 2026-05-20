@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAP 决策者视图</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #edeef7;
+    --surface-glass: rgba(255,255,255,0.5);
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --border-disabled: #d9d9d9;
+    --text-default: #131825;
+    --text-heading: #202536;
+    --text-secondary: #73726e;
+    --text-disabled: #ababa9;
+    --text-tertiary: #b7b7b7;
+    --accent: #131825;
+    --green: #52c41a;
+    --green-bg: #f6ffed;
+    --green-border: #b7eb8f;
+    --orange: #f59e0b;
+    --blue: #3b82f6;
+    --shadow-sm: 0 1px 4px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 24px rgba(0,0,0,.08);
+    --radius-md: 12px;
+    /* legacy aliases */
+    --text-primary: #131825;
+    --text-tertiary: #b7b7b7;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(200,210,240,.35) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(190,205,235,.25) 0%, transparent 65%);
+    font-family: 'Inter', 'PingFang SC', 'Noto Sans SC', sans-serif;
+    color: var(--text-default);
+    font-size: 14px;
+    line-height: 1.57;
+    overflow: hidden;
+  }
+
+  /* ─── Role Badge ─── */
+  .role-badge {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 4px;
+    width: 183px;
+    box-shadow: none;
+    cursor: pointer;
+  }
+  .role-badge .avatar {
+    width: 40px; height: 40px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .role-badge .name-row { display: flex; flex-direction: column; padding-left: 8px; }
+  .role-badge .uname { font-size: 14px; font-weight: 500; color: var(--text-default); line-height: 22px; }
+  .role-badge .urole { font-size: 12px; font-weight: 400; color: var(--text-disabled); line-height: 18px; }
+
+  /* ─── Page Layout ─── */
+  /* badge: left=14px, width≈183px → badge right edge ≈ 197px; keep ≥10px gap → content starts at 207px min */
+  .page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: min(970px, calc(100vw - 220px));
+    margin-left: max(207px, calc((100vw - 970px) / 2));
+    margin-right: auto;
+    padding: 14px 0 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ─── Todo Section ─── */
+  .todo-section {
+    flex-shrink: 0;
+    padding-bottom: 10px;
+  }
+  .todo-header {
+    display: flex; align-items: center; gap: 4px;
+    padding: 0 2px 8px;
+  }
+  .todo-label {
+    font-size: 14px; font-weight: 700;
+    color: var(--text-heading); letter-spacing: 0;
+  }
+  .todo-count {
+    font-size: 12px; font-weight: 400;
+    color: var(--text-secondary);
+  }
+  .todo-cards {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    background: var(--surface-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .todo-divider-v {
+    background: var(--border);
+    align-self: stretch;
+  }
+  .todo-card {
+    padding: 12px;
+    cursor: pointer;
+    transition: background .12s;
+    position: relative;
+  }
+  .todo-card:hover { background: rgba(255,255,255,.3); }
+  .todo-card-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .todo-cat {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 400; color: var(--text-disabled);
+  }
+  .cat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .cat-dot.green { background: #52c41a; border: .5px solid #b7eb8f; }
+  .cat-dot.orange { background: #ffa940; border: .5px solid #ffd591; }
+  .todo-card-count {
+    display: flex; align-items: center; gap: 3px;
+    font-size: 14px; color: #9fa2a8; letter-spacing: .1em;
+    cursor: pointer;
+  }
+  .todo-card-title {
+    font-size: 14px; font-weight: 500; color: var(--text-heading);
+    margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 22px;
+  }
+  .todo-card-meta {
+    font-size: 12px; color: var(--text-disabled);
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* ─── Main Card ─── */
+  .main-card {
+    flex: 1;
+    background: var(--surface-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    box-shadow: 0 -2px 20px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  /* ─── Tabs ─── */
+  .tabs-bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 6px;
+    border-bottom: 1px solid #dedee0;
+    flex-shrink: 0;
+  }
+  .tab-btn {
+    padding: 18px 12px;
+    font-size: 14px; font-weight: 500; color: var(--text-default);
+    border: none; background: none; cursor: pointer;
+    border-bottom: 1.5px solid transparent;
+    margin-bottom: -1px;
+    transition: opacity .15s, border-color .15s;
+    white-space: nowrap; opacity: .5;
+  }
+  .tab-btn:hover { opacity: .8; }
+  .tab-btn.active {
+    font-weight: 700; opacity: 1;
+    border-bottom-color: var(--text-default);
+  }
+  .tab-count {
+    margin-left: 2px; font-size: 14px; font-weight: inherit;
+  }
+
+  /* ─── Tab Panels ─── */
+  .tab-panel { display: none; flex: 1; overflow: hidden; }
+  .tab-panel.active { display: flex; flex-direction: column; overflow-y: auto; }
+
+  /* ─── Goal Tab ─── */
+  .goal-panel { padding: 0; }
+
+  .goal-item {
+    border-bottom: 1px solid var(--border);
+  }
+  .goal-header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 18px;
+    padding: 24px;
+    cursor: pointer;
+    transition: background .12s;
+    user-select: none;
+  }
+  .goal-header-row:hover { background: rgba(0,0,0,.02); }
+  .goal-header-left {
+    display: flex; align-items: center; gap: 18px; flex: 1; min-width: 0;
+  }
+  .goal-header-right {
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .goal-chevron {
+    color: var(--text-tertiary);
+    transition: transform .2s;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .goal-item.expanded .goal-chevron { transform: rotate(90deg); }
+
+  /* Circular badge */
+  .circ-badge {
+    position: relative;
+    width: 44px; height: 44px;
+    flex-shrink: 0;
+  }
+  .circ-badge svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+  .circ-badge .badge-num {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 500; color: #000;
+  }
+
+  .goal-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .goal-title {
+    font-size: 14px; font-weight: 500; color: var(--text-heading);
+    line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .goal-desc {
+    font-size: 12px; font-weight: 400; color: var(--text-disabled); line-height: 18px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .goal-metrics {
+    display: flex; gap: 12px; align-items: center;
+  }
+  .metric-col {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    width: 75px;
+  }
+  .metric-num {
+    font-size: 20px; font-weight: 400; color: var(--text-heading); line-height: 24px;
+  }
+  .metric-label {
+    font-size: 12px; font-weight: 400; color: var(--text-disabled);
+    line-height: 18px;
+  }
+
+  /* ─── Sub-task tree ─── */
+  .subtask-tree {
+    padding: 0 24px 24px 24px;
+    display: flex; flex-direction: column; gap: 24px;
+  }
+
+  .task-group { }
+
+  .task-group-title {
+    font-size: 14px; font-weight: 500; color: var(--text-heading);
+    line-height: 22px; margin-bottom: 16px;
+  }
+
+  .task-group-rows {
+    display: flex; flex-direction: column; gap: 16px;
+    padding-left: 32px;
+    border-left: 2px solid var(--border-disabled);
+  }
+
+  .task-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+  }
+  .task-row:hover .task-chat-btn { opacity: 1; }
+
+  /* executor icon */
+  .exec-icon {
+    width: 20px; height: 20px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-tertiary);
+  }
+  .exec-icon.ai {
+    font-size: 9px; font-weight: 700; color: var(--blue, #3b82f6);
+    letter-spacing: 0;
+  }
+
+  .task-title-cell {
+    flex: 1; min-width: 0;
+    font-size: 14px; font-weight: 400; color: var(--text-default);
+    line-height: 18px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .task-title-cell.done-title {
+    text-decoration: line-through; color: var(--text-tertiary);
+  }
+
+  /* right column group */
+  .task-right {
+    display: flex; align-items: center; gap: 32px;
+    flex-shrink: 0;
+  }
+  .task-assignee {
+    font-size: 14px; color: var(--text-secondary);
+    line-height: 18px; white-space: nowrap;
+  }
+  .task-date {
+    font-size: 14px; color: var(--text-disabled);
+    line-height: 18px; font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* status tags — exact Figma spec */
+  .stag {
+    font-size: 12px; font-weight: 400;
+    width: 48px; height: 22px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 4px; padding: 0 8px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  /* Done: gray bordered box */
+  .stag.done { border: 1px solid var(--border); color: var(--text-tertiary); }
+  /* To do: gray bordered box, slightly darker text */
+  .stag.todo { border: 1px solid var(--border); color: var(--text-secondary); }
+  /* Doing: green chip */
+  .stag.doing { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+  /* Review: yellow */
+  .stag.review { background: #fffbe6; border: 1px solid #ffe58f; color: #d48806; }
+
+  /* chat-ref bubble */
+  .task-chat-btn {
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-default); cursor: pointer; flex-shrink: 0;
+    border: none; background: none; padding: 0;
+    opacity: 0; transition: opacity .12s;
+  }
+  .task-row:hover .task-chat-btn { opacity: 1; }
+  .task-chat-btn:hover { color: #3b82f6; }
+
+  /* run button */
+  .run-btn {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 12px; font-weight: 500; color: #3b82f6;
+    background: #eff6ff; border: 1px solid #bfdbfe;
+    padding: 1px 8px; height: 22px; border-radius: 4px; cursor: pointer;
+    transition: background .12s; white-space: nowrap; flex-shrink: 0;
+  }
+  .run-btn:hover { background: #dbeafe; }
+
+  .accept-btn {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 12px; font-weight: 500; color: var(--green);
+    background: var(--green-bg); border: 1px solid var(--green-border);
+    padding: 1px 8px; height: 22px; border-radius: 4px; cursor: pointer;
+    transition: background .12s; flex-shrink: 0;
+  }
+  .accept-btn:hover { background: #d9f7be; }
+
+  /* ─── Dashboard Tab ─── */
+  .dash-list { }
+  .dash-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background .12s;
+  }
+  .dash-row:last-child { border-bottom: none; }
+  .dash-row:hover { background: rgba(0,0,0,.02); }
+  .dash-row-name { font-size: 14px; color: var(--text-primary); }
+  .dash-row-action { font-size: 12px; color: var(--text-tertiary); display: flex; align-items: center; gap: 4px; }
+
+  /* ─── Brain Tab ─── */
+  .brain-list { }
+  .brain-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px; gap: 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background .12s;
+  }
+  .brain-item:last-child { border-bottom: none; }
+  .brain-item:hover { background: rgba(0,0,0,.02); }
+  .brain-item-left { flex: 1; min-width: 0; }
+  .brain-item-title { font-size: 14px; color: var(--text-primary); margin-bottom: 10px; font-weight: 500; }
+  .brain-from-row { display: flex; align-items: flex-start; gap: 2px; }
+  .brain-from-label { font-size: 10px; color: var(--text-tertiary); letter-spacing: .06em; margin-right: 8px; margin-top: 4px; flex-shrink: 0; }
+  .brain-chips { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+  .brain-chip { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .brain-chip-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+  }
+  .brain-chip-name { font-size: 10px; color: var(--text-primary); white-space: nowrap; }
+  .brain-chip-role { font-size: 9px; color: var(--text-tertiary); white-space: nowrap; }
+  .brain-item-right {
+    display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+    color: var(--text-tertiary); font-size: 12px;
+  }
+  .brain-item-right svg { flex-shrink: 0; }
+  .brain-mention-btn {
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    color: var(--text-tertiary); font-size: 12px; padding: 4px;
+    border-radius: 6px; transition: background .12s, color .12s;
+  }
+  .brain-mention-btn:hover { background: rgba(0,0,0,.05); color: var(--text-secondary); }
+
+  /* ─── Chat Bar ─── */
+  .chat-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(686px, 90vw);
+    z-index: 200;
+  }
+  .chat-input-wrap {
+    background: #f9fafb;
+    border-radius: 31px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    display: flex; align-items: center;
+    padding: 4px;
+    gap: 0;
+  }
+  .chat-input-inner {
+    flex: 1; background: white; border-radius: 27px;
+    display: flex; align-items: center; padding: 8px 16px; gap: 8px;
+  }
+  .chat-prefix {
+    font-size: 14px; font-weight: 400; color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .chat-divider {
+    width: 1px; height: 17px; background: var(--border); flex-shrink: 0;
+  }
+  .chat-input {
+    flex: 1; border: none; outline: none; background: none;
+    font-size: 14px; color: var(--text-default);
+    font-family: inherit;
+  }
+  .chat-input::placeholder { color: var(--text-tertiary); }
+  .chat-send-btn {
+    width: 36px; height: 36px; border-radius: 18px;
+    background: #dbdbdb; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background .15s, transform .1s;
+  }
+  .chat-send-btn:hover { background: #2d3a55; }
+  .chat-send-btn:active { transform: scale(.93); }
+  .chat-send-btn svg { color: #fff; }
+
+  /* ─── Floating Side Buttons ─── */
+  .side-actions {
+    position: fixed;
+    right: max(16px, calc((100vw - 970px) / 2 - 56px));
+    bottom: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 200;
+  }
+  .side-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .15s, transform .1s;
+  }
+  .side-btn:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .side-btn.cs { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+  .side-btn.mk { background: #fdf4ff; color: #9333ea; border: 1px solid #e9d5ff; }
+
+  /* ─── Task Detail Drawer ─── */
+  /* ─── Modal (replaces drawer) ─── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,.18);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    width: 480px; max-height: 80vh;
+    background: #f9f9f6;
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.15), 0 4px 16px rgba(0,0,0,.08);
+    display: flex; flex-direction: column;
+    animation: modalIn .18s ease;
+    overflow: hidden;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(.96) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-hd {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e8e8e3;
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .modal-title {
+    font-size: 16px; font-weight: 700; color: #1a1a1a; letter-spacing: -.01em;
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .modal-count { font-size: 13px; font-weight: 400; color: #b0b0a8; }
+  .modal-close {
+    width: 24px; height: 24px;
+    border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #b0b0a8; border-radius: 6px;
+    transition: color .12s, background .12s;
+  }
+  .modal-close:hover { color: #555; background: rgba(0,0,0,.05); }
+  .modal-body { flex: 1; overflow-y: auto; }
+
+  /* task rows inside modal */
+  .mt-item {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e8e8e3;
+    cursor: default;
+  }
+  .mt-item:last-child { border-bottom: none; }
+  .mt-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .mt-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    background: #ccc; margin-top: 1px;
+  }
+  .mt-dot.doing { background: #131825; }
+  .mt-title {
+    flex: 1; font-size: 15px; font-weight: 700; color: #1a1a1a; line-height: 1.3;
+  }
+  .mt-status {
+    font-size: 13px; font-weight: 400; color: #b0b0a8; white-space: nowrap;
+  }
+  .mt-status.doing { color: #555; }
+  .mt-run-btn {
+    width: 20px; height: 20px; border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #b0b0a8; border-radius: 50%; flex-shrink: 0;
+    transition: color .12s, background .12s;
+  }
+  .mt-run-btn:hover { color: #555; background: rgba(0,0,0,.06); }
+  .mt-chat-btn {
+    width: 20px; height: 20px; border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #c8c8c0; border-radius: 50%; flex-shrink: 0;
+    transition: color .12s, background .12s;
+  }
+  .mt-chat-btn:hover { color: #555; background: rgba(0,0,0,.06); }
+  .mt-meta {
+    font-size: 12px; color: #b0b0a8; margin-top: 4px; padding-left: 19px;
+  }
+
+  /* ─── Escalated item — flat minimal ─── */
+  .mt-escalate-section { border-bottom: 1px solid #e8e8e3; }
+  .mt-escalate-item {
+    padding: 16px 24px 14px;
+    cursor: default;
+  }
+  .mt-escalate-item + .mt-escalate-item { border-top: 1px solid #eeecea; }
+
+  /* Collapsible header */
+  .mt-esc-hd {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; padding: 2px 0 8px; user-select: none;
+  }
+  .mt-esc-hd:hover .mt-esc-title { color: #333; }
+  .mt-esc-hd-left { flex: 1; min-width: 0; }
+  .mt-esc-title {
+    font-size: 14px; font-weight: 700; color: #1a1a1a; line-height: 1.4;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .mt-esc-type-icon { font-size: 14px; flex-shrink: 0; }
+  .mt-esc-hd-source {
+    font-size: 12px; color: #aaa; margin-top: 3px;
+    display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  }
+  .mt-esc-hd-chev {
+    font-size: 12px; color: #ccc; flex-shrink: 0;
+    transition: transform .18s; margin-left: 4px;
+  }
+  .mt-esc-hd-chev.open { transform: rotate(180deg); }
+
+  /* Collapsible detail body */
+  .mt-esc-detail { display: none; padding-top: 6px; }
+  .mt-esc-detail.open { display: block; }
+
+  /* Source line (inside detail, kept for reference — now in hd) */
+  .mt-esc-source {
+    font-size: 12px; color: #aaa; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  }
+  .mt-esc-avatar {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #888; color: #fff; font-size: 8px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .mt-esc-source-name { color: #555; font-weight: 500; }
+
+  /* Flat section block: label + content */
+  .mt-esc-block { margin-bottom: 10px; }
+  .mt-esc-block-label {
+    font-size: 11px; font-weight: 600; color: #bbb; letter-spacing: .04em;
+    text-transform: uppercase; margin-bottom: 3px;
+  }
+  .mt-esc-block-text {
+    font-size: 13px; color: #444; line-height: 1.6;
+  }
+  .mt-esc-block-item {
+    font-size: 13px; color: #555; line-height: 1.7;
+    padding-left: 10px; position: relative;
+  }
+  .mt-esc-block-item::before {
+    content: '·'; position: absolute; left: 0; color: #bbb;
+  }
+
+  /* Section dividers in modal */
+  .mt-section-label {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 24px 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: .07em;
+    color: #b0b0a8; border-top: 1px solid #eeecea;
+  }
+  .mt-section-label:first-child { border-top: none; }
+
+  /* Memory inline list */
+  .mt-esc-mem-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+  .mt-esc-mem-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    font-size: 12px; line-height: 1.6; color: #777;
+  }
+  .mt-esc-mem-row strong { font-weight: 600; color: #444; }
+  .mt-esc-mem-tag {
+    flex-shrink: 0; font-size: 10px; color: #aaa; white-space: nowrap;
+  }
+
+  /* Brain-doc collapsible row */
+  .mt-esc-bd { margin-bottom: 14px; }
+  .mt-esc-bd-hd {
+    display: flex; align-items: baseline; gap: 6px;
+    cursor: pointer; user-select: none;
+    padding: 3px 0;
+  }
+  .mt-esc-bd-hd:hover .mt-esc-bd-title { color: #333; }
+  .mt-esc-bd-title {
+    font-size: 11px; font-weight: 600; color: #bbb;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .mt-esc-bd-ref {
+    font-size: 11px; font-weight: 600; color: #888;
+  }
+  .mt-esc-bd-preview {
+    font-size: 12px; color: #aaa; flex: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mt-esc-bd-chev {
+    font-size: 10px; color: #ccc; flex-shrink: 0; transition: transform .18s;
+  }
+  .mt-esc-bd-chev.open { transform: rotate(180deg); }
+  .mt-esc-bd-body { display: none; padding: 4px 0 0 0; }
+  .mt-esc-bd-row {
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: 2px 10px; padding: 5px 0;
+    border-bottom: 1px solid #f0efeb; font-size: 12px;
+  }
+  .mt-esc-bd-row:last-child { border-bottom: none; }
+  .mt-esc-bd-row-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .04em;
+    color: #ccc; text-transform: uppercase; padding-top: 2px;
+  }
+  .mt-esc-bd-row-val { color: #666; line-height: 1.6; }
+
+  /* ─── Action summary box (top of escalated item) ─── */
+  .mt-esc-summary {
+    display: flex; gap: 16px; align-items: stretch;
+    background: #fafaf8; border: 1px solid #eeecea; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 14px;
+  }
+  .mt-esc-summary-stat {
+    display: flex; flex-direction: column; gap: 2px; min-width: 0;
+  }
+  .mt-esc-summary-stat + .mt-esc-summary-stat {
+    padding-left: 16px; border-left: 1px solid #eeecea;
+  }
+  .mt-esc-summary-num {
+    font-size: 20px; font-weight: 700; line-height: 1.1;
+  }
+  .mt-esc-summary-num.done     { color: #2e7d32; }
+  .mt-esc-summary-num.escalated{ color: #bf6000; }
+  .mt-esc-summary-label {
+    font-size: 11px; color: #aaa; line-height: 1.4;
+  }
+  .mt-esc-summary-desc {
+    font-size: 12px; color: #888; line-height: 1.6; align-self: center; flex: 1;
+  }
+
+  /* ─── Action list (per-action level) ─── */
+  .mt-esc-action-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .mt-esc-action-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 0; font-size: 13px; color: #444; border-radius: 6px;
+    transition: background .12s;
+  }
+  .mt-esc-action-exec {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; letter-spacing: .05em;
+    padding: 2px 5px; border-radius: 4px; flex-shrink: 0;
+    transition: background .3s, color .3s;
+  }
+  .mt-esc-action-exec.ai { background: rgba(0,0,0,.07); color: rgba(0,0,0,.45); }
+  .mt-esc-action-exec.hu { background: #e8f4ff; border: 1px solid #b3d9ff; color: #1565c0; }
+  /* running/done states */
+  .mt-esc-action-item.exec-running .mt-esc-action-exec.ai { background: rgba(255,152,0,.15); color: #bf6000; animation: escActionPulse 1s ease-in-out infinite; }
+  .mt-esc-action-item.exec-done    .mt-esc-action-exec.ai { background: rgba(76,175,80,.12); color: #2e7d32; }
+  .mt-esc-action-item.exec-done    .mt-esc-action-exec.hu { background: rgba(76,175,80,.12); color: #2e7d32; border-color: transparent; }
+  @keyframes escActionPulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .mt-esc-action-text { flex: 1; min-width: 0; line-height: 1.5; }
+  /* status badge */
+  .mt-esc-action-status {
+    font-size: 10px; font-weight: 600; letter-spacing: .03em;
+    padding: 2px 7px; border-radius: 10px; flex-shrink: 0; display: none;
+  }
+  .mt-esc-action-status.doing     { display: inline-flex; background: rgba(255,152,0,.12); color: #bf6000; }
+  .mt-esc-action-status.done      { display: inline-flex; background: rgba(76,175,80,.1);  color: #2e7d32; }
+  .mt-esc-action-status.escalated { display: inline-flex; background: rgba(255,152,0,.14); color: #bf6000; }
+  /* pre-done action row — muted, non-interactive */
+  .mt-esc-action-item--predone .mt-esc-action-text  { color: #aaa; }
+  .mt-esc-action-item--predone .mt-esc-action-exec  { opacity: .4; }
+  .mt-esc-action-item--predone .mt-esc-action-btns  { display: none; }
+  /* escalated action row — highlighted, this is the one needing decision */
+  .mt-esc-action-item--needsapproval { background: rgba(255,152,0,.05); border-radius: 6px; padding: 4px 6px; }
+  /* skip badge */
+  .mt-esc-action-skip-badge {
+    display: none; font-size: 9px; font-weight: 700; letter-spacing: .04em;
+    padding: 2px 6px; border-radius: 4px;
+    background: rgba(0,0,0,.06); color: rgba(0,0,0,.38); flex-shrink: 0;
+  }
+  .mt-esc-action-item--skip .mt-esc-action-skip-badge { display: inline-flex; }
+  .mt-esc-action-item--skip .mt-esc-action-text { color: #bbb; }
+  .mt-esc-action-item--skip .mt-esc-action-exec { opacity: .3; }
+  /* per-action skip / re-escalate buttons */
+  .mt-esc-action-btns { display: flex; align-items: center; gap: 3px; flex-shrink: 0; margin-left: auto; }
+  .mt-esc-action-skip-btn, .mt-esc-action-reesc-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 11px; font-weight: 500; padding: 2px 6px; border-radius: 4px;
+    color: rgba(0,0,0,.22); transition: color .12s, background .12s; white-space: nowrap;
+  }
+  .mt-esc-action-skip-btn:hover  { color: rgba(0,0,0,.55); background: rgba(0,0,0,.05); }
+  .mt-esc-action-reesc-btn:hover { color: #bf6000; background: rgba(255,152,0,.1); }
+  .mt-esc-action-item--skip .mt-esc-action-skip-btn  { color: rgba(0,0,0,.4); background: rgba(0,0,0,.05); }
+  /* re-escalated action state */
+  .mt-esc-action-item--reesc { background: rgba(255,152,0,.07); border-radius: 6px; }
+  .mt-esc-action-item--reesc .mt-esc-action-text { color: rgba(0,0,0,.45); }
+  .mt-esc-action-item--reesc .mt-esc-action-reesc-btn { color: #bf6000; background: rgba(255,152,0,.12); }
+  .mt-esc-action-item--reesc .mt-esc-action-btns .mt-esc-action-skip-btn { display: none; }
+  /* re-escalated badge */
+  .mt-esc-action-reesc-badge {
+    display: none; font-size: 9px; font-weight: 700; letter-spacing: .04em;
+    padding: 2px 6px; border-radius: 4px;
+    background: rgba(255,152,0,.18); color: #bf6000; flex-shrink: 0;
+  }
+  .mt-esc-action-item--reesc .mt-esc-action-reesc-badge { display: inline-flex; }
+
+  /* Action buttons */
+  .mt-esc-actions {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 14px; border-top: 1px solid #eeecea; margin-top: 4px;
+  }
+  .mt-esc-btn {
+    padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: background .12s, opacity .15s;
+    display: inline-flex; align-items: center; gap: 4px; border: none;
+  }
+  .mt-esc-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .mt-esc-btn.execute { background: #1a1a1a; color: #fff; }
+  .mt-esc-btn.execute:hover:not(:disabled) { background: #333; }
+  .mt-esc-btn.already-done { background: transparent; color: #888; border: 1px solid #e0ddd8; }
+  .mt-esc-btn.already-done:hover:not(:disabled) { background: #f5f5f2; }
+  .mt-esc-btn.chat { margin-left: auto; background: transparent; color: #555; border: 1px solid #e0ddd8; }
+  .mt-esc-btn.chat:hover:not(:disabled) { background: #f5f5f2; }
+
+  /* ─── Chat History Panel ─── */
+  .chat-history {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(680px, 90vw);
+    max-height: 360px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    z-index: 190;
+  }
+  .chat-history.open { display: flex; flex-direction: column; }
+  .chat-history-hd {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .chat-history-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: .05em; text-transform: uppercase; }
+  .chat-hide-btn {
+    font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+    background: none; border: none; cursor: pointer;
+  }
+  .chat-history-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .chat-msg { display: flex; gap: 8px; }
+  .chat-msg.user { flex-direction: row-reverse; }
+  .chat-msg-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+  .chat-msg.user .chat-msg-avatar { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+  .chat-msg.ai .chat-msg-avatar { background: #131825; color: #fff; }
+  .chat-msg-bubble {
+    max-width: 80%; padding: 8px 12px; border-radius: 12px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .chat-msg.user .chat-msg-bubble { background: #131825; color: #fff; border-radius: 12px 2px 12px 12px; }
+  .chat-msg.ai .chat-msg-bubble { background: #f4f6fb; color: var(--text-primary); border-radius: 2px 12px 12px 12px; }
+
+  /* Draft card */
+  .draft-card {
+    margin: 4px 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .draft-card-hd {
+    padding: 10px 14px;
+    background: #f8f9fc;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .draft-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .draft-count { font-size: 11px; color: var(--text-tertiary); }
+  .draft-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .draft-group { }
+  .draft-group-title {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .draft-checkbox {
+    width: 14px; height: 14px; border-radius: 3px;
+    border: 1.5px solid var(--border); cursor: pointer;
+    accent-color: var(--accent); flex-shrink: 0;
+  }
+  .draft-subtask {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 0 4px 20px;
+    font-size: 12px; color: var(--text-secondary);
+  }
+  .draft-ft {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 8px;
+  }
+  .dispatch-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 8px; padding: 7px 16px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    transition: background .15s;
+  }
+  .dispatch-btn:hover { background: #2d3a55; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+  /* Snackbar */
+  .snackbar {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: #131825; color: #fff; padding: 10px 20px; border-radius: 100px;
+    font-size: 12px; font-weight: 500; opacity: 0;
+    transition: opacity .2s, transform .2s;
+    pointer-events: none; z-index: 500;
+  }
+  .snackbar.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- Role Badge -->
+<div class="role-badge" onclick="showSnack('切换账号')">
+  <div class="avatar">SK</div>
+  <div class="name-row">
+    <span class="uname">金莎拉</span>
+    <span class="urole">运营总监</span>
+  </div>
+</div>
+
+<!-- Main Page -->
+<div class="page">
+
+  <!-- Todo Section -->
+  <div class="todo-section">
+    <div class="todo-header">
+      <span class="todo-label">To Do</span>
+      <span class="todo-count">(9)</span>
+    </div>
+    <div class="todo-cards">
+      <!-- Interview Card -->
+      <div class="todo-card" onclick="openDrawer('interview')">
+        <div class="todo-card-hd">
+          <div class="todo-cat"><span class="cat-dot green"></span>Interview</div>
+          <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('interview')">
+            0
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+        <div class="todo-card-title">高级客服主管 — 终面</div>
+        <div class="todo-card-meta">
+          <span>• 2h</span>
+          <span class="dot-sep">·</span>
+          <span>森健二</span>
+        </div>
+      </div>
+
+      <div class="todo-divider-v"></div>
+
+      <!-- Task Card (渲染由 JS 控制) -->
+      <div class="todo-card" id="taskTodoCard" onclick="openDrawer('task')"></div>
+    </div>
+  </div>
+
+  <!-- Main Card -->
+  <div class="main-card">
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('goal', this)">
+        Goal<span class="tab-count">10</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('dashboard', this)">
+        Dashboard<span class="tab-count">3</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('brain', this)">
+        Brain<span class="tab-count">11</span>
+      </button>
+    </div>
+
+    <!-- Goal Panel -->
+    <div class="tab-panel active goal-panel" id="tab-goal">
+
+      <!-- Goal 1 -->
+      <div class="goal-item">
+        <div class="goal-header-row" onclick="toggleGoal(this)">
+          <div class="goal-header-left">
+            <div class="circ-badge">
+              <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#e9ecf4" stroke-width="3"/>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#131825" stroke-width="3"
+                  stroke-dasharray="113.1" stroke-dashoffset="28.3" stroke-linecap="round"/>
+              </svg>
+              <span class="badge-num">72</span>
+            </div>
+            <div class="goal-info">
+              <div class="goal-title">维持客服质量评分 ≥ 92%</div>
+              <div class="goal-desc">AI 处理常规咨询，人类专注复杂案例和质量保障</div>
+            </div>
+          </div>
+          <div class="goal-header-right">
+            <div class="goal-metrics">
+              <div class="metric-col"><span class="metric-num">11</span><span class="metric-label">AI</span></div>
+              <div class="metric-col"><span class="metric-num">9</span><span class="metric-label">Human</span></div>
+              <div class="metric-col"><span class="metric-num">8</span><span class="metric-label">Done</span></div>
+            </div>
+            <div class="goal-chevron"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+          </div>
+        </div>
+        <div class="subtask-tree" style="display:none">
+          <div class="task-group">
+            <div class="task-group-title">自动回复用户咨询</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell done-title">分诊转交工单队列</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[分诊转交…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">处理 VIP 和复杂案例</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[处理 VIP…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">验证 AI 建议的解决方案</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[验证 AI…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">评估并标注 AI 回复</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">评估并标注 AI 回复</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[评估并标…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">更新 V3.2 产品 QA</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">更新 v3.2 产品 FAQ</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[更新 v3.…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">生成月度意图偏差报告</span>
+                <div class="task-right">
+                  <span class="task-assignee"></span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[生成月度…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal 2 -->
+      <div class="goal-item">
+        <div class="goal-header-row" onclick="toggleGoal(this)">
+          <div class="goal-header-left">
+            <div class="circ-badge">
+              <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#e9ecf4" stroke-width="3"/>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#131825" stroke-width="3"
+                  stroke-dasharray="113.1" stroke-dashoffset="51.5" stroke-linecap="round"/>
+              </svg>
+              <span class="badge-num">48</span>
+            </div>
+            <div class="goal-info">
+              <div class="goal-title">将 PWA 安装率提升至 35%</div>
+              <div class="goal-desc">设计安装引导入口与文案，结合数据监控持续迭代转化漏斗</div>
+            </div>
+          </div>
+          <div class="goal-header-right">
+            <div class="goal-metrics">
+              <div class="metric-col"><span class="metric-num">9</span><span class="metric-label">AI</span></div>
+              <div class="metric-col"><span class="metric-num">7</span><span class="metric-label">Human</span></div>
+              <div class="metric-col"><span class="metric-num">5</span><span class="metric-label">Done</span></div>
+            </div>
+            <div class="goal-chevron"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+          </div>
+        </div>
+        <div class="subtask-tree" style="display:none">
+          <div class="task-group">
+            <div class="task-group-title">监控安装指标和异常告警</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell done-title">监控安装指标和异常告警</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date"></span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[监控安装…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">设计安装提示 UX 方案</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell done-title">设计 Chrome Android 横幅方案</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date"></span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[设计 Chr…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">设计 iOS Safari 自定义弹窗</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date">26/03/22</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[设计 iOS…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">设计场景内提示位置置位</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date">26/03/22</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[设计场景…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">撰写安装利益文案并本地化</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">撰写安装利益文案并本地化</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date">26/03/23</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[撰写安装…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">生成多语言版本文案初稿</span>
+                <div class="task-right">
+                  <span class="task-assignee"></span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[生成多语…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal 3 -->
+      <div class="goal-item">
+        <div class="goal-header-row" onclick="toggleGoal(this)">
+          <div class="goal-header-left">
+            <div class="circ-badge">
+              <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#e9ecf4" stroke-width="3"/>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#131825" stroke-width="3"
+                  stroke-dasharray="113.1" stroke-dashoffset="64.3" stroke-linecap="round"/>
+              </svg>
+              <span class="badge-num">48</span>
+            </div>
+            <div class="goal-info">
+              <div class="goal-title">Q2 CS AI 训练员团队扩容至 8 人</div>
+              <div class="goal-desc">招募并完成 3 名新 AI 训练员的入职培训，建立标准化评估机制</div>
+            </div>
+          </div>
+          <div class="goal-header-right">
+            <div class="goal-metrics">
+              <div class="metric-col"><span class="metric-num">11</span><span class="metric-label">AI</span></div>
+              <div class="metric-col"><span class="metric-num">9</span><span class="metric-label">Human</span></div>
+              <div class="metric-col"><span class="metric-num">8</span><span class="metric-label">Done</span></div>
+            </div>
+            <div class="goal-chevron"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+          </div>
+        </div>
+        <div class="subtask-tree" style="display:none">
+          <div class="task-group">
+            <div class="task-group-title">候选人筛选与面试</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell done-title">发布 AI 训练员 JD 至各渠道</span>
+                <div class="task-right">
+                  <span class="task-assignee">森健二</span>
+                  <span class="task-date"></span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[发布 AI…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">完成高级客服主管终面</span>
+                <div class="task-right">
+                  <span class="task-assignee">金莎拉</span>
+                  <span class="task-date">26/05/19</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[完成高级…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">入职培训体系搭建</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">生成 AI 训练员培训大纲初稿</span>
+                <div class="task-right">
+                  <span class="task-assignee"></span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[生成培训…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">设计新人评估测试题库</span>
+                <div class="task-right">
+                  <span class="task-assignee">森健二</span>
+                  <span class="task-date">26/05/30</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[设计评估…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Padding for chat bar -->
+      <div style="height: 80px;"></div>
+    </div>
+
+    <!-- Dashboard Panel -->
+    <div class="tab-panel" id="tab-dashboard">
+      <div class="dash-list">
+        <div class="dash-row" onclick="showSnack('跳转 Creative Dashboard')">
+          <span class="dash-row-name">Creative</span>
+          <span class="dash-row-action">Open <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+        </div>
+        <div class="dash-row" onclick="showSnack('跳转 Marketing Dashboard')">
+          <span class="dash-row-name">Marketing</span>
+          <span class="dash-row-action">Open <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+        </div>
+        <div class="dash-row" onclick="showSnack('跳转 CS Dashboard')">
+          <span class="dash-row-name">CS</span>
+          <span class="dash-row-action">Open <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+        </div>
+      </div>
+      <div style="height: 80px;"></div>
+    </div>
+
+    <!-- Brain Panel -->
+    <div class="tab-panel" id="tab-brain">
+      <div class="brain-list">
+
+        <div class="brain-item" onclick="showSnack('打开 AI客服质量决策模型')">
+          <div class="brain-item-left">
+            <div class="brain-item-title">AI客服质量决策模型</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">叶</div>
+                  <span class="brain-chip-name">叶亚</span>
+                  <span class="brain-chip-role">CTO</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#f472b6,#db2777)">黑</div>
+                  <span class="brain-chip-name">黑春文</span>
+                  <span class="brain-chip-role">RE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('AI客服质量决策模型')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>15</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="showSnack('打开 PAP数据检索与字段解析规则')">
+          <div class="brain-item-left">
+            <div class="brain-item-title">PAP 数据检索与字段解析规则</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#60a5fa,#2563eb)">李</div>
+                  <span class="brain-chip-name">李淳磊</span>
+                  <span class="brain-chip-role">DlOPS</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#34d399,#059669)">卢</div>
+                  <span class="brain-chip-name">卢劲源</span>
+                  <span class="brain-chip-role">FIN</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">叶</div>
+                  <span class="brain-chip-name">叶亚</span>
+                  <span class="brain-chip-role">CTO</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('PAP 数据检索与字段解析规则')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>12</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="showSnack('打开 AI附件预览与下载权限规则')">
+          <div class="brain-item-left">
+            <div class="brain-item-title">AI 附件预览与下载权限规则</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#fb923c,#ea580c)">顾</div>
+                  <span class="brain-chip-name">顾春文</span>
+                  <span class="brain-chip-role"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('AI 附件预览与下载权限规则')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>10</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="showSnack('打开 线上事故应急响应与玩家安抚规则')">
+          <div class="brain-item-left">
+            <div class="brain-item-title">线上事故应急响应与玩家安抚规则</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#e879f9,#a21caf)">李</div>
+                  <span class="brain-chip-name">李怡菲</span>
+                  <span class="brain-chip-role"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('线上事故应急响应与玩家安抚规则')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>10</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="showSnack('打开 运营公告与代金券分发操作规范')">
+          <div class="brain-item-left">
+            <div class="brain-item-title">运营公告与代金券分发操作规范</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#e879f9,#a21caf)">李</div>
+                  <span class="brain-chip-name">李怡菲</span>
+                  <span class="brain-chip-role"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('运营公告与代金券分发操作规范')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>10</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="showSnack('打开 CS服务质量决策模型')">
+          <div class="brain-item-left">
+            <div class="brain-item-title">CS 服务质量决策模型</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#fbbf24,#d97706)">金</div>
+                  <span class="brain-chip-name">金莎拉</span>
+                  <span class="brain-chip-role">CS</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#94a3b8,#475569)">佐</div>
+                  <span class="brain-chip-name">佐佐木</span>
+                  <span class="brain-chip-role">OPS</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('CS 服务质量决策模型')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>8</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="showSnack('打开 数据驱动决策框架')">
+          <div class="brain-item-left">
+            <div class="brain-item-title">数据驱动决策框架</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#fbbf24,#d97706)">金</div>
+                  <span class="brain-chip-name">金莎拉</span>
+                  <span class="brain-chip-role">CS</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#60a5fa,#2563eb)">王</div>
+                  <span class="brain-chip-name">王晓芳</span>
+                  <span class="brain-chip-role">MKT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('数据驱动决策框架')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>7</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+      </div>
+      <div style="height: 80px;"></div>
+    </div>
+
+  </div><!-- /main-card -->
+</div><!-- /page -->
+
+<!-- Chat History Panel -->
+<div class="chat-history" id="chatHistory">
+  <div class="chat-history-hd">
+    <span class="chat-history-title">Chat · 对话历史</span>
+    <button class="chat-hide-btn" onclick="toggleChatHistory()">Hide</button>
+  </div>
+  <div class="chat-history-body" id="chatHistoryBody">
+  </div>
+</div>
+
+<!-- Chat Bar -->
+<div class="chat-bar">
+  <div class="chat-input-wrap">
+    <div class="chat-input-inner">
+      <span class="chat-prefix">Ask</span>
+      <div class="chat-divider"></div>
+      <input type="text" class="chat-input" id="chatInput"
+        placeholder="Type your message..."
+        onkeydown="handleChatKey(event)">
+    </div>
+    <button class="chat-send-btn" onclick="sendChat()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Side Action Buttons -->
+<div class="side-actions">
+  <button class="side-btn cs" onclick="showSnack('跳转 CS Dashboard')">CS</button>
+  <button class="side-btn mk" onclick="showSnack('跳转 Marketing')">MK</button>
+</div>
+
+<!-- Task Drawer -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal" onclick="event.stopPropagation()">
+    <div class="modal-hd">
+      <span class="modal-title" id="modalTitle">
+        Task <span class="modal-count" id="modalCount"></span>
+      </span>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Snackbar -->
+<div class="snackbar" id="snackbar"></div>
+
+<script>
+// ── Task Todo Card ──
+function renderTaskTodoCard() {
+  const card = document.getElementById('taskTodoCard');
+  if (!card) return;
+  const total = escalateData.length + taskData.length;
+  const hasEsc = escalateData.length > 0;
+  const esc = escalateData[0];
+
+  if (hasEsc) {
+    card.innerHTML = `
+      <div class="todo-card-hd">
+        <div class="todo-cat">
+          <span class="cat-dot orange"></span>Task
+        </div>
+        <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('task')">
+          ${total}
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow:hidden">
+        <span class="todo-card-title" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc.title}</span>
+        <span style="flex-shrink:0;font-size:9px;font-weight:700;letter-spacing:.05em;color:#aaa;border:1px solid #ddd;border-radius:10px;padding:2px 7px;white-space:nowrap">↑ ESC</span>
+      </div>
+      <div class="todo-card-meta">来自 ${esc.escalatorName} · ${esc.time}</div>
+    `;
+  } else {
+    const first = taskData[0];
+    card.innerHTML = `
+      <div class="todo-card-hd">
+        <div class="todo-cat">
+          <span class="cat-dot orange"></span>Task
+        </div>
+        <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('task')">
+          ${total}
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+      <div class="todo-card-title">${first ? first.title : ''}</div>
+      <div class="todo-card-meta">${first ? first.meta : ''}</div>
+    `;
+  }
+}
+
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ── Goal expand/collapse (subtask tree) ──
+function toggleGoal(headerRow) {
+  const item = headerRow.closest('.goal-item');
+  const tree = item.querySelector('.subtask-tree');
+  if (!tree) return;
+  const isOpen = tree.style.display !== 'none';
+  tree.style.display = isOpen ? 'none' : 'block';
+  item.classList.toggle('expanded', !isOpen);
+}
+
+// ── AI Task Run ──
+function runAiTask(btn) {
+  const row = btn.closest('.task-row');
+  const taskTitle = row.querySelector('.task-title-cell').textContent.trim();
+  const taskRight = row.querySelector('.task-right');
+  btn.disabled = true;
+  btn.textContent = '⟳ Running...';
+  btn.style.opacity = '.5';
+  setTimeout(() => {
+    btn.remove();
+    const reviewTag = document.createElement('span');
+    reviewTag.className = 'stag review';
+    reviewTag.style.cursor = 'pointer';
+    reviewTag.textContent = 'Review';
+    reviewTag.title = '点击查看 AI 执行结果';
+    reviewTag.onclick = (e) => { e.stopPropagation(); openReviewModal(taskTitle, reviewTag, row, taskRight); };
+    taskRight.insertBefore(reviewTag, taskRight.querySelector('.task-chat-btn'));
+    showSnack('AI 已完成，请 Review 结果');
+  }, 2000);
+}
+
+function openReviewModal(taskTitle, reviewTag, row, taskRight) {
+  const overlay = document.getElementById('modalOverlay');
+  const titleEl = document.getElementById('modalTitle');
+  const countEl = document.getElementById('modalCount');
+  const body = document.getElementById('modalBody');
+
+  titleEl.childNodes[0].textContent = 'Review  ';
+  countEl.textContent = '';
+  body.innerHTML = `
+    <div class="mt-item" style="cursor:default">
+      <div style="font-size:13px;color:#b0b0a8;margin-bottom:10px;font-weight:500;letter-spacing:.02em">AI 执行结果</div>
+      <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:8px">${taskTitle}</div>
+      <div style="font-size:13px;color:#555;line-height:1.7;background:#f3f3f0;border-radius:8px;padding:12px 14px;margin-bottom:16px">
+        AI 已按照策略完成本次任务，处理了 12 条客服工单，平均响应时间从 4.2 分钟降至 1.8 分钟。<br>
+        质量检测通过率 97.3%，无人工干预记录。
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="rejectReview('${taskTitle}')"
+          style="padding:8px 18px;border-radius:8px;border:1px solid #e8e8e3;background:#fff;font-size:13px;font-weight:600;color:#888;cursor:pointer;font-family:inherit">
+          拒绝
+        </button>
+        <button onclick="acceptReview()"
+          style="padding:8px 18px;border-radius:8px;border:none;background:#1a1a1a;font-size:13px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit">
+          ✓ Accept
+        </button>
+      </div>
+    </div>
+  `;
+
+  // store refs for accept/reject
+  overlay._reviewRef = { reviewTag, row, taskRight };
+  overlay.classList.add('open');
+}
+
+function acceptReview() {
+  const overlay = document.getElementById('modalOverlay');
+  const { reviewTag, row, taskRight } = overlay._reviewRef || {};
+  if (reviewTag) {
+    reviewTag.remove();
+    row.querySelector('.task-title-cell').classList.add('done-title');
+    const doneTag = document.createElement('span');
+    doneTag.className = 'stag done';
+    doneTag.textContent = 'Done';
+    taskRight.insertBefore(doneTag, taskRight.querySelector('.task-chat-btn'));
+  }
+  closeModal();
+  showSnack('任务已标记完成');
+}
+
+function rejectReview(title) {
+  const overlay = document.getElementById('modalOverlay');
+  const { reviewTag } = overlay._reviewRef || {};
+  if (reviewTag) reviewTag.remove();
+  closeModal();
+  showSnack(`已退回：${title}`);
+}
+
+// ── Drawer ──
+const interviewData = [
+  { title: '高级客服主管 — 终面', meta: '森健二 · 今天 16:00', desc: '候选人具备 5 年客服管理经验，熟悉 AI 辅助客服工具，待最终确认。', status: 'doing' }
+];
+const escalateData = [
+  {
+    id: 'esc0',
+    typeIcon: '🎮',
+    title: 'CP「逃离校园」紧急道具补偿',
+    escalatorInitial: 'L',
+    escalatorName: '卢劲源',
+    escalatorColor: '#6c5ce7',
+    time: '11:28',
+    escalateReason: '超出当前 brain-doc 覆盖范围',
+    note: '70 张合成卡数量超过我的授权额度（> 50 张），需要 manager 批准。',
+    cpItems: [
+      '「校园合成」Lv.7 / Lv.11 成就 bug，153 名玩家待补 70 张「合成卡」',
+      '活动今日 23:59 结束',
+    ],
+    actions: [
+      { type: 'ai', text: '批准 CS 工具向 153 名玩家批量发放 70 张「合成卡」', status: 'escalated' },
+      { type: 'hu', text: '同步技术组排查成就触发逻辑（需技术组负责人确认）',   status: 'done' },
+      { type: 'ai', text: '官方渠道发布补偿公告，附预计修复时间',               status: 'done' },
+    ],
+    memory: [
+      { date: '5/12', text: '同 CP 类似成就 bug（×2 人报告）', tag: 'memory · DingTalk' },
+      { date: '4/28', text: 'CS 处理过同游戏成就补偿', tag: 'memory · CS-Agent' },
+    ],
+    braindoc: {
+      ref: 'CS-PB-014',
+      preview: 'CP 反映游戏内成就或道具类 bug，影响活动正常进程，需在活动截止前完成批量补偿时',
+      rows: [
+        { label: 'When to apply', val: 'CP 反映游戏内成就或道具类 bug，影响活动正常进程，需在活动截止前完成批量补偿时' },
+        { label: 'Scope', val: 'CS 运营类问题；批量用户道具补偿；成就修复补发；受影响人数 ≥ 10' },
+        { label: 'KPI', val: '补偿完成率 ≥ 95% · 响应时效 ≤ 2h · 用户满意度 ≥ 4.2 / 5' },
+        { label: 'Actions', val: 'CS 工具批量发放道具，优先级 P0；同步技术组排查根本原因；官方渠道发布补偿公告，附预计修复时间' },
+      ],
+    },
+    ref: 'CP 逃离校园…',
+  }
+];
+const taskData = [
+  { title: 'Q2 客服 AI 上线评审', meta: 'DDL · 2026-05-08', status: 'doing', ref: 'Q2 客服 AI 上…' },
+  { title: '客服团队 Q2 OKR 草拟', meta: 'DDL · 2026-03-21', status: 'doing', ref: '客服团队 Q2 OKR…' },
+  { title: 'Q2 客服 AI 上线评审', meta: 'DDL · 2026-03-20', status: 'todo', ref: 'Q2 客服 AI…' },
+  { title: 'PWA 安装活动复盘', meta: 'DDL · 2026-03-21', status: 'todo', ref: 'PWA 安装活动…' },
+  { title: '运营月报 — 2026 / 03', meta: 'DDL · 2026-03-23', status: 'todo', ref: '运营月报…' },
+  { title: '本地化供应商续约对齐', meta: 'DDL · 2026-03-24', status: 'todo', ref: '本地化供应商…' },
+  { title: '客服知识库季度审计', meta: 'DDL · 2026-03-26', status: 'todo', ref: '客服知识库…' },
+];
+
+function openDrawer(type) {
+  const overlay = document.getElementById('modalOverlay');
+  const titleEl = document.getElementById('modalTitle');
+  const countEl = document.getElementById('modalCount');
+  const body = document.getElementById('modalBody');
+  overlay.classList.add('open');
+
+  if (type === 'interview') {
+    titleEl.childNodes[0].textContent = 'Interview  ';
+    countEl.textContent = interviewData.length;
+    body.innerHTML = interviewData.map(d => `
+      <div class="mt-item">
+        <div class="mt-row">
+          <span class="mt-dot doing"></span>
+          <span class="mt-title">${d.title}</span>
+          <span class="mt-status doing">doing</span>
+          <button class="mt-chat-btn" onclick="injectChatRef('@[${d.title}] ')">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </button>
+        </div>
+        <div class="mt-meta">${d.meta}</div>
+      </div>
+    `).join('');
+  } else {
+    const total = escalateData.length + taskData.length;
+    titleEl.childNodes[0].textContent = 'Task  ';
+    countEl.textContent = total;
+
+    const escalateHTML = escalateData.length ? `
+      <div class="mt-escalate-section">
+        <div class="mt-section-label" style="border-top:none">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="#fa8c16"><path d="M12 2l9 20H3L12 2z"/></svg>
+          AI Task · ${escalateData.length}
+        </div>
+        ${escalateData.map((d, i) => `
+          <div class="mt-escalate-item" id="mtEsc${i}">
+
+            <!-- Collapsed header: always visible -->
+            <div class="mt-esc-hd" onclick="toggleEscDetail(this)">
+              <div class="mt-esc-hd-left">
+                <div class="mt-esc-title">
+                  <span class="mt-esc-type-icon">${d.typeIcon}</span>
+                  ${d.title}
+                </div>
+                <div class="mt-esc-hd-source">
+                  来自
+                  <span class="mt-esc-avatar" style="background:${d.escalatorColor}">${d.escalatorInitial}</span>
+                  <span class="mt-esc-source-name">${d.escalatorName}</span>
+                  · ${d.time}
+                </div>
+              </div>
+              <span class="mt-esc-hd-chev">▾</span>
+            </div>
+
+            <!-- Expandable detail -->
+            <div class="mt-esc-detail" id="mtEscDetail${i}">
+
+            ${(() => {
+              const doneCount      = d.actions.filter(a => a.status === 'done').length;
+              const escalatedCount = d.actions.filter(a => a.status === 'escalated').length;
+              return `
+              <div class="mt-esc-summary">
+                <div class="mt-esc-summary-stat">
+                  <span class="mt-esc-summary-num done">${doneCount}</span>
+                  <span class="mt-esc-summary-label">已由员工执行</span>
+                </div>
+                <div class="mt-esc-summary-stat">
+                  <span class="mt-esc-summary-num escalated">${escalatedCount}</span>
+                  <span class="mt-esc-summary-label">需你处理</span>
+                </div>
+                <span class="mt-esc-summary-desc">Agent 共建议 ${d.actions.length} 条 Action，员工已处理其中 ${doneCount} 条，${escalatedCount} 条因权限不足需要你处理。</span>
+              </div>`;
+            })()}
+
+            <div class="mt-esc-block">
+              <div class="mt-esc-block-label">员工备注</div>
+              <div class="mt-esc-block-text">${d.note}</div>
+            </div>
+
+            <div class="mt-esc-block">
+              <div class="mt-esc-block-label">CP 诉求</div>
+              ${d.cpItems.map(item => `<div class="mt-esc-block-item">${item}</div>`).join('')}
+            </div>
+
+            <div class="mt-esc-block">
+              <div class="mt-esc-block-label">Agent 建议 Actions</div>
+              <ul class="mt-esc-action-list" id="mtEscActions${i}">
+                ${d.actions.map((a, ai) => {
+                  const isDone      = a.status === 'done';
+                  const isEscalated = a.status === 'escalated';
+                  const extraClass  = isDone ? 'mt-esc-action-item--predone' : '';
+                  const statusBadge = isDone
+                    ? '<span class="mt-esc-action-status done">Done</span>'
+                    : `<span class="mt-esc-action-status" id="mtEscStatus${i}_${ai}"></span>`;
+                  const actionBtns  = isDone ? '' : `
+                    <span class="mt-esc-action-skip-badge">Skipped</span>
+                    <span class="mt-esc-action-btns">
+                      <button class="mt-esc-action-skip-btn" id="mtEscSkipBtn${i}_${ai}" onclick="toggleEscActionSkip(${i},${ai})">Skip</button>
+                    </span>`;
+                  return `
+                  <li class="mt-esc-action-item ${extraClass}" id="mtEscAction${i}_${ai}">
+                    <span class="mt-esc-action-exec ${a.type}" id="mtEscExec${i}_${ai}">${a.type.toUpperCase()}</span>
+                    <span class="mt-esc-action-text">${a.text}</span>
+                    ${statusBadge}
+                    ${actionBtns}
+                  </li>`;
+                }).join('')}
+              </ul>
+            </div>
+
+            <div class="mt-esc-block">
+              <div class="mt-esc-block-label">Related Memory</div>
+              <ul class="mt-esc-mem-list">
+                ${d.memory.map(m => `
+                  <li class="mt-esc-mem-row">
+                    <span><strong>${m.date}</strong> ${m.text}</span>
+                    <span class="mt-esc-mem-tag">${m.tag}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            <div class="mt-esc-bd">
+              <div class="mt-esc-bd-hd" onclick="toggleEscBrainDoc(this)">
+                <span class="mt-esc-bd-title">Brain-doc</span>
+                <span class="mt-esc-bd-ref">${d.braindoc.ref}</span>
+                <span class="mt-esc-bd-preview">${d.braindoc.preview}</span>
+                <span class="mt-esc-bd-chev">▾</span>
+              </div>
+              <div class="mt-esc-bd-body">
+                ${d.braindoc.rows.map(r => `
+                  <div class="mt-esc-bd-row">
+                    <span class="mt-esc-bd-row-label">${r.label}</span>
+                    <span class="mt-esc-bd-row-val">${r.val}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="mt-esc-actions" id="mtEscActionBar${i}">
+              <button class="mt-esc-btn execute" id="mtEscApproveBtn${i}" onclick="handleEscApprove(${i})">Execute</button>
+              <button class="mt-esc-btn already-done" onclick="handleEscAlreadyDone(${i})">Already Done</button>
+              <button class="mt-esc-btn chat" onclick="startEscChatMock('@[${d.ref}] ')">Chat to Adjust</button>
+            </div>
+
+            </div><!-- /mt-esc-detail -->
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
+    const normalLabel = `
+      <div class="mt-section-label">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="#b0b0a8"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+        NORMAL · ${taskData.length}
+      </div>
+    `;
+
+    const tasksHTML = normalLabel + taskData.map((d) => {
+      const isDoing = d.status === 'doing';
+      return `
+        <div class="mt-item">
+          <div class="mt-row">
+            <span class="mt-dot ${isDoing ? 'doing' : ''}"></span>
+            <span class="mt-title">${d.title}</span>
+            <span class="mt-status ${isDoing ? 'doing' : ''}">${isDoing ? 'doing' : 'todo'}</span>
+            ${!isDoing ? `<button class="mt-run-btn" title="开始执行" onclick="event.stopPropagation();showSnack('开始执行: ${d.title}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+            </button>` : ''}
+            <button class="mt-chat-btn" onclick="injectChatRef('@[${d.ref}] ')">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </button>
+          </div>
+          <div class="mt-meta">${d.meta}</div>
+        </div>
+      `;
+    }).join('');
+
+    body.innerHTML = escalateHTML + tasksHTML;
+  }
+}
+
+function toggleEscDetail(hdEl) {
+  const item   = hdEl.closest('.mt-escalate-item');
+  const detail = item.querySelector('.mt-esc-detail');
+  const chev   = hdEl.querySelector('.mt-esc-hd-chev');
+  const isOpen = detail.classList.toggle('open');
+  chev.classList.toggle('open', isOpen);
+}
+
+function toggleEscBrainDoc(hdEl) {
+  const parent = hdEl.closest('.mt-esc-bd');
+  const body = parent.querySelector('.mt-esc-bd-body');
+  const preview = parent.querySelector('.mt-esc-bd-preview');
+  const chev = hdEl.querySelector('.mt-esc-bd-chev');
+  const isOpen = body.style.display === 'block';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (preview) preview.style.display = isOpen ? 'block' : 'none';
+  chev.classList.toggle('open', !isOpen);
+}
+
+function _dismissEscItem(idx) {
+  const el = document.getElementById('mtEsc' + idx);
+  if (el) {
+    el.style.transition = 'opacity .2s, max-height .3s, padding .3s';
+    el.style.overflow = 'hidden';
+    el.style.maxHeight = el.offsetHeight + 'px';
+    requestAnimationFrame(() => {
+      el.style.opacity = '0';
+      setTimeout(() => { el.style.maxHeight = '0'; el.style.padding = '0'; }, 50);
+      setTimeout(() => { el.remove(); escalateData.splice(idx, 1);
+        const countEl = document.getElementById('modalCount');
+        if (countEl) countEl.textContent = escalateData.length + taskData.length;
+        renderTaskTodoCard();
+      }, 320);
+    });
+  }
+}
+
+// Compute Execute button enabled state
+function _updateEscExecuteBtn(escIdx) {
+  const d = escalateData[escIdx];
+  if (!d) return;
+  const anyActive = d.actions.some((a, ai) => {
+    if (a.status === 'done') return false;
+    const r = document.getElementById(`mtEscAction${escIdx}_${ai}`);
+    return r && !r.classList.contains('mt-esc-action-item--skip');
+  });
+  const execBtn = document.getElementById(`mtEscApproveBtn${escIdx}`);
+  if (execBtn) execBtn.disabled = !anyActive;
+}
+
+// Toggle skip state for a single action
+function toggleEscActionSkip(escIdx, actionIdx) {
+  const row = document.getElementById(`mtEscAction${escIdx}_${actionIdx}`);
+  const btn = document.getElementById(`mtEscSkipBtn${escIdx}_${actionIdx}`);
+  if (!row || row.classList.contains('mt-esc-action-item--predone')) return;
+  const isSkip = row.classList.toggle('mt-esc-action-item--skip');
+  if (btn) btn.textContent = isSkip ? 'Undo' : 'Skip';
+  _updateEscExecuteBtn(escIdx);
+}
+
+// Execute: animate non-skipped/non-re-escalated actions then dismiss
+function handleEscApprove(escIdx) {
+  const d = escalateData[escIdx];
+  if (!d) return;
+
+  const execBtn = document.getElementById(`mtEscApproveBtn${escIdx}`);
+  if (execBtn) execBtn.disabled = true;
+
+  // disable all skip buttons
+  d.actions.forEach((_, ai) => {
+    const btn = document.getElementById(`mtEscSkipBtn${escIdx}_${ai}`);
+    if (btn) btn.disabled = true;
+  });
+
+  // actions to execute: not pre-done, not skipped
+  const activeActions = d.actions.map((a, ai) => {
+    const row = document.getElementById(`mtEscAction${escIdx}_${ai}`);
+    const isSkipped = row && row.classList.contains('mt-esc-action-item--skip');
+    return { ...a, ai, skip: isSkipped };
+  }).filter(a => a.status !== 'done' && !a.skip);
+
+  // animate active actions
+  activeActions.forEach(a => {
+    const statusEl = document.getElementById(`mtEscStatus${escIdx}_${a.ai}`);
+    const execEl   = document.getElementById(`mtEscExec${escIdx}_${a.ai}`);
+    const row      = document.getElementById(`mtEscAction${escIdx}_${a.ai}`);
+    if (a.type === 'hu') {
+      if (row)      row.classList.add('exec-done');
+      if (execEl)   execEl.textContent = '✓ HU';
+      if (statusEl) { statusEl.className = 'mt-esc-action-status done'; statusEl.textContent = 'Done'; }
+    } else {
+      if (row)      row.classList.add('exec-running');
+      if (execEl)   execEl.textContent = '⟳ AI';
+      if (statusEl) { statusEl.className = 'mt-esc-action-status doing'; statusEl.textContent = 'Doing'; }
+      setTimeout(() => {
+        if (row)      { row.classList.remove('exec-running'); row.classList.add('exec-done'); }
+        if (execEl)   execEl.textContent = '✓ AI';
+        if (statusEl) { statusEl.className = 'mt-esc-action-status done'; statusEl.textContent = 'Done'; }
+      }, 1500);
+    }
+  });
+
+  const hasPendingAI = activeActions.some(a => a.type === 'ai');
+  const delay = hasPendingAI ? 2400 : 900;
+  setTimeout(() => {
+    const skipped = d.actions.filter(a => a.status !== 'done').length - activeActions.length;
+    const msg = skipped > 0
+      ? `已执行 ${activeActions.length} 条 Action（${skipped} 条已跳过），结果将同步给员工`
+      : '已执行，结果将同步给员工';
+    _dismissEscItem(escIdx);
+    closeModal();
+    showSnack(msg);
+  }, delay);
+}
+
+function handleEscAlreadyDone(idx) {
+  _dismissEscItem(idx);
+  closeModal();
+  showSnack('已标记完成 · 结果将同步至 Memory');
+}
+
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+// legacy alias
+function closeDrawer(e) { closeModal(e); }
+
+function openCandidatePage() {
+  showSnack('跳转候选人页（模拟）');
+}
+
+// Esc to close modal / chat
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.getElementById('chatHistory').classList.remove('open');
+  }
+});
+
+// ── Chat ──
+const chatMessages = [];
+let chatContext = null; // tracks multi-turn mock state
+
+function toggleChatHistory() {
+  document.getElementById('chatHistory').classList.toggle('open');
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+function injectChatRef(ref, autoFocus = true) {
+  const input = document.getElementById('chatInput');
+  input.value += ref;
+  closeModal();
+  document.getElementById('chatHistory').classList.add('open');
+  if (autoFocus) {
+    setTimeout(() => {
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }, 150);
+  }
+}
+
+function mentionBrainDoc(docName) {
+  injectChatRef(`@[${docName}] `);
+  showSnack(`已引用 @[${docName}]`);
+}
+
+// Auto-type text into chat input character by character, then send
+function _typeAndSend(text, onAiDone) {
+  const input = document.getElementById('chatInput');
+  input.value = '';
+  input.disabled = true;
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < text.length) {
+      input.value += text[i++];
+    } else {
+      clearInterval(interval);
+      setTimeout(() => {
+        input.disabled = false;
+        // Trigger send manually (bypass normal sendChat flow to keep context)
+        sendChat();
+        // Wait for AI response to appear before proceeding
+        const aiDelay = text.length > 30 ? 1200 : 900;
+        setTimeout(() => { if (onAiDone) onAiDone(); }, aiDelay + 600);
+      }, 500);
+    }
+  }, 18);
+}
+
+// Full mock conversation for "Chat to Adjust" on escalated task
+function startEscChatMock(ref) {
+  closeModal();
+  document.getElementById('chatHistory').classList.add('open');
+
+  const steps = [
+    ref + '修改action，直接批量发放140张合成卡',
+    '执行',
+    '更新策略，下次这种小于200的执行层可以直接执行，不需要再升级审批',
+  ];
+
+  let idx = 0;
+  function runNext() {
+    if (idx >= steps.length) return;
+    _typeAndSend(steps[idx++], () => setTimeout(runNext, 800));
+  }
+  setTimeout(runNext, 500);
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  // Open history panel
+  document.getElementById('chatHistory').classList.add('open');
+
+  // Add user message
+  appendChatMsg('user', text);
+
+  // Simulate AI response
+  const delay = text.length > 30 ? 1200 : 900;
+  setTimeout(() => {
+    const lower = text;
+    let reply = '';
+
+    // ── Multi-turn mock: CP逃离校园 修改 action ──────────────────────────────
+    if ((lower.includes('修改') || lower.includes('修改action')) && lower.includes('140')) {
+      chatContext = 'cp_action_updated';
+      reply = `好的，action 已更新。更新后：<br><br>
+        <div style="background:#f5f5f2;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#555">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#aaa;margin-bottom:6px">ACTION 已更新</div>
+          <div style="display:flex;align-items:flex-start;gap:6px;">
+            <span style="display:inline-flex;align-items:center;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.07);color:rgba(0,0,0,.45);flex-shrink:0;margin-top:2px">AI</span>
+            <span>批准 CS 工具向 153 名玩家批量发放 140 张「合成卡」</span>
+          </div>
+        </div>`;
+
+    } else if (lower.trim() === '执行' && chatContext === 'cp_action_updated') {
+      chatContext = 'cp_executed';
+      reply = `执行成功。<br><br>
+        <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#389e0d">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#52c41a;margin-bottom:4px">✓ 执行完成</div>
+          已向 153 名玩家批量发放 140 张「合成卡」。
+        </div>`;
+
+    } else if ((lower.includes('更新策略') || lower.includes('下次') || lower.includes('不需要再升级')) && lower.includes('200')) {
+      chatContext = null;
+      reply = `好的，Brain-doc（CS-PB-014）已更新。<br><br>
+        <div style="background:#f5f5f2;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#555">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#aaa;margin-bottom:6px">BRAIN-DOC 已更新 · CS-PB-014</div>
+          <div><span style="color:#aaa;font-size:10px">新增规则</span><br>影响范围大且补偿金额 &lt; 200 元的经济补偿任务，执行层直接有权发放补偿礼包，无需上级审批。</div>
+        </div>`;
+
+    // ── Existing rules ────────────────────────────────────────────────────────
+    } else if ((lower.includes('优先处理') || lower.includes('不需要') || lower.includes('直接有权') || lower.includes('无需审批')) &&
+        (lower.includes('补偿') || lower.includes('礼包'))) {
+      reply = `好的，已更新到对应 Brain-doc。<br><br>
+        <div style="background:#f5f5f2;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#555">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#aaa;margin-bottom:6px">BRAIN-DOC 已更新 · CS-PB-014</div>
+          <div><span style="color:#aaa;font-size:10px">新增规则</span><br>影响范围 ≥ 10 人且补偿金额 &lt; 200 元的经济补偿任务，执行层直接有权发放补偿礼包，无需上级审批。</div>
+        </div>`;
+    } else if (lower.includes('目标') || lower.includes('goal') || lower.includes('提升') || lower.includes('达成')) {
+      reply = '好的，让我先确认几点：<br>1. 目标基线是多少？（当前数值）<br>2. 期望在什么时间窗口内完成？<br>3. 是否已有主要执行路径或切入点？';
+    } else if (lower.includes('brain') || lower.includes('文档') || lower.includes('模型')) {
+      reply = '我来帮你管理 Brain 决策文档。你是想新建文档、修改适用条件，还是删除某个文档？';
+    } else if (lower.includes('任务') || lower.includes('task') || lower.includes('改')) {
+      reply = '好的，请告诉我要修改哪个任务——负责人、DDL，还是要转交人工？我会帮你确认是否存在 DDL 冲突。';
+    } else {
+      reply = '已收到。根据当前目标和团队状态，我建议优先推进客服 AI 准确率提升模块。需要我生成任务草案吗？';
+    }
+
+    appendChatMsg('ai', reply);
+
+    // Scroll to bottom
+    const body = document.getElementById('chatHistoryBody');
+    body.scrollTop = body.scrollHeight;
+  }, delay);
+}
+
+function appendChatMsg(role, text) {
+  const body = document.getElementById('chatHistoryBody');
+  const el = document.createElement('div');
+  el.className = `chat-msg ${role}`;
+  const initial = role === 'user' ? 'SK' : 'D';
+  el.innerHTML = `
+    <div class="chat-msg-avatar">${initial}</div>
+    <div class="chat-msg-bubble">${text}</div>
+  `;
+  body.appendChild(el);
+  body.scrollTop = body.scrollHeight;
+}
+
+// ── Snackbar ──
+let snackTimer;
+function showSnack(msg) {
+  const s = document.getElementById('snackbar');
+  s.textContent = msg;
+  s.classList.add('show');
+  clearTimeout(snackTimer);
+  snackTimer = setTimeout(() => s.classList.remove('show'), 2200);
+}
+
+// ── Init ──
+renderTaskTodoCard();
+</script>
+</body>
+</html>
