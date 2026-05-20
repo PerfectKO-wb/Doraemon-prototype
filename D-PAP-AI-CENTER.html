@@ -971,16 +971,16 @@ html,body{width:100%;height:100%;overflow:hidden;}
 /* per-action right-side buttons */
 .pdm-rec-actions{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0;}
 .pdm-rec-esc-btn,.pdm-rec-skip-btn{
-  background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;
-  font-size:11px;font-weight:500;line-height:1.4;white-space:nowrap;
-  transition:color .12s,background .12s;
+  background:none;border:1px solid transparent;cursor:pointer;padding:2px 8px;border-radius:5px;
+  font-size:11px;font-weight:600;line-height:1.5;white-space:nowrap;
+  transition:color .12s,background .12s,border-color .12s;
 }
-.pdm-rec-esc-btn{color:rgba(0,0,0,.22);}
-.pdm-rec-esc-btn:hover{color:#bf6000;background:rgba(255,152,0,.1);}
-.pdm-rec-item--esc .pdm-rec-esc-btn{color:#bf6000;background:rgba(255,152,0,.12);}
-.pdm-rec-skip-btn{color:rgba(0,0,0,.22);}
-.pdm-rec-skip-btn:hover{color:rgba(0,0,0,.55);background:rgba(0,0,0,.05);}
-.pdm-rec-item--skip .pdm-rec-skip-btn{color:rgba(0,0,0,.4);background:rgba(0,0,0,.06);}
+.pdm-rec-esc-btn{color:rgba(0,0,0,.3);border-color:transparent;}
+.pdm-rec-esc-btn:hover{color:#bf6000;background:rgba(255,152,0,.1);border-color:rgba(255,152,0,.35);}
+.pdm-rec-item--esc .pdm-rec-esc-btn{color:#bf6000;background:rgba(255,152,0,.12);border-color:rgba(255,152,0,.4);}
+.pdm-rec-skip-btn{color:rgba(0,0,0,.3);border-color:transparent;}
+.pdm-rec-skip-btn:hover{color:rgba(0,0,0,.6);background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.15);}
+.pdm-rec-item--skip .pdm-rec-skip-btn{color:rgba(0,0,0,.45);background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.15);}
 /* skip badge inside the row */
 .pdm-rec-skip-badge{display:none;flex-shrink:0;align-items:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.07);color:rgba(0,0,0,.4);margin-top:2px;white-space:nowrap;}
 .pdm-rec-item--skip .pdm-rec-skip-badge{display:inline-flex;}
@@ -1297,7 +1297,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
                     <span class="pdm-rec-esc-badge" id="pdmRecEscBadge0">↑ Escalate</span>
                     <span class="pdm-rec-actions">
                       <button class="pdm-rec-skip-btn" id="pdmRecSkipBtn0" onclick="toggleRecSkip(0)" title="不采纳此建议">Skip</button>
-                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn0" onclick="toggleRecEsc(0)" title="升级此 Action 给决策者">↑</button>
+                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn0" onclick="toggleRecEsc(0)" title="升级此 Action 给决策者">↑ Escalate</button>
                     </span>
                   </li>
                   <li class="pdm-rec-item" id="pdmRecItem1">
@@ -1307,7 +1307,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
                     <span class="pdm-rec-esc-badge" id="pdmRecEscBadge1">↑ Escalate</span>
                     <span class="pdm-rec-actions">
                       <button class="pdm-rec-skip-btn" id="pdmRecSkipBtn1" onclick="toggleRecSkip(1)" title="不采纳此建议">Skip</button>
-                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn1" onclick="toggleRecEsc(1)" title="升级此 Action 给决策者">↑</button>
+                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn1" onclick="toggleRecEsc(1)" title="升级此 Action 给决策者">↑ Escalate</button>
                     </span>
                   </li>
                   <li class="pdm-rec-item" id="pdmRecItem2">
@@ -1317,7 +1317,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
                     <span class="pdm-rec-esc-badge" id="pdmRecEscBadge2">↑ Escalate</span>
                     <span class="pdm-rec-actions">
                       <button class="pdm-rec-skip-btn" id="pdmRecSkipBtn2" onclick="toggleRecSkip(2)" title="不采纳此建议">Skip</button>
-                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn2" onclick="toggleRecEsc(2)" title="升级此 Action 给决策者">↑</button>
+                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn2" onclick="toggleRecEsc(2)" title="升级此 Action 给决策者">↑ Escalate</button>
                     </span>
                   </li>
                 </ul>
@@ -2242,7 +2242,7 @@ function switchPdmCase(n){
       const row = document.getElementById('pdmRecItem' + i);
       if(row){ row.classList.remove('exec-running','exec-done','exec-assigned','pdm-rec-item--skip','pdm-rec-item--esc'); }
       const escBtn  = document.getElementById('pdmRecEscBtn'  + i);
-      if(escBtn){  escBtn.textContent  = '↑'; escBtn.disabled  = false; }
+      if(escBtn){  escBtn.textContent  = '↑ Escalate'; escBtn.disabled  = false; }
       const skipBtn = document.getElementById('pdmRecSkipBtn' + i);
       if(skipBtn){ skipBtn.textContent = 'Skip'; skipBtn.disabled = false; }
       const escBadge = document.getElementById('pdmRecEscBadge' + i);
