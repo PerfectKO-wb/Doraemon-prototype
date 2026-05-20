@@ -2326,6 +2326,10 @@ function closePdmDonePanel(){
   if(panel) panel.classList.remove('show');
   const fb = document.getElementById('pdmDoneFeedback');
   if(fb) fb.value = '';
+  const yes = document.getElementById('pdmAgentYes');
+  const done = document.getElementById('pdmAgentDone');
+  if(yes) yes.style.display = '';
+  if(done) done.style.display = '';
 }
 
 
@@ -2438,6 +2442,8 @@ if(user.view==='pdm'){
   // Done: show feedback panel
   document.getElementById('pdmAgentDone').addEventListener('click', function(){
     if(this.disabled) return;
+    document.getElementById('pdmAgentYes').style.display = 'none';
+    document.getElementById('pdmAgentDone').style.display = 'none';
     document.getElementById('pdmDonePanel').classList.add('show');
     document.getElementById('pdmDoneFeedback').focus();
   });
