@@ -2242,9 +2242,9 @@ function switchPdmCase(n){
       const row = document.getElementById('pdmRecItem' + i);
       if(row){ row.classList.remove('exec-running','exec-done','exec-assigned','pdm-rec-item--skip','pdm-rec-item--esc'); }
       const escBtn  = document.getElementById('pdmRecEscBtn'  + i);
-      if(escBtn){  escBtn.textContent  = '↑ Escalate'; escBtn.disabled  = false; }
+      if(escBtn){  escBtn.textContent  = '↑ Escalate'; escBtn.disabled = false; escBtn.style.display = ''; }
       const skipBtn = document.getElementById('pdmRecSkipBtn' + i);
-      if(skipBtn){ skipBtn.textContent = 'Skip'; skipBtn.disabled = false; }
+      if(skipBtn){ skipBtn.textContent = 'Skip'; skipBtn.disabled = false; skipBtn.style.display = ''; }
       const escBadge = document.getElementById('pdmRecEscBadge' + i);
       if(escBadge) escBadge.textContent = '↑ Escalate';
     });
@@ -2275,28 +2275,39 @@ function togglePdmBrainDoc(){
 
 // Per-action skip toggle
 function toggleRecSkip(idx){
-  const row = document.getElementById('pdmRecItem' + idx);
-  const btn = document.getElementById('pdmRecSkipBtn' + idx);
+  const row     = document.getElementById('pdmRecItem'   + idx);
+  const skipBtn = document.getElementById('pdmRecSkipBtn' + idx);
+  const escBtn  = document.getElementById('pdmRecEscBtn'  + idx);
   if(!row) return;
-  // can't skip an escalated item
-  if(row.classList.contains('pdm-rec-item--esc')) return;
+  if(row.classList.contains('pdm-rec-item--esc')) return; // can't skip an escalated item
   const isSkip = row.classList.toggle('pdm-rec-item--skip');
-  if(btn) btn.textContent = isSkip ? 'Undo' : 'Skip';
+  if(isSkip){
+    // skipped: show only Undo (skip btn), hide escalate btn
+    if(skipBtn){ skipBtn.textContent = 'Undo'; skipBtn.style.display = ''; }
+    if(escBtn)  escBtn.style.display = 'none';
+  } else {
+    // restored: show both buttons
+    if(skipBtn){ skipBtn.textContent = 'Skip'; skipBtn.style.display = ''; }
+    if(escBtn){  escBtn.textContent  = '↑ Escalate'; escBtn.style.display = ''; }
+  }
   _updateExecBtn();
 }
 
-// Per-action escalate toggle
 function toggleRecEsc(idx){
-  const row = document.getElementById('pdmRecItem' + idx);
-  const btn = document.getElementById('pdmRecEscBtn' + idx);
+  const row     = document.getElementById('pdmRecItem'   + idx);
+  const escBtn  = document.getElementById('pdmRecEscBtn'  + idx);
+  const skipBtn = document.getElementById('pdmRecSkipBtn' + idx);
   if(!row) return;
   const isEsc = row.classList.toggle('pdm-rec-item--esc');
-  if(btn) btn.textContent = isEsc ? '×' : '↑';
-  // escalated items are also removed from skip state
   if(isEsc){
+    // escalated: show only Undo (esc btn), hide skip btn; also clear any skip state
     row.classList.remove('pdm-rec-item--skip');
-    const skipBtn = document.getElementById('pdmRecSkipBtn' + idx);
-    if(skipBtn) skipBtn.textContent = 'Skip';
+    if(escBtn){  escBtn.textContent  = 'Undo'; escBtn.style.display = ''; }
+    if(skipBtn){ skipBtn.textContent = 'Skip'; skipBtn.style.display = 'none'; }
+  } else {
+    // restored: show both buttons
+    if(escBtn){  escBtn.textContent  = '↑ Escalate'; escBtn.style.display = ''; }
+    if(skipBtn){ skipBtn.textContent = 'Skip';        skipBtn.style.display = ''; }
   }
   _updateExecBtn();
 }
