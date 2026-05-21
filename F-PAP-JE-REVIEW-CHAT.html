@@ -655,28 +655,6 @@ const jeSessions = [
     messages: [
       { role: 'bot', type: 'je-draft-card', time: '2026-05-08 09:42' }
     ]
-  },
-  {
-    id: 'JE-DRAFT-2026-0502',
-    sourceType: 'invoice',
-    sourceId: 'INV-202604-0008',
-    currency: 'JPY',
-    region: 'JP',
-    company: 'CTW INC',
-    accountingDate: '2026-04-30',
-    createdAt: '2026-05-08 09:45',
-    state: 'pending',
-    reviewer: '王喆',
-    confidence: 52,
-    confidenceLevel: 'low',
-    aiReason: 'Confidence is low (52%) — the invoice description mentions "戦略コンサルティング" which may span multiple service periods. Unable to determine if this should be expensed in full or amortized. Please confirm accounting treatment.',
-    lines: [
-      { no: 1, acctCode: '6110', acctName: 'コンサルティング費用', dr: '320,000', cr: '' },
-      { no: 2, acctCode: '2110', acctName: '未払金',               dr: '',       cr: '320,000' },
-    ],
-    messages: [
-      { role: 'bot', type: 'je-draft-card', time: '2026-05-08 09:45' }
-    ]
   }
 ];
 
@@ -749,11 +727,9 @@ function renderList() {
 
   let sessionHtml = '';
   if (pending.length > 0) {
-    sessionHtml += `<div class="list-section-label">Awaiting Review <span class="list-section-badge">${pending.length}</span></div>`;
     sessionHtml += pending.map(s => buildSessionCard(s)).join('');
   }
   if (confirmed.length > 0) {
-    sessionHtml += `<div class="list-section-label">Confirmed</div>`;
     sessionHtml += confirmed.map(s => buildSessionCard(s)).join('');
   }
 
