@@ -1293,24 +1293,6 @@ html,body{width:100%;height:100%;overflow:hidden;}
                 <button type="button" class="pdm-btn pdm-btn-done-inline" id="pdmAgentDone">Already Done</button>
                 <button type="button" class="pdm-btn pdm-btn-help" id="pdmAgentHelp" onclick="openPdmHelpPanel()">Help</button>
               </div>
-              <!-- Done feedback panel -->
-              <div class="pdm-done-panel" id="pdmDonePanel">
-                <div class="pdm-done-panel-label">向 Agent 反馈此次处理情况（可选，有助于提升下次决策准确性）</div>
-                <textarea id="pdmDoneFeedback" rows="2" placeholder="例：技术组确认是服务器缓存问题，补偿已先发出，修复预计明日完成…"></textarea>
-                <div class="pdm-done-panel-actions">
-                  <button type="button" class="pdm-btn pdm-btn-done-confirm" id="pdmDoneConfirm">确认完成</button>
-                  <button type="button" class="pdm-btn pdm-btn-done-cancel" onclick="closePdmDonePanel()">取消</button>
-                </div>
-              </div>
-              <!-- Help panel -->
-              <div class="pdm-help-panel" id="pdmHelpPanel">
-                <div class="pdm-help-panel-label">描述需要帮助的内容，Agent 将转交给决策者处理</div>
-                <textarea id="pdmHelpFeedback" rows="2" placeholder="例：不确定这个补偿数量是否合理，需要决策者判断…"></textarea>
-                <div class="pdm-help-panel-actions">
-                  <button type="button" class="pdm-btn pdm-btn-done-confirm" id="pdmHelpConfirm" onclick="confirmPdmHelp()">提交</button>
-                  <button type="button" class="pdm-btn pdm-btn-done-cancel" onclick="closePdmHelpPanel()">取消</button>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -2219,11 +2201,6 @@ function switchPdmCase(n){
       const row = document.getElementById('pdmRecItem' + i);
       if(row){ row.classList.remove('exec-running','exec-done','exec-assigned'); }
     });
-    // Hide Help panel if open
-    const hp = document.getElementById('pdmHelpPanel');
-    if(hp){ hp.classList.remove('show'); }
-    const hf = document.getElementById('pdmHelpFeedback');
-    if(hf) hf.value = '';
     const e0 = document.getElementById('pdmRecExec0'); if(e0) e0.textContent = 'AI';
     const e1 = document.getElementById('pdmRecExec1'); if(e1) e1.textContent = 'HU';
     const e2 = document.getElementById('pdmRecExec2'); if(e2) e2.textContent = 'AI';
@@ -2249,43 +2226,10 @@ function togglePdmBrainDoc(){
 }
 
 
-// Task-level Help panel
 function openPdmHelpPanel(){
-  const panel = document.getElementById('pdmHelpPanel');
-  if(panel) panel.classList.add('show');
-  // Hide task-level buttons while panel is open
-  ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
-    const b = document.getElementById(id); if(b) b.style.display = 'none';
-  });
-}
-function closePdmHelpPanel(){
-  const panel = document.getElementById('pdmHelpPanel');
-  if(panel) panel.classList.remove('show');
-  const fb = document.getElementById('pdmHelpFeedback');
-  if(fb) fb.value = '';
-  ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
-    const b = document.getElementById(id); if(b) b.style.display = '';
-  });
-}
-function confirmPdmHelp(){
-  const st = document.getElementById('pdmAgentStatus');
-  if(st){ st.className='pdm-agent-status show info'; st.textContent='已提交 Help 请求，决策者将介入处理。'; }
-  closePdmHelpPanel();
-  // Disable all task-level buttons after help submitted
-  ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
-    const b = document.getElementById(id); if(b) b.disabled = true;
-  });
+  _dismissAgentCard('已提交 Help 请求，决策者将介入处理。', 'info', 3500);
 }
 
-function closePdmDonePanel(){
-  const panel = document.getElementById('pdmDonePanel');
-  if(panel) panel.classList.remove('show');
-  const fb = document.getElementById('pdmDoneFeedback');
-  if(fb) fb.value = '';
-  ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
-    const b = document.getElementById(id); if(b) b.style.display = '';
-  });
-}
 
 
 if(user.view==='pdm'){
@@ -2394,24 +2338,10 @@ if(user.view==='pdm'){
     }, 2800);
   });
 
-  // Done: show feedback panel
+  // Done: directly dismiss
   document.getElementById('pdmAgentDone').addEventListener('click', function(){
     if(this.disabled) return;
-    ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
-      const b = document.getElementById(id); if(b) b.style.display = 'none';
-    });
-    document.getElementById('pdmDonePanel').classList.add('show');
-    document.getElementById('pdmDoneFeedback').focus();
-  });
-
-  // Done confirm: feed back to agent if content exists, then dismiss
-  document.getElementById('pdmDoneConfirm').addEventListener('click', function(){
-    const feedback = document.getElementById('pdmDoneFeedback').value.trim();
-    const msg = feedback
-      ? '✓ 已完成 · 反馈「' + feedback.slice(0, 28) + (feedback.length > 28 ? '…' : '') + '」已喂给 Agent，将提升下次决策准确性。'
-      : '✓ 已标记完成 · 结果将同步至 Memory。';
-    document.getElementById('pdmDonePanel').classList.remove('show');
-    _dismissAgentCard(msg, 'ok', 3500);
+    _dismissAgentCard('✓ 已标记完成 · 结果将同步至 Memory。', 'ok', 3500);
   });
 }
 
