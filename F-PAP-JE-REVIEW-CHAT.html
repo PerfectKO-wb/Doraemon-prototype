@@ -597,18 +597,6 @@
           placeholder="回复… 例：「第1行 科目代码 → 6060」「入账日期 → 2026-05-31」「确认」"></textarea>
         <div class="chat-input-footer">
           <div class="chat-input-hints">
-            <button class="hint-pill" data-msg="确认">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              确认 JE
-            </button>
-            <button class="hint-pill" data-msg="第1行 科目代码 → ">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              修改科目
-            </button>
-            <button class="hint-pill" data-msg="入账日期 → ">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              修改日期
-            </button>
           </div>
           <button class="input-send-btn" id="sendBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -800,16 +788,7 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
       <span>${s.aiReason}</span>
     </div>` : '';
 
-  const actionsHtml = !confirmed ? `
-    <div class="msg-actions-row">
-      <button class="msg-quick-btn confirm-btn" onclick="sendMessage('确认')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        确认 JE
-      </button>
-      <button class="msg-quick-btn" onclick="document.getElementById('chatInput').value='第1行 科目代码 → ';document.getElementById('chatInput').focus();document.getElementById('sendBtn').classList.add('active');">
-        修改科目代码
-      </button>
-    </div>` : '';
+  const actionsHtml = '';
 
   const wrap = document.createElement('div');
   wrap.className = 'msg-bot';
