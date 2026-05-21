@@ -579,7 +579,6 @@
       <div class="chat-header-badge" id="chatBadge">待审核</div>
       <div class="chat-header-info">
         <div class="chat-header-title" id="chatTitle">JE-DRAFT-2026-0501</div>
-        <div class="chat-header-sub" id="chatSub">来源: INV-202604-0006 · JPY</div>
       </div>
       <div class="chat-header-actions">
         <button class="hdr-btn" onclick="window.location='F-PAP-PAYMENT-REVIEW.html'">
@@ -960,7 +959,6 @@ function switchSession(id) {
   activeSessionId = id;
   const s = activeSession();
   document.getElementById('chatTitle').textContent = s.id;
-  document.getElementById('chatSub').textContent = `来源: ${s.sourceId} · ${s.currency}`;
   const badge = document.getElementById('chatBadge');
   badge.textContent = s.state === 'confirmed' ? '已确认' : '待审核';
   badge.className = 'chat-header-badge' + (s.state === 'confirmed' ? ' confirmed' : '');
