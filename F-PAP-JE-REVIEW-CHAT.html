@@ -630,7 +630,7 @@ const jeSessions = [
     reviewer: '王喆',
     confidence: 68,
     confidenceLevel: 'med',
-    aiReason: '科目代码 6050（广告宣传费）置信度为 68%，根据收款方描述"クラウドインフラ"，也可能归类为 6060（其他外包费用）。请确认正确的费用科目。',
+    aiReason: '',
     lines: [
       { no: 1, acctCode: '6050', acctName: '广告宣传费', dr: '128,500', cr: '' },
       { no: 2, acctCode: '2110', acctName: '应付款',     dr: '',       cr: '128,500' },
@@ -950,7 +950,6 @@ function renderDetailPanel() {
     <div class="detail-section">
       <div class="detail-section-title">置信度</div>
       <span class="conf-score ${cl}">${s.confidence}%</span>
-      <p style="font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">${s.aiReason}</p>
     </div>
     <div class="detail-section">
       <div class="detail-section-title">JE 信息</div>
