@@ -326,6 +326,28 @@
             width: 8px; height: 8px; border-radius: 50%;
             background: var(--primary);
         }
+        .list-section-label {
+            display: flex; align-items: center; gap: 8px;
+            padding: 12px 16px 6px;
+            font-size: 11px; font-weight: 600;
+            color: var(--text-disabled); letter-spacing: 0.4px;
+            text-transform: uppercase;
+            border-top: 1px solid var(--border-divider);
+        }
+        .list-section-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 16px; height: 16px; padding: 0 4px;
+            background: #d97706; color: #fff;
+            border-radius: 8px; font-size: 10px; font-weight: 700;
+        }
+        .je-conf-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 1px 6px; border-radius: 4px;
+            font-size: 10px; font-weight: 600;
+            background: #fffbeb; border: 1px solid #fde68a; color: #d97706;
+            margin-top: 4px;
+        }
+        .je-conf-badge.low { background: #fff1f0; border-color: #ffa39e; color: #f5222d; }
 
         .list-empty {
             flex: 1;
@@ -1159,15 +1181,6 @@
             dot: true,
             href: 'F-PAP-VOUCHER-COLLECTION.html'
         },
-        {
-            key: 'je-review',
-            title: 'JE Review',
-            desc: 'Confirm AI-generated journal entries',
-            meta: 'Awaiting · 2 JE drafts',
-            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/><line x1="8" y1="9" x2="10" y2="9"/></svg>',
-            dot: true,
-            href: 'F-PAP-JE-REVIEW-CHAT.html'
-        },
     ];
 
     let invoiceFiles = [
@@ -1200,9 +1213,14 @@
 
     function fileIcon(type) { return type === 'img' ? ICON_IMG : ICON_PDF; }
 
+    const jeDrafts = [
+        { id: 'JE-DRAFT-2026-0501', sourceId: 'INV-202604-0006', currency: 'JPY', confidence: 68, confLevel: 'med' },
+        { id: 'JE-DRAFT-2026-0502', sourceId: 'INV-202604-0008', currency: 'JPY', confidence: 52, confLevel: 'low' },
+    ];
+
     function renderList() {
         const body = document.getElementById('listBody');
-        body.innerHTML = listItems.map(it => `
+        const navHtml = listItems.map(it => `
             <div class="list-card ${it.active ? 'active' : ''}" data-key="${it.key}">
                 <div class="list-card-icon">${it.icon}</div>
                 <div class="list-card-content">
@@ -1216,7 +1234,19 @@
                 ${it.dot ? '<span class="list-card-dot"></span>' : ''}
             </div>
         `).join('');
-        body.querySelectorAll('.list-card').forEach(card => {
+        const jeHtml = `
+            <div class="list-section-label">JE Review <span class="list-section-badge">${jeDrafts.length}</span></div>
+            ${jeDrafts.map(je => `
+            <div class="list-card" style="cursor:pointer;" onclick="window.location='F-PAP-JE-REVIEW-CHAT.html'">
+                <div class="list-card-content">
+                    <div class="list-card-title" style="font-size:13px;">${je.id}</div>
+                    <div class="list-card-desc">${je.sourceId} · ${je.currency}</div>
+                    <div><span class="je-conf-badge ${je.confLevel === 'low' ? 'low' : ''}">${je.confidence}% confidence</span></div>
+                </div>
+                <span class="list-card-dot" style="background:#d97706;top:14px;"></span>
+            </div>`).join('')}`;
+        body.innerHTML = navHtml + jeHtml;
+        body.querySelectorAll('.list-card[data-key]').forEach(card => {
             card.addEventListener('click', () => {
                 const it = listItems.find(x => x.key === card.dataset.key);
                 if (it && it.href && !it.active) window.location.href = it.href;
