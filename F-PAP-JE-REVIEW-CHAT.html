@@ -576,7 +576,7 @@
   <!-- ===== MAIN CHAT AREA ===== -->
   <div class="chat-main">
     <div class="chat-header">
-      <div class="chat-header-badge" id="chatBadge">待审核</div>
+      <div class="chat-header-badge" id="chatBadge">PENDING</div>
       <div class="chat-header-info">
         <div class="chat-header-title" id="chatTitle">JE-DRAFT-2026-0501</div>
       </div>
@@ -960,7 +960,7 @@ function switchSession(id) {
   const s = activeSession();
   document.getElementById('chatTitle').textContent = s.id;
   const badge = document.getElementById('chatBadge');
-  badge.textContent = s.state === 'confirmed' ? '已确认' : '待审核';
+  badge.textContent = s.state === 'confirmed' ? '已确认' : 'PENDING';
   badge.className = 'chat-header-badge' + (s.state === 'confirmed' ? ' confirmed' : '');
   renderSessionList();
   renderThread();
