@@ -665,7 +665,8 @@ const jeSessions = [
     },
     messages: [
       { role: 'bot', type: 'je-draft-card', time: '2026-05-08 09:42' }
-    ]
+    ],
+    jeSummary: 'クラウドワークス株式会社 クラウドインフラ利用料 4月分（入账日期：2026-04-30）'
   }
 ];
 
@@ -818,25 +819,23 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
     `是否一次性费用：${iv.oneTimeExpense}`,
   ].join('\n') : '';
 
-  const headClass = confirmed ? 'je-draft-head confirmed-head' : 'je-draft-head';
   const headLabel = confirmed ? '分录已确认' : '分录草稿 — 待审核';
 
-  const linesHtml = lines.map(ln => `
-    <div class="je-lines-row">
-      <div class="je-col-no">${ln.no}</div>
-      <div class="je-col-acct">${ln.acctCode}</div>
-      <div class="je-col-name">${ln.acctName}</div>
-      <div class="je-col-dr">${ln.dr ? ln.dr : '—'}</div>
-      <div class="je-col-cr">${ln.cr ? ln.cr : '—'}</div>
-    </div>`).join('');
+  // Build plain-text JE lines
+  const summary = linesSnapshot ? s.jeSummary : (s.jeSummary || '');
+  const acctDateDisplay = acctDateSnapshot || s.accountingDate;
+  const jePlainLines = lines.map(ln => {
+    if (ln.dr) return `Dr. (借)  ${ln.acctName} [${ln.acctCode}]   ¥${ln.dr}`;
+    if (ln.cr) return `    Cr. (贷)  ${ln.acctName} [${ln.acctCode}]   ¥${ln.cr}`;
+    return '';
+  }).join('\n');
+  const jePlainText = jePlainLines + (summary ? `\n\n摘要：${summary}` : '');
 
   const confRowHtml = !confirmed ? `
-    <div class="je-conf-row">
+    <div class="je-conf-row" style="border-radius:6px;margin-top:8px;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <span>${s.aiReason}</span>
     </div>` : '';
-
-  const actionsHtml = '';
 
   const wrap = document.createElement('div');
   wrap.className = 'msg-bot';
@@ -853,36 +852,10 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
         ${iv && !prefixText ? `<hr class="md-hr"><pre style="font-size:12px;line-height:1.8;color:var(--text-secondary);white-space:pre-wrap;word-break:break-all;margin:0 0 4px;">${ivText}</pre>` : ''}
         <hr class="md-hr">
         <p class="md-heading"><span class="md-tag ${!confirmed ? 'warn' : ''}">${headLabel}</span> &nbsp;<span style="font-size:12px;font-weight:400;color:var(--text-tertiary);">${s.id}</span></p>
-        <table class="md-table" style="margin-bottom:8px;">
-          <tr><th>来源</th><td>${s.sourceId} (${s.sourceType.toUpperCase()})</td></tr>
-          <tr><th>公司</th><td>${s.company}</td></tr>
-          <tr><th>币种</th><td>${s.currency}</td></tr>
-          <tr><th>入账日期</th><td>${acctDate}</td></tr>
-        </table>
-        <div class="je-draft-msg">
-          <div class="${headClass}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <span class="je-draft-head-title">${headLabel}</span>
-            <span class="je-draft-head-id">${s.id}</span>
-          </div>
-          <div class="je-lines-table">
-            <div class="je-lines-head">
-              <div class="je-col-no">#</div>
-              <div class="je-col-acct">科目代码</div>
-              <div class="je-col-name">科目名称</div>
-              <div class="je-col-dr">借方</div>
-              <div class="je-col-cr">贷方</div>
-            </div>
-            ${linesHtml}
-          </div>
-          ${confRowHtml}
-          <div class="je-draft-footer">
-            <span class="je-footer-mention">${mentionStr} 请审核</span>
-            <span class="je-footer-date">入账日期：${acctDate}</span>
-          </div>
-        </div>
+        <pre style="font-size:13px;line-height:2;color:var(--text-default);white-space:pre-wrap;margin:6px 0 0;font-family:inherit;">${jePlainText}</pre>
+        ${confRowHtml}
+        <p style="font-size:11px;color:var(--text-tertiary);margin-top:8px;">${mentionStr} 请审核，确认无误后回复「确认」提交。</p>
       </div>
-      ${actionsHtml}
     </div>`;
   return wrap;
 }
@@ -1101,10 +1074,12 @@ function doChangeDate(s, newDate) {
 }
 
 function doListLines(s) {
-  const lines = s.lines.map(l =>
-    `• 第 ${l.no} 行：[${l.acctCode}] ${l.acctName}  ${l.dr ? '借 ' + l.dr : ''}${l.cr ? '贷 ' + l.cr : ''}`
-  ).join('\n');
-  return `JE ${s.id} 共 ${s.lines.length} 行：\n${lines}\n\n入账日期：${s.accountingDate}`;
+  const lines = s.lines.map(l => {
+    if (l.dr) return `Dr. (借)  ${l.acctName} [${l.acctCode}]   ¥${l.dr}`;
+    if (l.cr) return `    Cr. (贷)  ${l.acctName} [${l.acctCode}]   ¥${l.cr}`;
+    return '';
+  }).join('\n');
+  return `JE ${s.id} 当前分录：\n${lines}\n\n摘要：${s.jeSummary || ''}\n入账日期：${s.accountingDate}`;
 }
 
 // ========== SEND MESSAGE ==========
