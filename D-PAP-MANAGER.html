@@ -1380,7 +1380,7 @@
     <div class="tab-panel" id="tab-brain">
       <div class="brain-list">
 
-        <div class="brain-item" onclick="showSnack('打开 AI客服质量决策模型')">
+        <div class="brain-item" onclick="openBrainDetail(0)">
           <div class="brain-item-left">
             <div class="brain-item-title">AI客服质量决策模型</div>
             <div class="brain-from-row">
@@ -1406,7 +1406,7 @@
           </button>
         </div>
 
-        <div class="brain-item" onclick="showSnack('打开 PAP数据检索与字段解析规则')">
+        <div class="brain-item" onclick="openBrainDetail(1)">
           <div class="brain-item-left">
             <div class="brain-item-title">PAP 数据检索与字段解析规则</div>
             <div class="brain-from-row">
@@ -1437,7 +1437,7 @@
           </button>
         </div>
 
-        <div class="brain-item" onclick="showSnack('打开 AI附件预览与下载权限规则')">
+        <div class="brain-item" onclick="openBrainDetail(2)">
           <div class="brain-item-left">
             <div class="brain-item-title">AI 附件预览与下载权限规则</div>
             <div class="brain-from-row">
@@ -1458,7 +1458,7 @@
           </button>
         </div>
 
-        <div class="brain-item" onclick="showSnack('打开 线上事故应急响应与玩家安抚规则')">
+        <div class="brain-item" onclick="openBrainDetail(3)">
           <div class="brain-item-left">
             <div class="brain-item-title">线上事故应急响应与玩家安抚规则</div>
             <div class="brain-from-row">
@@ -1479,7 +1479,7 @@
           </button>
         </div>
 
-        <div class="brain-item" onclick="showSnack('打开 运营公告与代金券分发操作规范')">
+        <div class="brain-item" onclick="openBrainDetail(4)">
           <div class="brain-item-left">
             <div class="brain-item-title">运营公告与代金券分发操作规范</div>
             <div class="brain-from-row">
@@ -1500,7 +1500,7 @@
           </button>
         </div>
 
-        <div class="brain-item" onclick="openBrainDetail()">
+        <div class="brain-item" onclick="openBrainDetail(5)">
           <div class="brain-item-left">
             <div class="brain-item-title">CS 服务质量决策模型</div>
             <div class="brain-from-row">
@@ -1526,7 +1526,7 @@
           </button>
         </div>
 
-        <div class="brain-item" onclick="showSnack('打开 数据驱动决策框架')">
+        <div class="brain-item" onclick="openBrainDetail(6)">
           <div class="brain-item-left">
             <div class="brain-item-title">数据驱动决策框架</div>
             <div class="brain-from-row">
@@ -1556,105 +1556,16 @@
       <div style="height: 80px;"></div>
     </div>
 
-  <!-- Brain Detail Page -->
+  <!-- Brain Detail Page (dynamic) -->
   <div class="brain-detail" id="brainDetail">
     <div class="brain-detail-topbar">
       <button class="brain-back-btn" onclick="closeBrainDetail()">
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
         BACK TO BRAIN
       </button>
-      <span class="brain-detail-ver">V2.4 · 更新于 2026-04-19</span>
+      <span class="brain-detail-ver" id="brainDetailVer"></span>
     </div>
-
-    <div class="brain-detail-body">
-      <div class="brain-detail-title-row">
-        <span class="brain-detail-title">客服质量与转人工决策模型</span>
-        <button class="brain-edit-btn" title="编辑" onclick="showSnack('编辑 Brain-doc')">
-          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-      </div>
-
-      <!-- WHEN TO APPLY -->
-      <div class="brain-section">
-        <div class="brain-section-label">WHEN TO APPLY</div>
-        <p class="brain-section-text">当目标场景为「客服 AI 工单 / 转人工 / CSAT / 客服质量监控 / 客服流量峰值 / 客服效应或至量」时启用。你的目标：判断自动回复率基线、设计转人工触发条件、为客服 SLA / 一次解决率设定目标。不适用于：偶尔咨询高档话术、人力扩容流程。</p>
-      </div>
-      <div class="brain-divider"></div>
-
-      <!-- FROM -->
-      <div class="brain-section">
-        <div class="brain-section-label">FROM</div>
-        <div class="brain-detail-chips">
-          <div class="brain-detail-chip">
-            <div class="brain-detail-chip-avatar" style="background:linear-gradient(135deg,#94a3b8,#475569)">SS</div>
-            <span class="brain-detail-chip-name">依优木</span>
-            <span class="brain-detail-chip-role">CEO</span>
-          </div>
-          <div class="brain-detail-chip">
-            <div class="brain-detail-chip-avatar" style="background:linear-gradient(135deg,#60a5fa,#2563eb)">LX</div>
-            <span class="brain-detail-chip-name">刘睿</span>
-            <span class="brain-detail-chip-role">COO</span>
-          </div>
-          <div class="brain-detail-chip">
-            <div class="brain-detail-chip-avatar" style="background:linear-gradient(135deg,#fbbf24,#d97706)">SK</div>
-            <span class="brain-detail-chip-name">金莎拉</span>
-            <span class="brain-detail-chip-role">运营总监</span>
-          </div>
-          <div class="brain-detail-chip">
-            <div class="brain-detail-chip-avatar" style="background:linear-gradient(135deg,#34d399,#059669)">SK</div>
-            <span class="brain-detail-chip-name">Sarah Kim</span>
-            <span class="brain-detail-chip-role">CS TEAM LEAD</span>
-          </div>
-          <div class="brain-detail-chip">
-            <div class="brain-detail-chip-avatar" style="background:linear-gradient(135deg,#f472b6,#db2777)">PS</div>
-            <span class="brain-detail-chip-name">Priya Singh</span>
-            <span class="brain-detail-chip-role">QUALITY REVIEWER</span>
-          </div>
-        </div>
-      </div>
-      <div class="brain-divider"></div>
-
-      <!-- 近期优先级 -->
-      <div class="brain-section">
-        <div class="brain-section-label">近期优先级</div>
-        <ul class="brain-bullets">
-          <li>CSAT 与百剩时长是 Q2 维二被允许「授权升级」的指标</li>
-          <li>AI 自动解决率每提升 1pp，要求转人工准确率不得下降 0.3pp 以上</li>
-          <li>所有上线必须给出 P0 / P1 两级降级预案，否则一票否决</li>
-        </ul>
-      </div>
-      <div class="brain-divider"></div>
-
-      <!-- 决策向导 -->
-      <div class="brain-section">
-        <div class="brain-section-label">决策向导</div>
-        <p class="brain-section-text">CEO 偏好「先 80% 上线，再 20% 迭代」，反感为完美等待；</p>
-        <p class="brain-section-text" style="margin-top:8px">在转人工策略上倾向授权——从队主管可在偏差 ±0.05 范围内自调，无需走审批。</p>
-        <div class="brain-quote">「客服永远是品牌门面，可以慢慢应答，不可以说不回复。」</div>
-      </div>
-      <div class="brain-divider"></div>
-
-      <!-- 红线与禁区 -->
-      <div class="brain-section">
-        <div class="brain-section-label">红线与禁区</div>
-        <ul class="brain-bullets">
-          <li>禁止用 AI 直接处理涉及实名 / 退款 / 法律敏感的工单</li>
-          <li>不允许把 CSAT 兑换成短期成本节省</li>
-          <li>VIP 玩家工单必须 5 分钟内有人工介入</li>
-        </ul>
-      </div>
-      <div class="brain-divider"></div>
-
-      <!-- 往往案例 -->
-      <div class="brain-section">
-        <div class="brain-section-label">往往案例</div>
-        <ul class="brain-bullets">
-          <li>Q1 客服评审：三条管辖矢度 → 决定完全量 1 条 × 观察 7 天再放量</li>
-          <li>23 年 12 月退款风波：把 AI 转人工阈值临时调到 0.7 兜底</li>
-          <li>JP 客季活动：临时关闭 AI 自动结案、全量人工直核</li>
-        </ul>
-      </div>
-    </div>
+    <div class="brain-detail-body" id="brainDetailBody"></div>
   </div>
 
   </div><!-- /main-card -->
@@ -2422,8 +2333,253 @@ function appendChatMsg(role, text) {
 
 // ── Snackbar ──
 let snackTimer;
-function openBrainDetail() {
-  document.getElementById('brainDetail').classList.add('open');
+const BRAIN_DOCS = [
+  {
+    title: 'AI 客服质量决策模型',
+    ver: 'V3.1 · 更新于 2026-04-22',
+    whenToApply: '当需要评估 AI 客服回复质量、设计质检规则或制定 CSAT 评分标准时启用。目标：建立 AI 回复准确率与满意度的量化基线，界定哪些场景允许 AI 独立答复，哪些需要转人工复核。不适用于：纯人工质检流程设计、人员排班优化。',
+    from: [
+      { initials: '叶', name: '叶亚', role: 'CTO', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+      { initials: '黑', name: '黑春文', role: 'RE', bg: 'linear-gradient(135deg,#f472b6,#db2777)' },
+      { initials: 'SK', name: 'Sarah Kim', role: 'CS TEAM LEAD', bg: 'linear-gradient(135deg,#34d399,#059669)' },
+    ],
+    priorities: [
+      'Q2 AI 独立解决率目标：≥ 75%，低于 70% 触发人工审查',
+      '质检抽样比例从 5% 提升至 12%，重点覆盖退款与投诉类工单',
+      '所有新增质检规则上线前须通过 500 条历史工单回测',
+    ],
+    guide: 'CTO 要求所有质检模型必须可解释——每条质检结论须附带置信分及触发规则 ID；反感黑盒评分体系。\n\n团队在质检规则迭代上倾向小步快跑，每两周一次规则评审，不等季度 OKR 周期。',
+    quote: '「质量是速度的前提，不是速度的对立面。」',
+    redLines: [
+      '禁止用 AI 质检结论直接触发客服绩效扣分，须人工确认',
+      '涉及法务风险的工单（实名 / 退款纠纷）不纳入 AI 质检范围',
+      '质检模型版本更新须保留 30 天回滚窗口',
+    ],
+    cases: [
+      'Q1 质检模型上线：回测准确率 91.3%，首周漏判率 2.1%，两周后修复',
+      '23 年大促期间 AI 质检误判率飙升，临时降低置信阈值至 0.85 兜底',
+      'JP 用户投诉集中爆发：质检规则未覆盖日语语境，紧急添加语言分流',
+    ],
+  },
+  {
+    title: 'PAP 数据检索与字段解析规则',
+    ver: 'V2.0 · 更新于 2026-04-10',
+    whenToApply: '当 Agent 需要从 PAP 系统检索用户行为数据、工单字段或运营指标时启用。目标：统一字段命名规范、定义检索优先级、明确哪些字段可直接用于决策，哪些需要二次清洗。不适用于：财务报表数据、HR 系统字段。',
+    from: [
+      { initials: '李', name: '李淳磊', role: 'DLOPS', bg: 'linear-gradient(135deg,#60a5fa,#2563eb)' },
+      { initials: '卢', name: '卢劲源', role: 'FIN', bg: 'linear-gradient(135deg,#34d399,#059669)' },
+      { initials: '叶', name: '叶亚', role: 'CTO', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+    ],
+    priorities: [
+      '字段版本对齐：PAP v2.3 与 DW v1.9 存在 14 个字段命名冲突，Q2 须全部修复',
+      'user_id 与 player_id 在跨系统检索中不可互换，必须显式映射',
+      '检索结果缓存 TTL 统一调整为 5 分钟，热点数据降至 1 分钟',
+    ],
+    guide: 'DataOps 负责人要求所有检索规则变更须在 Confluence 留存变更记录；不允许 Agent 直接修改字段映射表，必须走 PR 审批。\n\n当检索结果置信度 < 0.8 时，Agent 必须在回复中显示数据来源和采样时间。',
+    quote: '「数据是决策的地基，地基不稳，楼建得再高也会倒。」',
+    redLines: [
+      '禁止直接检索包含身份证号 / 银行卡号的原始字段',
+      '跨租户数据检索须经数据安全组审批，不得绕过权限层',
+      '实时检索接口 QPS 上限 200，超限须走离线批量通道',
+    ],
+    cases: [
+      '25 年初数据迁移：字段命名混乱导致 Agent 误判用户等级，影响 3,200 条工单',
+      '大促期间检索超时：将热点字段预加载进 Redis，响应时间从 800ms 降至 120ms',
+      'PAP 字段审计：发现 23 个废弃字段仍被 Agent 引用，清理后准确率提升 4%',
+    ],
+  },
+  {
+    title: 'AI 附件预览与下载权限规则',
+    ver: 'V1.5 · 更新于 2026-03-28',
+    whenToApply: '当工单处理涉及用户上传附件（图片 / 视频 / 文档）的预览或下载时启用。目标：定义不同角色对附件的访问权限层级，防止敏感内容泄露，同时保证客服处理效率。不适用于：内部报告附件、系统日志文件。',
+    from: [
+      { initials: '顾', name: '顾春文', role: 'SEC', bg: 'linear-gradient(135deg,#fb923c,#ea580c)' },
+      { initials: '叶', name: '叶亚', role: 'CTO', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+    ],
+    priorities: [
+      '图片预览需在 2 秒内完成加载，超时降级为缩略图',
+      'VIP 用户附件须单独存储于加密桶，访问日志保留 90 天',
+      '当附件触发内容安全扫描时，自动暂停预览并通知安全组',
+    ],
+    guide: '安全负责人要求所有附件访问须记录操作日志，禁止静默访问；客服侧只允许预览，不允许下载原始文件，仅管理员可申请下载。\n\n权限变更遵循「最小权限原则」，新角色默认无附件访问权，须显式授权。',
+    quote: '「权限不是障碍，是保护。」',
+    redLines: [
+      '禁止 AI 自动解析用户上传的可执行文件（.exe / .apk / .sh）',
+      '包含人脸或证件的图片不允许 AI 直接读取内容，须人工审核',
+      '附件存储超过 180 天自动归档，归档后不可被 Agent 直接检索',
+    ],
+    cases: [
+      '23 年安全事件：某 CS 角色误获下载权限，批量导出 1,200 份用户截图，事后权限全面收紧',
+      '大促高峰：预览服务并发超限，临时扩容 CDN 节点，P99 延迟从 4s 降至 800ms',
+      '内容安全误判：正常游戏截图被标记为违规，调整模型阈值后误判率降至 0.3%',
+    ],
+  },
+  {
+    title: '线上事故应急响应与玩家安抚规则',
+    ver: 'V3.0 · 更新于 2026-04-15',
+    whenToApply: '当游戏服务出现 P0 / P1 级故障（服务中断、数据异常、大规模玩家投诉）时启用。目标：定义响应时效 SLA、安抚话术标准、补偿决策权限，以及 Agent 在事故期间的自动化处理边界。不适用于：日常 Bug 反馈、单用户投诉处理。',
+    from: [
+      { initials: '李', name: '李怡菲', role: 'CS MGR', bg: 'linear-gradient(135deg,#e879f9,#a21caf)' },
+      { initials: 'LX', name: '刘睿', role: 'COO', bg: 'linear-gradient(135deg,#60a5fa,#2563eb)' },
+      { initials: '叶', name: '叶亚', role: 'CTO', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+    ],
+    priorities: [
+      'P0 事故：15 分钟内发出首条玩家公告，1 小时内给出补偿方案',
+      'P1 事故：CS 可在 50 元补偿额度内自主决策，超额需 manager 审批',
+      '安抚话术库 Q2 须覆盖「服务器维护 / 道具丢失 / 活动延期」三类场景',
+    ],
+    guide: 'COO 要求事故期间 Agent 只做信息收集和公告推送，不允许自动发放补偿；所有补偿决策须由有权限的人工确认，避免超发引发连锁投诉。\n\n事故结束后 24 小时内须提交复盘报告，根因分析纳入 Brain-doc 更新流程。',
+    quote: '「事故时玩家最需要的是被听见，其次才是被补偿。」',
+    redLines: [
+      'P0 事故期间禁止 AI 自动关闭工单，所有工单须人工处置',
+      '禁止在事故公告中承诺具体修复时间，除非技术组已确认',
+      '单次事故补偿总额超过 10 万元须 CEO 审批',
+    ],
+    cases: [
+      '26 年初服务器宕机 3 小时：Agent 自动推送安抚公告，人工处理率降低 40%',
+      '道具丢失事件：补偿额度临时上调至 200 元，事后发现 30% 用户补偿超量',
+      'JP 大区延迟风暴：跨时区响应延误 45 分钟，事后建立 JP 专属值班机制',
+    ],
+  },
+  {
+    title: '运营公告与代金券分发操作规范',
+    ver: 'V2.2 · 更新于 2026-04-08',
+    whenToApply: '当需要发布游戏内公告、向特定用户群分发代金券或道具补偿时启用。目标：规范公告审批流程、代金券分发权限层级、防止超发与误发，并确保 Agent 在执行分发操作前经过人工确认节点。不适用于：营销活动策划阶段、A/B 测试设计。',
+    from: [
+      { initials: '李', name: '李怡菲', role: 'CS MGR', bg: 'linear-gradient(135deg,#e879f9,#a21caf)' },
+      { initials: 'SK', name: '金莎拉', role: '运营总监', bg: 'linear-gradient(135deg,#fbbf24,#d97706)' },
+    ],
+    priorities: [
+      '代金券面额 ≥ 30 元须运营总监审批，≥ 100 元须 COO 审批',
+      '公告发布须提前 30 分钟通知 CS 团队，避免工单量突增无人响应',
+      'Agent 分发操作完成后须在 5 分钟内回传分发结果至运营后台',
+    ],
+    guide: '运营总监要求所有批量分发操作必须有明确的受众圈定条件，禁止「全服广播」式分发；每次分发前须预估影响人数，超过 5,000 人须额外确认。\n\n公告文案须经过法务审核模板库比对，不符合模板的内容不允许直接发布。',
+    quote: '「每一张代金券背后都是一次信任，不能随便给，也不能不给。」',
+    redLines: [
+      '禁止 Agent 在未经人工确认的情况下自动触发分发操作',
+      '同一用户 24 小时内不可重复收到同类型补偿',
+      '代金券有效期设置须与活动周期匹配，禁止发放无期限代金券',
+    ],
+    cases: [
+      '25 年活动误发：条件配置错误导致 12,000 名非目标用户收到代金券，事后全量追回引发投诉',
+      '节日公告超时：CS 未提前收到通知，工单量在公告后 10 分钟内翻倍',
+      '道具补偿测试：小范围 500 人测试后再全量发放，成功避免一次潜在超发事故',
+    ],
+  },
+  {
+    title: '客服质量与转人工决策模型',
+    ver: 'V2.4 · 更新于 2026-04-19',
+    whenToApply: '当目标场景为「客服 AI 工单 / 转人工 / CSAT / 客服质量监控 / 客服流量峰值 / 客服效应或至量」时启用。你的目标：判断自动回复率基线、设计转人工触发条件、为客服 SLA / 一次解决率设定目标。不适用于：偶尔咨询高档话术、人力扩容流程。',
+    from: [
+      { initials: 'SS', name: '依优木', role: 'CEO', bg: 'linear-gradient(135deg,#94a3b8,#475569)' },
+      { initials: 'LX', name: '刘睿', role: 'COO', bg: 'linear-gradient(135deg,#60a5fa,#2563eb)' },
+      { initials: 'SK', name: '金莎拉', role: '运营总监', bg: 'linear-gradient(135deg,#fbbf24,#d97706)' },
+      { initials: 'SK', name: 'Sarah Kim', role: 'CS TEAM LEAD', bg: 'linear-gradient(135deg,#34d399,#059669)' },
+      { initials: 'PS', name: 'Priya Singh', role: 'QUALITY REVIEWER', bg: 'linear-gradient(135deg,#f472b6,#db2777)' },
+    ],
+    priorities: [
+      'CSAT 与百剩时长是 Q2 维二被允许「授权升级」的指标',
+      'AI 自动解决率每提升 1pp，要求转人工准确率不得下降 0.3pp 以上',
+      '所有上线必须给出 P0 / P1 两级降级预案，否则一票否决',
+    ],
+    guide: 'CEO 偏好「先 80% 上线，再 20% 迭代」，反感为完美等待；\n\n在转人工策略上倾向授权——从队主管可在偏差 ±0.05 范围内自调，无需走审批。',
+    quote: '「客服永远是品牌门面，可以慢慢应答，不可以说不回复。」',
+    redLines: [
+      '禁止用 AI 直接处理涉及实名 / 退款 / 法律敏感的工单',
+      '不允许把 CSAT 兑换成短期成本节省',
+      'VIP 玩家工单必须 5 分钟内有人工介入',
+    ],
+    cases: [
+      'Q1 客服评审：三条管辖矢度 → 决定完全量 1 条 × 观察 7 天再放量',
+      '23 年 12 月退款风波：把 AI 转人工阈值临时调到 0.7 兜底',
+      'JP 客季活动：临时关闭 AI 自动结案、全量人工直核',
+    ],
+  },
+  {
+    title: '数据驱动决策框架',
+    ver: 'V1.8 · 更新于 2026-04-05',
+    whenToApply: '当需要为运营决策、产品迭代或 Agent 策略调整提供数据依据时启用。目标：定义哪些指标是核心决策指标，如何设置观察窗口，什么情况下数据结论可以直接推动执行，什么情况下需要人工判断介入。不适用于：财务预算决策、人员评级。',
+    from: [
+      { initials: '金', name: '金莎拉', role: 'CS MGR', bg: 'linear-gradient(135deg,#fbbf24,#d97706)' },
+      { initials: '王', name: '王晓芳', role: 'MKT', bg: 'linear-gradient(135deg,#60a5fa,#2563eb)' },
+      { initials: 'LX', name: '刘睿', role: 'COO', bg: 'linear-gradient(135deg,#60a5fa,#3b82f6)' },
+    ],
+    priorities: [
+      '核心决策指标每周更新一次，Agent 须使用最新版本指标基线',
+      'A/B 测试结论须达到 95% 置信度才可推动全量上线',
+      '指标异常波动（±15%）须在 2 小时内触发自动告警并通知决策者',
+    ],
+    guide: 'COO 要求所有数据驱动决策必须附带「如果数据错了，后果是什么」的风险评估；不允许仅凭单一指标做全量决策，至少需要两个互相印证的指标。\n\n数据结论的有效期为 7 天，超期须重新验证，不允许引用过期数据支撑当前决策。',
+    quote: '「数据告诉你发生了什么，但你自己要想明白为什么。」',
+    redLines: [
+      '禁止用采样率 < 5% 的数据结论推动全量策略变更',
+      '不允许在数据回溯期 < 2 周的情况下定义「趋势」',
+      '所有指标定义变更须同步更新数据字典，不得口头约定',
+    ],
+    cases: [
+      '25 年 Q3 策略误判：仅看 DAU 忽略留存率，全量上线后次周留存下降 8%',
+      '活动效果评估：引入对照组后发现自然增长占比 60%，避免过度归因活动',
+      'Agent 策略 A/B：观察期延长至 3 周后结论反转，避免一次错误全量上线',
+    ],
+  },
+];
+
+function _renderBrainDetail(doc) {
+  const editIcon = `<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+  const chipsHtml = doc.from.map(p => `
+    <div class="brain-detail-chip">
+      <div class="brain-detail-chip-avatar" style="background:${p.bg}">${p.initials}</div>
+      <span class="brain-detail-chip-name">${p.name}</span>
+      <span class="brain-detail-chip-role">${p.role}</span>
+    </div>`).join('');
+  const bulletsHtml = (items) => items.map(i => `<li>${i}</li>`).join('');
+  const guideParas = doc.guide.split('\n\n').map(p => `<p class="brain-section-text" style="margin-top:8px">${p}</p>`).join('');
+  return `
+    <div class="brain-detail-title-row">
+      <span class="brain-detail-title">${doc.title}</span>
+      <button class="brain-edit-btn" title="编辑" onclick="showSnack('编辑 Brain-doc')">${editIcon}</button>
+    </div>
+    <div class="brain-section">
+      <div class="brain-section-label">WHEN TO APPLY</div>
+      <p class="brain-section-text">${doc.whenToApply}</p>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">FROM</div>
+      <div class="brain-detail-chips">${chipsHtml}</div>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">近期优先级</div>
+      <ul class="brain-bullets">${bulletsHtml(doc.priorities)}</ul>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">决策向导</div>
+      ${guideParas}
+      <div class="brain-quote">${doc.quote}</div>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">红线与禁区</div>
+      <ul class="brain-bullets">${bulletsHtml(doc.redLines)}</ul>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">往往案例</div>
+      <ul class="brain-bullets">${bulletsHtml(doc.cases)}</ul>
+    </div>`;
+}
+
+function openBrainDetail(idx) {
+  const doc = BRAIN_DOCS[idx];
+  if (!doc) return;
+  document.getElementById('brainDetailVer').textContent = doc.ver;
+  document.getElementById('brainDetailBody').innerHTML = _renderBrainDetail(doc);
+  const panel = document.getElementById('brainDetail');
+  panel.classList.add('open');
+  panel.scrollTop = 0;
 }
 function closeBrainDetail() {
   document.getElementById('brainDetail').classList.remove('open');
