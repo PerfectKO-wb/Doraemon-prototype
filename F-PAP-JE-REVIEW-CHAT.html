@@ -561,12 +561,12 @@
         </div>
       </div>
       <div class="list-filter-row">
-        <button class="chip solid">Awaiting Review</button>
-        <button class="chip">All</button>
+        <button class="chip solid">待审核</button>
+        <button class="chip">全部</button>
       </div>
       <div class="search-row">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Search JE drafts...">
+        <input type="text" placeholder="搜索 JE 草稿...">
       </div>
     </div>
     <div class="list-count" id="listCount"><strong>5</strong> total</div>
@@ -576,15 +576,15 @@
   <!-- ===== MAIN CHAT AREA ===== -->
   <div class="chat-main">
     <div class="chat-header">
-      <div class="chat-header-badge" id="chatBadge">PENDING</div>
+      <div class="chat-header-badge" id="chatBadge">待审核</div>
       <div class="chat-header-info">
         <div class="chat-header-title" id="chatTitle">JE-DRAFT-2026-0501</div>
-        <div class="chat-header-sub" id="chatSub">Source: INV-202604-0006 · JPY</div>
+        <div class="chat-header-sub" id="chatSub">来源: INV-202604-0006 · JPY</div>
       </div>
       <div class="chat-header-actions">
         <button class="hdr-btn" onclick="window.location='F-PAP-PAYMENT-REVIEW.html'">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          Back
+          返回
         </button>
       </div>
     </div>
@@ -594,20 +594,20 @@
     <div class="chat-input-wrap">
       <div class="chat-input-box" id="inputBox">
         <textarea class="chat-input-textarea" id="chatInput" rows="1"
-          placeholder="Reply… e.g. 「line 1 account code → 6060」「accounting date → 2026-05-31」「confirm」"></textarea>
+          placeholder="回复… 例：「第1行 科目代码 → 6060」「入账日期 → 2026-05-31」「确认」"></textarea>
         <div class="chat-input-footer">
           <div class="chat-input-hints">
-            <button class="hint-pill" data-msg="confirm">
+            <button class="hint-pill" data-msg="确认">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Confirm JE
+              确认 JE
             </button>
-            <button class="hint-pill" data-msg="line 1 account code → ">
+            <button class="hint-pill" data-msg="第1行 科目代码 → ">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit Account
+              修改科目
             </button>
-            <button class="hint-pill" data-msg="accounting date → ">
+            <button class="hint-pill" data-msg="入账日期 → ">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              Change Date
+              修改日期
             </button>
           </div>
           <button class="input-send-btn" id="sendBtn">
@@ -621,7 +621,7 @@
   <!-- ===== RIGHT DETAIL PANEL ===== -->
   <div class="detail-panel">
     <div class="detail-panel-head">
-      JE Details
+      JE 详情
       <button class="icon-btn" style="width:26px;height:26px;" title="Refresh">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       </button>
@@ -647,10 +647,10 @@ const jeSessions = [
     reviewer: '王喆',
     confidence: 68,
     confidenceLevel: 'med',
-    aiReason: 'Account code 6050 (広告宣伝費) has 68% confidence. Could be 6060 (その他外注費) based on payee description "クラウドインフラ". Please confirm the correct account classification.',
+    aiReason: '科目代码 6050（广告宣传费）置信度为 68%，根据收款方描述"クラウドインフラ"，也可能归类为 6060（其他外包费用）。请确认正确的费用科目。',
     lines: [
-      { no: 1, acctCode: '6050', acctName: '広告宣伝費', dr: '128,500', cr: '' },
-      { no: 2, acctCode: '2110', acctName: '未払金',     dr: '',       cr: '128,500' },
+      { no: 1, acctCode: '6050', acctName: '广告宣传费', dr: '128,500', cr: '' },
+      { no: 2, acctCode: '2110', acctName: '应付款',     dr: '',       cr: '128,500' },
     ],
     messages: [
       { role: 'bot', type: 'je-draft-card', time: '2026-05-08 09:42' }
@@ -780,10 +780,10 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
 
   const intro = prefixText
     ? `${prefixText}`
-    : `${mentionStr} AI has generated the following Journal Entry draft from <span class="inline-code">${s.sourceId}</span>, but confidence is below threshold. Please review and confirm or correct before it is posted to F System.`;
+    : `${mentionStr} AI 已根据 <span class="inline-code">${s.sourceId}</span> 生成以下会计分录草稿，但置信度低于阈值，需要人工确认。请核对后确认或更正，再提交至 F System。`;
 
   const headClass = confirmed ? 'je-draft-head confirmed-head' : 'je-draft-head';
-  const headLabel = confirmed ? 'JE Confirmed' : 'JE Draft — Pending Review';
+  const headLabel = confirmed ? '分录已确认' : '分录草稿 — 待审核';
 
   const linesHtml = lines.map(ln => `
     <div class="je-lines-row">
@@ -802,12 +802,12 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
 
   const actionsHtml = !confirmed ? `
     <div class="msg-actions-row">
-      <button class="msg-quick-btn confirm-btn" onclick="sendMessage('confirm')">
+      <button class="msg-quick-btn confirm-btn" onclick="sendMessage('确认')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        Confirm JE
+        确认 JE
       </button>
-      <button class="msg-quick-btn" onclick="document.getElementById('chatInput').value='line 1 account code → ';document.getElementById('chatInput').focus();document.getElementById('sendBtn').classList.add('active');">
-        Edit Account Code
+      <button class="msg-quick-btn" onclick="document.getElementById('chatInput').value='第1行 科目代码 → ';document.getElementById('chatInput').focus();document.getElementById('sendBtn').classList.add('active');">
+        修改科目代码
       </button>
     </div>` : '';
 
@@ -819,17 +819,17 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
       <div class="msg-bot-meta">
         <span class="msg-bot-name">Xiaobao</span>
         <span class="msg-time">${time}</span>
-        ${!confirmed ? `<span class="je-conf-badge ${cl}">${s.confidence}% conf.</span>` : ''}
+        ${!confirmed ? `<span class="je-conf-badge ${cl}">${s.confidence}% 置信度</span>` : ''}
       </div>
       <div class="msg-bubble">
         <p>${intro}</p>
         <hr class="md-hr">
         <p class="md-heading"><span class="md-tag ${!confirmed ? 'warn' : ''}">${headLabel}</span> &nbsp;<span style="font-size:12px;font-weight:400;color:var(--text-tertiary);">${s.id}</span></p>
         <table class="md-table" style="margin-bottom:8px;">
-          <tr><th>Source</th><td>${s.sourceId} (${s.sourceType.toUpperCase()})</td></tr>
-          <tr><th>Company</th><td>${s.company}</td></tr>
-          <tr><th>Currency</th><td>${s.currency}</td></tr>
-          <tr><th>Accounting Date</th><td>${acctDate}</td></tr>
+          <tr><th>来源</th><td>${s.sourceId} (${s.sourceType.toUpperCase()})</td></tr>
+          <tr><th>公司</th><td>${s.company}</td></tr>
+          <tr><th>币种</th><td>${s.currency}</td></tr>
+          <tr><th>入账日期</th><td>${acctDate}</td></tr>
         </table>
         <div class="je-draft-msg">
           <div class="${headClass}">
@@ -840,17 +840,17 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
           <div class="je-lines-table">
             <div class="je-lines-head">
               <div class="je-col-no">#</div>
-              <div class="je-col-acct">Acct Code</div>
-              <div class="je-col-name">Account Name</div>
-              <div class="je-col-dr">Debit</div>
-              <div class="je-col-cr">Credit</div>
+              <div class="je-col-acct">科目代码</div>
+              <div class="je-col-name">科目名称</div>
+              <div class="je-col-dr">借方</div>
+              <div class="je-col-cr">贷方</div>
             </div>
             ${linesHtml}
           </div>
           ${confRowHtml}
           <div class="je-draft-footer">
-            <span class="je-footer-mention">${mentionStr} Please review</span>
-            <span class="je-footer-date">Acct. Date: ${acctDate}</span>
+            <span class="je-footer-mention">${mentionStr} 请审核</span>
+            <span class="je-footer-date">入账日期：${acctDate}</span>
           </div>
         </div>
       </div>
@@ -937,41 +937,41 @@ function renderDetailPanel() {
 
   const linesHtml = s.lines.map(ln => `
     <div class="je-line-detail-card">
-      <div class="je-line-no">LINE ${ln.no}</div>
+      <div class="je-line-no">第 ${ln.no} 行</div>
       <div class="je-line-acct">${ln.acctCode}</div>
       <div class="je-line-name">${ln.acctName}</div>
       <div class="je-line-amounts">
-        ${ln.dr ? `<span class="je-line-dr">Dr ${ln.dr}</span>` : ''}
-        ${ln.cr ? `<span class="je-line-cr">Cr ${ln.cr}</span>` : ''}
+        ${ln.dr ? `<span class="je-line-dr">借 ${ln.dr}</span>` : ''}
+        ${ln.cr ? `<span class="je-line-cr">贷 ${ln.cr}</span>` : ''}
       </div>
     </div>`).join('');
 
   el.innerHTML = `
     <div class="detail-section">
-      <div class="detail-section-title">Confidence</div>
+      <div class="detail-section-title">置信度</div>
       <span class="conf-score ${cl}">${s.confidence}%</span>
       <p style="font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">${s.aiReason}</p>
     </div>
     <div class="detail-section">
-      <div class="detail-section-title">JE Info</div>
-      <div class="detail-field"><span class="detail-field-label">Draft ID</span><span class="detail-field-val" style="font-family:monospace;">${s.id}</span></div>
-      <div class="detail-field"><span class="detail-field-label">Source</span><span class="detail-field-val">${s.sourceId}</span></div>
-      <div class="detail-field"><span class="detail-field-label">Company</span><span class="detail-field-val">${s.company}</span></div>
-      <div class="detail-field"><span class="detail-field-label">Currency</span><span class="detail-field-val">${s.currency}</span></div>
-      <div class="detail-field"><span class="detail-field-label">Acct. Date</span><span class="detail-field-val" id="detailAcctDate">${s.accountingDate}</span></div>
-      <div class="detail-field"><span class="detail-field-label">Status</span>
-        <span class="je-conf-badge ${confirmed ? 'high' : cl}">${confirmed ? 'Confirmed' : 'Pending Review'}</span>
+      <div class="detail-section-title">JE 信息</div>
+      <div class="detail-field"><span class="detail-field-label">草稿 ID</span><span class="detail-field-val" style="font-family:monospace;">${s.id}</span></div>
+      <div class="detail-field"><span class="detail-field-label">来源</span><span class="detail-field-val">${s.sourceId}</span></div>
+      <div class="detail-field"><span class="detail-field-label">公司</span><span class="detail-field-val">${s.company}</span></div>
+      <div class="detail-field"><span class="detail-field-label">币种</span><span class="detail-field-val">${s.currency}</span></div>
+      <div class="detail-field"><span class="detail-field-label">入账日期</span><span class="detail-field-val" id="detailAcctDate">${s.accountingDate}</span></div>
+      <div class="detail-field"><span class="detail-field-label">状态</span>
+        <span class="je-conf-badge ${confirmed ? 'high' : cl}">${confirmed ? '已确认' : '待审核'}</span>
       </div>
     </div>
     <div class="detail-section">
-      <div class="detail-section-title">JE Lines (${s.lines.length})</div>
+      <div class="detail-section-title">JE 分录（${s.lines.length} 行）</div>
       ${linesHtml}
     </div>`;
 
   if (confirmed) {
     const banner = document.createElement('div');
     banner.className = 'submitted-banner';
-    banner.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> JE confirmed · Posted to F System`;
+    banner.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> JE 已确认 · 已提交至 F System`;
     el.appendChild(banner);
   }
 }
@@ -981,9 +981,9 @@ function switchSession(id) {
   activeSessionId = id;
   const s = activeSession();
   document.getElementById('chatTitle').textContent = s.id;
-  document.getElementById('chatSub').textContent = `Source: ${s.sourceId} · ${s.currency}`;
+  document.getElementById('chatSub').textContent = `来源: ${s.sourceId} · ${s.currency}`;
   const badge = document.getElementById('chatBadge');
-  badge.textContent = s.state === 'confirmed' ? 'CONFIRMED' : 'PENDING';
+  badge.textContent = s.state === 'confirmed' ? '已确认' : '待审核';
   badge.className = 'chat-header-badge' + (s.state === 'confirmed' ? ' confirmed' : '');
   renderSessionList();
   renderThread();
@@ -996,44 +996,44 @@ function parseAndExecute(text) {
   const lower = text.toLowerCase().trim();
 
   // Confirm
-  if (/^(confirm|lgtm|ok$|approve|confirmed|没问题|确认|提交)/i.test(lower) || lower.includes('confirm')) {
+  if (/^(confirm|lgtm|ok$|approve|confirmed|没问题|确认|提交)/i.test(lower) || lower.includes('confirm') || lower.includes('确认')) {
     return doConfirm(s);
   }
 
-  // Change account code: "line 1 account code → 6060" or "line 2 acct → 2200"
-  const acctMatch = text.match(/line\s*(\d+)\s+(?:account\s*code|acct(?:ount)?)\s*[→\->\s]+\s*(\w+)/i);
+  // Change account code: "第1行 科目代码 → 6060" or "line 1 account code → 6060"
+  const acctMatch = text.match(/(?:第\s*(\d+)\s*行|line\s*(\d+))\s*(?:科目代码|account\s*code|acct(?:ount)?)\s*[→\->\s]+\s*(\w+)/i);
   if (acctMatch) {
-    return doChangeAccount(s, Number(acctMatch[1]), acctMatch[2].trim());
+    return doChangeAccount(s, Number(acctMatch[1] || acctMatch[2]), acctMatch[3].trim());
   }
 
-  // Change accounting date: "accounting date → 2026-05-31"
-  const dateMatch = text.match(/accounting\s*date\s*[→\->\s]+\s*([\d\-\/]+)/i);
+  // Change accounting date: "入账日期 → 2026-05-31" or "accounting date → 2026-05-31"
+  const dateMatch = text.match(/(?:入账日期|accounting\s*date)\s*[→\->\s]+\s*([\d\-\/]+)/i);
   if (dateMatch) {
     return doChangeDate(s, dateMatch[1].trim());
   }
 
-  // Change account name: "line 1 account name → xxx"
-  const nameMatch = text.match(/line\s*(\d+)\s+(?:account\s*name|name)\s*[→\->\s]+\s*(.+)/i);
+  // Change account name: "第1行 科目名称 → xxx"
+  const nameMatch = text.match(/(?:第\s*(\d+)\s*行|line\s*(\d+))\s*(?:科目名称|account\s*name|name)\s*[→\->\s]+\s*(.+)/i);
   if (nameMatch) {
-    return doChangeAccountName(s, Number(nameMatch[1]), nameMatch[2].trim());
+    return doChangeAccountName(s, Number(nameMatch[1] || nameMatch[2]), nameMatch[3].trim());
   }
 
   // Show lines
-  if (lower.includes('show') || lower.includes('lines') || lower.includes('list') || lower.includes('查看')) {
+  if (lower.includes('show') || lower.includes('lines') || lower.includes('list') || lower.includes('查看') || lower.includes('明细')) {
     return doListLines(s);
   }
 
   // Default
-  return `Understood. Available commands:\n• Confirm: \`confirm\`\n• Edit account code: \`line 1 account code → 6060\`\n• Edit account name: \`line 1 account name → 広告宣伝費\`\n• Change accounting date: \`accounting date → 2026-05-31\`\n• List JE lines: \`show lines\``;
+  return `收到。支持以下操作：\n• 确认分录：\`确认\`\n• 修改科目代码：\`第1行 科目代码 → 6060\`\n• 修改科目名称：\`第1行 科目名称 → 广告宣传费\`\n• 修改入账日期：\`入账日期 → 2026-05-31\`\n• 查看明细：\`查看明细\``;
 }
 
 function doConfirm(s) {
-  if (s.state === 'confirmed') return { systemMsg: 'This JE has already been confirmed.', type: 'info' };
+  if (s.state === 'confirmed') return { systemMsg: '该 JE 已确认，无需重复操作。', type: 'info' };
   s.state = 'confirmed';
   s.confidence = 100;
   s.confidenceLevel = 'high';
   return {
-    systemMsg: `✓ JE ${s.id} confirmed at ${nowStr()} — posted to F System.`,
+    systemMsg: `✓ JE ${s.id} 已于 ${nowStr()} 确认，已提交至 F System。`,
     type: 'success',
     refresh: true
   };
@@ -1041,43 +1041,43 @@ function doConfirm(s) {
 
 function doChangeAccount(s, lineNo, newCode) {
   const line = s.lines.find(l => l.no === lineNo);
-  if (!line) return `Line ${lineNo} not found. The draft has ${s.lines.length} lines.`;
-  if (s.state === 'confirmed') return 'JE is already confirmed and cannot be modified.';
+  if (!line) return `第 ${lineNo} 行不存在，该草稿共 ${s.lines.length} 行。`;
+  if (s.state === 'confirmed') return 'JE 已确认，无法修改。';
   const old = line.acctCode;
   line.acctCode = newCode;
   return {
-    updateMsg: `Line ${lineNo} account code updated: \`${old}\` → \`${newCode}\`.\nPlease review the updated JE below and confirm when ready.`,
+    updateMsg: `第 ${lineNo} 行科目代码已更新：\`${old}\` → \`${newCode}\`。\n请确认下方更新后的分录，无误后提交。`,
     refresh: true
   };
 }
 
 function doChangeAccountName(s, lineNo, newName) {
   const line = s.lines.find(l => l.no === lineNo);
-  if (!line) return `Line ${lineNo} not found.`;
-  if (s.state === 'confirmed') return 'JE is already confirmed and cannot be modified.';
+  if (!line) return `第 ${lineNo} 行不存在。`;
+  if (s.state === 'confirmed') return 'JE 已确认，无法修改。';
   const old = line.acctName;
   line.acctName = newName;
   return {
-    updateMsg: `Line ${lineNo} account name updated: \`${old}\` → \`${newName}\`.\nPlease confirm when ready.`,
+    updateMsg: `第 ${lineNo} 行科目名称已更新：\`${old}\` → \`${newName}\`。\n请确认无误后提交。`,
     refresh: true
   };
 }
 
 function doChangeDate(s, newDate) {
-  if (s.state === 'confirmed') return 'JE is already confirmed and cannot be modified.';
+  if (s.state === 'confirmed') return 'JE 已确认，无法修改。';
   const old = s.accountingDate;
   s.accountingDate = newDate;
   return {
-    updateMsg: `Accounting date updated: \`${old}\` → \`${newDate}\`.\nPlease review the updated JE below and confirm.`,
+    updateMsg: `入账日期已更新：\`${old}\` → \`${newDate}\`。\n请确认下方更新后的分录，无误后提交。`,
     refresh: true
   };
 }
 
 function doListLines(s) {
   const lines = s.lines.map(l =>
-    `• Line ${l.no}: [${l.acctCode}] ${l.acctName}  ${l.dr ? 'Dr ' + l.dr : ''}${l.cr ? 'Cr ' + l.cr : ''}`
+    `• 第 ${l.no} 行：[${l.acctCode}] ${l.acctName}  ${l.dr ? '借 ' + l.dr : ''}${l.cr ? '贷 ' + l.cr : ''}`
   ).join('\n');
-  return `JE ${s.id} has ${s.lines.length} lines:\n${lines}\n\nAccounting Date: ${s.accountingDate}`;
+  return `JE ${s.id} 共 ${s.lines.length} 行：\n${lines}\n\n入账日期：${s.accountingDate}`;
 }
 
 // ========== SEND MESSAGE ==========
