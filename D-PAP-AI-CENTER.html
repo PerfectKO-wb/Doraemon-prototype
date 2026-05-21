@@ -959,43 +959,6 @@ html,body{width:100%;height:100%;overflow:hidden;}
 .pdm-rec-hd{font-size:11px;font-weight:600;color:#bf6000;margin-bottom:8px;letter-spacing:.01em;}
 .pdm-rec-list{list-style:none;display:flex;flex-direction:column;gap:6px;}
 .pdm-rec-item{font-size:13px;line-height:1.55;color:rgba(0,0,0,.82);display:flex;align-items:flex-start;gap:6px;border-radius:6px;padding:4px 5px;transition:background .12s;}
-/* skipped state */
-.pdm-rec-item--skip .pdm-rec-item-text{color:rgba(0,0,0,.35);}
-.pdm-rec-item--skip .pdm-rec-exec{opacity:.35;}
-/* escalated state */
-.pdm-rec-item--esc{background:rgba(255,152,0,.07);}
-.pdm-rec-item--esc .pdm-rec-item-text{color:rgba(0,0,0,.45);}
-/* escalate badge */
-.pdm-rec-esc-badge{display:none;flex-shrink:0;align-items:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 6px;border-radius:4px;background:rgba(255,152,0,.18);color:#bf6000;margin-top:2px;white-space:nowrap;}
-.pdm-rec-item--esc .pdm-rec-esc-badge{display:inline-flex;}
-/* per-action checkbox (skip = uncheck) */
-.pdm-rec-cb-wrap{display:flex;align-items:flex-start;flex-shrink:0;padding-top:2px;}
-.pdm-rec-cb{
-  appearance:none;-webkit-appearance:none;
-  width:15px;height:15px;border-radius:4px;border:1.5px solid rgba(0,0,0,.25);
-  background:#fff;cursor:pointer;flex-shrink:0;position:relative;
-  transition:border-color .12s,background .12s;
-}
-.pdm-rec-cb:checked{background:#1a1a1a;border-color:#1a1a1a;}
-.pdm-rec-cb:checked::after{
-  content:'';position:absolute;left:3px;top:0px;width:5px;height:9px;
-  border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg);
-}
-.pdm-rec-cb:disabled{opacity:.4;cursor:not-allowed;}
-.pdm-rec-item--skip .pdm-rec-item-text{text-decoration:line-through;}
-/* per-action right-side buttons */
-.pdm-rec-actions{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0;}
-.pdm-rec-esc-btn{
-  background:none;border:1px solid transparent;cursor:pointer;padding:2px 8px;border-radius:5px;
-  font-size:11px;font-weight:600;line-height:1.5;white-space:nowrap;
-  transition:color .12s,background .12s,border-color .12s;
-  color:rgba(0,0,0,.3);
-}
-.pdm-rec-esc-btn:hover{color:#bf6000;background:rgba(255,152,0,.1);border-color:rgba(255,152,0,.35);}
-.pdm-rec-item--esc .pdm-rec-esc-btn{color:#bf6000;background:rgba(255,152,0,.12);border-color:rgba(255,152,0,.4);}
-/* skip badge inside the row */
-.pdm-rec-skip-badge{display:none;}
-.pdm-rec-item--skip .pdm-rec-skip-badge{display:none;}
 /* Executor badges */
 .pdm-rec-exec{display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 5px;border-radius:4px;flex-shrink:0;margin-top:2px;transition:background .3s,color .3s;}
 .pdm-rec-exec.ai{background:rgba(0,0,0,.07);color:rgba(0,0,0,.45);}
@@ -1024,6 +987,15 @@ html,body{width:100%;height:100%;overflow:hidden;}
 .pdm-btn-execute:hover:not(:disabled){opacity:.85;}
 .pdm-btn-done-inline{background:transparent;border:1px solid rgba(0,0,0,.14);color:rgba(0,0,0,.55);}
 .pdm-btn-done-inline:hover:not(:disabled){background:rgba(76,175,80,.06);border-color:rgba(76,175,80,.35);color:#2e7d32;}
+.pdm-btn-help{background:transparent;border:1px solid rgba(255,152,0,.4);color:#bf6000;}
+.pdm-btn-help:hover:not(:disabled){background:rgba(255,152,0,.08);border-color:rgba(255,152,0,.6);}
+/* Help feedback panel */
+.pdm-help-panel{display:none;flex-direction:column;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,.1);}
+.pdm-help-panel.show{display:flex;}
+.pdm-help-panel-label{font-size:11px;color:rgba(0,0,0,.45);letter-spacing:.01em;}
+.pdm-help-panel textarea{width:100%;box-sizing:border-box;border:1px solid rgba(0,0,0,.14);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;color:rgba(0,0,0,.8);background:rgba(255,255,255,.7);resize:none;outline:none;line-height:1.6;}
+.pdm-help-panel textarea:focus{border-color:rgba(0,0,0,.3);background:#fff;}
+.pdm-help-panel-actions{display:flex;gap:8px;align-items:center;}
 .pdm-agent-status{display:none;font-size:13px;line-height:1.55;padding:10px 12px;border-radius:10px;margin-bottom:10px;}
 .pdm-agent-status.show{display:block;}
 .pdm-agent-status.ok{background:#f6ffed;border:1px solid #b7eb8f;color:#389e0d;}
@@ -1303,37 +1275,24 @@ html,body{width:100%;height:100%;overflow:hidden;}
                 <div class="pdm-rec-hd">Recommended Action · Ref. BRAIN-DOC CS-PB-014</div>
                 <ul class="pdm-rec-list" id="pdmRecList">
                   <li class="pdm-rec-item" id="pdmRecItem0">
-                    <span class="pdm-rec-cb-wrap"><input type="checkbox" class="pdm-rec-cb" id="pdmRecCb0" checked onchange="toggleRecSkip(0)"></span>
                     <span class="pdm-rec-exec ai" id="pdmRecExec0">AI</span>
                     <span class="pdm-rec-item-text">批准 CS 工具向 153 名玩家批量发放 70 张「合成卡」</span>
-                    <span class="pdm-rec-esc-badge" id="pdmRecEscBadge0">↑ Escalate</span>
-                    <span class="pdm-rec-actions">
-                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn0" onclick="toggleRecEsc(0)" title="升级此 Action 给决策者">↑ Escalate</button>
-                    </span>
                   </li>
                   <li class="pdm-rec-item" id="pdmRecItem1">
-                    <span class="pdm-rec-cb-wrap"><input type="checkbox" class="pdm-rec-cb" id="pdmRecCb1" checked onchange="toggleRecSkip(1)"></span>
                     <span class="pdm-rec-exec hu" id="pdmRecExec1">HU</span>
                     <span class="pdm-rec-item-text">同步技术组排查成就触发逻辑（需技术组负责人确认）</span>
-                    <span class="pdm-rec-esc-badge" id="pdmRecEscBadge1">↑ Escalate</span>
-                    <span class="pdm-rec-actions">
-                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn1" onclick="toggleRecEsc(1)" title="升级此 Action 给决策者">↑ Escalate</button>
-                    </span>
                   </li>
                   <li class="pdm-rec-item" id="pdmRecItem2">
-                    <span class="pdm-rec-cb-wrap"><input type="checkbox" class="pdm-rec-cb" id="pdmRecCb2" checked onchange="toggleRecSkip(2)"></span>
                     <span class="pdm-rec-exec ai" id="pdmRecExec2">AI</span>
                     <span class="pdm-rec-item-text">官方渠道发布补偿公告，附预计修复时间</span>
-                    <span class="pdm-rec-esc-badge" id="pdmRecEscBadge2">↑ Escalate</span>
-                    <span class="pdm-rec-actions">
-                      <button class="pdm-rec-esc-btn" id="pdmRecEscBtn2" onclick="toggleRecEsc(2)" title="升级此 Action 给决策者">↑ Escalate</button>
-                    </span>
                   </li>
                 </ul>
               </div>
               <div class="pdm-action-row" id="pdmActionRow">
                 <button type="button" class="pdm-btn pdm-btn-execute" id="pdmAgentYes">Execute</button>
                 <button type="button" class="pdm-btn pdm-btn-done-inline" id="pdmAgentDone">Already Done</button>
+                <button type="button" class="pdm-btn pdm-btn-help" id="pdmAgentHelp" onclick="openPdmHelpPanel()">Help</button>
+              </div>
               <!-- Done feedback panel -->
               <div class="pdm-done-panel" id="pdmDonePanel">
                 <div class="pdm-done-panel-label">向 Agent 反馈此次处理情况（可选，有助于提升下次决策准确性）</div>
@@ -1341,6 +1300,15 @@ html,body{width:100%;height:100%;overflow:hidden;}
                 <div class="pdm-done-panel-actions">
                   <button type="button" class="pdm-btn pdm-btn-done-confirm" id="pdmDoneConfirm">确认完成</button>
                   <button type="button" class="pdm-btn pdm-btn-done-cancel" onclick="closePdmDonePanel()">取消</button>
+                </div>
+              </div>
+              <!-- Help panel -->
+              <div class="pdm-help-panel" id="pdmHelpPanel">
+                <div class="pdm-help-panel-label">描述需要帮助的内容，Agent 将转交给决策者处理</div>
+                <textarea id="pdmHelpFeedback" rows="2" placeholder="例：不确定这个补偿数量是否合理，需要决策者判断…"></textarea>
+                <div class="pdm-help-panel-actions">
+                  <button type="button" class="pdm-btn pdm-btn-done-confirm" id="pdmHelpConfirm" onclick="confirmPdmHelp()">提交</button>
+                  <button type="button" class="pdm-btn pdm-btn-done-cancel" onclick="closePdmHelpPanel()">取消</button>
                 </div>
               </div>
             </div>
@@ -2243,20 +2211,19 @@ function switchPdmCase(n){
     card.classList.remove('resolving','resolved-msg');
     const st = document.getElementById('pdmAgentStatus');
     st.className = 'pdm-agent-status'; st.textContent = '';
-    ['pdmAgentYes','pdmAgentDone'].forEach(id => {
-      const b = document.getElementById(id); if(b) b.disabled = false;
+    ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
+      const b = document.getElementById(id); if(b){ b.disabled = false; b.style.display = ''; }
     });
-    // Reset rec-list: execution states + skip + escalated
+    // Reset rec-list: execution states only
     [0,1,2].forEach(i => {
       const row = document.getElementById('pdmRecItem' + i);
-      if(row){ row.classList.remove('exec-running','exec-done','exec-assigned','pdm-rec-item--skip','pdm-rec-item--esc'); }
-      const cb = document.getElementById('pdmRecCb' + i);
-      if(cb){ cb.checked = true; cb.style.display = ''; }
-      const escBtn = document.getElementById('pdmRecEscBtn' + i);
-      if(escBtn){ escBtn.textContent = '↑ Escalate'; escBtn.disabled = false; escBtn.style.display = ''; }
-      const escBadge = document.getElementById('pdmRecEscBadge' + i);
-      if(escBadge) escBadge.textContent = '↑ Escalate';
+      if(row){ row.classList.remove('exec-running','exec-done','exec-assigned'); }
     });
+    // Hide Help panel if open
+    const hp = document.getElementById('pdmHelpPanel');
+    if(hp){ hp.classList.remove('show'); }
+    const hf = document.getElementById('pdmHelpFeedback');
+    if(hf) hf.value = '';
     const e0 = document.getElementById('pdmRecExec0'); if(e0) e0.textContent = 'AI';
     const e1 = document.getElementById('pdmRecExec1'); if(e1) e1.textContent = 'HU';
     const e2 = document.getElementById('pdmRecExec2'); if(e2) e2.textContent = 'AI';
@@ -2282,67 +2249,42 @@ function togglePdmBrainDoc(){
 }
 
 
-// Per-action skip: driven by checkbox state
-function toggleRecSkip(idx){
-  const row    = document.getElementById('pdmRecItem' + idx);
-  const cb     = document.getElementById('pdmRecCb'   + idx);
-  const escBtn = document.getElementById('pdmRecEscBtn' + idx);
-  if(!row || !cb) return;
-  if(row.classList.contains('pdm-rec-item--esc')) { cb.checked = false; return; } // locked while escalated
-  const isSkip = !cb.checked;
-  row.classList.toggle('pdm-rec-item--skip', isSkip);
-  if(escBtn) escBtn.style.display = isSkip ? 'none' : '';
-  _updateExecBtn();
-}
-
-function toggleRecEsc(idx){
-  const row    = document.getElementById('pdmRecItem' + idx);
-  const escBtn = document.getElementById('pdmRecEscBtn' + idx);
-  const cb     = document.getElementById('pdmRecCb'    + idx);
-  if(!row) return;
-  const isEsc = row.classList.toggle('pdm-rec-item--esc');
-  if(isEsc){
-    // escalated: restore from skip first, hide checkbox, show Undo on esc btn
-    row.classList.remove('pdm-rec-item--skip');
-    if(cb){ cb.checked = true; cb.style.display = 'none'; }
-    if(escBtn){ escBtn.textContent = 'Undo'; escBtn.style.display = ''; }
-  } else {
-    // un-escalated: show checkbox, restore esc btn label
-    if(cb){ cb.style.display = ''; }
-    if(escBtn){ escBtn.textContent = '↑ Escalate'; escBtn.style.display = ''; }
-  }
-  _updateExecBtn();
-}
-
-// Recompute Execute button enabled state
-function _updateExecBtn(){
-  const ALL_ITEMS = [
-    { idx: 0 }, { idx: 1 }, { idx: 2 },
-  ];
-  const anyExecute = ALL_ITEMS.some(it => {
-    const row = document.getElementById('pdmRecItem' + it.idx);
-    return row && !row.classList.contains('pdm-rec-item--skip') && !row.classList.contains('pdm-rec-item--esc');
+// Task-level Help panel
+function openPdmHelpPanel(){
+  const panel = document.getElementById('pdmHelpPanel');
+  if(panel) panel.classList.add('show');
+  // Hide task-level buttons while panel is open
+  ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
+    const b = document.getElementById(id); if(b) b.style.display = 'none';
   });
-  const anyEsc = ALL_ITEMS.some(it => {
-    const row = document.getElementById('pdmRecItem' + it.idx);
-    return row && row.classList.contains('pdm-rec-item--esc');
-  });
-  const execBtn = document.getElementById('pdmAgentYes');
-  if(execBtn) execBtn.disabled = !anyExecute && !anyEsc;
 }
-
-// Legacy alias (called nowhere now but kept for safety)
-function onRecCbChange(){ _updateExecBtn(); }
+function closePdmHelpPanel(){
+  const panel = document.getElementById('pdmHelpPanel');
+  if(panel) panel.classList.remove('show');
+  const fb = document.getElementById('pdmHelpFeedback');
+  if(fb) fb.value = '';
+  ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
+    const b = document.getElementById(id); if(b) b.style.display = '';
+  });
+}
+function confirmPdmHelp(){
+  const st = document.getElementById('pdmAgentStatus');
+  if(st){ st.className='pdm-agent-status show info'; st.textContent='已提交 Help 请求，决策者将介入处理。'; }
+  closePdmHelpPanel();
+  // Disable all task-level buttons after help submitted
+  ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
+    const b = document.getElementById(id); if(b) b.disabled = true;
+  });
+}
 
 function closePdmDonePanel(){
   const panel = document.getElementById('pdmDonePanel');
   if(panel) panel.classList.remove('show');
   const fb = document.getElementById('pdmDoneFeedback');
   if(fb) fb.value = '';
-  const yes = document.getElementById('pdmAgentYes');
-  const done = document.getElementById('pdmAgentDone');
-  if(yes) yes.style.display = '';
-  if(done) done.style.display = '';
+  ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
+    const b = document.getElementById(id); if(b) b.style.display = '';
+  });
 }
 
 
@@ -2455,8 +2397,9 @@ if(user.view==='pdm'){
   // Done: show feedback panel
   document.getElementById('pdmAgentDone').addEventListener('click', function(){
     if(this.disabled) return;
-    document.getElementById('pdmAgentYes').style.display = 'none';
-    document.getElementById('pdmAgentDone').style.display = 'none';
+    ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
+      const b = document.getElementById(id); if(b) b.style.display = 'none';
+    });
     document.getElementById('pdmDonePanel').classList.add('show');
     document.getElementById('pdmDoneFeedback').focus();
   });
