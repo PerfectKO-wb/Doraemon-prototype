@@ -959,8 +959,8 @@ html,body{width:100%;height:100%;overflow:hidden;}
 .pdm-rec-hd{font-size:11px;font-weight:600;color:#bf6000;margin-bottom:8px;letter-spacing:.01em;}
 .pdm-rec-list{list-style:none;display:flex;flex-direction:column;gap:6px;}
 .pdm-rec-item{font-size:13px;line-height:1.55;color:rgba(0,0,0,.82);display:flex;align-items:flex-start;gap:6px;border-radius:6px;padding:4px 5px;transition:background .12s;}
-/* skipped state — muted, no strikethrough */
-.pdm-rec-item--skip .pdm-rec-item-text{color:rgba(0,0,0,.3);}
+/* skipped state */
+.pdm-rec-item--skip .pdm-rec-item-text{color:rgba(0,0,0,.35);}
 .pdm-rec-item--skip .pdm-rec-exec{opacity:.35;}
 /* escalated state */
 .pdm-rec-item--esc{background:rgba(255,152,0,.07);}
@@ -968,22 +968,34 @@ html,body{width:100%;height:100%;overflow:hidden;}
 /* escalate badge */
 .pdm-rec-esc-badge{display:none;flex-shrink:0;align-items:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 6px;border-radius:4px;background:rgba(255,152,0,.18);color:#bf6000;margin-top:2px;white-space:nowrap;}
 .pdm-rec-item--esc .pdm-rec-esc-badge{display:inline-flex;}
+/* per-action checkbox (skip = uncheck) */
+.pdm-rec-cb-wrap{display:flex;align-items:flex-start;flex-shrink:0;padding-top:2px;}
+.pdm-rec-cb{
+  appearance:none;-webkit-appearance:none;
+  width:15px;height:15px;border-radius:4px;border:1.5px solid rgba(0,0,0,.25);
+  background:#fff;cursor:pointer;flex-shrink:0;position:relative;
+  transition:border-color .12s,background .12s;
+}
+.pdm-rec-cb:checked{background:#1a1a1a;border-color:#1a1a1a;}
+.pdm-rec-cb:checked::after{
+  content:'';position:absolute;left:3px;top:0px;width:5px;height:9px;
+  border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg);
+}
+.pdm-rec-cb:disabled{opacity:.4;cursor:not-allowed;}
+.pdm-rec-item--skip .pdm-rec-item-text{text-decoration:line-through;}
 /* per-action right-side buttons */
 .pdm-rec-actions{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0;}
-.pdm-rec-esc-btn,.pdm-rec-skip-btn{
+.pdm-rec-esc-btn{
   background:none;border:1px solid transparent;cursor:pointer;padding:2px 8px;border-radius:5px;
   font-size:11px;font-weight:600;line-height:1.5;white-space:nowrap;
   transition:color .12s,background .12s,border-color .12s;
+  color:rgba(0,0,0,.3);
 }
-.pdm-rec-esc-btn{color:rgba(0,0,0,.3);border-color:transparent;}
 .pdm-rec-esc-btn:hover{color:#bf6000;background:rgba(255,152,0,.1);border-color:rgba(255,152,0,.35);}
 .pdm-rec-item--esc .pdm-rec-esc-btn{color:#bf6000;background:rgba(255,152,0,.12);border-color:rgba(255,152,0,.4);}
-.pdm-rec-skip-btn{color:rgba(0,0,0,.3);border-color:transparent;}
-.pdm-rec-skip-btn:hover{color:rgba(0,0,0,.6);background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.15);}
-.pdm-rec-item--skip .pdm-rec-skip-btn{color:rgba(0,0,0,.45);background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.15);}
 /* skip badge inside the row */
-.pdm-rec-skip-badge{display:none;flex-shrink:0;align-items:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.07);color:rgba(0,0,0,.4);margin-top:2px;white-space:nowrap;}
-.pdm-rec-item--skip .pdm-rec-skip-badge{display:inline-flex;}
+.pdm-rec-skip-badge{display:none;}
+.pdm-rec-item--skip .pdm-rec-skip-badge{display:none;}
 /* Executor badges */
 .pdm-rec-exec{display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 5px;border-radius:4px;flex-shrink:0;margin-top:2px;transition:background .3s,color .3s;}
 .pdm-rec-exec.ai{background:rgba(0,0,0,.07);color:rgba(0,0,0,.45);}
@@ -1204,7 +1216,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
           <div id="pdmAgentSection" class="section" style="display:none;">
             <div class="sec-label-row">
               <span class="sec-label" style="margin:0;">AI Task</span>
-              <span class="pdm-agent-badge" id="pdmAgentBadge">1 Agent Task</span>
+              <span class="pdm-agent-badge" id="pdmAgentBadge" style="display:none"></span>
             </div>
             <div class="pdm-agent-status" id="pdmAgentStatus"></div>
             <div class="pdm-agent-card" id="pdmAgentCard">
@@ -1291,32 +1303,29 @@ html,body{width:100%;height:100%;overflow:hidden;}
                 <div class="pdm-rec-hd">Recommended Action · Ref. BRAIN-DOC CS-PB-014</div>
                 <ul class="pdm-rec-list" id="pdmRecList">
                   <li class="pdm-rec-item" id="pdmRecItem0">
+                    <span class="pdm-rec-cb-wrap"><input type="checkbox" class="pdm-rec-cb" id="pdmRecCb0" checked onchange="toggleRecSkip(0)"></span>
                     <span class="pdm-rec-exec ai" id="pdmRecExec0">AI</span>
                     <span class="pdm-rec-item-text">批准 CS 工具向 153 名玩家批量发放 70 张「合成卡」</span>
-                    <span class="pdm-rec-skip-badge" id="pdmRecSkipBadge0">Skipped</span>
                     <span class="pdm-rec-esc-badge" id="pdmRecEscBadge0">↑ Escalate</span>
                     <span class="pdm-rec-actions">
-                      <button class="pdm-rec-skip-btn" id="pdmRecSkipBtn0" onclick="toggleRecSkip(0)" title="不采纳此建议">Skip</button>
                       <button class="pdm-rec-esc-btn" id="pdmRecEscBtn0" onclick="toggleRecEsc(0)" title="升级此 Action 给决策者">↑ Escalate</button>
                     </span>
                   </li>
                   <li class="pdm-rec-item" id="pdmRecItem1">
+                    <span class="pdm-rec-cb-wrap"><input type="checkbox" class="pdm-rec-cb" id="pdmRecCb1" checked onchange="toggleRecSkip(1)"></span>
                     <span class="pdm-rec-exec hu" id="pdmRecExec1">HU</span>
                     <span class="pdm-rec-item-text">同步技术组排查成就触发逻辑（需技术组负责人确认）</span>
-                    <span class="pdm-rec-skip-badge" id="pdmRecSkipBadge1">Skipped</span>
                     <span class="pdm-rec-esc-badge" id="pdmRecEscBadge1">↑ Escalate</span>
                     <span class="pdm-rec-actions">
-                      <button class="pdm-rec-skip-btn" id="pdmRecSkipBtn1" onclick="toggleRecSkip(1)" title="不采纳此建议">Skip</button>
                       <button class="pdm-rec-esc-btn" id="pdmRecEscBtn1" onclick="toggleRecEsc(1)" title="升级此 Action 给决策者">↑ Escalate</button>
                     </span>
                   </li>
                   <li class="pdm-rec-item" id="pdmRecItem2">
+                    <span class="pdm-rec-cb-wrap"><input type="checkbox" class="pdm-rec-cb" id="pdmRecCb2" checked onchange="toggleRecSkip(2)"></span>
                     <span class="pdm-rec-exec ai" id="pdmRecExec2">AI</span>
                     <span class="pdm-rec-item-text">官方渠道发布补偿公告，附预计修复时间</span>
-                    <span class="pdm-rec-skip-badge" id="pdmRecSkipBadge2">Skipped</span>
                     <span class="pdm-rec-esc-badge" id="pdmRecEscBadge2">↑ Escalate</span>
                     <span class="pdm-rec-actions">
-                      <button class="pdm-rec-skip-btn" id="pdmRecSkipBtn2" onclick="toggleRecSkip(2)" title="不采纳此建议">Skip</button>
                       <button class="pdm-rec-esc-btn" id="pdmRecEscBtn2" onclick="toggleRecEsc(2)" title="升级此 Action 给决策者">↑ Escalate</button>
                     </span>
                   </li>
@@ -2241,10 +2250,10 @@ function switchPdmCase(n){
     [0,1,2].forEach(i => {
       const row = document.getElementById('pdmRecItem' + i);
       if(row){ row.classList.remove('exec-running','exec-done','exec-assigned','pdm-rec-item--skip','pdm-rec-item--esc'); }
-      const escBtn  = document.getElementById('pdmRecEscBtn'  + i);
-      if(escBtn){  escBtn.textContent  = '↑ Escalate'; escBtn.disabled = false; escBtn.style.display = ''; }
-      const skipBtn = document.getElementById('pdmRecSkipBtn' + i);
-      if(skipBtn){ skipBtn.textContent = 'Skip'; skipBtn.disabled = false; skipBtn.style.display = ''; }
+      const cb = document.getElementById('pdmRecCb' + i);
+      if(cb){ cb.checked = true; cb.style.display = ''; }
+      const escBtn = document.getElementById('pdmRecEscBtn' + i);
+      if(escBtn){ escBtn.textContent = '↑ Escalate'; escBtn.disabled = false; escBtn.style.display = ''; }
       const escBadge = document.getElementById('pdmRecEscBadge' + i);
       if(escBadge) escBadge.textContent = '↑ Escalate';
     });
@@ -2273,41 +2282,34 @@ function togglePdmBrainDoc(){
 }
 
 
-// Per-action skip toggle
+// Per-action skip: driven by checkbox state
 function toggleRecSkip(idx){
-  const row     = document.getElementById('pdmRecItem'   + idx);
-  const skipBtn = document.getElementById('pdmRecSkipBtn' + idx);
-  const escBtn  = document.getElementById('pdmRecEscBtn'  + idx);
-  if(!row) return;
-  if(row.classList.contains('pdm-rec-item--esc')) return; // can't skip an escalated item
-  const isSkip = row.classList.toggle('pdm-rec-item--skip');
-  if(isSkip){
-    // skipped: show only Undo (skip btn), hide escalate btn
-    if(skipBtn){ skipBtn.textContent = 'Undo'; skipBtn.style.display = ''; }
-    if(escBtn)  escBtn.style.display = 'none';
-  } else {
-    // restored: show both buttons
-    if(skipBtn){ skipBtn.textContent = 'Skip'; skipBtn.style.display = ''; }
-    if(escBtn){  escBtn.textContent  = '↑ Escalate'; escBtn.style.display = ''; }
-  }
+  const row    = document.getElementById('pdmRecItem' + idx);
+  const cb     = document.getElementById('pdmRecCb'   + idx);
+  const escBtn = document.getElementById('pdmRecEscBtn' + idx);
+  if(!row || !cb) return;
+  if(row.classList.contains('pdm-rec-item--esc')) { cb.checked = false; return; } // locked while escalated
+  const isSkip = !cb.checked;
+  row.classList.toggle('pdm-rec-item--skip', isSkip);
+  if(escBtn) escBtn.style.display = isSkip ? 'none' : '';
   _updateExecBtn();
 }
 
 function toggleRecEsc(idx){
-  const row     = document.getElementById('pdmRecItem'   + idx);
-  const escBtn  = document.getElementById('pdmRecEscBtn'  + idx);
-  const skipBtn = document.getElementById('pdmRecSkipBtn' + idx);
+  const row    = document.getElementById('pdmRecItem' + idx);
+  const escBtn = document.getElementById('pdmRecEscBtn' + idx);
+  const cb     = document.getElementById('pdmRecCb'    + idx);
   if(!row) return;
   const isEsc = row.classList.toggle('pdm-rec-item--esc');
   if(isEsc){
-    // escalated: show only Undo (esc btn), hide skip btn; also clear any skip state
+    // escalated: restore from skip first, hide checkbox, show Undo on esc btn
     row.classList.remove('pdm-rec-item--skip');
-    if(escBtn){  escBtn.textContent  = 'Undo'; escBtn.style.display = ''; }
-    if(skipBtn){ skipBtn.textContent = 'Skip'; skipBtn.style.display = 'none'; }
+    if(cb){ cb.checked = true; cb.style.display = 'none'; }
+    if(escBtn){ escBtn.textContent = 'Undo'; escBtn.style.display = ''; }
   } else {
-    // restored: show both buttons
-    if(escBtn){  escBtn.textContent  = '↑ Escalate'; escBtn.style.display = ''; }
-    if(skipBtn){ skipBtn.textContent = 'Skip';        skipBtn.style.display = ''; }
+    // un-escalated: show checkbox, restore esc btn label
+    if(cb){ cb.style.display = ''; }
+    if(escBtn){ escBtn.textContent = '↑ Escalate'; escBtn.style.display = ''; }
   }
   _updateExecBtn();
 }
