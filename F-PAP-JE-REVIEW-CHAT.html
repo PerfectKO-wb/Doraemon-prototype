@@ -648,6 +648,7 @@ const jeSessions = [
       bankName: 'みずほ銀行',
       bankNameKana: 'ミズホ ギンコウ',
       bankCode: '0001',
+      branchName: '新宿西口支店',
       branchNameKana: 'シンジュク ニシグチ',
       branchCode: '016',
       accountType: '当座預金',
@@ -663,6 +664,18 @@ const jeSessions = [
       servicePeriodEnd: '2026-02-28',
       accountingDate: '2026-04-30',
       oneTimeExpense: '是',
+      detailPayload: {
+        headers: ['品名', '月份', '売上総額', '料率', 'ロイヤリティ（税抜）', '支払額'],
+        rows: [
+          ['SeireiGensouki AnotherTale', '1月', '¥1,905,742', '8.0%', '¥152,460', '¥152,460'],
+          ['SeireiGensouki AnotherTale', '2月', '¥928,317',   '8.0%', '¥74,266',  '¥74,266'],
+        ],
+        footer: [
+          { label: '小計（10%対象）', value: '¥226,726' },
+          { label: '消費税（10%）',   value: '¥22,673'  },
+          { label: '合計（税込金額）', value: '¥249,399' },
+        ]
+      }
     },
     messages: [
       { role: 'bot', type: 'je-draft-card', time: '2026-05-08 10:15' }
@@ -818,6 +831,18 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
     `服务期间：${iv.servicePeriodStart} ～ ${iv.servicePeriodEnd}`,
     `入账日期：${iv.accountingDate}`,
     `是否一次性费用：${iv.oneTimeExpense}`,
+    ...(iv.detailPayload ? (() => {
+      const dp = iv.detailPayload;
+      const colWidths = dp.headers.map((h, ci) =>
+        Math.max(h.length, ...dp.rows.map(r => (r[ci] || '').length)) + 2
+      );
+      const pad = (s, w) => String(s).padEnd(w, '　');
+      const divider = colWidths.map(w => '─'.repeat(w)).join('┼');
+      const headerRow = dp.headers.map((h, i) => pad(h, colWidths[i])).join('│');
+      const dataRows = dp.rows.map(r => r.map((c, i) => pad(c, colWidths[i])).join('│'));
+      const footerLines = dp.footer ? dp.footer.map(f => `  ${f.label}：${f.value}`) : [];
+      return [``, `【费用明细】`, headerRow, divider, ...dataRows, ...(footerLines.length ? ['', ...footerLines] : [])];
+    })() : []),
   ].join('\n') : '';
 
   const headLabel = confirmed ? '分录已确认' : '分录草稿 — 待审核';
