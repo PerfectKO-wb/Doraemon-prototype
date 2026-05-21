@@ -635,6 +635,34 @@ const jeSessions = [
       { no: 1, acctCode: '6050', acctName: '广告宣传费', dr: '128,500', cr: '' },
       { no: 2, acctCode: '2110', acctName: '应付款',     dr: '',       cr: '128,500' },
     ],
+    invoiceDetail: {
+      description: 'クラウドインフラ利用料',
+      company: 'CTW INC',
+      region: 'JP',
+      currency: 'JPY',
+      paymentType: 'Non-Administrative',
+      paymentBank: '三井住友銀行',
+      payeeName: 'クラウドワークス株式会社',
+      accountHolderKana: 'クラウドワークス カブシキガイシャ',
+      bankName: '三井住友銀行',
+      bankNameKana: 'ミツイ スミトモ ギンコウ',
+      bankCode: '0009',
+      branchNameKana: 'シブヤ',
+      branchCode: '210',
+      accountType: 'Normal',
+      accountNo: '1234567',
+      amount: '¥128,500',
+      taxRate: '10%',
+      purpose: 'クラウドインフラ利用料 4月分',
+      applicant: 'yamada.taro@ctw.inc',
+      applicationDate: '2026-04-25 10:30',
+      invoiceDate: '2026-04-20',
+      transactionDate: '2026-04-18',
+      servicePeriodStart: '2026-04-01',
+      servicePeriodEnd: '2026-04-30',
+      accountingDate: '2026-04-30',
+      oneTimeExpense: '是',
+    },
     messages: [
       { role: 'bot', type: 'je-draft-card', time: '2026-05-08 09:42' }
     ]
@@ -765,6 +793,31 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
     ? `${prefixText}`
     : `${mentionStr} AI 已根据 <span class="inline-code">${s.sourceId}</span> 生成以下会计分录草稿，但置信度低于阈值，需要人工确认。请核对后确认或更正，再提交至 F System。`;
 
+  // Build invoice detail plain text
+  const iv = s.invoiceDetail;
+  const ivText = iv ? [
+    `【Invoice 解析内容】`,
+    `费用名：${iv.description}`,
+    `公司：${iv.company}　地区：${iv.region}　币种：${iv.currency}`,
+    `付款类型：${iv.paymentType}　打款银行：${iv.paymentBank}`,
+    ``,
+    `收款方：${iv.payeeName}`,
+    `收款方（片假名）：${iv.accountHolderKana}`,
+    `银行名称：${iv.bankName}（${iv.bankNameKana}）`,
+    `银行代码：${iv.bankCode}　支店名称：${iv.branchNameKana}　分行代码：${iv.branchCode}`,
+    `账户类型：${iv.accountType}　账户号码：${iv.accountNo}`,
+    ``,
+    `金额：${iv.amount}　税率：${iv.taxRate}`,
+    `打款用途：${iv.purpose}`,
+    ``,
+    `申请人：${iv.applicant}`,
+    `申请日期：${iv.applicationDate}`,
+    `发票开具日期：${iv.invoiceDate}　交易发生日：${iv.transactionDate}`,
+    `服务期间：${iv.servicePeriodStart} ～ ${iv.servicePeriodEnd}`,
+    `入账日期：${iv.accountingDate}`,
+    `是否一次性费用：${iv.oneTimeExpense}`,
+  ].join('\n') : '';
+
   const headClass = confirmed ? 'je-draft-head confirmed-head' : 'je-draft-head';
   const headLabel = confirmed ? '分录已确认' : '分录草稿 — 待审核';
 
@@ -797,6 +850,7 @@ function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapsho
       </div>
       <div class="msg-bubble">
         <p>${intro}</p>
+        ${iv && !prefixText ? `<hr class="md-hr"><pre style="font-size:12px;line-height:1.8;color:var(--text-secondary);white-space:pre-wrap;word-break:break-all;margin:0 0 4px;">${ivText}</pre>` : ''}
         <hr class="md-hr">
         <p class="md-heading"><span class="md-tag ${!confirmed ? 'warn' : ''}">${headLabel}</span> &nbsp;<span style="font-size:12px;font-weight:400;color:var(--text-tertiary);">${s.id}</span></p>
         <table class="md-table" style="margin-bottom:8px;">
