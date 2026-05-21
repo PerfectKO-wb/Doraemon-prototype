@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F Expert · JE Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #f9fafb;
+    --bg-container: #ffffff;
+    --bg-hover: #f5f5f4;
+    --bg-active: #efefef;
+    --bg-subtle: #f5f6f7;
+    --border-divider: #e5e7eb;
+    --border-default: #d9d9d9;
+    --text-default: #131825;
+    --text-secondary: #73726e;
+    --text-tertiary: #9a9a98;
+    --text-disabled: #ababa9;
+    --white: #ffffff;
+    --primary: #1c64f2;
+    --error: #f5222d;
+    --error-bg: #fff1f0;
+    --error-border: #ffa39e;
+    --success: #15803d;
+    --success-bg: #ecfdf5;
+    --success-border: #a7f3d0;
+    --warn: #d97706;
+    --warn-bg: #fffbeb;
+    --warn-border: #fde68a;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; color: var(--text-default); background: var(--bg-base); -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; cursor: pointer; }
+
+  .app { display: flex; width: 100vw; height: 100vh; }
+
+  /* ===== LEFT NAV SIDEBAR ===== */
+  .sidebar {
+    width: 200px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    height: 100vh;
+    background: var(--bg-container);
+    border-right: 1px solid var(--border-divider);
+  }
+  .sidebar-top {
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 12px 0 16px;
+    border-bottom: 1px solid var(--border-divider);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; }
+  .logo-mark {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    display: grid; place-items: center; color: #fff;
+  }
+  .logo-mark svg { width: 13px; height: 13px; }
+  .logo-text { font-family: 'Urbanist', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.3px; }
+  .sidebar-collapse {
+    width: 28px; height: 28px; border: none; background: none;
+    border-radius: 6px; cursor: pointer;
+    display: grid; place-items: center; color: var(--text-secondary);
+  }
+  .sidebar-collapse:hover { background: var(--bg-hover); }
+  .sidebar-scroll { flex: 1; overflow-y: auto; padding: 4px 8px 16px; }
+  .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+  .sidebar-scroll::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    height: 34px; padding: 0 10px;
+    border-radius: 8px; cursor: pointer;
+    color: var(--text-default); font-size: 13px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg-hover); }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-secondary); }
+  .nav-item .dot { width: 8px; height: 8px; border-radius: 50%; margin-left: auto; }
+  .nav-item.active { background: var(--bg-active); }
+  .nav-section {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 12px 6px;
+    font-size: 11px; font-weight: 500; color: var(--text-disabled); letter-spacing: 0.3px;
+  }
+  .agent-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+  .agent-dot.f { background: linear-gradient(135deg, #5ec6d0 0%, #3ba5b0 100%); }
+  .sidebar-bottom {
+    border-top: 1px solid var(--border-divider); padding: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 28px; height: 28px; border-radius: 14px;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    display: grid; place-items: center;
+    color: #fff; font-size: 11px; font-weight: 600; flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 500; line-height: 16px; }
+  .user-role { font-size: 11px; color: var(--text-secondary); line-height: 14px; }
+  .user-more {
+    width: 28px; height: 28px; border: none; background: none;
+    border-radius: 6px; cursor: pointer;
+    display: grid; place-items: center; color: var(--text-secondary);
+  }
+  .user-more:hover { background: var(--bg-hover); }
+
+  /* ===== MIDDLE LIST PANEL ===== */
+  .list-panel {
+    width: 320px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    height: 100vh;
+    background: var(--bg-container);
+    border-right: 1px solid var(--border-divider);
+  }
+  .list-panel-header { padding: 10px 16px 14px; border-bottom: 1px solid var(--border-divider); }
+  .expert-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
+  .expert-avatar {
+    width: 44px; height: 44px; border-radius: 14px;
+    background: linear-gradient(135deg, #5ec6d0 0%, #3ba5b0 100%);
+    display: grid; place-items: center; flex-shrink: 0;
+    color: #fff; font-size: 20px; font-weight: 700; font-family: 'Urbanist', sans-serif;
+  }
+  .expert-title-col { flex: 1; min-width: 0; }
+  .expert-title { display: flex; align-items: center; gap: 6px; font-size: 17px; font-weight: 700; line-height: 24px; }
+  .avatar-stack { display: flex; align-items: center; margin-top: 4px; }
+  .avatar-chip {
+    width: 22px; height: 22px; border-radius: 11px;
+    border: 1.5px solid #fff; margin-left: -6px;
+    display: grid; place-items: center;
+    color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0;
+  }
+  .avatar-chip:first-child { margin-left: 0; }
+  .icon-btn {
+    width: 32px; height: 32px; display: grid; place-items: center;
+    border: none; background: none; border-radius: 8px;
+    color: var(--text-secondary); cursor: pointer;
+  }
+  .icon-btn:hover { background: var(--bg-hover); color: var(--text-default); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .list-filter-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+  .chip {
+    height: 32px; padding: 0 12px; border-radius: 8px;
+    border: 1px solid var(--border-default); background: var(--bg-container);
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 500; color: var(--text-default); cursor: pointer;
+  }
+  .chip:hover { background: var(--bg-hover); }
+  .chip.solid { background: var(--bg-active); border-color: var(--border-default); font-weight: 600; }
+  .search-row {
+    margin-top: 10px; height: 34px; padding: 0 10px;
+    border: 1px solid var(--border-default); border-radius: 8px;
+    display: flex; align-items: center; gap: 8px; background: var(--bg-container);
+  }
+  .search-row svg { width: 14px; height: 14px; color: var(--text-disabled); flex-shrink: 0; }
+  .search-row input {
+    flex: 1; border: none; outline: none; font-family: inherit;
+    font-size: 13px; color: var(--text-default); background: transparent;
+  }
+  .search-row input::placeholder { color: var(--text-disabled); }
+  .list-count { font-size: 12px; color: var(--text-secondary); padding: 10px 16px 6px; }
+  .list-count strong { color: var(--text-default); font-weight: 700; }
+  .list-body { flex: 1; overflow-y: auto; }
+  .list-body::-webkit-scrollbar { width: 4px; }
+  .list-body::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 2px; }
+  .list-card {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; cursor: pointer; position: relative;
+  }
+  .list-card.nav-card { padding: 8px 16px; align-items: center; }
+  .list-card.nav-card .list-card-icon { width: 32px; height: 32px; border-radius: 8px; }
+  .list-card.nav-card .list-card-icon svg { width: 16px; height: 16px; }
+  .list-card.session-card { padding: 14px 16px; }
+  .list-card + .list-card { border-top: 1px solid var(--border-divider); }
+  .list-card:hover { background: var(--bg-hover); }
+  .list-card.active { background: var(--bg-active); }
+  .list-card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--bg-subtle); display: grid; place-items: center;
+    color: var(--text-secondary); flex-shrink: 0;
+  }
+  .list-card-icon svg { width: 20px; height: 20px; }
+  .list-card-content { flex: 1; min-width: 0; }
+  .list-card-title {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 13px; font-weight: 600; line-height: 20px;
+  }
+  .list-card-title .chev { width: 14px; height: 14px; color: var(--text-disabled); }
+  .list-card-desc { font-size: 12px; line-height: 18px; color: var(--text-secondary); margin-top: 2px; }
+  .list-card-meta {
+    font-size: 11px; color: var(--text-disabled); margin-top: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .list-card-meta svg { width: 12px; height: 12px; }
+  .list-card-dot {
+    position: absolute; top: 18px; right: 16px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--warn);
+  }
+  .je-conf-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 6px; border-radius: 4px;
+    font-size: 10px; font-weight: 600;
+    background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn);
+    margin-top: 5px;
+  }
+  .je-conf-badge.low { background: var(--error-bg); border-color: var(--error-border); color: var(--error); }
+  .je-conf-badge.high { background: var(--success-bg); border-color: var(--success-border); color: var(--success); }
+  .list-section-label {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px 6px;
+    font-size: 11px; font-weight: 600;
+    color: var(--text-disabled); letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border-divider);
+    margin-top: 4px;
+  }
+  .list-section-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--warn); color: #fff;
+    border-radius: 8px; font-size: 10px; font-weight: 700;
+  }
+
+  /* ===== MAIN CHAT AREA ===== */
+  .chat-main { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100vh; }
+  .chat-header {
+    height: 52px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border-divider);
+    background: var(--bg-container);
+  }
+  .chat-header-badge {
+    flex-shrink: 0;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 3px 8px; border-radius: 4px;
+    border: 1.5px solid var(--warn); color: var(--warn);
+    background: transparent;
+    text-transform: uppercase;
+  }
+  .chat-header-badge.confirmed { border-color: var(--success); color: var(--success); }
+  .chat-header-info { flex: 1; min-width: 0; }
+  .chat-header-title { font-size: 14px; font-weight: 700; color: var(--text-default); text-align: center; }
+  .chat-header-sub { font-size: 11px; color: var(--text-tertiary); text-align: center; margin-top: 1px; }
+  .chat-header-actions { display: flex; gap: 6px; align-items: center; }
+  .hdr-btn {
+    height: 30px; padding: 0 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--border-default); background: #fff; color: var(--text-secondary);
+  }
+  .hdr-btn:hover { background: var(--bg-hover); color: var(--text-default); }
+  .hdr-btn svg { width: 13px; height: 13px; }
+
+  /* ===== CHAT THREAD ===== */
+  .chat-thread { flex: 1; overflow-y: auto; padding: 16px 28px 24px; display: flex; flex-direction: column; gap: 0; }
+  .chat-thread::-webkit-scrollbar { width: 6px; }
+  .chat-thread::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 3px; }
+
+  .msg-divider {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 11px; color: var(--text-tertiary); font-weight: 500;
+    letter-spacing: 0.3px; margin: 8px 0;
+  }
+  .msg-divider::before, .msg-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border-divider);
+  }
+
+  /* Bot message */
+  .msg-bot { display: flex; align-items: flex-start; gap: 10px; padding: 14px 0; }
+  .msg-bot-avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #5ec6d0 0%, #3ba5b0 100%);
+    display: grid; place-items: center; color: #fff;
+    margin-top: 1px;
+  }
+  .msg-bot-avatar svg { width: 17px; height: 17px; }
+  .msg-bot-body { flex: 1; min-width: 0; max-width: 720px; }
+  .msg-bot-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .msg-bot-name { font-size: 13px; font-weight: 700; color: var(--text-default); }
+  .msg-time { font-size: 12px; color: var(--text-tertiary); }
+  .msg-bubble { font-size: 13.5px; line-height: 1.7; color: var(--text-default); word-break: break-word; }
+  .msg-bubble p { margin: 0 0 6px; }
+  .msg-bubble p:last-child { margin-bottom: 0; }
+  .md-hr { border: none; border-top: 1px solid var(--border-divider); margin: 8px 0; }
+  .md-heading { font-size: 13.5px; font-weight: 700; margin: 0 0 8px; color: var(--text-default); }
+  .md-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 6px 0 10px; }
+  .md-table th { text-align: left; padding: 4px 10px 4px 0; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-divider); white-space: nowrap; }
+  .md-table td { padding: 5px 10px 5px 0; vertical-align: top; border-bottom: 1px solid var(--bg-hover); }
+  .md-table tr:last-child td { border-bottom: none; }
+  .md-tag { display: inline-block; font-size: 11px; background: var(--bg-subtle); border: 1px solid var(--border-divider); border-radius: 4px; padding: 1px 6px; font-family: monospace; }
+  .md-tag.warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn); }
+
+  /* JE draft card inside chat */
+  .je-draft-msg {
+    border: 1px solid var(--border-divider); border-radius: 10px;
+    overflow: hidden; margin-top: 10px;
+    background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .je-draft-head {
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    display: flex; align-items: center; gap: 8px; color: #fff;
+  }
+  .je-draft-head svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .je-draft-head-title { font-size: 13px; font-weight: 600; }
+  .je-draft-head-id { font-size: 11px; opacity: 0.9; margin-left: auto; font-family: monospace; }
+  .je-draft-head.confirmed-head { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+  .je-meta-row {
+    display: flex; padding: 10px 14px; gap: 0;
+    border-bottom: 1px solid var(--border-divider);
+  }
+  .je-meta-col { flex: 1; }
+  .je-meta-col + .je-meta-col { border-left: 1px solid var(--border-divider); padding-left: 14px; }
+  .je-meta-label { font-size: 11px; color: var(--text-tertiary); margin-bottom: 2px; }
+  .je-meta-val { font-size: 12px; font-weight: 600; color: var(--text-default); }
+  .je-lines-table { width: 100%; }
+  .je-lines-head {
+    display: flex; padding: 6px 14px;
+    background: var(--bg-subtle); border-bottom: 1px solid var(--border-divider);
+    font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .je-lines-row {
+    display: flex; padding: 8px 14px; align-items: center;
+    border-bottom: 1px solid var(--border-divider); gap: 0;
+    font-size: 12px;
+  }
+  .je-lines-row:last-child { border-bottom: none; }
+  .je-col-no { width: 28px; flex-shrink: 0; color: var(--text-tertiary); font-size: 11px; }
+  .je-col-acct { width: 110px; flex-shrink: 0; font-family: monospace; font-size: 12px; }
+  .je-col-name { flex: 1; min-width: 0; color: var(--text-secondary); }
+  .je-col-dr { width: 100px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; color: #1d4ed8; }
+  .je-col-cr { width: 100px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; color: #7c3aed; }
+  .je-conf-row {
+    padding: 8px 14px; background: var(--warn-bg);
+    border-top: 1px solid var(--warn-border);
+    font-size: 12px; color: var(--warn);
+    display: flex; align-items: flex-start; gap: 7px;
+  }
+  .je-conf-row svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+  .je-draft-footer {
+    padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-subtle); border-top: 1px solid var(--border-divider);
+  }
+  .je-footer-mention { font-size: 12px; color: var(--primary); font-weight: 500; }
+  .je-footer-date { font-size: 11px; color: var(--text-tertiary); }
+
+  /* message actions */
+  .msg-actions-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .msg-quick-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border-default); background: #fff;
+    color: var(--text-default); transition: all 0.15s; cursor: pointer;
+  }
+  .msg-quick-btn:hover { background: var(--bg-hover); border-color: #999; }
+  .msg-quick-btn.confirm-btn { background: #131825; color: #fff; border-color: #131825; }
+  .msg-quick-btn.confirm-btn:hover { background: #2d3748; }
+  .msg-quick-btn svg { width: 12px; height: 12px; }
+
+  /* User message */
+  .msg-user { display: flex; justify-content: flex-end; align-items: flex-end; gap: 8px; padding: 10px 0; }
+  .msg-user-bubble {
+    max-width: 520px; padding: 10px 14px;
+    background: #131825; color: #fff;
+    border-radius: 12px 4px 12px 12px;
+    font-size: 13.5px; line-height: 1.6;
+  }
+  .msg-user-time { font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px; text-align: right; }
+
+  /* System message */
+  .msg-system { display: flex; justify-content: center; padding: 6px 0; }
+  .msg-system-bubble {
+    padding: 5px 14px; border-radius: 8px;
+    background: var(--success-bg); border: 1px solid var(--success-border);
+    color: var(--success); font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .msg-system-bubble svg { width: 13px; height: 13px; }
+  .msg-system-bubble.warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn); }
+  .msg-system-bubble.info { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+
+  /* mention highlight */
+  .mention { color: var(--primary); font-weight: 500; }
+  .inline-code { font-family: monospace; background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+  /* ===== CHAT INPUT ===== */
+  .chat-input-wrap {
+    flex-shrink: 0;
+    padding: 12px 24px 20px;
+    background: var(--bg-container);
+  }
+  .chat-input-box {
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--bg-subtle);
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .chat-input-box:focus-within {
+    border-color: #131825;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(19,24,37,0.06);
+  }
+  .chat-input-textarea {
+    width: 100%; resize: none; border: none; outline: none;
+    background: transparent;
+    padding: 12px 16px 0;
+    font-size: 14px; font-family: inherit; line-height: 1.5;
+    color: var(--text-default); min-height: 44px; max-height: 140px;
+  }
+  .chat-input-textarea::placeholder { color: var(--text-disabled); }
+  .chat-input-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px 10px 16px;
+  }
+  .chat-input-hints { display: flex; gap: 6px; flex-wrap: wrap; }
+  .hint-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 9px; border-radius: 10px;
+    font-size: 11px; font-weight: 500;
+    background: #fff; border: 1px solid var(--border-default);
+    color: var(--text-secondary); cursor: pointer;
+    transition: all 0.12s;
+  }
+  .hint-pill:hover { background: var(--bg-active); color: var(--text-default); border-color: #999; }
+  .input-send-btn {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    background: var(--bg-active); border: none; color: var(--text-tertiary);
+    display: grid; place-items: center; transition: all 0.15s;
+  }
+  .input-send-btn.active { background: #131825; color: #fff; }
+  .input-send-btn svg { width: 15px; height: 15px; }
+
+  /* ===== RIGHT DETAIL PANEL ===== */
+  .detail-panel {
+    width: 264px; flex-shrink: 0;
+    background: var(--bg-container);
+    border-left: 1px solid var(--border-divider);
+    display: flex; flex-direction: column; height: 100vh;
+    overflow-y: auto;
+  }
+  .detail-panel::-webkit-scrollbar { width: 4px; }
+  .detail-panel::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 2px; }
+  .detail-panel-head {
+    height: 52px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border-divider);
+    font-size: 13px; font-weight: 600; color: var(--text-default);
+    position: sticky; top: 0; background: var(--bg-container); z-index: 1;
+  }
+  .detail-section { padding: 14px 16px; border-bottom: 1px solid var(--border-divider); }
+  .detail-section-title {
+    font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+  }
+  .detail-field { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .detail-field:last-child { margin-bottom: 0; }
+  .detail-field-label { font-size: 11px; color: var(--text-secondary); min-width: 68px; flex-shrink: 0; }
+  .detail-field-val { font-size: 12px; color: var(--text-default); font-weight: 500; }
+  .conf-score {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 700;
+    padding: 1px 7px; border-radius: 5px;
+  }
+  .conf-score.low { color: var(--error); background: var(--error-bg); border: 1px solid var(--error-border); }
+  .conf-score.med { color: var(--warn); background: var(--warn-bg); border: 1px solid var(--warn-border); }
+  .conf-score.high { color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
+  .je-line-detail-card {
+    padding: 8px 10px; border-radius: 8px;
+    border: 1px solid var(--border-divider); background: var(--bg-subtle);
+    margin-bottom: 6px; font-size: 12px;
+  }
+  .je-line-detail-card:last-child { margin-bottom: 0; }
+  .je-line-no { font-size: 10px; font-weight: 700; color: var(--text-tertiary); margin-bottom: 3px; }
+  .je-line-acct { font-family: monospace; font-size: 12px; font-weight: 700; color: var(--text-default); }
+  .je-line-name { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .je-line-amounts { display: flex; gap: 10px; margin-top: 5px; font-size: 11px; }
+  .je-line-dr { color: #1d4ed8; font-weight: 600; }
+  .je-line-cr { color: #7c3aed; font-weight: 600; }
+  .submitted-banner {
+    margin: 14px 16px; padding: 10px 14px; border-radius: 10px;
+    background: var(--success-bg); border: 1px solid var(--success-border);
+    font-size: 12px; color: var(--success); font-weight: 500;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .submitted-banner svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* typing indicator */
+  .typing-dots { display: flex; align-items: center; gap: 4px; padding: 6px 0; }
+  .typing-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-tertiary); animation: bounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ========== Left sidebar ========== -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <span class="logo-text">Doraemon</span>
+      </div>
+      <button class="sidebar-collapse" title="Collapse">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+      </button>
+    </div>
+    <div class="sidebar-scroll">
+      <div class="nav-section"><span>Expert agent</span></div>
+      <div class="nav-item"><span class="agent-dot f">F</span><span>F Expert</span></div>
+      <div class="nav-section"><span>Workspace</span></div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11.5" cy="14.5" r="2.5"/></svg>
+        <span>JE Review</span>
+        <span class="dot" style="background:var(--warn);"></span>
+      </div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="user-avatar">WZ</div>
+      <div class="user-info">
+        <div class="user-name">Wang Zhe</div>
+        <div class="user-role">Finance · PAP</div>
+      </div>
+      <button class="user-more" title="Menu">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========== Middle list panel ========== -->
+  <section class="list-panel">
+    <div class="list-panel-header">
+      <div class="expert-row">
+        <div class="expert-avatar">F</div>
+        <div class="expert-title-col">
+          <div class="expert-title">F Expert</div>
+          <div class="avatar-stack">
+            <div class="avatar-chip" style="background:#1C64F2;">i</div>
+            <div class="avatar-chip" style="background:#F59E0B;">A</div>
+            <div class="avatar-chip" style="background:#8B5CF6;">S</div>
+            <div class="avatar-chip" style="background:#10B981;">L</div>
+          </div>
+        </div>
+      </div>
+      <div class="list-filter-row">
+        <button class="chip solid">Awaiting Review</button>
+        <button class="chip">All</button>
+      </div>
+      <div class="search-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search JE drafts...">
+      </div>
+    </div>
+    <div class="list-count" id="listCount"><strong>5</strong> total</div>
+    <div class="list-body" id="listBody"></div>
+  </section>
+
+  <!-- ===== MAIN CHAT AREA ===== -->
+  <div class="chat-main">
+    <div class="chat-header">
+      <div class="chat-header-badge" id="chatBadge">PENDING</div>
+      <div class="chat-header-info">
+        <div class="chat-header-title" id="chatTitle">JE-DRAFT-2026-0501</div>
+        <div class="chat-header-sub" id="chatSub">Source: INV-202604-0006 · JPY</div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="hdr-btn" onclick="window.location='F-PAP-PAYMENT-REVIEW.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-thread" id="chatThread"></div>
+
+    <div class="chat-input-wrap">
+      <div class="chat-input-box" id="inputBox">
+        <textarea class="chat-input-textarea" id="chatInput" rows="1"
+          placeholder="Reply… e.g. 「line 1 account code → 6060」「accounting date → 2026-05-31」「confirm」"></textarea>
+        <div class="chat-input-footer">
+          <div class="chat-input-hints">
+            <button class="hint-pill" data-msg="confirm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Confirm JE
+            </button>
+            <button class="hint-pill" data-msg="line 1 account code → ">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit Account
+            </button>
+            <button class="hint-pill" data-msg="accounting date → ">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Change Date
+            </button>
+          </div>
+          <button class="input-send-btn" id="sendBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RIGHT DETAIL PANEL ===== -->
+  <div class="detail-panel">
+    <div class="detail-panel-head">
+      JE Details
+      <button class="icon-btn" style="width:26px;height:26px;" title="Refresh">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+    </div>
+    <div id="detailContent"></div>
+  </div>
+
+</div>
+
+<script>
+// ========== DATA ==========
+const jeSessions = [
+  {
+    id: 'JE-DRAFT-2026-0501',
+    sourceType: 'invoice',
+    sourceId: 'INV-202604-0006',
+    currency: 'JPY',
+    region: 'JP',
+    company: 'CTW INC',
+    accountingDate: '2026-04-30',
+    createdAt: '2026-05-08 09:42',
+    state: 'pending',
+    reviewer: '王喆',
+    confidence: 68,
+    confidenceLevel: 'med',
+    aiReason: 'Account code 6050 (広告宣伝費) has 68% confidence. Could be 6060 (その他外注費) based on payee description "クラウドインフラ". Please confirm the correct account classification.',
+    lines: [
+      { no: 1, acctCode: '6050', acctName: '広告宣伝費', dr: '128,500', cr: '' },
+      { no: 2, acctCode: '2110', acctName: '未払金',     dr: '',       cr: '128,500' },
+    ],
+    messages: [
+      { role: 'bot', type: 'je-draft-card', time: '2026-05-08 09:42' }
+    ]
+  },
+  {
+    id: 'JE-DRAFT-2026-0502',
+    sourceType: 'invoice',
+    sourceId: 'INV-202604-0008',
+    currency: 'JPY',
+    region: 'JP',
+    company: 'CTW INC',
+    accountingDate: '2026-04-30',
+    createdAt: '2026-05-08 09:45',
+    state: 'pending',
+    reviewer: '王喆',
+    confidence: 52,
+    confidenceLevel: 'low',
+    aiReason: 'Confidence is low (52%) — the invoice description mentions "戦略コンサルティング" which may span multiple service periods. Unable to determine if this should be expensed in full or amortized. Please confirm accounting treatment.',
+    lines: [
+      { no: 1, acctCode: '6110', acctName: 'コンサルティング費用', dr: '320,000', cr: '' },
+      { no: 2, acctCode: '2110', acctName: '未払金',               dr: '',       cr: '320,000' },
+    ],
+    messages: [
+      { role: 'bot', type: 'je-draft-card', time: '2026-05-08 09:45' }
+    ]
+  }
+];
+
+let activeSessionId = jeSessions[0].id;
+
+// ========== NAV LIST ITEMS ==========
+const navItems = [
+  {
+    key: 'collection',
+    title: 'Invoice Collection',
+    desc: 'Submit payment request',
+    meta: 'Pending · 26 invoices',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`,
+    href: 'F-PAP-PAYMENT-REQUEST.html'
+  },
+  {
+    key: 'review',
+    title: 'Invoice Review',
+    desc: 'Review and approve invoices',
+    meta: 'Pending · 18 invoices',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11.5" cy="14.5" r="2.5"/><line x1="15" y1="18" x2="13.5" y2="16.5"/></svg>`,
+    href: 'F-PAP-PAYMENT-REVIEW.html'
+  },
+  {
+    key: 'voucher',
+    title: 'Voucher Collection',
+    desc: 'Upload reimbursement vouchers',
+    meta: 'Parsing · 4 vouchers',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>`,
+    href: 'F-PAP-VOUCHER-COLLECTION.html'
+  }
+];
+
+// ========== HELPERS ==========
+function nowStr() {
+  return new Date().toISOString().slice(0, 16).replace('T', ' ');
+}
+function activeSession() {
+  return jeSessions.find(s => s.id === activeSessionId);
+}
+function confClass(level) {
+  return level === 'low' ? 'low' : level === 'high' ? 'high' : 'med';
+}
+function confLabel(score) {
+  return `${score}% confidence`;
+}
+
+// ========== RENDER LIST ==========
+function renderList() {
+  const body = document.getElementById('listBody');
+
+  const navHtml = navItems.map(it => `
+    <div class="list-card nav-card" onclick="window.location='${it.href}'" style="cursor:pointer;">
+      <div class="list-card-icon">${it.icon}</div>
+      <div class="list-card-content">
+        <div class="list-card-title">
+          ${it.title}
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="list-card-desc">${it.desc}</div>
+        <div class="list-card-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${it.meta}
+        </div>
+      </div>
+    </div>`).join('');
+
+  const pending = jeSessions.filter(s => s.state === 'pending');
+  const confirmed = jeSessions.filter(s => s.state === 'confirmed');
+
+  let sessionHtml = '';
+  if (pending.length > 0) {
+    sessionHtml += `<div class="list-section-label">Awaiting Review <span class="list-section-badge">${pending.length}</span></div>`;
+    sessionHtml += pending.map(s => buildSessionCard(s)).join('');
+  }
+  if (confirmed.length > 0) {
+    sessionHtml += `<div class="list-section-label">Confirmed</div>`;
+    sessionHtml += confirmed.map(s => buildSessionCard(s)).join('');
+  }
+
+  body.innerHTML = navHtml + sessionHtml;
+
+  body.querySelectorAll('[data-sid]').forEach(el => {
+    el.addEventListener('click', () => switchSession(el.dataset.sid));
+  });
+}
+
+function buildSessionCard(s) {
+  const isActive = s.id === activeSessionId;
+  const cl = confClass(s.confidenceLevel);
+  return `
+  <div class="list-card session-card${isActive ? ' active' : ''}" data-sid="${s.id}" style="cursor:pointer;">
+    <div class="list-card-content">
+      <div class="list-card-title" style="font-size:13px;">${s.id}</div>
+      <div class="list-card-desc">${s.sourceId} · ${s.currency}</div>
+      <div><span class="je-conf-badge ${cl}">${s.confidence}% confidence</span></div>
+    </div>
+    ${s.state === 'pending' ? '<div class="list-card-dot"></div>' : ''}
+  </div>`;
+}
+
+function renderSessionList() {
+  renderList();
+  const total = navItems.length + jeSessions.length;
+  document.getElementById('listCount').innerHTML = `<strong>${total}</strong> total`;
+}
+
+// ========== BUILD MESSAGES ==========
+const BOT_AVATAR = `<div class="msg-bot-avatar">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="8" width="18" height="12" rx="3"/>
+    <path d="M8 8V6a4 4 0 0 1 8 0v2"/>
+    <circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="14" r="1" fill="currentColor" stroke="none"/>
+    <path d="M9 18h6"/>
+  </svg>
+</div>`;
+
+function buildJeDraftCardMsg(s, time, prefixText, linesSnapshot, acctDateSnapshot) {
+  const lines = linesSnapshot || s.lines;
+  const acctDate = acctDateSnapshot || s.accountingDate;
+  const confirmed = s.state === 'confirmed';
+  const mentionStr = `<span class="mention">@${s.reviewer}</span>`;
+  const cl = confClass(s.confidenceLevel);
+
+  const intro = prefixText
+    ? `${prefixText}`
+    : `${mentionStr} AI has generated the following Journal Entry draft from <span class="inline-code">${s.sourceId}</span>, but confidence is below threshold. Please review and confirm or correct before it is posted to F System.`;
+
+  const headClass = confirmed ? 'je-draft-head confirmed-head' : 'je-draft-head';
+  const headLabel = confirmed ? 'JE Confirmed' : 'JE Draft — Pending Review';
+
+  const linesHtml = lines.map(ln => `
+    <div class="je-lines-row">
+      <div class="je-col-no">${ln.no}</div>
+      <div class="je-col-acct">${ln.acctCode}</div>
+      <div class="je-col-name">${ln.acctName}</div>
+      <div class="je-col-dr">${ln.dr ? ln.dr : '—'}</div>
+      <div class="je-col-cr">${ln.cr ? ln.cr : '—'}</div>
+    </div>`).join('');
+
+  const confRowHtml = !confirmed ? `
+    <div class="je-conf-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>${s.aiReason}</span>
+    </div>` : '';
+
+  const actionsHtml = !confirmed ? `
+    <div class="msg-actions-row">
+      <button class="msg-quick-btn confirm-btn" onclick="sendMessage('confirm')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirm JE
+      </button>
+      <button class="msg-quick-btn" onclick="document.getElementById('chatInput').value='line 1 account code → ';document.getElementById('chatInput').focus();document.getElementById('sendBtn').classList.add('active');">
+        Edit Account Code
+      </button>
+    </div>` : '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-bot';
+  wrap.innerHTML = `
+    ${BOT_AVATAR}
+    <div class="msg-bot-body">
+      <div class="msg-bot-meta">
+        <span class="msg-bot-name">Xiaobao</span>
+        <span class="msg-time">${time}</span>
+        ${!confirmed ? `<span class="je-conf-badge ${cl}">${s.confidence}% conf.</span>` : ''}
+      </div>
+      <div class="msg-bubble">
+        <p>${intro}</p>
+        <hr class="md-hr">
+        <p class="md-heading"><span class="md-tag ${!confirmed ? 'warn' : ''}">${headLabel}</span> &nbsp;<span style="font-size:12px;font-weight:400;color:var(--text-tertiary);">${s.id}</span></p>
+        <table class="md-table" style="margin-bottom:8px;">
+          <tr><th>Source</th><td>${s.sourceId} (${s.sourceType.toUpperCase()})</td></tr>
+          <tr><th>Company</th><td>${s.company}</td></tr>
+          <tr><th>Currency</th><td>${s.currency}</td></tr>
+          <tr><th>Accounting Date</th><td>${acctDate}</td></tr>
+        </table>
+        <div class="je-draft-msg">
+          <div class="${headClass}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span class="je-draft-head-title">${headLabel}</span>
+            <span class="je-draft-head-id">${s.id}</span>
+          </div>
+          <div class="je-lines-table">
+            <div class="je-lines-head">
+              <div class="je-col-no">#</div>
+              <div class="je-col-acct">Acct Code</div>
+              <div class="je-col-name">Account Name</div>
+              <div class="je-col-dr">Debit</div>
+              <div class="je-col-cr">Credit</div>
+            </div>
+            ${linesHtml}
+          </div>
+          ${confRowHtml}
+          <div class="je-draft-footer">
+            <span class="je-footer-mention">${mentionStr} Please review</span>
+            <span class="je-footer-date">Acct. Date: ${acctDate}</span>
+          </div>
+        </div>
+      </div>
+      ${actionsHtml}
+    </div>`;
+  return wrap;
+}
+
+function buildBotMsg(text, time) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-bot';
+  const htmlText = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>')
+    .replace(/@([\w.@+\u3040-\u30ff\u4e00-\u9fa5]+)/g, '<span class="mention">@$1</span>')
+    .replace(/`([^`]+)`/g, '<span class="inline-code">$1</span>');
+  wrap.innerHTML = `${BOT_AVATAR}
+    <div class="msg-bot-body">
+      <div class="msg-bot-meta"><span class="msg-bot-name">Xiaobao</span><span class="msg-time">${time}</span></div>
+      <div class="msg-bubble">${htmlText}</div>
+    </div>`;
+  return wrap;
+}
+
+function buildUserMsg(text, time) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-user';
+  const htmlText = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  wrap.innerHTML = `<div>
+    <div class="msg-user-time">${time}</div>
+    <div class="msg-user-bubble">${htmlText}</div>
+  </div>`;
+  return wrap;
+}
+
+function buildSystemMsg(text, type) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-system';
+  const iconMap = {
+    success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    warn: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>`,
+    info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`
+  };
+  const htmlText = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  wrap.innerHTML = `<div class="msg-system-bubble ${type !== 'success' ? type : ''}">
+    ${iconMap[type] || iconMap.success} ${htmlText}
+  </div>`;
+  return wrap;
+}
+
+// ========== RENDER THREAD ==========
+function renderThread() {
+  const s = activeSession();
+  const thread = document.getElementById('chatThread');
+  thread.innerHTML = '';
+
+  s.messages.forEach(m => {
+    if (m.type === 'je-draft-card') {
+      thread.appendChild(buildJeDraftCardMsg(s, m.time, m.prefixText, m.linesSnapshot, m.acctDateSnapshot));
+    } else if (m.role === 'bot') {
+      thread.appendChild(buildBotMsg(m.text, m.time));
+    } else if (m.role === 'user') {
+      thread.appendChild(buildUserMsg(m.text, m.time));
+    } else if (m.role === 'system') {
+      thread.appendChild(buildSystemMsg(m.text, m.type || 'success'));
+    }
+  });
+
+  const typing = document.createElement('div');
+  typing.className = 'msg-bot'; typing.id = 'typingIndicator'; typing.style.display = 'none';
+  typing.innerHTML = `<div class="msg-bot-avatar" style="background:linear-gradient(135deg,#5ec6d0,#3ba5b0);"></div>
+    <div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  thread.appendChild(typing);
+
+  thread.scrollTop = thread.scrollHeight;
+}
+
+// ========== RENDER DETAIL PANEL ==========
+function renderDetailPanel() {
+  const s = activeSession();
+  const el = document.getElementById('detailContent');
+  const confirmed = s.state === 'confirmed';
+  const cl = confClass(s.confidenceLevel);
+
+  const linesHtml = s.lines.map(ln => `
+    <div class="je-line-detail-card">
+      <div class="je-line-no">LINE ${ln.no}</div>
+      <div class="je-line-acct">${ln.acctCode}</div>
+      <div class="je-line-name">${ln.acctName}</div>
+      <div class="je-line-amounts">
+        ${ln.dr ? `<span class="je-line-dr">Dr ${ln.dr}</span>` : ''}
+        ${ln.cr ? `<span class="je-line-cr">Cr ${ln.cr}</span>` : ''}
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">Confidence</div>
+      <span class="conf-score ${cl}">${s.confidence}%</span>
+      <p style="font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">${s.aiReason}</p>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">JE Info</div>
+      <div class="detail-field"><span class="detail-field-label">Draft ID</span><span class="detail-field-val" style="font-family:monospace;">${s.id}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Source</span><span class="detail-field-val">${s.sourceId}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Company</span><span class="detail-field-val">${s.company}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Currency</span><span class="detail-field-val">${s.currency}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Acct. Date</span><span class="detail-field-val" id="detailAcctDate">${s.accountingDate}</span></div>
+      <div class="detail-field"><span class="detail-field-label">Status</span>
+        <span class="je-conf-badge ${confirmed ? 'high' : cl}">${confirmed ? 'Confirmed' : 'Pending Review'}</span>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">JE Lines (${s.lines.length})</div>
+      ${linesHtml}
+    </div>`;
+
+  if (confirmed) {
+    const banner = document.createElement('div');
+    banner.className = 'submitted-banner';
+    banner.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> JE confirmed · Posted to F System`;
+    el.appendChild(banner);
+  }
+}
+
+// ========== SWITCH SESSION ==========
+function switchSession(id) {
+  activeSessionId = id;
+  const s = activeSession();
+  document.getElementById('chatTitle').textContent = s.id;
+  document.getElementById('chatSub').textContent = `Source: ${s.sourceId} · ${s.currency}`;
+  const badge = document.getElementById('chatBadge');
+  badge.textContent = s.state === 'confirmed' ? 'CONFIRMED' : 'PENDING';
+  badge.className = 'chat-header-badge' + (s.state === 'confirmed' ? ' confirmed' : '');
+  renderSessionList();
+  renderThread();
+  renderDetailPanel();
+}
+
+// ========== AI COMMAND PARSER ==========
+function parseAndExecute(text) {
+  const s = activeSession();
+  const lower = text.toLowerCase().trim();
+
+  // Confirm
+  if (/^(confirm|lgtm|ok$|approve|confirmed|没问题|确认|提交)/i.test(lower) || lower.includes('confirm')) {
+    return doConfirm(s);
+  }
+
+  // Change account code: "line 1 account code → 6060" or "line 2 acct → 2200"
+  const acctMatch = text.match(/line\s*(\d+)\s+(?:account\s*code|acct(?:ount)?)\s*[→\->\s]+\s*(\w+)/i);
+  if (acctMatch) {
+    return doChangeAccount(s, Number(acctMatch[1]), acctMatch[2].trim());
+  }
+
+  // Change accounting date: "accounting date → 2026-05-31"
+  const dateMatch = text.match(/accounting\s*date\s*[→\->\s]+\s*([\d\-\/]+)/i);
+  if (dateMatch) {
+    return doChangeDate(s, dateMatch[1].trim());
+  }
+
+  // Change account name: "line 1 account name → xxx"
+  const nameMatch = text.match(/line\s*(\d+)\s+(?:account\s*name|name)\s*[→\->\s]+\s*(.+)/i);
+  if (nameMatch) {
+    return doChangeAccountName(s, Number(nameMatch[1]), nameMatch[2].trim());
+  }
+
+  // Show lines
+  if (lower.includes('show') || lower.includes('lines') || lower.includes('list') || lower.includes('查看')) {
+    return doListLines(s);
+  }
+
+  // Default
+  return `Understood. Available commands:\n• Confirm: \`confirm\`\n• Edit account code: \`line 1 account code → 6060\`\n• Edit account name: \`line 1 account name → 広告宣伝費\`\n• Change accounting date: \`accounting date → 2026-05-31\`\n• List JE lines: \`show lines\``;
+}
+
+function doConfirm(s) {
+  if (s.state === 'confirmed') return { systemMsg: 'This JE has already been confirmed.', type: 'info' };
+  s.state = 'confirmed';
+  s.confidence = 100;
+  s.confidenceLevel = 'high';
+  return {
+    systemMsg: `✓ JE ${s.id} confirmed at ${nowStr()} — posted to F System.`,
+    type: 'success',
+    refresh: true
+  };
+}
+
+function doChangeAccount(s, lineNo, newCode) {
+  const line = s.lines.find(l => l.no === lineNo);
+  if (!line) return `Line ${lineNo} not found. The draft has ${s.lines.length} lines.`;
+  if (s.state === 'confirmed') return 'JE is already confirmed and cannot be modified.';
+  const old = line.acctCode;
+  line.acctCode = newCode;
+  return {
+    updateMsg: `Line ${lineNo} account code updated: \`${old}\` → \`${newCode}\`.\nPlease review the updated JE below and confirm when ready.`,
+    refresh: true
+  };
+}
+
+function doChangeAccountName(s, lineNo, newName) {
+  const line = s.lines.find(l => l.no === lineNo);
+  if (!line) return `Line ${lineNo} not found.`;
+  if (s.state === 'confirmed') return 'JE is already confirmed and cannot be modified.';
+  const old = line.acctName;
+  line.acctName = newName;
+  return {
+    updateMsg: `Line ${lineNo} account name updated: \`${old}\` → \`${newName}\`.\nPlease confirm when ready.`,
+    refresh: true
+  };
+}
+
+function doChangeDate(s, newDate) {
+  if (s.state === 'confirmed') return 'JE is already confirmed and cannot be modified.';
+  const old = s.accountingDate;
+  s.accountingDate = newDate;
+  return {
+    updateMsg: `Accounting date updated: \`${old}\` → \`${newDate}\`.\nPlease review the updated JE below and confirm.`,
+    refresh: true
+  };
+}
+
+function doListLines(s) {
+  const lines = s.lines.map(l =>
+    `• Line ${l.no}: [${l.acctCode}] ${l.acctName}  ${l.dr ? 'Dr ' + l.dr : ''}${l.cr ? 'Cr ' + l.cr : ''}`
+  ).join('\n');
+  return `JE ${s.id} has ${s.lines.length} lines:\n${lines}\n\nAccounting Date: ${s.accountingDate}`;
+}
+
+// ========== SEND MESSAGE ==========
+function sendMessage(text) {
+  if (!text.trim()) return;
+  const s = activeSession();
+
+  s.messages.push({ role: 'user', text, time: nowStr() });
+  renderThread();
+
+  setTimeout(() => {
+    document.getElementById('typingIndicator').style.display = 'flex';
+    document.getElementById('chatThread').scrollTop = 99999;
+  }, 100);
+
+  setTimeout(() => {
+    document.getElementById('typingIndicator').style.display = 'none';
+    const result = parseAndExecute(text);
+
+    if (typeof result === 'string') {
+      s.messages.push({ role: 'bot', text: result, time: nowStr() });
+    } else if (result) {
+      if (result.updateMsg && result.refresh && s.state !== 'confirmed') {
+        s.messages.push({
+          role: 'bot', type: 'je-draft-card',
+          prefixText: result.updateMsg,
+          time: nowStr(),
+          linesSnapshot: JSON.parse(JSON.stringify(s.lines)),
+          acctDateSnapshot: s.accountingDate
+        });
+      } else {
+        if (result.botMsg) s.messages.push({ role: 'bot', text: result.botMsg, time: nowStr() });
+        if (result.systemMsg) s.messages.push({ role: 'system', text: result.systemMsg, type: result.type || 'success', time: nowStr() });
+        if (result.refresh && s.state === 'confirmed') {
+          s.messages.push({ role: 'bot', type: 'je-draft-card', time: nowStr() });
+        }
+      }
+    }
+
+    renderThread();
+    if (result?.refresh) {
+      renderDetailPanel();
+      renderSessionList();
+      const badge = document.getElementById('chatBadge');
+      if (s.state === 'confirmed') {
+        badge.textContent = 'CONFIRMED';
+        badge.className = 'chat-header-badge confirmed';
+      }
+    }
+  }, 800);
+}
+
+// ========== EVENTS ==========
+const inputEl = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+
+inputEl.addEventListener('input', () => {
+  sendBtn.classList.toggle('active', inputEl.value.trim().length > 0);
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + 'px';
+});
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    const val = inputEl.value.trim();
+    if (val) { sendMessage(val); inputEl.value = ''; sendBtn.classList.remove('active'); inputEl.style.height = 'auto'; }
+  }
+});
+sendBtn.addEventListener('click', () => {
+  const val = inputEl.value.trim();
+  if (val) { sendMessage(val); inputEl.value = ''; sendBtn.classList.remove('active'); inputEl.style.height = 'auto'; }
+});
+document.querySelectorAll('.hint-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    inputEl.value = btn.dataset.msg;
+    inputEl.dispatchEvent(new Event('input'));
+    inputEl.focus();
+  });
+});
+
+// ========== INIT ==========
+switchSession(activeSessionId);
+</script>
+</body>
+</html>
