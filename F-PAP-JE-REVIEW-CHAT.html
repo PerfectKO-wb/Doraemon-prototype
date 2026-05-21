@@ -667,6 +667,58 @@ const jeSessions = [
       { role: 'bot', type: 'je-draft-card', time: '2026-05-08 09:42' }
     ],
     jeSummary: 'クラウドワークス株式会社 クラウドインフラ利用料 4月分（入账日期：2026-04-30）'
+  },
+  {
+    id: 'JE-DRAFT-2026-0502',
+    sourceType: 'invoice',
+    sourceId: 'INV-202603-0012',
+    currency: 'JPY',
+    region: 'JP',
+    company: 'CTW INC',
+    accountingDate: '2026-04-30',
+    createdAt: '2026-05-08 10:15',
+    state: 'pending',
+    reviewer: '王喆',
+    confidence: 72,
+    confidenceLevel: 'med',
+    aiReason: '',
+    lines: [
+      { no: 1, acctCode: '6070', acctName: '版税費',           dr: '226,726', cr: '' },
+      { no: 2, acctCode: '1160', acctName: '仮払消費税',       dr: '22,673',  cr: '' },
+      { no: 3, acctCode: '2110', acctName: '未払金 - 株式会社ホビージャパン', dr: '', cr: '249,399' },
+    ],
+    invoiceDetail: {
+      description: 'ロイヤリティ支払（SeireiGensouki AnotherTale）',
+      company: 'CTW INC',
+      region: 'JP',
+      currency: 'JPY',
+      paymentType: 'Non-Administrative',
+      paymentBank: '三井住友銀行',
+      payeeName: '株式会社ホビージャパン',
+      accountHolderKana: 'ホビージャパン カブシキガイシャ',
+      bankName: 'みずほ銀行',
+      bankNameKana: 'ミズホ ギンコウ',
+      bankCode: '0001',
+      branchNameKana: 'シンジュク ニシグチ',
+      branchCode: '016',
+      accountType: '当座預金',
+      accountNo: '108731',
+      amount: '¥249,399',
+      taxRate: '10%',
+      purpose: 'SeireiGensouki AnotherTale ロイヤリティ 2026年1〜2月分',
+      applicant: 'yamada.taro@ctw.inc',
+      applicationDate: '2026-03-01 09:00',
+      invoiceDate: '2026-03-01',
+      transactionDate: '2026-02-28',
+      servicePeriodStart: '2026-01-01',
+      servicePeriodEnd: '2026-02-28',
+      accountingDate: '2026-04-30',
+      oneTimeExpense: '是',
+    },
+    messages: [
+      { role: 'bot', type: 'je-draft-card', time: '2026-05-08 10:15' }
+    ],
+    jeSummary: '株式会社ホビージャパン SeireiGensouki AnotherTale ロイヤリティ 1〜2月分（入账日期：2026-04-30）'
   }
 ];
 
