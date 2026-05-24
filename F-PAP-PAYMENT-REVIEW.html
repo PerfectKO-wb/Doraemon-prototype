@@ -804,7 +804,7 @@
 
         /* Summary form panel */
         .detail-right {
-            width: 440px;
+            width: 560px;
             flex-shrink: 0;
             background: #fff;
             border-left: 1px solid var(--border-divider);
@@ -1100,7 +1100,22 @@
             border-bottom: 1px solid var(--border-divider);
             text-align: left;
         }
-        .payload-wrap th:last-child, .payload-wrap td:last-child { text-align: right; }
+        .payload-wrap th:last-child { text-align: right; }
+        .payload-wrap td.li-del { width: 32px; text-align: center; padding: 0 4px; }
+        .li-del-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--text-tertiary); font-size: 15px; line-height: 1;
+            padding: 2px 5px; border-radius: 4px;
+        }
+        .li-del-btn:hover { color: #ef4444; background: #fee2e2; }
+        .li-add-row {
+            margin-top: 6px; width: 100%;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+            font-size: 12px; color: var(--text-secondary);
+            background: none; border: 1px dashed var(--border-divider);
+            border-radius: 6px; padding: 5px 10px; cursor: pointer;
+        }
+        .li-add-row:hover { color: #2563eb; border-color: #2563eb; background: #eff6ff; }
         .payload-wrap td {
             padding: 0;
             color: var(--text-default);
@@ -1165,14 +1180,37 @@
         .recog-info-box strong { font-weight: 600; }
         /* Required highlight on service period rows */
         .sp-required .form-label::after {
-            content: ' *'; color: #ef4444; font-weight: 700;
+            content: 'Required';
+            display: inline-block; width: fit-content;
+            padding: 1px 6px;
+            background: #fff3e0; color: #e65100;
+            border: 1px solid #ffcc80;
+            border-radius: 4px;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.04em; line-height: 1.7;
         }
-        .sp-required input {
-            border-color: #93c5fd !important;
-            background: #eff6ff !important;
-        }
+        .sp-required { align-items: flex-start; }
+        .sp-required .form-label { display: flex; flex-direction: column; gap: 3px; padding-top: 7px; }
+        .sp-required .date-period-row { margin-top: 5px; }
         /* Payee bank required labels */
         .req-label::after { display: none; }
+
+        /* ── Required field badge ── */
+        .form-row[data-req] { align-items: flex-start; }
+        .form-row[data-req] .form-label {
+            display: flex; flex-direction: column; gap: 3px; padding-top: 7px;
+        }
+        .form-row[data-req] .form-label::after {
+            content: 'Required';
+            display: inline-block; width: fit-content;
+            padding: 1px 6px;
+            background: #fff3e0; color: #e65100;
+            border: 1px solid #ffcc80;
+            border-radius: 4px;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.04em; line-height: 1.7;
+        }
+        .form-row[data-req] .form-control,
+        .form-row[data-req] select.form-control { margin-top: 5px; }
+        .form-row[data-req] .date-period-row { margin-top: 5px; }
 
         /* ── Quick-fill ── */
         .qf-wrap { display:flex; align-items:center; gap:6px; }
@@ -1328,7 +1366,7 @@
 
         @media (max-width: 1280px) {
             .list-panel { width: 300px; }
-            .detail-right { width: 380px; }
+            .detail-right { width: 460px; }
         }
     </style>
 </head>
@@ -1572,7 +1610,7 @@
                             <div class="form-label">Description :</div>
                             <div class="form-control"><input id="ivDescription" placeholder="e.g. Marketing expenses · Apr"></div>
                         </div>
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Region :</div>
                             <select class="form-control" id="ivRegion" onchange="syncIvCompanyFromRegion()">
                                 <option value="JP">Japan (JP)</option>
@@ -1582,14 +1620,7 @@
                                 <option value="TW">Taiwan (TW)</option>
                             </select>
                         </div>
-                        <div class="form-row" data-region="all">
-                            <div class="form-label">Direction :</div>
-                            <select class="form-control" id="ivInvoiceDirection">
-                                <option value="PURCHASE">PURCHASE</option>
-                                <option value="SALES">SALES</option>
-                            </select>
-                        </div>
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Company :</div>
                             <select class="form-control" id="ivCompany">
                                 <option value="">— Select —</option>
@@ -1601,11 +1632,7 @@
                                 <option value="CTW CAYMAN">CTW CAYMAN</option>
                             </select>
                         </div>
-                        <div class="form-row" data-region="all">
-                            <div class="form-label">Document Type :</div>
-                            <div class="form-control"><input id="ivDocumentType" placeholder="e.g. INVOICE / RECEIPT / PAYMENT_REPORT"></div>
-                        </div>
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Vendor Name :</div>
                             <div class="form-control"><input id="ivVendorName" placeholder="Issuing vendor"></div>
                         </div>
@@ -1621,7 +1648,7 @@
                         <!-- ── Amount ── -->
                         <div class="form-section-label">Amount</div>
 
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Currency :</div>
                             <select class="form-control" id="ivCurrency">
                                 <option value="JPY">JPY</option>
@@ -1631,7 +1658,7 @@
                                 <option value="TWD">TWD</option>
                             </select>
                         </div>
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Total Amount :</div>
                             <div class="form-control"><input id="ivAmount" type="text" placeholder="0.00"></div>
                         </div>
@@ -1660,11 +1687,21 @@
                         <!-- ── Category ── -->
                         <div class="form-section-label">Category</div>
 
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Business Category :</div>
-                            <div class="form-control"><input id="ivBusinessCategory" placeholder="e.g. ROYALTY / ADVERTISING / SAAS"></div>
+                            <select class="form-control" id="ivBusinessCategory">
+                                <option value="">— Select —</option>
+                                <option value="ADVERTISING">ADVERTISING</option>
+                                <option value="ROYALTY">ROYALTY</option>
+                                <option value="OFFICE_ADMIN">OFFICE_ADMIN</option>
+                                <option value="SAAS">SAAS</option>
+                                <option value="CLOUD">CLOUD</option>
+                                <option value="PROFESSIONAL_SERVICE">PROFESSIONAL_SERVICE</option>
+                                <option value="COMMUNICATION">COMMUNICATION</option>
+                                <option value="OTHER">OTHER</option>
+                            </select>
                         </div>
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Payment Type :</div>
                             <select class="form-control" id="ivPaymentType">
                                 <option value="ADMINISTRATIVE">ADMINISTRATIVE</option>
@@ -1679,7 +1716,7 @@
                         </div>
 
                         <!-- ── Purpose ── -->
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Purpose :</div>
                             <div class="form-control"><input id="ivPurpose"></div>
                         </div>
@@ -1707,7 +1744,7 @@
                                 <input type="date" id="ivServicePeriodEnd" style="font:inherit;font-size:13px;border:1px solid var(--border-default);border-radius:6px;padding:6px 8px;background:#fff;color:var(--text-default);outline:none;flex:1;min-width:0;">
                             </div>
                         </div>
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Accounting Date :</div>
                             <div class="form-control">
                                 <input type="date" id="ivAccountingDate" style="font:inherit;font-size:13px;border:1px solid var(--border-default);border-radius:6px;padding:6px 10px;background:#fff;color:var(--text-default);outline:none;width:100%;">
@@ -1718,7 +1755,7 @@
                         <div class="form-section-label">Payee Bank Info</div>
 
                         <!-- Common -->
-                        <div class="form-row req-bank" data-region="all">
+                        <div class="form-row req-bank" data-region="all" data-req>
                             <div class="form-label req-label">Bank Name :</div>
                             <div class="form-control"><input id="ivBankName" placeholder="Beneficiary bank name"></div>
                         </div>
@@ -1726,16 +1763,21 @@
                             <div class="form-label">Branch Name :</div>
                             <div class="form-control"><input id="ivBranchName" placeholder="Branch name"></div>
                         </div>
-                        <!-- Account type: free text, all regions -->
-                        <div class="form-row" data-region="all">
+                        <!-- Account type: JP only, enum -->
+                        <div class="form-row" data-region="jp">
                             <div class="form-label">Account Type :</div>
-                            <div class="form-control"><input id="ivAccountType" placeholder="e.g. 普通預金 / CHECKING / SAVINGS"></div>
+                            <select class="form-control" id="ivAccountType">
+                                <option value="">— Select —</option>
+                                <option value="普通預金">普通預金</option>
+                                <option value="当座預金">当座預金</option>
+                                <option value="定期預金">定期預金</option>
+                            </select>
                         </div>
-                        <div class="form-row req-bank" data-region="all">
+                        <div class="form-row req-bank" data-region="all" data-req>
                             <div class="form-label req-label">Account No. :</div>
                             <div class="form-control"><input id="ivAccountNo" placeholder="Account number"></div>
                         </div>
-                        <div class="form-row req-bank" data-region="all">
+                        <div class="form-row req-bank" data-region="all" data-req>
                             <div class="form-label req-label">Account Name :</div>
                             <div class="form-control"><input id="ivAccountName" placeholder="Account holder name"></div>
                         </div>
@@ -1751,7 +1793,7 @@
                         </div>
 
                         <!-- JP only: Kana fields -->
-                        <div class="form-row" data-region="jp">
+                        <div class="form-row" data-region="jp" data-req>
                             <div class="form-label">Account Name (Kana) :</div>
                             <div class="form-control"><input id="ivAccountHolderKana" placeholder="半角カタカナ"></div>
                         </div>
@@ -1785,11 +1827,11 @@
                         <!-- ── Payer Bank ── -->
                         <div class="form-section-label">Payer Bank</div>
 
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Payer Bank :</div>
                             <div class="form-control"><input id="ivPaymentBank" placeholder="CTW payer bank (PURCHASE direction)"></div>
                         </div>
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Payer Account :</div>
                             <div class="form-control"><input id="ivPayerAccountName" placeholder="CTW payer account name"></div>
                         </div>
@@ -1797,7 +1839,7 @@
                         <!-- ── Fee Recognition ── -->
                         <div class="form-section-label">Fee Recognition</div>
 
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Recognition :</div>
                             <select class="form-control" id="ivRecognitionPolicy" onchange="onRecognitionChange(this.value)">
                                 <option value="IMMEDIATE">IMMEDIATE</option>
@@ -1965,7 +2007,6 @@
         return Object.assign({
             region: 'JP',
             company: 'CTW INC',
-            invoiceDirection: 'PURCHASE',
             recognitionPolicy: 'PREPAID_MONTHLY',
             allocationMethod: 'MONTHLY_EQUAL',
             documentType: 'INVOICE',
@@ -2014,7 +2055,6 @@
         return Object.assign({
             region: 'US',
             company: 'CTW US INC',
-            invoiceDirection: 'PURCHASE',
             recognitionPolicy: 'ACCRUAL_BY_SERVICE_PERIOD',
             allocationMethod: 'MONTHLY_EQUAL',
             documentType: 'INVOICE',
@@ -2062,7 +2102,6 @@
         return Object.assign({
             region: 'SG',
             company: 'CTW G123 SINGAPORE PTE LTD',
-            invoiceDirection: 'PURCHASE',
             recognitionPolicy: 'PREPAID_DAILY',
             allocationMethod: 'DAILY_PRORATA',
             documentType: 'INVOICE',
@@ -2111,7 +2150,6 @@
         return Object.assign({
             region: 'CN',
             company: 'CTW G123 SINGAPORE PTE LTD',
-            invoiceDirection: 'PURCHASE',
             recognitionPolicy: 'IMMEDIATE',
             allocationMethod: 'MONTHLY_EQUAL',
             documentType: 'CONTRACT',
@@ -2159,7 +2197,6 @@
         return Object.assign({
             region: 'TW',
             company: 'AINEKOX CO LTD.',
-            invoiceDirection: 'PURCHASE',
             recognitionPolicy: 'MONTHLY_BY_LINE_ITEM',
             allocationMethod: 'MONTHLY_BY_LINE_ITEM',
             documentType: 'INVOICE',
@@ -2438,10 +2475,6 @@
     function renderLineItems(lineItems, editable = true) {
         currentLineItems = lineItems ? lineItems.map(it => Object.assign({}, it)) : [];
         const wrap = document.getElementById('ivPayloadWrap');
-        if (!currentLineItems.length) {
-            wrap.innerHTML = '<div class="payload-empty">No line items</div>';
-            return;
-        }
         const rows = currentLineItems.map((item, i) => `
             <tr data-li="${i}">
                 <td class="li-seq">${i + 1}</td>
@@ -2451,15 +2484,22 @@
                 <td class="li-num">${liCell(item.amount_excluding_tax, editable)}</td>
                 <td class="li-num">${liCell(item.tax_rate, editable)}</td>
                 <td class="li-num">${liCell(item.tax_inclusive_amount, editable)}</td>
+                <td class="li-del"><button class="li-del-btn" title="Delete row" onclick="deleteLineItem(${i})">×</button></td>
             </tr>`).join('');
-        wrap.innerHTML = `<div class="payload-wrap"><table>
-            <thead><tr>
-                <th style="width:28px">#</th>
-                <th>Item</th><th>Description</th><th>Service Period</th>
-                <th>Excl. Tax</th><th>Tax Rate</th><th>Incl. Tax</th>
-            </tr></thead>
-            <tbody>${rows}</tbody>
-        </table></div>`;
+        wrap.innerHTML = `
+            <div class="payload-wrap"><table>
+                <thead><tr>
+                    <th style="width:28px">#</th>
+                    <th>Item</th><th>Description</th><th>Service Period</th>
+                    <th>Excl. Tax</th><th>Tax Rate</th><th style="text-align:right">Incl. Tax</th>
+                    <th style="width:32px"></th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table></div>
+            <button class="li-add-row" onclick="addLineItem()">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg>
+                Add Row
+            </button>`;
     }
 
     function setLineItemsEditable(editable) {
@@ -2484,6 +2524,22 @@
         });
     }
 
+    function addLineItem() {
+        currentLineItems = collectLineItems();
+        currentLineItems.push({ item_name: '', description: '', service_period_start: '', service_period_end: '', amount_excluding_tax: '', tax_rate: '', tax_inclusive_amount: '' });
+        renderLineItems(currentLineItems);
+        // Focus first cell of the new row
+        const rows = document.querySelectorAll('#ivPayloadWrap tbody tr[data-li]');
+        const lastRow = rows[rows.length - 1];
+        if (lastRow) lastRow.querySelector('.li-cell')?.focus();
+    }
+
+    function deleteLineItem(idx) {
+        currentLineItems = collectLineItems();
+        currentLineItems.splice(idx, 1);
+        renderLineItems(currentLineItems);
+    }
+
     function populateInvoiceSummary(inv) {
         const f = inv.fields || {};
         const setVal = (id, v) => {
@@ -2494,9 +2550,7 @@
         };
         setVal('ivDescription', f.description);
         setVal('ivRegion', f.region || inv.region);
-        setVal('ivInvoiceDirection', f.invoiceDirection || 'PURCHASE');
         setVal('ivCompany', f.company);
-        setVal('ivDocumentType', f.documentType);
         setVal('ivVendorName', f.vendorName);
         setVal('ivPayeeName', f.payeeName);
         setVal('ivInvoiceNumber', f.invoiceNumber);
@@ -2805,9 +2859,7 @@
         return {
             description: v('ivDescription'),
             region: sel('ivRegion'),
-            invoiceDirection: sel('ivInvoiceDirection'),
             company: sel('ivCompany'),
-            documentType: v('ivDocumentType'),
             vendorName: v('ivVendorName'),
             payeeName: v('ivPayeeName'),
             invoiceNumber: v('ivInvoiceNumber'),
@@ -3051,7 +3103,6 @@
     renderList();
     renderTable();
     applyDateLabel();
-    initQuickFill();
 
     // ========== Quick-fill ==========
     const CTW_BANK_PRESETS = {
@@ -3169,13 +3220,48 @@
         ]
     };
 
+    // Payer-only presets (CTW outgoing bank accounts per region)
+    const CTW_PAYER_PRESETS = {
+        jp: [
+            { label: 'SMBC', sub: '三井住友銀行 法人口座',
+              paymentBank: 'SMBC', payerAccountName: '三井住友 (法人)' },
+            { label: 'みずほ銀行', sub: 'みずほ銀行 法人口座',
+              paymentBank: 'みずほ銀行', payerAccountName: 'CTW INC (法人)' }
+        ],
+        us: [
+            { label: 'East West Bank (MM)', sub: 'Primary USD disbursement account',
+              paymentBank: 'East West Bank (MM)', payerAccountName: 'CTW US INC' },
+            { label: 'Citibank NA', sub: 'Secondary USD wire account',
+              paymentBank: 'Citibank NA', payerAccountName: 'CTW US INC' }
+        ],
+        sg: [
+            { label: 'Citibank SGD', sub: 'Primary SGD disbursement account',
+              paymentBank: 'Citibank SGD', payerAccountName: 'CTW G123 SINGAPORE PTE LTD' },
+            { label: 'DBS Bank SGD', sub: 'Secondary SGD account',
+              paymentBank: 'DBS Bank SGD', payerAccountName: 'CTW G123 SINGAPORE PTE LTD' }
+        ],
+        cn: [
+            { label: '中国工商银行（上海）', sub: '主要人民币付款账户',
+              paymentBank: '中国工商银行（上海）', payerAccountName: '上海维优艺初心科技有限公司' },
+            { label: '招商银行（上海）', sub: '备用人民币付款账户',
+              paymentBank: '招商银行（上海）', payerAccountName: '上海维优艺初心科技有限公司' }
+        ],
+        tw: [
+            { label: '台新銀行（法人帳戶）', sub: '主要新台幣付款帳戶',
+              paymentBank: '台新銀行（法人帳戶）', payerAccountName: 'AINEKOX CO LTD' },
+            { label: '國泰世華（法人帳戶）', sub: '備用新台幣付款帳戶',
+              paymentBank: '國泰世華（法人帳戶）', payerAccountName: 'AINEKOX CO LTD' }
+        ]
+    };
+
     // IDs that belong to payee / payer quick-fill groups
-    const QF_PAYEE_IDS = ['ivBankName','ivBranchName','ivAccountType','ivAccountNo','ivAccountName',
-                          'ivBankCode','ivBranchCode','ivAccountHolderKana','ivBankNameKana',
-                          'ivSwiftCode','ivAchRouting','ivWireRouting','ivPayNowUen'];
-    const QF_PAYER_IDS = ['ivPaymentBank','ivPayerAccountName'];
+    const QF_PAYEE_IDS = [];
+    const QF_PAYER_IDS = ['ivPaymentBank'];
 
     let _qfGroup = 'payee';
+
+    // Call initQuickFill here, after all QF constants are defined
+    initQuickFill();
 
     function initQuickFill() {
         const svgIcon = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -3210,10 +3296,17 @@
         const list = document.getElementById('qfList');
         const title = document.getElementById('qfDropTitle');
         const region = (document.getElementById('ivRegion')?.value || 'jp').toLowerCase();
-        const presets = CTW_BANK_PRESETS[region] || CTW_BANK_PRESETS.jp;
 
         _qfGroup = group;
-        title.textContent = group === 'payer' ? 'CTW Payer Accounts' : 'CTW / Payee Presets';
+
+        let presets;
+        if (group === 'payer') {
+            presets = CTW_PAYER_PRESETS[region] || CTW_PAYER_PRESETS.jp;
+            title.textContent = 'CTW Payer Accounts';
+        } else {
+            presets = CTW_BANK_PRESETS[region] || CTW_BANK_PRESETS.jp;
+            title.textContent = 'CTW / Payee Presets';
+        }
 
         list.innerHTML = presets.map((p, i) => `
             <div class="qf-item" onclick="applyBankPreset(${i})">
@@ -3237,10 +3330,15 @@
 
     function applyBankPreset(idx) {
         const region = (document.getElementById('ivRegion')?.value || 'jp').toLowerCase();
-        const preset = (CTW_BANK_PRESETS[region] || CTW_BANK_PRESETS.jp)[idx];
-        if (!preset) return;
         const sv = (id, val) => { if (val !== undefined && val !== null) { const el = document.getElementById(id); if (el) el.value = val; } };
-        if (_qfGroup === 'payee') {
+        if (_qfGroup === 'payer') {
+            const preset = (CTW_PAYER_PRESETS[region] || CTW_PAYER_PRESETS.jp)[idx];
+            if (!preset) return;
+            sv('ivPaymentBank', preset.paymentBank);
+            sv('ivPayerAccountName', preset.payerAccountName);
+        } else {
+            const preset = (CTW_BANK_PRESETS[region] || CTW_BANK_PRESETS.jp)[idx];
+            if (!preset) return;
             const p = preset.payee || {};
             sv('ivBankName', p.bankName); sv('ivBranchName', p.branchName);
             sv('ivBankCode', p.bankCode); sv('ivBranchCode', p.branchCode);
@@ -3249,9 +3347,6 @@
             sv('ivBankNameKana', p.bankNameKana); sv('ivSwiftCode', p.swiftCode);
             sv('ivAchRouting', p.achRouting); sv('ivWireRouting', p.wireRouting);
             sv('ivPayNowUen', p.payNowUen);
-        } else {
-            const p = preset.payer || {};
-            sv('ivPaymentBank', p.paymentBank); sv('ivPayerAccountName', p.payerAccountName);
         }
         closeQuickFill();
     }
@@ -3271,9 +3366,7 @@ const FIELD_SPEC = {
             // Overview
             ['invoice_description',                        'AI 生成的发票内容摘要，帮助财务快速理解',              '✏️ 文本输入',       '⚪ / ⚪',  'Description'],
             ['region_code',                                '标识地区，决定付款路由规则',                            '🔽 下拉选择',       '✅ / ✅',  'Region'],
-            ['invoice_direction',                          '决定付款方/收款方角色，影响 bank_account 填写逻辑',     '🔽 下拉选择',       '✅ / ✅',  'Direction'],
             ['company_code',                               '标识 CTW 付款主体，与财务账套强关联',                   '🔽 下拉选择',       '✅ / ✅',  'Company'],
-            ['document_type',                              '区分 9 种凭证类型，影响审核逻辑',                       '✏️ 文本输入',       '✅ / ✅',  'Document Type'],
             ['vendor_name',                                '标识开票方，与付款对象核对',                            '✏️ 文本输入',       '✅ / ✅',  'Vendor Name'],
             ['invoice_number',                             '发票编号，溯源与重复检查（59% 有值）',                  '✏️ 文本输入',       '⚪ / ⚪',  'Invoice No.'],
             // Amount
@@ -3283,7 +3376,7 @@ const FIELD_SPEC = {
             ['tax_amount',                                 '税额，与税前金额相加核验',                              '🔢 数字输入',       '⚪ / ⚪',  'Tax Amount'],
             ['tax_registration_no',                        '税务登记号（JP: 適格請求書登録番号；US: EIN；SG: GST Reg No.；CN: 统一社会信用代码；TW: 统编）',      '✏️ 文本输入',       '⚪ / ⚪',  'Tax Reg. No.'],
             // Category
-            ['business_category',                          '费用类别，用于会计科目映射',                            '✏️ 文本输入',       '✅ / ✅',  'Business Category'],
+            ['business_category',                          '费用类别，用于会计科目映射',                            '🔽 下拉选择（ADVERTISING / ROYALTY / OFFICE_ADMIN / SAAS / CLOUD / PROFESSIONAL_SERVICE / COMMUNICATION / OTHER）','✅ / ✅',  'Business Category'],
             ['payment_type',                               '行政类/非行政类，影响审批流程',                         '🔽 下拉选择',       '✅ / ✅',  'Payment Type'],
             ['line_items[*]',                              '费用明细行，核验 AI 解析（含 item_name / amount / tax_rate 等）','✏️ 可编辑表格','⚪ / ⚪', 'Line Items'],
             ['payment_purpose',                            '打款用途说明',                                          '✏️ 文本输入',       '✅ / ✅',  'Purpose'],
@@ -3295,7 +3388,7 @@ const FIELD_SPEC = {
             // Payee Bank
             ['ext_data.bank_account.bank_name',            '收款方银行名称（结构化）',                              '✏️ 文本输入',       '✅ / ✅',  'Bank Name'],
             ['ext_data.bank_account.branch_name',          '收款方支行名称',                                        '✏️ 文本输入',       '⚪ / ⚪',  'Branch Name'],
-            ['ext_data.bank_account.account_type',         '收款方账户类型（e.g. 普通預金）',                       '✏️ 文本输入',       '⚪ / ⚪',  'Account Type'],
+            ['ext_data.bank_account.account_type',         '收款方账户类型，JP 专用枚举',                           '🔽 下拉选择（普通預金 / 当座預金 / 定期預金）','⚪ / ⚪',  'Account Type'],
             ['ext_data.bank_account.account_no',           '收款方口座番号（7位）',                                 '✏️ 文本输入',       '✅ / ✅',  'Account No.'],
             ['ext_data.bank_account.account_name',         '收款方账户名称，两个方向都需要核验收款人身份',          '✏️ 文本输入',       '✅ / ✅',  'Account Name'],
             ['ext_data.payment_rail.bank_code',            '银行代码（4位，JP 金融机构代码）',                      '✏️ 文本输入',       '⚪ / ⚪',  'Bank Code'],
@@ -3310,6 +3403,7 @@ const FIELD_SPEC = {
             ['allocation_method',                          '摊销计算方式，仅 ACCRUAL_BY_SERVICE_PERIOD 时可编辑；其余策略自动匹配','🔽 下拉选择（MONTHLY_EQUAL / DAILY_PRORATA）仅条件展示','⚪ / ⚪', 'Allocation'],
         ],
         hide: [
+            ['document_type',                                     '前端不展示，后端字段保留；AI 识别值由系统内部使用'],
             ['ext_data.payment_rail.swift_code',                  'JP 内汇不使用 SWIFT'],
             ['ext_data.payment_rail.ach_routing / wire_routing',  '美国支付体系，日本不适用'],
             ['ext_data.payment_rail.paynow_uen',                  '新加坡 PayNow 专用，日本不适用'],
@@ -3323,17 +3417,17 @@ const FIELD_SPEC = {
             // Overview
             ['invoice_description',                        'AI 生成的发票摘要',                                     '✏️ 文本输入',       '⚪ / ⚪',  'Description'],
             ['region_code',                                '标识地区，决定付款路由规则',                            '🔽 下拉选择',       '✅ / ✅',  'Region'],
-            ['invoice_direction',                          '决定付款方/收款方角色，影响 bank_account 填写逻辑',     '🔽 下拉选择',       '✅ / ✅',  'Direction'],
             ['company_code',                               '标识 CTW 付款主体',                                     '🔽 下拉选择',       '✅ / ✅',  'Company'],
-            ['document_type',                              '区分 9 种凭证类型',                                     '✏️ 文本输入',       '✅ / ✅',  'Document Type'],
             ['vendor_name',                                '开票方名称',                                            '✏️ 文本输入',       '✅ / ✅',  'Vendor Name'],
             ['invoice_number',                             '发票编号，溯源与重复检查',                              '✏️ 文本输入',       '⚪ / ⚪',  'Invoice No.'],
             // Amount
             ['currency',                                   'USD',                                                   '🔽 下拉选择',       '✅ / ✅',  'Currency'],
-            ['total_amount / amount_excluding_tax / tax_amount', '含税总额、税前金额、税额',                        '🔢 数字输入',       '✅/⚪/⚪', 'Total / Excl. / Tax Amount'],
+            ['total_amount',                               '含税总金额，主要付款金额',                              '🔢 数字输入',       '✅ / ✅',  'Total Amount'],
+            ['amount_excluding_tax',                       '税前金额',                                              '🔢 数字输入',       '⚪ / ⚪',  'Excl. Tax Amount'],
+            ['tax_amount',                                 '税额',                                                  '🔢 数字输入',       '⚪ / ⚪',  'Tax Amount'],
             ['tax_registration_no',                        'EIN / 卖方税号，AI 可能识别，财务可补填',              '✏️ 文本输入',       '⚪ / ⚪',  'Tax Reg. No.'],
             // Category
-            ['business_category',                          '费用类别',                                              '✏️ 文本输入',       '✅ / ✅',  'Business Category'],
+            ['business_category',                          '费用类别，用于会计科目映射',                            '🔽 下拉选择（ADVERTISING / ROYALTY / OFFICE_ADMIN / SAAS / CLOUD / PROFESSIONAL_SERVICE / COMMUNICATION / OTHER）','✅ / ✅',  'Business Category'],
             ['payment_type',                               '行政类/非行政类',                                       '🔽 下拉选择',       '✅ / ✅',  'Payment Type'],
             ['line_items[*]',                              '费用明细行',                                            '✏️ 可编辑表格',     '⚪ / ⚪',  'Line Items'],
             ['payment_purpose',                            '打款用途',                                              '✏️ 文本输入',       '✅ / ✅',  'Purpose'],
@@ -3344,7 +3438,6 @@ const FIELD_SPEC = {
             ['accounting_date',                            '入账日期（必须手填）',                                  '📝 日期选择器',     '✅ / ✅',  'Accounting Date'],
             // Payee Bank
             ['ext_data.bank_account.bank_name',            '收款方银行名称',                                        '✏️ 文本输入',       '✅ / ✅',  'Bank Name'],
-            ['ext_data.bank_account.account_type',         '收款方账户类型（e.g. CHECKING / SAVINGS）',             '✏️ 文本输入',       '⚪ / ⚪',  'Account Type'],
             ['ext_data.bank_account.account_no',           '收款方账号',                                            '✏️ 文本输入',       '✅ / ✅',  'Account No.'],
             ['ext_data.bank_account.account_name',         '收款方账户持有人名称，两个方向都需要核验收款人身份',    '✏️ 文本输入',       '✅ / ✅',  'Account Name'],
             ['ext_data.payment_rail.swift_code',           '收款方路由：跨境收款时必需（8或11位）',                 '✏️ 文本输入',       '⚪ / ⚪',  'SWIFT Code'],
@@ -3358,6 +3451,8 @@ const FIELD_SPEC = {
             ['allocation_method',                          '同 JP，仅 ACCRUAL_BY_SERVICE_PERIOD 时可编辑',           '🔽 下拉选择（条件展示）','⚪ / ⚪', 'Allocation'],
         ],
         hide: [
+            ['document_type',                                     '前端不展示，后端字段保留；AI 识别值由系统内部使用'],
+            ['ext_data.bank_account.account_type',               'JP 枚举字段（普通/当座/定期預金），美国不适用'],
             ['ext_data.payment_rail.bank_code / branch_code',     '美国不使用数字银行代码，用 routing number 代替'],
             ['ext_data.payment_rail.account_name_kana / bank_name_kana','日本片假名字段，美国完全不适用'],
             ['ext_data.payment_rail.paynow_uen',                  '新加坡 PayNow 专用，美国不适用'],
@@ -3372,17 +3467,17 @@ const FIELD_SPEC = {
             // Overview
             ['invoice_description',                        'AI 生成的发票摘要',                                     '✏️ 文本输入',       '⚪ / ⚪',  'Description'],
             ['region_code',                                '标识地区',                                              '🔽 下拉选择',       '✅ / ✅',  'Region'],
-            ['invoice_direction',                          '决定付款方/收款方角色',                                 '🔽 下拉选择',       '✅ / ✅',  'Direction'],
             ['company_code',                               '标识 CTW 付款主体',                                     '🔽 下拉选择',       '✅ / ✅',  'Company'],
-            ['document_type',                              '区分凭证类型',                                          '✏️ 文本输入',       '✅ / ✅',  'Document Type'],
             ['vendor_name',                                '开票方名称',                                            '✏️ 文本输入',       '✅ / ✅',  'Vendor Name'],
             ['invoice_number',                             '发票编号',                                              '✏️ 文本输入',       '⚪ / ⚪',  'Invoice No.'],
             // Amount
             ['currency',                                   'SGD / USD',                                             '🔽 下拉选择',       '✅ / ✅',  'Currency'],
-            ['total_amount / amount_excluding_tax / tax_amount', '含税总额、税前金额、税额',                        '🔢 数字输入',       '✅/✅/⚪', 'Total / Excl. / Tax Amount'],
+            ['total_amount',                               '含税总金额，主要付款金额',                              '🔢 数字输入',       '✅ / ✅',  'Total Amount'],
+            ['amount_excluding_tax',                       '税前金额',                                              '🔢 数字输入',       '⚪ / ⚪',  'Excl. Tax Amount'],
+            ['tax_amount',                                 '税额',                                                  '🔢 数字输入',       '⚪ / ⚪',  'Tax Amount'],
             ['tax_registration_no',                        'GST 登记号（AI 可能识别，财务可补填）',                '✏️ 文本输入',       '⚪ / ⚪',  'Tax Reg. No.'],
             // Category
-            ['business_category',                          '费用类别',                                              '✏️ 文本输入',       '✅ / ✅',  'Business Category'],
+            ['business_category',                          '费用类别，用于会计科目映射',                            '🔽 下拉选择（ADVERTISING / ROYALTY / OFFICE_ADMIN / SAAS / CLOUD / PROFESSIONAL_SERVICE / COMMUNICATION / OTHER）','✅ / ✅',  'Business Category'],
             ['payment_type',                               '行政类/非行政类',                                       '🔽 下拉选择',       '✅ / ✅',  'Payment Type'],
             ['line_items[*]',                              '费用明细行',                                            '✏️ 可编辑表格',     '⚪ / ⚪',  'Line Items'],
             ['payment_purpose',                            '打款用途',                                              '✏️ 文本输入',       '✅ / ✅',  'Purpose'],
@@ -3393,7 +3488,6 @@ const FIELD_SPEC = {
             // Payee Bank
             ['ext_data.bank_account.bank_name',            '收款方银行名称',                                        '✏️ 文本输入',       '✅ / ✅',  'Bank Name'],
             ['ext_data.bank_account.branch_name',          '收款方支行名称',                                        '✏️ 文本输入',       '⚪ / ⚪',  'Branch Name'],
-            ['ext_data.bank_account.account_type',         '收款方账户类型（e.g. CHECKING / SAVINGS / CURRENT）',  '✏️ 文本输入',       '⚪ / ⚪',  'Account Type'],
             ['ext_data.bank_account.account_no',           '收款方账号',                                            '✏️ 文本输入',       '✅ / ✅',  'Account No.'],
             ['ext_data.bank_account.account_name',         '收款方账户持有人名称，两个方向都需要核验收款人身份',    '✏️ 文本输入',       '✅ / ✅',  'Account Name'],
             ['ext_data.payment_rail.bank_code',            '新加坡部分银行有 bank code',                            '✏️ 文本输入',       '⚪ / ⚪',  'Bank Code'],
@@ -3408,6 +3502,8 @@ const FIELD_SPEC = {
             ['allocation_method',                          '同 JP，仅 ACCRUAL_BY_SERVICE_PERIOD 时可编辑',           '🔽 下拉选择（条件展示）','⚪ / ⚪', 'Allocation'],
         ],
         hide: [
+            ['document_type',                                     '前端不展示，后端字段保留；AI 识别值由系统内部使用'],
+            ['ext_data.bank_account.account_type',               'JP 枚举字段（普通/当座/定期預金），新加坡不适用'],
             ['ext_data.payment_rail.ach_routing / wire_routing',  '美国支付体系，新加坡不适用'],
             ['ext_data.payment_rail.account_name_kana / bank_name_kana','日本专用片假名，新加坡不适用'],
             ['payee_bank_name / payee_account_no',                '与 ext_data.bank_account.* 重复'],
@@ -3420,17 +3516,17 @@ const FIELD_SPEC = {
             // Overview
             ['invoice_description',                        'AI 生成的发票摘要',                                     '✏️ 文本输入',       '⚪ / ⚪',  'Description'],
             ['region_code',                                '标识地区',                                              '🔽 下拉选择',       '✅ / ✅',  'Region'],
-            ['invoice_direction',                          '决定付款方/收款方角色',                                 '🔽 下拉选择',       '✅ / ✅',  'Direction'],
             ['company_code',                               '标识 CTW 付款主体',                                     '🔽 下拉选择',       '✅ / ✅',  'Company'],
-            ['document_type',                              '区分凭证类型',                                          '✏️ 文本输入',       '✅ / ✅',  'Document Type'],
             ['vendor_name',                                '开票方名称',                                            '✏️ 文本输入',       '✅ / ✅',  'Vendor Name'],
             ['invoice_number',                             '发票编号',                                              '✏️ 文本输入',       '⚪ / ⚪',  'Invoice No.'],
             // Amount
             ['currency',                                   'USD（样本为跨境结算）',                                  '🔽 下拉选择',       '✅ / ✅',  'Currency'],
-            ['total_amount / amount_excluding_tax / tax_amount', '含税总额、税前金额、税额',                        '🔢 数字输入',       '✅/✅/⚪', 'Total / Excl. / Tax Amount'],
+            ['total_amount',                               '含税总金额，主要付款金额',                              '🔢 数字输入',       '✅ / ✅',  'Total Amount'],
+            ['amount_excluding_tax',                       '税前金额',                                              '🔢 数字输入',       '⚪ / ⚪',  'Excl. Tax Amount'],
+            ['tax_amount',                                 '税额',                                                  '🔢 数字输入',       '⚪ / ⚪',  'Tax Amount'],
             ['tax_registration_no',                        '统一社会信用代码，AI 可能识别，财务可补填',            '✏️ 文本输入',       '⚪ / ⚪',  'Tax Reg. No.'],
             // Category
-            ['business_category',                          '费用类别',                                              '✏️ 文本输入',       '✅ / ✅',  'Business Category'],
+            ['business_category',                          '费用类别，用于会计科目映射',                            '🔽 下拉选择（ADVERTISING / ROYALTY / OFFICE_ADMIN / SAAS / CLOUD / PROFESSIONAL_SERVICE / COMMUNICATION / OTHER）','✅ / ✅',  'Business Category'],
             ['payment_type',                               '行政类/非行政类',                                       '🔽 下拉选择',       '✅ / ✅',  'Payment Type'],
             ['line_items[*]',                              'CN 明细行最多 6 行，核验重要性高',                     '✏️ 可编辑表格',     '⚪ / ⚪',  'Line Items'],
             ['payment_purpose',                            '打款用途',                                              '✏️ 文本输入',       '✅ / ✅',  'Purpose'],
@@ -3441,7 +3537,6 @@ const FIELD_SPEC = {
             // Payee Bank
             ['ext_data.bank_account.bank_name',            '收款方银行名称',                                        '✏️ 文本输入',       '✅ / ✅',  'Bank Name'],
             ['ext_data.bank_account.branch_name',          '收款方支行名称',                                        '✏️ 文本输入',       '⚪ / ⚪',  'Branch Name'],
-            ['ext_data.bank_account.account_type',         '收款方账户类型（e.g. CHECKING）',                       '✏️ 文本输入',       '⚪ / ⚪',  'Account Type'],
             ['ext_data.bank_account.account_no',           '收款方账号',                                            '✏️ 文本输入',       '✅ / ✅',  'Account No.'],
             ['ext_data.bank_account.account_name',         '收款方账户持有人名称，两个方向都需要核验收款人身份',    '✏️ 文本输入',       '✅ / ✅',  'Account Name'],
             ['ext_data.payment_rail.swift_code',           'CN 对外付款必需，中国银行强制要求收款方 SWIFT Code',   '✏️ 文本输入',       '✅ / ✅',  'SWIFT Code'],
@@ -3453,6 +3548,8 @@ const FIELD_SPEC = {
             ['allocation_method',                          '同 JP，仅 ACCRUAL_BY_SERVICE_PERIOD 时可编辑',           '🔽 下拉选择（条件展示）','⚪ / ⚪', 'Allocation'],
         ],
         hide: [
+            ['document_type',                                     '前端不展示，后端字段保留；AI 识别值由系统内部使用'],
+            ['ext_data.bank_account.account_type',               'JP 枚举字段（普通/当座/定期預金），中国不适用'],
             ['ext_data.payment_rail.ach_routing / wire_routing',  '美国支付体系，中国不适用'],
             ['ext_data.payment_rail.paynow_uen',                  '新加坡专用，中国不适用'],
             ['ext_data.payment_rail.account_name_kana / bank_name_kana','日本专用片假名，中国不适用'],
@@ -3467,17 +3564,17 @@ const FIELD_SPEC = {
             // Overview
             ['invoice_description',                        'AI 生成的发票摘要',                                     '✏️ 文本输入',       '⚪ / ⚪',  'Description'],
             ['region_code',                                '标识地区',                                              '🔽 下拉选择',       '✅ / ✅',  'Region'],
-            ['invoice_direction',                          '决定付款方/收款方角色',                                 '🔽 下拉选择',       '✅ / ✅',  'Direction'],
             ['company_code',                               '标识付款主体，TW 对应 AINEKOX CO LTD.',                '🔽 下拉选择',       '✅ / ✅',  'Company'],
-            ['document_type',                              '区分凭证类型',                                          '✏️ 文本输入',       '✅ / ✅',  'Document Type'],
             ['vendor_name',                                '开票方名称',                                            '✏️ 文本输入',       '✅ / ✅',  'Vendor Name'],
             ['invoice_number',                             '发票编号',                                              '✏️ 文本输入',       '⚪ / ⚪',  'Invoice No.'],
             // Amount
             ['currency',                                   'TWD（或 USD 跨境结算）',                                '🔽 下拉选择',       '✅ / ✅',  'Currency'],
-            ['total_amount / amount_excluding_tax / tax_amount', '含税总额、税前金额、税额',                        '🔢 数字输入',       '✅/⚪/⚪', 'Total / Excl. / Tax Amount'],
+            ['total_amount',                               '含税总金额，主要付款金额',                              '🔢 数字输入',       '✅ / ✅',  'Total Amount'],
+            ['amount_excluding_tax',                       '税前金额',                                              '🔢 数字输入',       '⚪ / ⚪',  'Excl. Tax Amount'],
+            ['tax_amount',                                 '税额',                                                  '🔢 数字输入',       '⚪ / ⚪',  'Tax Amount'],
             ['tax_registration_no',                        '台湾统编（统一编号），AI 可能识别，财务可补填',        '✏️ 文本输入',       '⚪ / ⚪',  'Tax Reg. No.'],
             // Category
-            ['business_category',                          '费用类别',                                              '✏️ 文本输入',       '✅ / ✅',  'Business Category'],
+            ['business_category',                          '费用类别，用于会计科目映射',                            '🔽 下拉选择（ADVERTISING / ROYALTY / OFFICE_ADMIN / SAAS / CLOUD / PROFESSIONAL_SERVICE / COMMUNICATION / OTHER）','✅ / ✅',  'Business Category'],
             ['payment_type',                               '行政类/非行政类',                                       '🔽 下拉选择',       '✅ / ✅',  'Payment Type'],
             ['line_items[*]',                              '费用明细行',                                            '✏️ 可编辑表格',     '⚪ / ⚪',  'Line Items'],
             ['payment_purpose',                            '打款用途',                                              '✏️ 文本输入',       '✅ / ✅',  'Purpose'],
@@ -3488,7 +3585,6 @@ const FIELD_SPEC = {
             // Payee Bank
             ['ext_data.bank_account.bank_name',            '收款方银行名称',                                        '✏️ 文本输入',       '✅ / ✅',  'Bank Name'],
             ['ext_data.bank_account.branch_name',          '收款方支行名称',                                        '✏️ 文本输入',       '⚪ / ⚪',  'Branch Name'],
-            ['ext_data.bank_account.account_type',         '收款方账户类型（e.g. CHECKING / SAVINGS / CURRENT）',  '✏️ 文本输入',       '⚪ / ⚪',  'Account Type'],
             ['ext_data.bank_account.account_no',           '收款方账号',                                            '✏️ 文本输入',       '✅ / ✅',  'Account No.'],
             ['ext_data.bank_account.account_name',         '收款方账户持有人名称，两个方向都需要核验收款人身份',    '✏️ 文本输入',       '✅ / ✅',  'Account Name'],
             ['ext_data.payment_rail.bank_code',            '台湾银行代码（3位），本地转账备用（暂无样本）',        '✏️ 文本输入',       '⚪ / ⚪',  'Bank Code'],
@@ -3502,6 +3598,8 @@ const FIELD_SPEC = {
             ['allocation_method',                          '同 JP，仅 ACCRUAL_BY_SERVICE_PERIOD 时可编辑',           '🔽 下拉选择（条件展示）','⚪ / ⚪', 'Allocation'],
         ],
         hide: [
+            ['document_type',                                     '前端不展示，后端字段保留；AI 识别值由系统内部使用'],
+            ['ext_data.bank_account.account_type',               'JP 枚举字段（普通/当座/定期預金），台湾不适用'],
             ['ext_data.payment_rail.ach_routing / wire_routing',  '美国支付体系，台湾不适用'],
             ['ext_data.payment_rail.paynow_uen',                  '新加坡专用，台湾不适用'],
             ['ext_data.payment_rail.account_name_kana / bank_name_kana','日本专用片假名，台湾不适用'],
