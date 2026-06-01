@@ -1907,13 +1907,9 @@ function buildEscalateHTML() {
         <div class="mt-escalate-item" id="mtEsc${i}">
           <div class="mt-esc-hd" onclick="toggleEscDetail(this)">
             <div class="mt-esc-hd-left">
-              <div class="mt-esc-title">
-                <span class="mt-esc-type-icon">${d.typeIcon}</span>
-                ${d.title}
-              </div>
+              <div class="mt-esc-title">${d.title}</div>
               <div class="mt-esc-hd-source">
                 来自
-                <span class="mt-esc-avatar" style="background:${d.escalatorColor}">${d.escalatorInitial}</span>
                 <span class="mt-esc-source-name">${d.escalatorName}</span>
                 · ${d.time}
               </div>
