@@ -497,35 +497,16 @@
     z-index: 200;
   }
   .chat-input-wrap {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 18px rgba(0,0,0,.13);
-    border: 1px solid rgba(0,0,0,.08);
-    overflow: hidden;
+    background: #f9fafb;
+    border-radius: 31px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    display: flex; align-items: center;
+    padding: 4px;
+    gap: 0;
   }
-  /* ── Dispatch row (top) ── */
-  .chat-dispatch-row {
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 14px 10px 16px;
-    border-bottom: 1px solid rgba(0,0,0,.07);
-  }
-  .chat-dispatch-input {
-    flex: 1; border: none; outline: none; background: none;
-    font-size: 13px; color: var(--text-default); font-family: inherit;
-    min-width: 0;
-  }
-  .chat-dispatch-input::placeholder { color: var(--text-tertiary); }
-  .chat-dispatch-btn {
-    display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
-    background: var(--accent); color: #fff;
-    border: none; border-radius: 8px; padding: 6px 14px;
-    font-size: 12px; font-weight: 700; cursor: pointer; letter-spacing: .02em;
-    transition: background .15s;
-  }
-  .chat-dispatch-btn:hover { background: #2d3a55; }
-  /* ── Ask row (bottom) ── */
   .chat-input-inner {
-    display: flex; align-items: center; padding: 10px 8px 10px 16px; gap: 8px;
+    flex: 1; background: white; border-radius: 27px;
+    display: flex; align-items: center; padding: 8px 16px; gap: 8px;
   }
   .chat-prefix {
     font-size: 14px; font-weight: 400; color: var(--text-secondary);
@@ -536,17 +517,17 @@
   }
   .chat-input {
     flex: 1; border: none; outline: none; background: none;
-    font-size: 14px; color: var(--text-default); font-family: inherit;
-    min-width: 0;
+    font-size: 14px; color: var(--text-default);
+    font-family: inherit;
   }
   .chat-input::placeholder { color: var(--text-tertiary); }
   .chat-send-btn {
-    width: 34px; height: 34px; border-radius: 10px;
+    width: 36px; height: 36px; border-radius: 18px;
     background: #dbdbdb; border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; transition: background .15s, transform .1s;
   }
-  .chat-send-btn:hover { background: var(--accent); }
+  .chat-send-btn:hover { background: #2d3a55; }
   .chat-send-btn:active { transform: scale(.93); }
   .chat-send-btn svg { color: #fff; }
 
@@ -1596,25 +1577,16 @@
 <!-- Chat Bar -->
 <div class="chat-bar">
   <div class="chat-input-wrap">
-    <!-- Dispatch row -->
-    <div class="chat-dispatch-row">
-      <input type="text" class="chat-dispatch-input" id="dispatchInput"
-        placeholder="选定子任务后，按端解组自动下发">
-      <button class="chat-dispatch-btn" id="dispatchBtn" onclick="handleDispatch()">
-        DISPATCH · <span id="dispatchCount">0</span>
-      </button>
-    </div>
-    <!-- Ask row -->
     <div class="chat-input-inner">
       <span class="chat-prefix">Ask</span>
       <div class="chat-divider"></div>
       <input type="text" class="chat-input" id="chatInput"
-        placeholder="Ask manager assistant"
+        placeholder="Type your message..."
         onkeydown="handleChatKey(event)">
-      <button class="chat-send-btn" onclick="sendChat()">
-        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
     </div>
+    <button class="chat-send-btn" onclick="sendChat()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
   </div>
 </div>
 
@@ -2155,14 +2127,6 @@ function handleChatKey(e) {
     e.preventDefault();
     sendChat();
   }
-}
-
-function handleDispatch() {
-  const count = parseInt(document.getElementById('dispatchCount').textContent) || 0;
-  if (count === 0) { showSnack('请先选择要下发的子任务'); return; }
-  showSnack(`已下发 ${count} 条子任务`);
-  document.getElementById('dispatchInput').value = '';
-  document.getElementById('dispatchCount').textContent = '0';
 }
 
 function injectChatRef(ref, autoFocus = true) {
