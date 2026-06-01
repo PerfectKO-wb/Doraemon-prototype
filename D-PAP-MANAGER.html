@@ -1947,9 +1947,9 @@ function buildEscalateHTML() {
             <div class="mt-esc-summary">
               <div class="mt-esc-summary-stat">
                 <span class="mt-esc-summary-num escalated">${d.actions.length}</span>
-                <span class="mt-esc-summary-label">待你处理</span>
+                <span class="mt-esc-summary-label">条 Action</span>
               </div>
-              <span class="mt-esc-summary-desc">员工通过 Help 上报了整个任务，Agent 共建议 ${d.actions.length} 条 Action，请逐条 Execute 或 Skip。</span>
+              <span class="mt-esc-summary-desc">员工通过 Help 上报了整个任务，Agent 已规划 ${d.actions.length} 条 Action，Approve 后全部执行。</span>
             </div>
 
             <div class="mt-esc-block">
@@ -1964,17 +1964,11 @@ function buildEscalateHTML() {
 
             <div class="mt-esc-block">
               <div class="mt-esc-block-label">Agent 建议 Actions</div>
-              <ul class="mt-esc-action-list" id="mtEscActions${i}">
-                ${d.actions.map((a, ai) => `
-                  <li class="mt-esc-action-item" id="mtEscAction${i}_${ai}">
-                    <span class="mt-esc-action-exec ${a.type}" id="mtEscExec${i}_${ai}">${a.type.toUpperCase()}</span>
+              <ul class="mt-esc-action-list">
+                ${d.actions.map(a => `
+                  <li class="mt-esc-action-item">
+                    <span class="mt-esc-action-exec ${a.type}">${a.type.toUpperCase()}</span>
                     <span class="mt-esc-action-text">${a.text}</span>
-                    <span class="mt-esc-action-skip-badge">Skipped</span>
-                    <span class="mt-esc-action-status" id="mtEscStatus${i}_${ai}"></span>
-                    <span class="mt-esc-action-btns">
-                      <button class="mt-esc-action-exec-btn" id="mtEscExecBtn${i}_${ai}" onclick="executeEscAction(${i},${ai})">Execute</button>
-                      <button class="mt-esc-action-skip-btn" id="mtEscSkipBtn${i}_${ai}" onclick="toggleEscActionSkip(${i},${ai})">Skip</button>
-                    </span>
                   </li>`).join('')}
               </ul>
             </div>
@@ -2007,8 +2001,8 @@ function buildEscalateHTML() {
             </div>
 
             <div class="mt-esc-actions" id="mtEscActionBar${i}">
-              <button class="mt-esc-btn already-done" id="mtEscAlreadyDoneBtn${i}" onclick="handleEscAlreadyDone(${i})">Already Done</button>
-              <button class="mt-esc-btn chat" id="mtEscChatBtn${i}" onclick="startEscChatMock('@[${d.ref}] ')">Chat to Adjust</button>
+              <button class="mt-esc-btn execute" onclick="approveEscTask(${i})">Approve</button>
+              <button class="mt-esc-btn chat" onclick="adjustEscTask(${i}, '${d.ref}')">Adjust</button>
             </div>
           </div><!-- /mt-esc-detail -->
         </div>`).join('')}
@@ -2059,92 +2053,19 @@ function _dismissEscItem(idx) {
   }
 }
 
-// Check if all actions are resolved (executed or skipped), auto-dismiss if so
-function _checkEscAllResolved(escIdx) {
-  const d = escalateData[escIdx];
-  if (!d) return;
-  const allResolved = d.actions.every((_, ai) => {
-    const row = document.getElementById(`mtEscAction${escIdx}_${ai}`);
-    return row && (
-      row.classList.contains('mt-esc-action-item--done') ||
-      row.classList.contains('mt-esc-action-item--skip')
-    );
-  });
-  if (allResolved) {
-    const skipped = d.actions.filter((_, ai) => {
-      const row = document.getElementById(`mtEscAction${escIdx}_${ai}`);
-      return row && row.classList.contains('mt-esc-action-item--skip');
-    }).length;
-    const executed = d.actions.length - skipped;
-    const msg = skipped > 0
-      ? `已执行 ${executed} 条 Action（${skipped} 条已跳过），结果将同步给员工`
-      : '已执行，结果将同步给员工';
-    setTimeout(() => {
-      _dismissEscItem(escIdx);
-      closeModal();
-      showSnack(msg);
-    }, 600);
-  }
+// ── AI Task: Approve / Adjust ──
+function approveEscTask(idx) {
+  const btn = document.querySelector(`#mtEscActionBar${idx} .mt-esc-btn.execute`);
+  if (btn) { btn.disabled = true; btn.textContent = '⟳ Executing…'; }
+  setTimeout(() => {
+    _dismissEscItem(idx);
+    showSnack('✓ 已批准 · Agent 正在执行全部 Action');
+  }, 800);
 }
 
-// Execute a single action
-function executeEscAction(escIdx, actionIdx) {
-  const d = escalateData[escIdx];
-  if (!d) return;
-  const a       = d.actions[actionIdx];
-  const row     = document.getElementById(`mtEscAction${escIdx}_${actionIdx}`);
-  const execBtn = document.getElementById(`mtEscExecBtn${escIdx}_${actionIdx}`);
-  const skipBtn = document.getElementById(`mtEscSkipBtn${escIdx}_${actionIdx}`);
-  const execEl  = document.getElementById(`mtEscExec${escIdx}_${actionIdx}`);
-  const statusEl= document.getElementById(`mtEscStatus${escIdx}_${actionIdx}`);
-  if (!row || row.classList.contains('mt-esc-action-item--done')) return;
-
-  // Lock buttons
-  if (execBtn) execBtn.disabled = true;
-  if (skipBtn) skipBtn.disabled = true;
-
-  if (a.type === 'hu') {
-    row.classList.add('exec-done', 'mt-esc-action-item--done');
-    if (execEl)   execEl.textContent = '✓ HU';
-    if (statusEl) { statusEl.className = 'mt-esc-action-status done'; statusEl.textContent = 'Done'; }
-    if (execBtn)  execBtn.style.display = 'none';
-    if (skipBtn)  skipBtn.style.display = 'none';
-    _checkEscAllResolved(escIdx);
-  } else {
-    row.classList.add('exec-running');
-    if (execEl)   execEl.textContent = '⟳ AI';
-    if (statusEl) { statusEl.className = 'mt-esc-action-status doing'; statusEl.textContent = 'Doing'; }
-    setTimeout(() => {
-      row.classList.remove('exec-running');
-      row.classList.add('exec-done', 'mt-esc-action-item--done');
-      if (execEl)   execEl.textContent = '✓ AI';
-      if (statusEl) { statusEl.className = 'mt-esc-action-status done'; statusEl.textContent = 'Done'; }
-      if (execBtn)  execBtn.style.display = 'none';
-      if (skipBtn)  skipBtn.style.display = 'none';
-      _checkEscAllResolved(escIdx);
-    }, 1400);
-  }
+function adjustEscTask(idx, ref) {
+  startEscChatMock(`@[${ref}] 请调整 Action 方案：`);
 }
-
-// Toggle skip state for a single action
-function toggleEscActionSkip(escIdx, actionIdx) {
-  const row     = document.getElementById(`mtEscAction${escIdx}_${actionIdx}`);
-  const skipBtn = document.getElementById(`mtEscSkipBtn${escIdx}_${actionIdx}`);
-  const execBtn = document.getElementById(`mtEscExecBtn${escIdx}_${actionIdx}`);
-  if (!row || row.classList.contains('mt-esc-action-item--done')) return;
-  const isSkip = row.classList.toggle('mt-esc-action-item--skip');
-  if (skipBtn) skipBtn.textContent = isSkip ? 'Undo' : 'Skip';
-  if (execBtn) execBtn.style.display = isSkip ? 'none' : '';
-  if (isSkip) _checkEscAllResolved(escIdx);
-}
-
-// Already Done: direct dismiss
-function handleEscAlreadyDone(idx) {
-  _dismissEscItem(idx);
-  closeModal();
-  showSnack('✓ 已标记完成 · 结果将同步至 Memory');
-}
-
 
 function closeModal(e) {
   if (!e || e.target === document.getElementById('modalOverlay')) {
