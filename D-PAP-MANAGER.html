@@ -1080,7 +1080,7 @@
         Brain<span class="tab-count">11</span>
       </button>
       <button class="tab-btn" id="aiTaskTabBtn" onclick="switchTab('aitask', this)">
-        AI Task<span class="tab-count" id="aiTaskTabCount">1</span>
+        Queue<span class="tab-count" id="aiTaskTabCount">1</span>
       </button>
     </div>
 
@@ -1899,7 +1899,7 @@ function openDrawer(type) {
 // ── AI Task Tab ──
 function buildEscalateHTML() {
   if (!escalateData.length) {
-    return '<div style="padding:32px 16px;text-align:center;color:#b7b7b7;font-size:13px">暂无 AI Task</div>';
+    return '<div style="padding:32px 16px;text-align:center;color:#b7b7b7;font-size:13px">Queue 为空</div>';
   }
   return `
     <div class="mt-escalate-section">
