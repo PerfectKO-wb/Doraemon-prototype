@@ -57,59 +57,51 @@
 
 | 前端标签 | 字段路径 | 展示原因 | 手填方式 | 必填（PURCHASE/SALE）|
 |---|---|---|---|---|
-| Description | `invoice_description` | AI 生成的发票内容摘要，帮助财务快速理解 | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ⚪ / ⚪ |
+| Description | `invoice_description` | AI 生成的发票内容摘要，帮助财务快速理解 | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ✅ / ⚪ |
 | Region | `region_code` | 标识发票所属地区，决定后续付款路由规则 | 🔽 下拉选择（枚举值：JP / US / SG / CN / TW） | ✅ / ✅ |
-| Direction | `invoice_direction` | 决定付款方/收款方角色分配，影响 payer_bank_name 和 bank_account 字段的填写逻辑 | 🔽 下拉选择（枚举值：PURCHASE / SALES） | ✅ / ✅ |
 | Company | `company_code` | 标识付款主体（CTW 哪家法人实体出款），与财务账套强关联 | 🔽 下拉选择（枚举值：JP_CTW_INC / US_CTW_INC / SG_CTW_INC / SH_WYYCX_INC 等） | ✅ / ✅ |
-| Document Type | `document_type` | 区分 INVOICE / PAYMENT_REPORT / RECEIPT 等 9 种类型，影响审核逻辑 | ✏️ 文本输入（AI 识别率高，可修正） | ✅ / ✅ |
 | Vendor Name | `vendor_name` | 标识开票方，与付款对象核对 | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice No. | `invoice_number` | 发票编号，用于溯源和重复检查（59% 有值，合同/收据类可能无编号） | ✏️ 文本输入 | ⚪ / ⚪ |
+| Invoice No. | `invoice_number` | 发票编号，用于溯源和重复检查 | ✏️ 文本输入 | ✅ / ⚪ |
 | Currency | `currency` | 币种，JPY，用于汇率换算和金额展示 | 🔽 下拉选择（枚举值：JPY / USD / CNY / SGD / TWD） | ✅ / ✅ |
 | Total Amount | `total_amount` | 含税总金额，主要付款金额 | 🔢 数字输入（AI 识别错误时财务可修正） | ✅ / ✅ |
-| Excl. Tax Amount | `amount_excluding_tax` | 税前金额，拆分税务处理 | 🔢 数字输入 | ⚪ / ⚪ |
-| Tax Amount | `tax_amount` | 税额，与税前金额相加核验（免税发票允许为 0） | 🔢 数字输入 | ⚪ / ⚪ |
-| Tax Reg. No. | `tax_registration_no` | 適格請求書登録番号，日本消费税合规字段；其他地区亦展示（如 EIN、GST Reg No.、统编），财务可补填 | ✏️ 文本输入（AI 识别错误或为空时财务可修正；JP 需与原始发票完全一致，修改需自行核实合规性） | ⚪ / ⚪ |
-| Business Category | `business_category` | 费用类别，用于会计科目映射 | ✏️ 文本输入（AI 识别后可修正） | ✅ / ✅ |
-| Payment Type | `payment_type` | 行政类/非行政类，影响审批流程 | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
-| Line Items | `line_items[*]` | 费用明细行，核验并修正 AI 解析的明细数据；每行包含：`item_name`（品名）、`tax_inclusive_amount`（含税金额）、`tax_rate`（税率）、`amount_excluding_tax`（税前金额）、`description`（明细说明）、`service_period_start/end`（明细服务期间）。示例：品名 `G123-PSP`，含税 `25428.64`，税率 `8%` | ✏️ 可编辑表格（逐行修改，不支持新增/删除行） | ⚪ / ⚪ |
+| Excl. Tax Amount | `amount_excluding_tax` | 税前金额，拆分税务处理 | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Amount | `tax_amount` | 税额，与税前金额相加核验（免税发票允许为 0） | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Reg. No. | `tax_registration_no` | 適格請求書登録番号，日本消费税合规字段；财务可补填，需与原始发票完全一致 | ✏️ 文本输入 | ✅ / —（SALE 方向不展示）|
+| Payment Type | `payment_type` | 行政类/非行政类，影响审批流程；默认选中 NON_ADMINISTRATIVE | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
+| Line Items | `line_items[*]` | 费用明细行，核验并修正 AI 解析的明细数据；每行包含：`item_name`（品名）、`tax_inclusive_amount`（含税金额）、`tax_rate`（税率）、`amount_excluding_tax`（税前金额）、`description`（明细说明）、`service_period_start/end`（明细服务期间）。示例：品名 `G123-PSP`，含税 `25428.64`，税率 `8%` | ✏️ 可编辑表格（逐行修改，支持新增/删除行） | ⚪ / ⚪ |
 | Purpose | `payment_purpose` | 打款用途，说明这笔钱用于什么 | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice Date | `invoice_date` | 发票开具日期，判断发票有效期（DDL 允许 NULL，AI 可能未识别，前端非强制） | 📅 日期选择器 | ⚪ / ⚪ |
-| Due Date | `due_date` | 付款截止日期，超期需预警（57% 有值，合同类无此字段） | 📅 日期选择器 | ⚪ / ⚪ |
-| Service Period | `service_period_start` / `service_period_end` | 服务期间，用于费用摊销判断 | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ⚪ |
+| Invoice Date | `invoice_date` | 发票开具日期 | 📅 日期选择器 | ✅ / ✅ |
+| Due Date | `due_date` | 付款截止日期（57% 有值，合同类无此字段） | 📅 日期选择器 | ⚪ / —（SALE 方向不展示）|
+| Service Period | `service_period_start` / `service_period_end` | 服务期间，用于费用摊销判断 | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ✅ |
 | Accounting Date | `accounting_date` | 入账日期，决定进哪个月的账 | 📝 日期选择器（AI 从不识别，0/179，必须手填） | ✅ / ✅ |
-| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化），转账必要信息 | ✏️ 文本输入 | ✅ / ✅ |
-| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称（JP 内汇建议填写） | ✏️ 文本输入 | ⚪ / ⚪ |
-| Account Type | `ext_data.bank_account.account_type` | **收款方**账户类型（e.g. 普通預金） | ✏️ 文本输入 | ⚪ / ⚪ |
-| Account No. | `ext_data.bank_account.account_no` | **收款方**口座番号（7位） | ✏️ 文本输入（限 7 位数字） | ✅ / ✅ |
-| Account Name | `ext_data.bank_account.account_name` | **收款方**账户名称（JP 需片假名）；PURCHASE 下为供应商账户名，SALE 下为 CTW 收款账户名，两个方向均需核验 | ✏️ 文本输入 | ✅ / ✅ |
-| Bank Code | `ext_data.payment_rail.bank_code` | 银行代码（4位，JP 金融机构代码） | ✏️ 文本输入（限 4 位数字） | ⚪ / ⚪ |
-| Branch Code | `ext_data.payment_rail.branch_code` | 支行代码（3位） | ✏️ 文本输入（限 3 位数字） | ⚪ / ⚪ |
-| Account Name (Kana) | `ext_data.payment_rail.account_name_kana` | **JP 必要**：口座名義（半角片假名），日本内汇银行系统强制要求；PURCHASE 方向为供应商 kana 名（必填），SALE 方向为 CTW 自身 kana 账户名（可预填，非强制手填） | ✏️ 文本输入（半角片假名格式，AI 识别率 5%，多数需财务补填） | ✅ / ⚪ |
-| Bank Name (Kana) | `ext_data.payment_rail.bank_name_kana` | 銀行名（半角片假名），部分银行系统报文要求；AI 几乎不识别，财务可补填 | ✏️ 文本输入（半角片假名格式） | ⚪ / ⚪ |
-| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款银行；仅在发票正文提及时 AI 识别（如信用卡账单、口座振替凭证） | 🔽 下拉选择（【待确认】从 CTW 固定银行账户中选择，AI 识别率 5.6%） | ✅ / ⚪ |
-| Payer Account | `payer_account_name` | 付款方账户名称，与 `payer_bank_name` 配套使用，明确付款主体。PURCHASE 下为 CTW 实体名称 | ✏️ 文本输入 | ✅ / ⚪ |
-| Recognition | `recognition_policy` | 控制费用在时间轴上的确认方式，直接决定 AI 将生成几条 JE 及其所属期间 | 🔽 下拉选择（枚举值：IMMEDIATE / PREPAID_MONTHLY / PREPAID_DAILY / ACCRUAL_BY_SERVICE_PERIOD / MONTHLY_BY_LINE_ITEM） | ✅ / ✅ |
-| Allocation | `allocation_method` | recognition_policy ≠ IMMEDIATE 时，指定分摊的数学计算方式（ACCRUAL_BY_SERVICE_PERIOD 时财务可选；其余策略自动匹配） | 🔽 下拉选择（枚举值：MONTHLY_EQUAL / DAILY_PRORATA / MONTHLY_BY_LINE_ITEM），仅当 ACCRUAL_BY_SERVICE_PERIOD 时可编辑 | ⚪ / ⚪ |
+| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化），转账必要信息 | ✏️ 文本输入 | ✅ / ⚪ |
+| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称（JP 内汇必填） | ✏️ 文本输入 | ✅ / ⚪ |
+| Account Type | `ext_data.bank_account.account_type` | **收款方**账户类型，JP 专用枚举 | 🔽 下拉选择（普通預金 / 当座預金 / 定期預金） | ✅ / ⚪ |
+| Account No. | `ext_data.bank_account.account_no` | **收款方**口座番号（7位） | ✏️ 文本输入（限 7 位数字） | ✅ / ⚪ |
+| Account Name | `ext_data.bank_account.account_name` | **收款方**账户名称（JP 需片假名）；PURCHASE 下为供应商账户名，SALE 下为 CTW 收款账户名 | ✏️ 文本输入 | ✅ / ⚪ |
+| Bank Code | `ext_data.payment_rail.bank_code` | 银行代码（4位，JP 金融机构代码） | ✏️ 文本输入（限 4 位数字） | ✅ / ⚪ |
+| Branch Code | `ext_data.payment_rail.branch_code` | 支行代码（3位） | ✏️ 文本输入（限 3 位数字） | ✅ / ⚪ |
+| Account Name (Kana) | `ext_data.payment_rail.account_name_kana` | 口座名義（半角片假名）；日本内汇银行系统格式要求，AI 识别率 5%，多数需财务补填 | ✏️ 文本输入（半角片假名格式，AI 识别率 5%，多数需财务补填） | ⚪ / —（SALE 方向不展示）|
+| Bank Name (Kana) | `ext_data.payment_rail.bank_name_kana` | 銀行名（半角片假名），部分银行系统报文要求 | ✏️ 文本输入（半角片假名格式） | ⚪ / —（SALE 方向不展示）|
+| SWIFT Code | `ext_data.payment_rail.swift_code` | 国际汇款时使用；JP 内汇通常不需要，但对外付款或特殊场景下可填写 | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
+| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款银行；仅在发票正文提及时 AI 识别 | ✏️ 文本输入（可手动填写/修改；输入框右侧提供快速填充图标，选择预设后同步填入 Payer Bank + Payer Account） | ⚪ / ⚪ |
+| Payer Account | `payer_account_name` | 付款方账户名称，与 `payer_bank_name` 配套使用，明确付款主体 | ✏️ 文本输入（可手动填写/修改；通过 Payer Bank 快速填充联动写入） | ⚪ / ⚪ |
+| Allocation Required | `allocation_required` | 是否需要跨期分摊，控制 Allocation 字段的显示；Yes = 需要摊销，显示 Allocation；No = 不摊销，Allocation 隐藏 | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
+| Allocation | `allocation_method` | 摊销计算方式，仅 allocation_required=Yes 时展示；枚举值：MONTHLY_EQUAL（按月平均）/ DAILY_PRORATA（按天比例）/ MONTHLY_BY_LINE_ITEM（明细行已按月拆分）/ BY_LINE_ITEM_PERIOD（行项目按非月度期间拆分）/ BY_EXPLICIT_SCHEDULE（按单据 schedule）/ USAGE_BASED（按用量分摊）/ MANUAL（证据不足，人工处理） | 🔽 下拉选择（7 个枚举值，条件展示） | ⚪ / ⚪ |
+| Recognition | `recognition_policy` | 费用确认策略，决定 AI 生成几条 JE 及所属期间；枚举值：IMMEDIATE（立即确认）/ PREPAID_MONTHLY（预付按月摊）/ PREPAID_DAILY（预付按天摊）/ ACCRUAL_BY_SERVICE_PERIOD（按可见服务期计提）/ MONTHLY_BY_LINE_ITEM（月度明细行即确认依据）/ SCHEDULED_BY_DOCUMENT（按单据 schedule 确认）/ USAGE_BASED（按用量/消耗确认）/ MILESTONE_BASED（按里程碑验收确认） | 🔽 下拉选择（8 个枚举值） | ⚪ / ⚪ |
 
-> ⚠️ **bank_account 必填规则**：`bank_name` 和 `account_no` 双方向均为必填——PURCHASE 方向为供应商（收款方）银行账户，是银行转账的必要信息；SALES 方向为 CTW（收款方）银行账户，客户需依此打款。若财务确认该发票为信用卡/自动扣款（无需手动发起转账），可勾选"Auto-debit / 自动扣款"跳过银行信息校验并填写说明。
+> ⚠️ **bank_account 必填规则**：`bank_name`、`branch_name`、`account_no`、`account_name`（JP 还需 `account_type`、`bank_code`、`branch_code`）在 **PURCHASE** 方向为供应商（收款方）银行账户，是银行转账的必要信息，均为必填；**SALE** 方向为 CTW 收款账户，客户依此打款，此时 bank_account 字段调整为选填（CTW 账户信息由系统预置，财务可按需补填）。JP 专用字段 `account_name_kana`、`bank_name_kana` 在 PURCHASE 方向为选填，SALE 方向不展示。
 >
 > ⚠️ **line_items 内部必填规则**：有明细行时，每行的 `item_name`、`tax_inclusive_amount`、`tax_rate` 为必填；`amount_excluding_tax`、`description`、`service_period` 为选填。
 >
-> ⚠️ **recognition_policy 联动交互规则**（所有地区通用）：
->
-> | recognition_policy 选择 | allocation_method | service_period（Header 级）| line_items.service_period |
-> |---|---|---|---|
-> | `IMMEDIATE` | 不展示 | 保持选填 | 保持选填 |
-> | `PREPAID_MONTHLY` | 自动锁定 MONTHLY_EQUAL（不可改） | **升级为必填（高亮提示）** | 保持选填 |
-> | `PREPAID_DAILY` | 自动锁定 DAILY_PRORATA（不可改） | **升级为必填（高亮提示）** | 保持选填 |
-> | `ACCRUAL_BY_SERVICE_PERIOD` | 可选：MONTHLY_EQUAL / DAILY_PRORATA | **升级为必填（高亮提示）** | 保持选填 |
-> | `MONTHLY_BY_LINE_ITEM` | 自动锁定 MONTHLY_BY_LINE_ITEM（不可改） | 不适用（Header 级不展示必填提示） | **每行 service_period 升级为必填** |
+> 联动规则详见「**九、Fee Recognition 联动规则**」章节。
 
 ### 不需要展示的字段
 
 | 字段路径 | 不展示原因 |
 |---|---|
-| `ext_data.payment_rail.swift_code` | JP 内汇不使用 SWIFT，该字段对日本付款无意义 |
+| `business_category` | 前端详情页不展示，由系统根据其他字段自动映射 |
+| `document_type` | 前端详情页不展示，后端字段保留；AI 识别值由系统内部流转使用，财务无需感知 |
 | `ext_data.payment_rail.ach_routing` / `wire_routing` | 美国支付路由体系，日本不适用 |
 | `ext_data.payment_rail.paynow_uen` | 新加坡 PayNow 专用，日本不适用 |
 | `payee_bank_name` / `payee_account_no` | 与 `ext_data.bank_account.*` 内容重复，优先展示结构化字段，平铺字段不重复展示 |
@@ -125,37 +117,34 @@
 
 | 前端标签 | 字段路径 | 展示原因 | 手填方式 | 必填（PURCHASE/SALE）|
 |---|---|---|---|---|
-| Description | `invoice_description` | 同 JP | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ⚪ / ⚪ |
+| Description | `invoice_description` | 同 JP | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ✅ / ⚪ |
 | Region | `region_code` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Direction | `invoice_direction` | 同 JP | 🔽 下拉选择（枚举值：PURCHASE / SALES） | ✅ / ✅ |
 | Company | `company_code` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Document Type | `document_type` | 同 JP | ✏️ 文本输入（AI 识别后可修正） | ✅ / ✅ |
 | Vendor Name | `vendor_name` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice No. | `invoice_number` | 同 JP | ✏️ 文本输入 | ⚪ / ⚪ |
+| Invoice No. | `invoice_number` | 同 JP | ✏️ 文本输入 | ✅ / ⚪ |
 | Currency | `currency` | USD | 🔽 下拉选择（枚举值：JPY / USD / CNY / SGD / TWD） | ✅ / ✅ |
 | Total Amount | `total_amount` | 同 JP | 🔢 数字输入 | ✅ / ✅ |
-| Excl. Tax Amount | `amount_excluding_tax` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
-| Tax Amount | `tax_amount` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
-| Tax Reg. No. | `tax_registration_no` | EIN / 卖方税号，AI 可能识别，财务可补填（US 样本多为空） | ✏️ 文本输入 | ⚪ / ⚪ |
-| Business Category | `business_category` | 同 JP | ✏️ 文本输入（AI 识别后可修正） | ✅ / ✅ |
-| Payment Type | `payment_type` | 同 JP | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
-| Line Items | `line_items[*]` | 同 JP | ✏️ 可编辑表格（逐行修改，不支持新增/删除行） | ⚪ / ⚪ |
+| Excl. Tax Amount | `amount_excluding_tax` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Amount | `tax_amount` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Reg. No. | `tax_registration_no` | EIN / 卖方税号，AI 可能识别，财务可补填（US 样本多为空） | ✏️ 文本输入 | ⚪ / —（SALE 方向不展示）|
+| Payment Type | `payment_type` | 同 JP；默认选中 NON_ADMINISTRATIVE | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
+| Line Items | `line_items[*]` | 同 JP | ✏️ 可编辑表格（逐行修改，支持新增/删除行） | ⚪ / ⚪ |
 | Purpose | `payment_purpose` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice Date | `invoice_date` | 同 JP | 📅 日期选择器 | ⚪ / ⚪ |
-| Due Date | `due_date` | 同 JP | 📅 日期选择器 | ⚪ / ⚪ |
-| Service Period | `service_period_start` / `service_period_end` | 同 JP | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ⚪ |
+| Invoice Date | `invoice_date` | 同 JP | 📅 日期选择器 | ✅ / ✅ |
+| Due Date | `due_date` | 同 JP | 📅 日期选择器 | ⚪ / —（SALE 方向不展示）|
+| Service Period | `service_period_start` / `service_period_end` | 同 JP | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ✅ |
 | Accounting Date | `accounting_date` | 同 JP | 📝 日期选择器（必须手填） | ✅ / ✅ |
-| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化） | ✏️ 文本输入 | ✅ / ✅ |
-| Account Type | `ext_data.bank_account.account_type` | **收款方**账户类型（e.g. CHECKING） | ✏️ 文本输入 | ⚪ / ⚪ |
-| Account No. | `ext_data.bank_account.account_no` | **收款方**账号 | ✏️ 文本输入 | ✅ / ✅ |
-| Account Name | `ext_data.bank_account.account_name` | **收款方**账户持有人名称；两个方向均需核验 | ✏️ 文本输入 | ✅ / ✅ |
-| SWIFT Code | `ext_data.payment_rail.swift_code` | **收款方路由**：跨境收款时必需，收款方在非美国银行时使用 | ✏️ 文本输入（8 或 11 位） | ⚪ / ⚪ |
-| ACH Routing | `ext_data.payment_rail.ach_routing` | **收款方路由**：ACH 路由号（9位），美国本地转账必需 | ✏️ 文本输入（限 9 位数字，AI 识别率 5.6%） | ⚪ / — |
-| Wire Routing | `ext_data.payment_rail.wire_routing` | **收款方路由**：Wire 路由号，电汇专用 | ✏️ 文本输入（限 9 位数字） | ⚪ / — |
-| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款账户，AI 可能识别到信用卡信息（如 `Visa 4*** 5636`） | 🔽 下拉选择（【待确认】从 CTW 固定银行账户中选择，AI 识别率低） | ✅ / ⚪ |
-| Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入 | ✅ / ⚪ |
-| Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Allocation | `allocation_method` | 同 JP | 🔽 下拉选择（枚举值同 JP），仅 ACCRUAL_BY_SERVICE_PERIOD 时可编辑 | ⚪ / ⚪ |
+| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化） | ✏️ 文本输入 | ✅ / ⚪ |
+| Account No. | `ext_data.bank_account.account_no` | **收款方**账号 | ✏️ 文本输入 | ✅ / ⚪ |
+| Account Name | `ext_data.bank_account.account_name` | **收款方**账户持有人名称；两个方向均需核验 | ✏️ 文本输入 | ✅ / ⚪ |
+| SWIFT Code | `ext_data.payment_rail.swift_code` | **收款方路由**：跨境收款时使用 | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
+| ACH Routing | `ext_data.payment_rail.ach_routing` | **收款方路由**：ACH 路由号（9位），美国本地转账必需 | ✏️ 文本输入（限 9 位数字，AI 识别率 5.6%） | ⚪ / —（SALE 方向不展示）|
+| Wire Routing | `ext_data.payment_rail.wire_routing` | **收款方路由**：Wire 路由号，电汇专用 | ✏️ 文本输入（限 9 位数字） | ⚪ / —（SALE 方向不展示）|
+| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款账户 | ✏️ 文本输入（可手动填写/修改；输入框右侧提供快速填充图标，选择预设后同步填入 Payer Bank + Payer Account） | ⚪ / ⚪ |
+| Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入（可手动填写/修改；通过 Payer Bank 快速填充联动写入） | ⚪ / ⚪ |
+| Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
+| Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
+| Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
 
 > ⚠️ US 付款路由必填联动：`ach_routing` 和 `wire_routing` 至少填一个；若两者均为空且 `swift_code` 也为空，则无法发起付款。bank_account 联动逻辑同 JP。
 
@@ -163,6 +152,9 @@
 
 | 字段路径 | 不展示原因 |
 |---|---|
+| `business_category` | 前端详情页不展示，由系统根据其他字段自动映射 |
+| `document_type` | 前端详情页不展示，后端字段保留；AI 识别值由系统内部流转使用，财务无需感知 |
+| `ext_data.bank_account.account_type` | JP 专用枚举字段（普通/当座/定期預金），美国不适用 |
 | `ext_data.payment_rail.bank_code` / `branch_code` | 美国银行系统不使用数字银行代码，用 routing number 代替 |
 | `ext_data.payment_rail.account_name_kana` / `bank_name_kana` | 日本片假名字段，美国完全不适用 |
 | `ext_data.payment_rail.paynow_uen` | 新加坡 PayNow 专用，美国不适用 |
@@ -178,42 +170,38 @@
 
 ### 需要展示的字段
 
-| 字段路径 | 展示原因 | 手填方式 | 必填（PURCHASE/SALE）|
-|---|---|---|---|
 | 前端标签 | 字段路径 | 展示原因 | 手填方式 | 必填（PURCHASE/SALE）|
 |---|---|---|---|---|
-| Description | `invoice_description` | 同 JP | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ⚪ / ⚪ |
+| Description | `invoice_description` | 同 JP | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ✅ / ⚪ |
 | Region | `region_code` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Direction | `invoice_direction` | 同 JP | 🔽 下拉选择（枚举值：PURCHASE / SALES） | ✅ / ✅ |
 | Company | `company_code` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Document Type | `document_type` | 同 JP | ✏️ 文本输入（AI 识别后可修正） | ✅ / ✅ |
 | Vendor Name | `vendor_name` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice No. | `invoice_number` | 同 JP | ✏️ 文本输入 | ⚪ / ⚪ |
+| Invoice No. | `invoice_number` | 同 JP | ✏️ 文本输入 | ✅ / ⚪ |
 | Currency | `currency` | SGD / USD | 🔽 下拉选择（枚举值：JPY / USD / CNY / SGD / TWD） | ✅ / ✅ |
 | Total Amount | `total_amount` | 同 JP | 🔢 数字输入 | ✅ / ✅ |
-| Excl. Tax Amount | `amount_excluding_tax` | 同 JP | 🔢 数字输入 | ✅ / ✅ |
-| Tax Amount | `tax_amount` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
-| Tax Reg. No. | `tax_registration_no` | GST 登记号，AI 可能识别，财务可补填（SG 样本多为空） | ✏️ 文本输入 | ⚪ / ⚪ |
-| Business Category | `business_category` | 同 JP | ✏️ 文本输入（AI 识别后可修正） | ✅ / ✅ |
-| Payment Type | `payment_type` | 同 JP | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
-| Line Items | `line_items[*]` | 同 JP | ✏️ 可编辑表格（逐行修改，不支持新增/删除行） | ⚪ / ⚪ |
+| Excl. Tax Amount | `amount_excluding_tax` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Amount | `tax_amount` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Reg. No. | `tax_registration_no` | GST 登记号，AI 可能识别，财务可补填（SG 样本多为空） | ✏️ 文本输入 | ⚪ / —（SALE 方向不展示）|
+| Payment Type | `payment_type` | 同 JP；默认选中 NON_ADMINISTRATIVE | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
+| Line Items | `line_items[*]` | 同 JP | ✏️ 可编辑表格（逐行修改，支持新增/删除行） | ⚪ / ⚪ |
 | Purpose | `payment_purpose` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice Date / Due Date | `invoice_date` / `due_date` | 同 JP | 📅 日期选择器 | ⚪ / ⚪ |
-| Service Period | `service_period_start` / `service_period_end` | 同 JP | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ⚪ |
+| Invoice Date | `invoice_date` | 同 JP | 📅 日期选择器 | ✅ / ✅ |
+| Due Date | `due_date` | 同 JP | 📅 日期选择器 | ⚪ / —（SALE 方向不展示）|
+| Service Period | `service_period_start` / `service_period_end` | 同 JP | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ✅ |
 | Accounting Date | `accounting_date` | 同 JP | 📝 日期选择器（必须手填） | ✅ / ✅ |
-| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化） | ✏️ 文本输入 | ✅ / ✅ |
-| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称 | ✏️ 文本输入 | ⚪ / ⚪ |
-| Account Type | `ext_data.bank_account.account_type` | **收款方**账户类型（e.g. CHECKING） | ✏️ 文本输入 | ⚪ / ⚪ |
-| Account No. | `ext_data.bank_account.account_no` | **收款方**账号 | ✏️ 文本输入 | ✅ / ✅ |
-| Account Name | `ext_data.bank_account.account_name` | **收款方**账户持有人名称；两个方向均需核验 | ✏️ 文本输入 | ✅ / ✅ |
+| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化） | ✏️ 文本输入 | ✅ / ⚪ |
+| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称 | ✏️ 文本输入 | ✅ / ⚪ |
+| Account No. | `ext_data.bank_account.account_no` | **收款方**账号 | ✏️ 文本输入 | ✅ / ⚪ |
+| Account Name | `ext_data.bank_account.account_name` | **收款方**账户持有人名称；两个方向均需核验 | ✏️ 文本输入 | ✅ / ⚪ |
 | Bank Code | `ext_data.payment_rail.bank_code` | 新加坡部分银行有 bank code | ✏️ 文本输入 | ⚪ / ⚪ |
 | Branch Code | `ext_data.payment_rail.branch_code` | 新加坡部分银行有 branch code | ✏️ 文本输入 | ⚪ / ⚪ |
-| SWIFT Code | `ext_data.payment_rail.swift_code` | **SG 跨境汇款必需**：新加坡对外付款走 SWIFT | ✏️ 文本输入（8 或 11 位） | ⚪ / ⚪ |
-| PayNow UEN | `ext_data.payment_rail.paynow_uen` | **SG 特有**：PayNow UEN，本地快速转账标识（当前样本均为 null，预留展示位） | ✏️ 文本输入（AI 暂不识别，需财务补填） | ⚪ / ⚪ |
-| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款银行，当发票正文提及时 AI 识别 | 🔽 下拉选择（【待确认】从 CTW 固定银行账户中选择，AI 识别率低） | ✅ / ⚪ |
-| Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入 | ✅ / ⚪ |
-| Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Allocation | `allocation_method` | 同 JP | 🔽 下拉选择（枚举值同 JP），仅 ACCRUAL_BY_SERVICE_PERIOD 时可编辑 | ⚪ / ⚪ |
+| SWIFT Code | `ext_data.payment_rail.swift_code` | **SG 跨境汇款**：新加坡对外付款走 SWIFT | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
+| PayNow UEN | `ext_data.payment_rail.paynow_uen` | **SG 特有**：PayNow UEN，本地快速转账标识 | ✏️ 文本输入（AI 暂不识别，需财务补填） | ⚪ / —（SALE 方向不展示）|
+| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款银行 | 🔽 下拉选择（【待确认】从 CTW 固定银行账户中选择） | ⚪ / ⚪ |
+| Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入 | ⚪ / ⚪ |
+| Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
+| Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
+| Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
 
 > ⚠️ SG 付款路由说明：`swift_code`、`bank_code`、`paynow_uen` 三个路由字段视具体付款方式填写其中一种。bank_account 联动逻辑同 JP。
 
@@ -221,6 +209,9 @@
 
 | 字段路径 | 不展示原因 |
 |---|---|
+| `business_category` | 前端详情页不展示，由系统根据其他字段自动映射 |
+| `document_type` | 前端详情页不展示，后端字段保留；AI 识别值由系统内部流转使用，财务无需感知 |
+| `ext_data.bank_account.account_type` | JP 专用枚举字段（普通/当座/定期預金），新加坡不适用 |
 | `ext_data.payment_rail.ach_routing` / `wire_routing` | 美国支付体系，新加坡不适用 |
 | `ext_data.payment_rail.account_name_kana` / `bank_name_kana` | 日本专用，新加坡不适用 |
 | `payee_bank_name` / `payee_account_no` | 与 `ext_data.bank_account.*` 重复，不重复展示 |
@@ -235,46 +226,45 @@
 
 ### 需要展示的字段
 
-| 字段路径 | 展示原因 | 手填方式 | 必填（PURCHASE/SALE）|
-|---|---|---|---|
 | 前端标签 | 字段路径 | 展示原因 | 手填方式 | 必填（PURCHASE/SALE）|
 |---|---|---|---|---|
-| Description | `invoice_description` | 同 JP | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ⚪ / ⚪ |
+| Description | `invoice_description` | 同 JP | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ✅ / ⚪ |
 | Region | `region_code` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Direction | `invoice_direction` | 同 JP | 🔽 下拉选择（枚举值：PURCHASE / SALES） | ✅ / ✅ |
 | Company | `company_code` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Document Type | `document_type` | 同 JP | ✏️ 文本输入（AI 识别后可修正） | ✅ / ✅ |
 | Vendor Name | `vendor_name` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice No. | `invoice_number` | 同 JP | ✏️ 文本输入 | ⚪ / ⚪ |
+| Invoice No. | `invoice_number` | 同 JP | ✏️ 文本输入 | ✅ / ⚪ |
 | Currency | `currency` | USD（样本为跨境结算） | 🔽 下拉选择（枚举值：JPY / USD / CNY / SGD / TWD） | ✅ / ✅ |
 | Total Amount | `total_amount` | 同 JP | 🔢 数字输入 | ✅ / ✅ |
-| Excl. Tax Amount | `amount_excluding_tax` | 同 JP | 🔢 数字输入 | ✅ / ✅ |
-| Tax Amount | `tax_amount` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
-| Tax Reg. No. | `tax_registration_no` | 统一社会信用代码，AI 可能识别，财务可补填（CN 样本多为空） | ✏️ 文本输入 | ⚪ / ⚪ |
-| Business Category | `business_category` | 同 JP | ✏️ 文本输入（AI 识别后可修正） | ✅ / ✅ |
-| Payment Type | `payment_type` | 同 JP | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
-| Line Items | `line_items[*]` | CN 样本明细行最多达 6 行（技术服务费按项目拆分），明细核验重要性高 | ✏️ 可编辑表格（逐行修改，不支持新增/删除行） | ⚪ / ⚪ |
+| Excl. Tax Amount | `amount_excluding_tax` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Amount | `tax_amount` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Reg. No. | `tax_registration_no` | 统一社会信用代码，AI 可能识别，财务可补填（CN 样本多为空） | ✏️ 文本输入 | ⚪ / —（SALE 方向不展示）|
+| Payment Type | `payment_type` | 同 JP；默认选中 NON_ADMINISTRATIVE | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
+| Line Items | `line_items[*]` | CN 样本明细行最多达 6 行（技术服务费按项目拆分），明细核验重要性高 | ✏️ 可编辑表格（逐行修改，支持新增/删除行） | ⚪ / ⚪ |
 | Purpose | `payment_purpose` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice Date / Due Date | `invoice_date` / `due_date` | 同 JP | 📅 日期选择器 | ⚪ / ⚪ |
-| Service Period | `service_period_start` / `service_period_end` | 同 JP | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ⚪ |
+| Invoice Date | `invoice_date` | 同 JP | 📅 日期选择器 | ✅ / ✅ |
+| Due Date | `due_date` | 同 JP | 📅 日期选择器 | ⚪ / —（SALE 方向不展示）|
+| Service Period | `service_period_start` / `service_period_end` | 同 JP | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ✅ |
 | Accounting Date | `accounting_date` | 同 JP | 📝 日期选择器（必须手填） | ✅ / ✅ |
-| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化） | ✏️ 文本输入 | ✅ / ✅ |
-| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称 | ✏️ 文本输入 | ⚪ / ⚪ |
-| Account Type | `ext_data.bank_account.account_type` | **收款方**账户类型（e.g. CHECKING） | ✏️ 文本输入 | ⚪ / ⚪ |
-| Account No. | `ext_data.bank_account.account_no` | **收款方**账号 | ✏️ 文本输入 | ✅ / ✅ |
-| Account Name | `ext_data.bank_account.account_name` | **收款方**账户持有人名称；两个方向均需核验 | ✏️ 文本输入 | ✅ / ✅ |
-| SWIFT Code | `ext_data.payment_rail.swift_code` | **CN 对外付款必需**：中国银行对外汇款强制要求收款方 SWIFT Code | ✏️ 文本输入（8 或 11 位） | ✅ / ✅ |
-| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款银行，当发票正文提及时 AI 识别 | 🔽 下拉选择（【待确认】从 CTW 固定银行账户中选择，AI 识别率低） | ✅ / ⚪ |
-| Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入 | ✅ / ⚪ |
-| Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Allocation | `allocation_method` | 同 JP | 🔽 下拉选择（枚举值同 JP），仅 ACCRUAL_BY_SERVICE_PERIOD 时可编辑 | ⚪ / ⚪ |
+| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化） | ✏️ 文本输入 | ✅ / ⚪ |
+| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称 | ✏️ 文本输入 | ✅ / ⚪ |
+| Account No. | `ext_data.bank_account.account_no` | **收款方**账号 | ✏️ 文本输入 | ✅ / ⚪ |
+| Account Name | `ext_data.bank_account.account_name` | **收款方**账户持有人名称；两个方向均需核验 | ✏️ 文本输入 | ✅ / ⚪ |
+| SWIFT Code | `ext_data.payment_rail.swift_code` | **CN 对外付款**：中国银行对外汇款时使用 | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
+| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款银行 | 🔽 下拉选择（【待确认】从 CTW 固定银行账户中选择） | ⚪ / ⚪ |
+| Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入 | ⚪ / ⚪ |
+| Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
+| Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
+| Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
 
-> ⚠️ CN 付款路由：`swift_code` 为对外汇款强制要求，若为空则无法发起 CN 付款。bank_account 联动逻辑同 JP。
+> ⚠️ CN 付款路由：`swift_code` 为对外汇款路由字段（选填），实际跨境付款时需填写。bank_account 联动逻辑同 JP。
 
 ### 不需要展示的字段
 
 | 字段路径 | 不展示原因 |
 |---|---|
+| `business_category` | 前端详情页不展示，由系统根据其他字段自动映射 |
+| `document_type` | 前端详情页不展示，后端字段保留；AI 识别值由系统内部流转使用，财务无需感知 |
+| `ext_data.bank_account.account_type` | JP 专用枚举字段（普通/当座/定期預金），中国不适用 |
 | `ext_data.payment_rail.ach_routing` / `wire_routing` | 美国支付体系，中国不适用 |
 | `ext_data.payment_rail.paynow_uen` | 新加坡专用，中国不适用 |
 | `ext_data.payment_rail.account_name_kana` / `bank_name_kana` | 日本专用，中国不适用 |
@@ -293,48 +283,47 @@
 
 ### 需要展示的字段
 
-| 字段路径 | 展示原因 | 手填方式 | 必填（PURCHASE/SALE）|
-|---|---|---|---|
 | 前端标签 | 字段路径 | 展示原因 | 手填方式 | 必填（PURCHASE/SALE）|
 |---|---|---|---|---|
-| Description | `invoice_description` | 同 JP | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ⚪ / ⚪ |
+| Description | `invoice_description` | 同 JP | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ✅ / ⚪ |
 | Region | `region_code` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Direction | `invoice_direction` | 同 JP | 🔽 下拉选择（枚举值：PURCHASE / SALES） | ✅ / ✅ |
 | Company | `company_code` | 标识付款主体，TW 对应 AINEKOX CO LTD. | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Document Type | `document_type` | 同 JP | ✏️ 文本输入（AI 识别后可修正） | ✅ / ✅ |
 | Vendor Name | `vendor_name` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice No. | `invoice_number` | 同 JP | ✏️ 文本输入 | ⚪ / ⚪ |
+| Invoice No. | `invoice_number` | 同 JP | ✏️ 文本输入 | ✅ / ⚪ |
 | Currency | `currency` | TWD（或 USD 跨境结算） | 🔽 下拉选择（枚举值：JPY / USD / CNY / SGD / TWD） | ✅ / ✅ |
 | Total Amount | `total_amount` | 同 JP | 🔢 数字输入 | ✅ / ✅ |
-| Excl. Tax Amount | `amount_excluding_tax` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
-| Tax Amount | `tax_amount` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
-| Tax Reg. No. | `tax_registration_no` | 台湾统一编号（统编），AI 可能识别，财务可补填 | ✏️ 文本输入 | ⚪ / ⚪ |
-| Business Category | `business_category` | 同 JP | ✏️ 文本输入（AI 识别后可修正） | ✅ / ✅ |
-| Payment Type | `payment_type` | 同 JP | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
-| Line Items | `line_items[*]` | 同 JP | ✏️ 可编辑表格（逐行修改，不支持新增/删除行） | ⚪ / ⚪ |
+| Excl. Tax Amount | `amount_excluding_tax` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Amount | `tax_amount` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Reg. No. | `tax_registration_no` | 台湾统一编号（统编），AI 可能识别，财务可补填 | ✏️ 文本输入 | ⚪ / —（SALE 方向不展示）|
+| Payment Type | `payment_type` | 同 JP；默认选中 NON_ADMINISTRATIVE | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
+| Line Items | `line_items[*]` | 同 JP | ✏️ 可编辑表格（逐行修改，支持新增/删除行） | ⚪ / ⚪ |
 | Purpose | `payment_purpose` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
-| Invoice Date / Due Date | `invoice_date` / `due_date` | 同 JP | 📅 日期选择器 | ⚪ / ⚪ |
-| Service Period | `service_period_start` / `service_period_end` | 同 JP | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ⚪ |
+| Invoice Date | `invoice_date` | 同 JP | 📅 日期选择器 | ✅ / ✅ |
+| Due Date | `due_date` | 同 JP | 📅 日期选择器 | ⚪ / —（SALE 方向不展示）|
+| Service Period | `service_period_start` / `service_period_end` | 同 JP | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ✅ |
 | Accounting Date | `accounting_date` | 同 JP | 📝 日期选择器（必须手填） | ✅ / ✅ |
-| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化） | ✏️ 文本输入 | ✅ / ✅ |
-| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称 | ✏️ 文本输入 | ⚪ / ⚪ |
-| Account Type | `ext_data.bank_account.account_type` | **收款方**账户类型（e.g. CHECKING） | ✏️ 文本输入 | ⚪ / ⚪ |
-| Account No. | `ext_data.bank_account.account_no` | **收款方**账号 | ✏️ 文本输入 | ✅ / ✅ |
-| Account Name | `ext_data.bank_account.account_name` | **收款方**账户持有人名称；两个方向均需核验 | ✏️ 文本输入 | ✅ / ✅ |
+| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化） | ✏️ 文本输入 | ✅ / ⚪ |
+| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称 | ✏️ 文本输入 | ✅ / ⚪ |
+| Account No. | `ext_data.bank_account.account_no` | **收款方**账号 | ✏️ 文本输入 | ✅ / ⚪ |
+| Account Name | `ext_data.bank_account.account_name` | **收款方**账户持有人名称；两个方向均需核验 | ✏️ 文本输入 | ✅ / ⚪ |
 | Bank Code | `ext_data.payment_rail.bank_code` | 台湾银行代码（3位），**本地转账**路由（暂无样本支撑，保留备用） | ✏️ 文本输入（限 3 位数字） | ⚪ / ⚪ |
 | Branch Code | `ext_data.payment_rail.branch_code` | 台湾支行代码，**本地转账**路由（暂无样本支撑，保留备用） | ✏️ 文本输入 | ⚪ / ⚪ |
-| SWIFT Code | `ext_data.payment_rail.swift_code` | **实际样本使用 SWIFT 汇款，为 TW 主要付款路由**，收款方银行国际识别码 | ✏️ 文本输入（8 或 11 位） | ✅ / ⚪ |
-| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 AINEKOX 出款银行，当发票正文提及时 AI 识别 | 🔽 下拉选择（【待确认】从 CTW 固定银行账户中选择，AI 识别率低） | ✅ / ⚪ |
-| Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 AINEKOX 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入 | ✅ / ⚪ |
-| Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
-| Allocation | `allocation_method` | 同 JP | 🔽 下拉选择（枚举值同 JP），仅 ACCRUAL_BY_SERVICE_PERIOD 时可编辑 | ⚪ / ⚪ |
+| SWIFT Code | `ext_data.payment_rail.swift_code` | 实际样本使用 SWIFT 汇款，为 TW 主要付款路由 | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
+| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 AINEKOX 出款银行 | ✏️ 文本输入（可手动填写/修改；输入框右侧提供快速填充图标，选择预设后同步填入 Payer Bank + Payer Account） | ⚪ / ⚪ |
+| Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 AINEKOX 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入（可手动填写/修改；通过 Payer Bank 快速填充联动写入） | ⚪ / ⚪ |
+| Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
+| Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
+| Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
 
-> ⚠️ TW 付款路由：当前样本使用 SWIFT 汇款，`swift_code` 为必填项；`bank_code` / `branch_code` 为本地转账备用字段，暂无样本支撑，AI 不识别时由财务手填。bank_account 联动逻辑同 JP。
+> ⚠️ TW 付款路由：当前样本使用 SWIFT 汇款，`swift_code` 为选填路由字段（可依实际付款方式决定是否填写）；`bank_code` / `branch_code` 为本地转账备用字段，暂无样本支撑，AI 不识别时由财务手填。bank_account 联动逻辑同 JP。
 
 ### 不需要展示的字段
 
 | 字段路径 | 不展示原因 |
 |---|---|
+| `business_category` | 前端详情页不展示，由系统根据其他字段自动映射 |
+| `document_type` | 前端详情页不展示，后端字段保留；AI 识别值由系统内部流转使用，财务无需感知 |
+| `ext_data.bank_account.account_type` | JP 专用枚举字段（普通/当座/定期預金），台湾不适用 |
 | `ext_data.payment_rail.ach_routing` / `wire_routing` | 美国支付体系，台湾不适用 |
 | `ext_data.payment_rail.paynow_uen` | 新加坡专用，台湾不适用 |
 | `ext_data.payment_rail.account_name_kana` / `bank_name_kana` | 日本专用片假名字段，台湾不适用 |
@@ -344,69 +333,231 @@
 
 ---
 
-## 六、各地区字段差异速查表
+## 六、KY 地区（开曼群岛）
 
-| 字段路径 | JP | US | SG | CN | TW | 手填方式 |
-|---|---|---|---|---|---|---|
-| `region_code` | ✅ | ✅ | ✅ | ✅ | ✅ | 🔽 下拉选择（JP / US / SG / CN / TW） |
-| `company_code` | ✅ | ✅ | ✅ | ✅ | ✅ | 🔽 下拉选择（JP_CTW_INC / US_CTW_INC / SG_CTW_INC / SH_WYYCX_INC / AINEKOX CO LTD. 等） |
-| `tax_registration_no` | ⚪（JP 适格請求書登録番号） | ⚪（EIN / 卖方税号） | ⚪（GST 登记号） | ⚪（统一社会信用代码） | ⚪（台湾统编） | ✏️ 文本输入（所有地区均展示，均为选填） |
-| `ext_data.payment_rail.bank_code` | ✅ | ❌ | ✅ | ❌ | ⚪（本地转账备用） | ✏️ 文本输入（收款方路由） |
-| `ext_data.payment_rail.branch_code` | ✅ | ❌ | ✅ | ❌ | ⚪（本地转账备用） | ✏️ 文本输入（收款方路由） |
-| `ext_data.payment_rail.account_name_kana` | ✅ / ⚪（PURCHASE 必填；SALE 为 CTW 自身账户名可预填） | ❌ | ❌ | ❌ | ❌ | ✏️ 文本输入（收款方半角片假名，AI 识别率低） |
-| `ext_data.payment_rail.bank_name_kana` | ✅（⚪/⚪，财务可补填） | ❌ | ❌ | ❌ | ❌ | ✏️ 文本输入（半角片假名，AI 几乎不识别） |
-| `ext_data.payment_rail.swift_code` | ❌ | ✅（跨境时） | ✅ | ✅ | ✅（主要路由） | ✏️ 文本输入（8 或 11 位） |
-| `ext_data.payment_rail.ach_routing` | ❌ | ✅（本地转账） | ❌ | ❌ | ❌ | ✏️ 文本输入（9 位，AI 识别率 5.6%） |
-| `ext_data.payment_rail.wire_routing` | ❌ | ✅（电汇） | ❌ | ❌ | ❌ | ✏️ 文本输入（9 位） |
-| `ext_data.payment_rail.paynow_uen` | ❌ | ❌ | ✅（预留） | ❌ | ❌ | ✏️ 文本输入（AI 暂不识别） |
-| `payer_bank_name` | ✅ | ✅ | ✅ | ✅ | ✅ | 🔽 下拉选择（【待确认】PURCHASE 下从 CTW 固定账户中选，AI 识别率 5.6%） |
-| `payer_account_name` | ✅ | ✅ | ✅ | ✅ | ✅ | ✏️ 文本输入（付款方账户名，PURCHASE 下必填） |
-| `accounting_date` | ✅ | ✅ | ✅ | ✅ | ✅ | 📝 日期选择器（所有地区必须手填，AI 从不识别） |
-| `due_date` | ✅ | ✅ | ✅ | ✅ | ✅ | 📅 日期选择器（AI 57% 有值，缺失时手填） |
-| `invoice_number` | ✅ | ✅ | ✅ | ✅ | ✅ | ✏️ 文本输入（AI 59% 有值，合同类常为空） |
+> ⚠️ 当前暂无真实样本，以下规则基于开曼群岛离岸实体的通用付款特征推断。CTW 开曼主体为 CTW CAYMAN。
+
+**付款特征**：开曼群岛为 CTW 集团离岸持股实体，对外付款走 SWIFT 国际电汇（USD）。与 CN 地区类似，无本地银行代码体系，付款路由依赖 SWIFT Code。
+
+### 需要展示的字段
+
+| 前端标签 | 字段路径 | 展示原因 | 手填方式 | 必填（PURCHASE/SALE）|
+|---|---|---|---|---|
+| Description | `invoice_description` | 同 JP | ✏️ 文本输入（多行，AI 识别错误时财务可修正） | ✅ / ⚪ |
+| Region | `region_code` | 同 JP | 🔽 下拉选择（枚举值同 JP，含 KY） | ✅ / ✅ |
+| Company | `company_code` | 开曼主体对应 CTW CAYMAN | 🔽 下拉选择（枚举值同 JP） | ✅ / ✅ |
+| Vendor Name | `vendor_name` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
+| Invoice No. | `invoice_number` | 同 JP | ✏️ 文本输入 | ✅ / ⚪ |
+| Currency | `currency` | USD（开曼离岸结算以 USD 为主） | 🔽 下拉选择（枚举值：JPY / USD / CNY / SGD / TWD） | ✅ / ✅ |
+| Total Amount | `total_amount` | 同 JP | 🔢 数字输入 | ✅ / ✅ |
+| Excl. Tax Amount | `amount_excluding_tax` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Amount | `tax_amount` | 同 JP | 🔢 数字输入 | ✅ / ⚪ |
+| Tax Reg. No. | `tax_registration_no` | 开曼公司注册编号，AI 可能识别，财务可补填 | ✏️ 文本输入 | ⚪ / —（SALE 方向不展示）|
+| Payment Type | `payment_type` | 同 JP；默认选中 NON_ADMINISTRATIVE | 🔽 下拉选择（枚举值：ADMINISTRATIVE / NON_ADMINISTRATIVE） | ✅ / ✅ |
+| Line Items | `line_items[*]` | 同 JP | ✏️ 可编辑表格（逐行修改，支持新增/删除行） | ⚪ / ⚪ |
+| Purpose | `payment_purpose` | 同 JP | ✏️ 文本输入 | ✅ / ✅ |
+| Invoice Date | `invoice_date` | 同 JP | 📅 日期选择器 | ✅ / ✅ |
+| Due Date | `due_date` | 同 JP | 📅 日期选择器 | ⚪ / —（SALE 方向不展示）|
+| Service Period | `service_period_start` / `service_period_end` | 同 JP | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ✅ |
+| Accounting Date | `accounting_date` | 同 JP | 📝 日期选择器（必须手填） | ✅ / ✅ |
+| Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化） | ✏️ 文本输入 | ✅ / ⚪ |
+| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称 | ✏️ 文本输入 | ✅ / ⚪ |
+| Account No. | `ext_data.bank_account.account_no` | **收款方**账号 | ✏️ 文本输入 | ✅ / ⚪ |
+| Account Name | `ext_data.bank_account.account_name` | **收款方**账户持有人名称；两个方向均需核验 | ✏️ 文本输入 | ✅ / ⚪ |
+| SWIFT Code | `ext_data.payment_rail.swift_code` | **KY 对外付款主要路由**：离岸结算均走 SWIFT 国际电汇 | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
+| Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW CAYMAN 出款银行 | ✏️ 文本输入（可手动填写/修改；输入框右侧提供快速填充图标，选择预设后同步填入 Payer Bank + Payer Account） | ⚪ / ⚪ |
+| Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW CAYMAN，与 `payer_bank_name` 配套 | ✏️ 文本输入（可手动填写/修改；通过 Payer Bank 快速填充联动写入） | ⚪ / ⚪ |
+| Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
+| Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
+| Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
+
+> ⚠️ KY 付款路由：对外付款走 SWIFT 国际电汇，`swift_code` 为主要路由字段（选填，实际付款时需填写）。无本地银行代码体系，`bank_code` / `branch_code` 不适用。bank_account 联动逻辑同 JP。
+
+### 不需要展示的字段
+
+| 字段路径 | 不展示原因 |
+|---|---|
+| `business_category` | 前端详情页不展示，由系统根据其他字段自动映射 |
+| `document_type` | 前端详情页不展示，后端字段保留；AI 识别值由系统内部使用，财务无需感知 |
+| `ext_data.bank_account.account_type` | JP 专用枚举字段（普通/当座/定期預金），开曼不适用 |
+| `ext_data.payment_rail.ach_routing` / `wire_routing` | 美国支付体系，开曼不适用 |
+| `ext_data.payment_rail.paynow_uen` | 新加坡专用，开曼不适用 |
+| `ext_data.payment_rail.account_name_kana` / `bank_name_kana` | 日本专用，开曼不适用 |
+| `ext_data.payment_rail.bank_code` / `branch_code` | 开曼无本地银行代码体系，付款依赖 SWIFT |
+| `payee_bank_name` / `payee_account_no` | 与 `ext_data.bank_account.*` 重复，不重复展示 |
+| `payee_name` | 与 `ext_data.bank_account.account_name` 业务含义等价（已确认），以结构化字段为准；写入时须同步覆盖顶层 `payee_name` |
+| 所有系统内部字段 | 见通用规范 |
 
 ---
 
-## 七、字段手填策略总结
+## 七、各地区字段差异速查表
+
+> ✅ 必填展示 ｜ ⚪ 选填展示 ｜ ❌ 不展示 ｜ **粗体**字段为前端 Required 标注字段
+>
+> **必填（P/S）** 列：P = `invoice_direction=PURCHASE`，S = `invoice_direction=SALE`；`—` 表示该方向下此字段不在页面展示
+
+| 字段路径 | 前端标签 | JP | US | SG | CN | TW | KY | 必填（P/S）| 手填方式 |
+|---|---|---|---|---|---|---|---|---|---|
+| **基本信息** | | | | | | | | | |
+| `region_code` | Region | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填 | 🔽 下拉选择（JP / US / SG / CN / TW / KY） |
+| `company_code` | Company | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填 | 🔽 下拉选择（AINEKOX / CTW G123 / CTW INC / CTW US INC / CTW CAYMAN 等） |
+| `vendor_name` | Vendor Name | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填 | ✏️ 文本输入（AI 识别率高） |
+| `invoice_number` | Invoice No. | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | ✏️ 文本输入 |
+| `invoice_description` | Description | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | ✏️ 文本输入（AI 识别率较高） |
+| **金额** | | | | | | | | | |
+| `currency` | Currency | ✅ JPY | ✅ USD | ✅ SGD | ✅ CNY | ✅ TWD | ✅ USD | 全地区必填 | 🔽 下拉选择（JPY / USD / SGD / CNY / TWD） |
+| `total_amount` | Total Amount | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填 | 🔢 数字输入（AI 识别率高） |
+| `amount_excluding_tax` | Excl. Tax Amount | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | 🔢 数字输入 |
+| `tax_amount` | Tax Amount | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | 🔢 数字输入 |
+| `tax_rate` | Tax Rate | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | ✏️ 数字输入（%） |
+| `tax_registration_no` | Tax Reg. No. | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | P: JP 必填，其他选填 ｜ S: 全地区不展示 | ✏️ 文本输入 |
+| **费用分类** | | | | | | | | | |
+| `business_category` | Business Category | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 前端不展示 | 系统自动映射 |
+| `payment_type` | Payment Type | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填（默认 NON_ADMINISTRATIVE） | 🔽 下拉选择（ADMINISTRATIVE / NON_ADMINISTRATIVE） |
+| `line_items[*]` | Line Items | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | ✏️ 可编辑表格（item_name / amount / tax_rate / service_period 等） |
+| `payment_purpose` | Purpose | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填 | ✏️ 文本输入（打款用途） |
+| **日期** | | | | | | | | | |
+| `invoice_date` | Invoice Date | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填 | 📅 日期选择器（AI 识别，可修正） |
+| `due_date` | Due Date | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | P: 选填 ｜ S: 不展示 | 📅 日期选择器 |
+| `service_period_start / end` | Service Period | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | P: 选填（摊销类 recognition 策略时提示填写）｜ S: 必填 | 📅 日期选择器（开始 + 结束） |
+| `accounting_date` | Accounting Date | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填 | 📝 日期选择器（必须手填，AI 从不识别） |
+| **收款方银行** | | | | | | | | | |
+| `ext_data.bank_account.bank_name` | Bank Name | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | ✏️ 文本输入（收款方银行名称） |
+| `ext_data.bank_account.branch_name` | Branch Name | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | P: 展示地区必填 ｜ S: 选填 | ✏️ 文本输入 |
+| `ext_data.bank_account.account_type` | Account Type | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | P: JP 必填 ｜ S: 选填 | 🔽 下拉选择（普通預金 / 当座預金 / 定期預金，仅 JP） |
+| `ext_data.bank_account.account_no` | Account No. | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | ✏️ 文本输入（收款方账号） |
+| `ext_data.bank_account.account_name` | Account Name | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | ✏️ 文本输入（收款方账户持有人） |
+| `ext_data.payment_rail.bank_code` | Bank Code | ✅ | ❌ | ⚪ | ❌ | ⚪ | ❌ | P: JP 必填，其他选填 ｜ S: 全地区选填 | ✏️ 文本输入 |
+| `ext_data.payment_rail.branch_code` | Branch Code | ✅ | ❌ | ⚪ | ❌ | ⚪ | ❌ | P: JP 必填，其他选填 ｜ S: 全地区选填 | ✏️ 文本输入 |
+| `ext_data.payment_rail.account_name_kana` | Account Name (Kana) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | P: JP 选填 ｜ S: 不展示 | ✏️ 文本输入（半角片假名） |
+| `ext_data.payment_rail.bank_name_kana` | Bank Name (Kana) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | P: JP 选填 ｜ S: 不展示 | ✏️ 文本输入（半角片假名） |
+| `ext_data.payment_rail.swift_code` | SWIFT Code | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | P: 选填 ｜ S: 不展示 | ✏️ 文本输入（8 或 11 位） |
+| `ext_data.payment_rail.ach_routing` | ACH Routing | ❌ | ⚪ | ❌ | ❌ | ❌ | ❌ | P: 选填 ｜ S: 不展示 | ✏️ 文本输入（9 位） |
+| `ext_data.payment_rail.wire_routing` | Wire Routing | ❌ | ⚪ | ❌ | ❌ | ❌ | ❌ | P: 选填 ｜ S: 不展示 | ✏️ 文本输入（9 位） |
+| `ext_data.payment_rail.paynow_uen` | PayNow UEN | ❌ | ❌ | ⚪ | ❌ | ❌ | ❌ | P: 选填 ｜ S: 不展示 | ✏️ 文本输入 |
+| **付款方银行** | | | | | | | | | |
+| `payer_bank_name` | Payer Bank | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | ✏️ 文本输入（支持手动填写；右侧快速填充图标可一键预填 Payer Bank + Payer Account） |
+| `payer_account_name` | Payer Account | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | ✏️ 文本输入（支持手动填写；可由 Payer Bank 快速填充联动写入） |
+| **费用确认** | | | | | | | | | |
+| `allocation_required` | Allocation Required | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | 🔽 下拉选择（Yes / No） |
+| `allocation_method` | Allocation | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | 选填（allocation_required=Yes 时展示） | 🔽 下拉选择（MONTHLY_EQUAL / DAILY_PRORATA / MONTHLY_BY_LINE_ITEM / BY_LINE_ITEM_PERIOD / BY_EXPLICIT_SCHEDULE / USAGE_BASED / MANUAL） |
+| `recognition_policy` | Recognition | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | 🔽 下拉选择（IMMEDIATE / PREPAID_MONTHLY / PREPAID_DAILY / ACCRUAL_BY_SERVICE_PERIOD / MONTHLY_BY_LINE_ITEM / SCHEDULED_BY_DOCUMENT / USAGE_BASED / MILESTONE_BASED） |
+| **提交人** | | | | | | | | | |
+| `applicant` | Applicant | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 只读（系统确保有值）｜ S: 只读 | 只读（上传者，系统自动填充） |
+| `application_date` | Application Date | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 只读（系统确保有值）｜ S: 只读 | 只读（上传时间，系统自动填充） |
+| `document_type` | — | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 前端不展示 | 后端保留供系统内部使用 |
+
+---
+
+## 八、字段手填策略总结
 
 ### 📝 日期选择器（必须手填，AI 从不识别）
 - `accounting_date`：入账日期，决定进哪个月报表，需财务根据会计准则主动填写
 
-### 🔽 下拉选择（联动控制字段）
-- `recognition_policy`：费用确认策略，控制 AI 生成 JE 的数量和期间分布。枚举值及联动规则：
-  - `IMMEDIATE`：立即全额确认，无需其他摊销信息
-  - `PREPAID_MONTHLY`：按月均摊（MONTHLY_EQUAL），Header 级 `service_period_start/end` 升级为必填
-  - `PREPAID_DAILY`：按天比例摊销（DAILY_PRORATA），Header 级 `service_period_start/end` 升级为必填
-  - `ACCRUAL_BY_SERVICE_PERIOD`：按服务期摊销，Header 级 `service_period_start/end` 必填 + `allocation_method` 可选
-  - `MONTHLY_BY_LINE_ITEM`：按明细行各月确认，每条 `line_items[*].service_period_start/end` 升级为必填
-- `allocation_method`：仅在 `ACCRUAL_BY_SERVICE_PERIOD` 时展示并可编辑（MONTHLY_EQUAL / DAILY_PRORATA）；其余策略自动匹配对应方法，不展示独立选项
-
 ### ✏️ 文本输入（特殊说明）
-- `tax_registration_no`（JP）：法定適格請求書登録番号，AI 识别错误或为空时财务可修正；修改须与原始发票核实，自行确保合规
-- `document_type`：AI 识别率高，可手动修正；参考值：INVOICE / PAYMENT_REPORT / RECEIPT / STATEMENT / CONTRACT / CREDIT_NOTE / PROFORMA_INVOICE / QUOTATION / EXPENSE_CLAIM
-- `business_category`：AI 识别后可手动修正；参考值：ADVERTISING / ROYALTY / OFFICE_ADMIN / SAAS / CLOUD / PROFESSIONAL_SERVICE / COMMUNICATION / PAYMENT_PROCESSING / TAX / OTHER
+- `tax_registration_no`（JP PURCHASE）：法定適格請求書登録番号，AI 识别错误或为空时财务可修正；修改须与原始发票核实，自行确保合规。**SALE 方向不展示此字段。**
+
+### ⚡ invoice_direction 对必填逻辑的影响
+
+以下字段在 `invoice_direction` 不同时，必填状态或展示状态有差异：
+
+| 字段 | PURCHASE | SALE |
+|---|---|---|
+| Invoice No. | 必填 | 选填 |
+| Description | 必填 | 选填 |
+| Excl. Tax Amount | 必填 | 选填 |
+| Tax Amount | 必填 | 选填 |
+| Tax Reg. No. | JP 必填，其他选填 | **不展示** |
+| Due Date | 选填 | **不展示** |
+| Service Period | 选填 | **必填** |
+| Bank Name | 必填 | 选填 |
+| Branch Name | 展示地区必填 | 选填 |
+| Account Type | JP 必填 | 选填 |
+| Account No. | 必填 | 选填 |
+| Account Name | 必填 | 选填 |
+| Bank Code | JP 必填，其他选填 | 选填 |
+| Branch Code | JP 必填，其他选填 | 选填 |
+| Account Name (Kana) | JP 选填 | **不展示** |
+| Bank Name (Kana) | JP 选填 | **不展示** |
+| SWIFT Code | 选填 | **不展示** |
+| ACH Routing | 选填 | **不展示** |
+| Wire Routing | 选填 | **不展示** |
+| PayNow UEN | 选填 | **不展示** |
+
 
 ### 🔽 下拉选择（固定枚举值）
-- `currency`：JPY / USD / CNY / SGD / TWD
-- `payment_type`：ADMINISTRATIVE / NON_ADMINISTRATIVE
-- `ext_data.bank_account.account_type`：JP 为 普通預金 / 当座預金；US 为 CHECKING / SAVINGS；SG/CN 为 CHECKING / SAVINGS / CURRENT
+
+| 字段路径 | 前端标签 | 枚举值 | 备注 |
+|---|---|---|---|
+| `region_code` | Region | JP / US / SG / CN / TW | 与 company_code 联动 |
+| `company_code` | Company | AINEKOX CO LTD. / SHANGHAI WEIYOUYI CHUXIN TECH CO LTD / CTW G123 SINGAPORE PTE LTD / CTW INC / CTW US INC / CTW CAYMAN | 随 Region 自动填充，可手动修改 |
+| `currency` | Currency | JPY / USD / SGD / CNY / TWD | 随 Region 联动默认值 |
+| `payment_type` | Payment Type | ADMINISTRATIVE / NON_ADMINISTRATIVE | 默认选中 NON_ADMINISTRATIVE |
+| `ext_data.bank_account.account_type` | Account Type | 普通預金 / 当座預金 / 定期預金 | 仅 JP 展示；PURCHASE 方向必填，SALE 方向选填 |
+| `recognition_policy` | Recognition | IMMEDIATE / PREPAID_MONTHLY / PREPAID_DAILY / ACCRUAL_BY_SERVICE_PERIOD / MONTHLY_BY_LINE_ITEM / SCHEDULED_BY_DOCUMENT / USAGE_BASED / MILESTONE_BASED | 选填；对 Service Period 必填的影响见上方说明 |
+| `allocation_method` | Allocation | MONTHLY_EQUAL / DAILY_PRORATA / MONTHLY_BY_LINE_ITEM / BY_LINE_ITEM_PERIOD / BY_EXPLICIT_SCHEDULE / USAGE_BASED / MANUAL | 仅 allocation_required=Yes 时展示 |
+| `allocation_required` | Allocation Required | Yes / No | 控制 allocation_method 的显示与否 |
+
+#### Payer Bank 快速填充交互说明
+
+`Payer Bank` 和 `Payer Account` 均支持**手动文本输入**，同时 `Payer Bank` 输入框右侧提供**快速填充**按钮（📋 图标）。点击后弹出当前地区 CTW 出款账户预设列表，选中某条预设后**同时自动填入 `Payer Bank` 和 `Payer Account` 两个字段**，填入后财务可进一步手动修改。
+
+**交互流程：**
+1. 财务在详情页选定 Region（地区）
+2. 点击 Payer Bank 输入框右侧的快速填充图标（📋）
+3. 弹出下拉列表，展示该地区 CTW 的出款账户选项（含银行名称 + 账户名称）
+4. 选择一条预设后，**Payer Bank 和 Payer Account 同步填入**
+5. 财务可在任意字段上进行手动修改
+
+**各地区预设值（Mock，正式银行账户信息收集中）：**
+
+| 地区 | Payer Bank（银行名称）| Payer Account（账户名称）|
+|---|---|---|
+| JP | SMBC（三井住友銀行）| 三井住友 (法人) |
+| JP | みずほ銀行 | CTW INC |
+| US | East West Bank (MM) | CTW US INC |
+| US | Citibank NA | CTW US INC |
+| SG | Citibank (SGD) | CTW G123 SINGAPORE PTE LTD |
+| SG | DBS Bank | CTW G123 SINGAPORE PTE LTD |
+| CN | 中国工商银行（上海）| SHANGHAI WEIYOUYI CHUXIN TECH CO LTD |
+| TW | 台新銀行 | AINEKOX CO LTD. |
+| TW | 國泰世華 | AINEKOX CO LTD. |
+
+> ⚠️ **待确认**：各地区 CTW 正式出款银行账户信息尚在收集中，当前列表为 Mock 数据，上线前需替换为真实账户列表。
 
 ### 📅 日期选择器（AI 有值时回填，缺失时手填）
-- `invoice_date`、`due_date`、`service_period_start`、`service_period_end`
+- `invoice_date`（必填）、`accounting_date`（必填）、`due_date`（选填）、`service_period_start`、`service_period_end`（均选填，选择摊销类 recognition 策略时前端提示填写）
 
 ### 🔢 数字输入（AI 有值时回填，识别错误时可修正）
-- `total_amount`、`amount_excluding_tax`、`tax_amount`
+- `total_amount`（必填）、`amount_excluding_tax`（必填）、`tax_amount`（必填）、`tax_rate`（选填）
 
 ### ✏️ 文本输入（AI 有值时回填，缺失或识别错误时可修正）
-- 主体信息：`vendor_name`、`invoice_number`、`payment_purpose`、`invoice_description`（多行文本）
-- 收款方银行账户：`ext_data.bank_account.bank_name`、`ext_data.bank_account.branch_name`、`ext_data.bank_account.account_no`、`ext_data.bank_account.account_name`
-- 收款方路由：`ext_data.payment_rail.bank_code`、`ext_data.payment_rail.branch_code`（JP/SG）、`ext_data.payment_rail.account_name_kana`（JP）、`ext_data.payment_rail.swift_code`（US/SG/CN）、`ext_data.payment_rail.ach_routing`、`ext_data.payment_rail.wire_routing`（US）、`ext_data.payment_rail.paynow_uen`（SG）
-- 打款方：`payer_bank_name`（【待确认】PURCHASE 下从 CTW 固定银行账户下拉选择；SALES 下同理，`ext_data.bank_account.*` 应从 CTW 固定收款账户中选择）、`payer_account_name`（PURCHASE 下为 CTW 实体名称，文本输入）
+- 必填：`vendor_name`、`invoice_number`、`invoice_description`（多行文本）、`payment_purpose`
+- 选填：`tax_registration_no`（JP 必填，其他选填）
+- 收款方银行（必填）：`ext_data.bank_account.bank_name`、`ext_data.bank_account.account_no`、`ext_data.bank_account.account_name`
+- 收款方银行（JP 必填，其他展示地区必填）：`ext_data.bank_account.branch_name`（US 不展示）
+- 收款方路由（JP 必填）：`ext_data.payment_rail.bank_code`、`ext_data.payment_rail.branch_code`、`ext_data.payment_rail.account_name_kana`、`ext_data.payment_rail.bank_name_kana`
+- 收款方路由（选填）：`ext_data.payment_rail.swift_code`（US/SG/CN/TW）、`ext_data.payment_rail.ach_routing`、`ext_data.payment_rail.wire_routing`（US）、`ext_data.payment_rail.paynow_uen`（SG）
+- 打款方（选填）：`payer_bank_name`（文本输入 + 快速填充，选后同步写入 `payer_account_name`）、`payer_account_name`（文本输入，也可由快速填充联动写入）
 
-### ✏️ 可编辑表格（逐行修改，不支持新增/删除行）
+### ✏️ 可编辑表格（逐行修改，支持新增/删除行）
 - `line_items[*]`：每行字段包括 `item_name`（品名）、`tax_inclusive_amount`（含税金额）、`tax_rate`（税率）、`amount_excluding_tax`（税前金额）、`description`（明细说明）、`service_period_start` / `service_period_end`（明细服务期间）
 
 ---
 
-*文档更新时间：2026-05-22*
+*文档更新时间：2026-05-25*
 *样本来源：3月份 invoice cases，共 179 个 JSON 文件*
+
+---
+
+## 九、Fee Recognition 联动规则
+
+Fee Recognition 区块包含三个字段，适用于所有地区：Allocation Required（`allocation_required`）、Allocation（`allocation_method`）、Recognition（`recognition_policy`）。
+
+**Allocation Required 控制 Allocation 的显示。** 选 No（默认）时，Allocation 字段隐藏，系统将 `allocation_method` 置为空（不摊销）。选 Yes 时，Allocation 下拉展示，财务从以下 7 个值中选择：MONTHLY_EQUAL（按月平均分摊）、DAILY_PRORATA（按天数比例分摊）、MONTHLY_BY_LINE_ITEM（明细行已按月拆分，按行项目月份确认）、BY_LINE_ITEM_PERIOD（行项目按明确的非月度期间拆分）、BY_EXPLICIT_SCHEDULE（按单据给出的摊销表 / 比例 / schedule）、USAGE_BASED（按用量或消耗量分摊）、MANUAL（需要摊销但证据不支持确定性方法，只能人工处理）。
+
+**Recognition 有 8 个枚举值：** IMMEDIATE（立即确认，不做跨期处理）、PREPAID_MONTHLY（预付费用按月摊销）、PREPAID_DAILY（预付费用按天摊销）、ACCRUAL_BY_SERVICE_PERIOD（按可见服务期计提确认）、MONTHLY_BY_LINE_ITEM（月度行项目本身即确认依据）、SCHEDULED_BY_DOCUMENT（按单据提供的 schedule 确认）、USAGE_BASED（按用量消耗确认）、MILESTONE_BASED（按交付物或里程碑验收确认）。
+
+**Recognition 联动 Service Period 必填状态。** 选 PREPAID_MONTHLY、PREPAID_DAILY 或 ACCRUAL_BY_SERVICE_PERIOD 时，Header 级 Service Period 升级为必填并高亮提示。选 MONTHLY_BY_LINE_ITEM 时，Header 级 Service Period 不适用，改为 Line Items 每行的 service_period 升级为必填。其余策略（IMMEDIATE、SCHEDULED_BY_DOCUMENT、USAGE_BASED、MILESTONE_BASED）不对 Service Period 产生额外必填要求。
+
+
