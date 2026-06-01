@@ -1795,9 +1795,10 @@ const escalateData = [
     id: 'esc0',
     typeIcon: '🎮',
     title: 'CP「逃离校园」紧急道具补偿',
-    escalatorInitial: 'L',
+    escalatorInitial: '卢',
     escalatorName: '卢劲源',
-    escalatorColor: '#6c5ce7',
+    escalatorRole: 'CS',
+    escalatorColor: 'linear-gradient(135deg,#a78bfa,#6c5ce7)',
     time: '11:28',
     escalateReason: '超出当前 brain-doc 覆盖范围',
     note: '70 张合成卡数量超过我的授权额度（> 50 张），需要 manager 批准。',
@@ -1908,10 +1909,16 @@ function buildEscalateHTML() {
           <div class="mt-esc-hd" onclick="toggleEscDetail(this)">
             <div class="mt-esc-hd-left">
               <div class="mt-esc-title">${d.title}</div>
-              <div class="mt-esc-hd-source">
-                来自
-                <span class="mt-esc-source-name">${d.escalatorName}</span>
-                · ${d.time}
+              <div class="brain-from-row" style="margin-top:4px">
+                <span class="brain-from-label">FROM</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="brain-chip-avatar" style="background:${d.escalatorColor}">${d.escalatorInitial}</div>
+                  <div>
+                    <div style="font-size:13px;font-weight:500;color:var(--text-default);line-height:1.4">${d.escalatorName}</div>
+                    <div style="font-size:10px;color:var(--text-tertiary);letter-spacing:.04em">${d.escalatorRole || ''}</div>
+                  </div>
+                </div>
+                <span style="margin-left:auto;font-size:11px;color:var(--text-tertiary)">${d.time}</span>
               </div>
             </div>
             <span class="mt-esc-hd-chev">▾</span>
