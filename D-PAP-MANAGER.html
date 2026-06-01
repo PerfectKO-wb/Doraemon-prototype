@@ -1061,7 +1061,7 @@
       <div class="todo-divider-v"></div>
 
       <!-- Task Card (渲染由 JS 控制) -->
-      <div class="todo-card" id="taskTodoCard" onclick="escalateData.length ? switchTab('aitask', document.getElementById('aiTaskTabBtn')) : openDrawer('task')"></div>
+      <div class="todo-card" id="taskTodoCard" onclick="openDrawer('task')"></div>
     </div>
   </div>
 
@@ -1684,7 +1684,7 @@ function renderTaskTodoCard() {
         <div class="todo-cat">
           <span class="cat-dot orange"></span>Task
         </div>
-        <div class="todo-card-count" onclick="event.stopPropagation();escalateData.length ? switchTab('aitask', document.getElementById('aiTaskTabBtn')) : openDrawer('task')">
+        <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('task')">
           ${total}
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </div>
