@@ -1674,43 +1674,21 @@
 function renderTaskTodoCard() {
   const card = document.getElementById('taskTodoCard');
   if (!card) return;
-  const total = escalateData.length + taskData.length;
-  const hasEsc = escalateData.length > 0;
-  const esc = escalateData[0];
-
-  if (hasEsc) {
-    card.innerHTML = `
-      <div class="todo-card-hd">
-        <div class="todo-cat">
-          <span class="cat-dot orange"></span>Task
-        </div>
-        <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('task')">
-          ${total}
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
+  const total = taskData.length;
+  const first = taskData[0];
+  card.innerHTML = `
+    <div class="todo-card-hd">
+      <div class="todo-cat">
+        <span class="cat-dot orange"></span>Task
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow:hidden">
-        <span class="todo-card-title" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc.title}</span>
-        <span style="flex-shrink:0;font-size:9px;font-weight:700;letter-spacing:.05em;color:#aaa;border:1px solid #ddd;border-radius:10px;padding:2px 7px;white-space:nowrap">↑ ESC</span>
+      <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('task')">
+        ${total}
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </div>
-      <div class="todo-card-meta">来自 ${esc.escalatorName} · ${esc.time}</div>
-    `;
-  } else {
-    const first = taskData[0];
-    card.innerHTML = `
-      <div class="todo-card-hd">
-        <div class="todo-cat">
-          <span class="cat-dot orange"></span>Task
-        </div>
-        <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('task')">
-          ${total}
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </div>
-      <div class="todo-card-title">${first ? first.title : ''}</div>
-      <div class="todo-card-meta">${first ? first.meta : ''}</div>
-    `;
-  }
+    </div>
+    <div class="todo-card-title">${first ? first.title : ''}</div>
+    <div class="todo-card-meta">${first ? first.meta : ''}</div>
+  `;
 }
 
 // ── Tab switching ──
