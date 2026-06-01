@@ -807,13 +807,11 @@
   .mt-esc-action-status.doing     { display: inline-flex; background: rgba(255,152,0,.12); color: #bf6000; }
   .mt-esc-action-status.done      { display: inline-flex; background: rgba(76,175,80,.1);  color: #2e7d32; }
   .mt-esc-action-status.escalated { display: inline-flex; background: rgba(255,152,0,.14); color: #bf6000; }
-  /* pre-done action row — muted, non-interactive */
+  /* pre-done action row — no longer used with Help model; kept as safety */
   .mt-esc-action-item--predone .mt-esc-action-text  { color: #aaa; }
   .mt-esc-action-item--predone .mt-esc-action-exec  { opacity: .4; }
   .mt-esc-action-item--predone .mt-esc-action-btns  { display: none; }
-  /* escalated action row — highlighted, this is the one needing decision */
-  .mt-esc-action-item--needsapproval { background: rgba(255,152,0,.05); border-radius: 6px; padding: 4px 6px; }
-  /* skip badge */
+  /* skip state */
   .mt-esc-action-skip-badge {
     display: none; font-size: 9px; font-weight: 700; letter-spacing: .04em;
     padding: 2px 6px; border-radius: 4px;
@@ -822,28 +820,23 @@
   .mt-esc-action-item--skip .mt-esc-action-skip-badge { display: inline-flex; }
   .mt-esc-action-item--skip .mt-esc-action-text { color: #bbb; }
   .mt-esc-action-item--skip .mt-esc-action-exec { opacity: .3; }
-  /* per-action skip / re-escalate buttons */
-  .mt-esc-action-btns { display: flex; align-items: center; gap: 3px; flex-shrink: 0; margin-left: auto; }
-  .mt-esc-action-skip-btn, .mt-esc-action-reesc-btn {
-    background: none; border: none; cursor: pointer;
-    font-size: 11px; font-weight: 500; padding: 2px 6px; border-radius: 4px;
-    color: rgba(0,0,0,.22); transition: color .12s, background .12s; white-space: nowrap;
+  .mt-esc-action-item--skip .mt-esc-action-btns .mt-esc-action-exec-btn { display: none; }
+  /* per-action buttons */
+  .mt-esc-action-btns { display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: auto; }
+  .mt-esc-action-exec-btn {
+    background: #1a1a1a; color: #fff; border: none; cursor: pointer;
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 5px;
+    transition: opacity .12s; white-space: nowrap;
   }
-  .mt-esc-action-skip-btn:hover  { color: rgba(0,0,0,.55); background: rgba(0,0,0,.05); }
-  .mt-esc-action-reesc-btn:hover { color: #bf6000; background: rgba(255,152,0,.1); }
-  .mt-esc-action-item--skip .mt-esc-action-skip-btn  { color: rgba(0,0,0,.4); background: rgba(0,0,0,.05); }
-  /* re-escalated action state */
-  .mt-esc-action-item--reesc { background: rgba(255,152,0,.07); border-radius: 6px; }
-  .mt-esc-action-item--reesc .mt-esc-action-text { color: rgba(0,0,0,.45); }
-  .mt-esc-action-item--reesc .mt-esc-action-reesc-btn { color: #bf6000; background: rgba(255,152,0,.12); }
-  .mt-esc-action-item--reesc .mt-esc-action-btns .mt-esc-action-skip-btn { display: none; }
-  /* re-escalated badge */
-  .mt-esc-action-reesc-badge {
-    display: none; font-size: 9px; font-weight: 700; letter-spacing: .04em;
-    padding: 2px 6px; border-radius: 4px;
-    background: rgba(255,152,0,.18); color: #bf6000; flex-shrink: 0;
+  .mt-esc-action-exec-btn:hover { opacity: .8; }
+  .mt-esc-action-exec-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .mt-esc-action-skip-btn {
+    background: none; border: 1px solid transparent; cursor: pointer;
+    font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 5px;
+    color: rgba(0,0,0,.22); transition: color .12s, background .12s, border-color .12s; white-space: nowrap;
   }
-  .mt-esc-action-item--reesc .mt-esc-action-reesc-badge { display: inline-flex; }
+  .mt-esc-action-skip-btn:hover { color: rgba(0,0,0,.55); background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.12); }
+  .mt-esc-action-item--skip .mt-esc-action-skip-btn { color: rgba(0,0,0,.45); background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.12); }
 
   /* Action buttons */
   .mt-esc-actions {
@@ -1776,9 +1769,9 @@ const escalateData = [
       '活动今日 23:59 结束',
     ],
     actions: [
-      { type: 'ai', text: '批准 CS 工具向 153 名玩家批量发放 70 张「合成卡」', status: 'escalated' },
-      { type: 'hu', text: '同步技术组排查成就触发逻辑（需技术组负责人确认）',   status: 'done' },
-      { type: 'ai', text: '官方渠道发布补偿公告，附预计修复时间',               status: 'done' },
+      { type: 'ai', text: '批准 CS 工具向 153 名玩家批量发放 70 张「合成卡」', status: 'pending' },
+      { type: 'hu', text: '同步技术组排查成就触发逻辑（需技术组负责人确认）',   status: 'pending' },
+      { type: 'ai', text: '官方渠道发布补偿公告，附预计修复时间',               status: 'pending' },
     ],
     memory: [
       { date: '5/12', text: '同 CP 类似成就 bug（×2 人报告）', tag: 'memory · DingTalk' },
@@ -1865,19 +1858,14 @@ function openDrawer(type) {
             <div class="mt-esc-detail" id="mtEscDetail${i}">
 
             ${(() => {
-              const doneCount      = d.actions.filter(a => a.status === 'done').length;
-              const escalatedCount = d.actions.filter(a => a.status === 'escalated').length;
+              const total = d.actions.length;
               return `
               <div class="mt-esc-summary">
                 <div class="mt-esc-summary-stat">
-                  <span class="mt-esc-summary-num done">${doneCount}</span>
-                  <span class="mt-esc-summary-label">已由员工执行</span>
+                  <span class="mt-esc-summary-num escalated">${total}</span>
+                  <span class="mt-esc-summary-label">待你处理</span>
                 </div>
-                <div class="mt-esc-summary-stat">
-                  <span class="mt-esc-summary-num escalated">${escalatedCount}</span>
-                  <span class="mt-esc-summary-label">需你处理</span>
-                </div>
-                <span class="mt-esc-summary-desc">Agent 共建议 ${d.actions.length} 条 Action，员工已处理其中 ${doneCount} 条，${escalatedCount} 条因权限不足需要你处理。</span>
+                <span class="mt-esc-summary-desc">员工通过 Help 上报了整个任务，Agent 共建议 ${total} 条 Action，请逐条 Execute 或 Skip。</span>
               </div>`;
             })()}
 
@@ -1895,23 +1883,16 @@ function openDrawer(type) {
               <div class="mt-esc-block-label">Agent 建议 Actions</div>
               <ul class="mt-esc-action-list" id="mtEscActions${i}">
                 ${d.actions.map((a, ai) => {
-                  const isDone      = a.status === 'done';
-                  const isEscalated = a.status === 'escalated';
-                  const extraClass  = isDone ? 'mt-esc-action-item--predone' : '';
-                  const statusBadge = isDone
-                    ? '<span class="mt-esc-action-status done">Done</span>'
-                    : `<span class="mt-esc-action-status" id="mtEscStatus${i}_${ai}"></span>`;
-                  const actionBtns  = isDone ? '' : `
-                    <span class="mt-esc-action-skip-badge">Skipped</span>
-                    <span class="mt-esc-action-btns">
-                      <button class="mt-esc-action-skip-btn" id="mtEscSkipBtn${i}_${ai}" onclick="toggleEscActionSkip(${i},${ai})">Skip</button>
-                    </span>`;
                   return `
-                  <li class="mt-esc-action-item ${extraClass}" id="mtEscAction${i}_${ai}">
+                  <li class="mt-esc-action-item" id="mtEscAction${i}_${ai}">
                     <span class="mt-esc-action-exec ${a.type}" id="mtEscExec${i}_${ai}">${a.type.toUpperCase()}</span>
                     <span class="mt-esc-action-text">${a.text}</span>
-                    ${statusBadge}
-                    ${actionBtns}
+                    <span class="mt-esc-action-skip-badge">Skipped</span>
+                    <span class="mt-esc-action-status" id="mtEscStatus${i}_${ai}"></span>
+                    <span class="mt-esc-action-btns">
+                      <button class="mt-esc-action-exec-btn" id="mtEscExecBtn${i}_${ai}" onclick="executeEscAction(${i},${ai})">Execute</button>
+                      <button class="mt-esc-action-skip-btn" id="mtEscSkipBtn${i}_${ai}" onclick="toggleEscActionSkip(${i},${ai})">Skip</button>
+                    </span>
                   </li>`;
                 }).join('')}
               </ul>
@@ -1947,17 +1928,8 @@ function openDrawer(type) {
             </div>
 
             <div class="mt-esc-actions" id="mtEscActionBar${i}">
-              <button class="mt-esc-btn execute" id="mtEscApproveBtn${i}" onclick="handleEscApprove(${i})">Execute</button>
-              <button class="mt-esc-btn already-done" id="mtEscAlreadyDoneBtn${i}" onclick="openEscDonePanel(${i})">Already Done</button>
+              <button class="mt-esc-btn already-done" id="mtEscAlreadyDoneBtn${i}" onclick="handleEscAlreadyDone(${i})">Already Done</button>
               <button class="mt-esc-btn chat" id="mtEscChatBtn${i}" onclick="startEscChatMock('@[${d.ref}] ')">Chat to Adjust</button>
-            </div>
-            <div class="mt-esc-done-panel" id="mtEscDonePanel${i}">
-              <div class="mt-esc-done-panel-label">向 Agent 反馈此次处理情况（可选，有助于提升下次决策准确性）</div>
-              <textarea id="mtEscDoneFeedback${i}" rows="2" placeholder="例：已通过其他渠道处理完毕，技术组排查中…"></textarea>
-              <div class="mt-esc-done-panel-actions">
-                <button class="mt-esc-done-confirm" onclick="confirmEscDone(${i})">确认完成</button>
-                <button class="mt-esc-done-cancel" onclick="closeEscDonePanel(${i})">取消</button>
-              </div>
             </div>
 
             </div><!-- /mt-esc-detail -->
@@ -2034,119 +2006,90 @@ function _dismissEscItem(idx) {
   }
 }
 
-// Compute Execute button enabled state
-function _updateEscExecuteBtn(escIdx) {
+// Check if all actions are resolved (executed or skipped), auto-dismiss if so
+function _checkEscAllResolved(escIdx) {
   const d = escalateData[escIdx];
   if (!d) return;
-  const anyActive = d.actions.some((a, ai) => {
-    if (a.status === 'done') return false;
-    const r = document.getElementById(`mtEscAction${escIdx}_${ai}`);
-    return r && !r.classList.contains('mt-esc-action-item--skip');
+  const allResolved = d.actions.every((_, ai) => {
+    const row = document.getElementById(`mtEscAction${escIdx}_${ai}`);
+    return row && (
+      row.classList.contains('mt-esc-action-item--done') ||
+      row.classList.contains('mt-esc-action-item--skip')
+    );
   });
-  const execBtn = document.getElementById(`mtEscApproveBtn${escIdx}`);
-  if (execBtn) execBtn.disabled = !anyActive;
+  if (allResolved) {
+    const skipped = d.actions.filter((_, ai) => {
+      const row = document.getElementById(`mtEscAction${escIdx}_${ai}`);
+      return row && row.classList.contains('mt-esc-action-item--skip');
+    }).length;
+    const executed = d.actions.length - skipped;
+    const msg = skipped > 0
+      ? `已执行 ${executed} 条 Action（${skipped} 条已跳过），结果将同步给员工`
+      : '已执行，结果将同步给员工';
+    setTimeout(() => {
+      _dismissEscItem(escIdx);
+      closeModal();
+      showSnack(msg);
+    }, 600);
+  }
+}
+
+// Execute a single action
+function executeEscAction(escIdx, actionIdx) {
+  const d = escalateData[escIdx];
+  if (!d) return;
+  const a       = d.actions[actionIdx];
+  const row     = document.getElementById(`mtEscAction${escIdx}_${actionIdx}`);
+  const execBtn = document.getElementById(`mtEscExecBtn${escIdx}_${actionIdx}`);
+  const skipBtn = document.getElementById(`mtEscSkipBtn${escIdx}_${actionIdx}`);
+  const execEl  = document.getElementById(`mtEscExec${escIdx}_${actionIdx}`);
+  const statusEl= document.getElementById(`mtEscStatus${escIdx}_${actionIdx}`);
+  if (!row || row.classList.contains('mt-esc-action-item--done')) return;
+
+  // Lock buttons
+  if (execBtn) execBtn.disabled = true;
+  if (skipBtn) skipBtn.disabled = true;
+
+  if (a.type === 'hu') {
+    row.classList.add('exec-done', 'mt-esc-action-item--done');
+    if (execEl)   execEl.textContent = '✓ HU';
+    if (statusEl) { statusEl.className = 'mt-esc-action-status done'; statusEl.textContent = 'Done'; }
+    if (execBtn)  execBtn.style.display = 'none';
+    if (skipBtn)  skipBtn.style.display = 'none';
+    _checkEscAllResolved(escIdx);
+  } else {
+    row.classList.add('exec-running');
+    if (execEl)   execEl.textContent = '⟳ AI';
+    if (statusEl) { statusEl.className = 'mt-esc-action-status doing'; statusEl.textContent = 'Doing'; }
+    setTimeout(() => {
+      row.classList.remove('exec-running');
+      row.classList.add('exec-done', 'mt-esc-action-item--done');
+      if (execEl)   execEl.textContent = '✓ AI';
+      if (statusEl) { statusEl.className = 'mt-esc-action-status done'; statusEl.textContent = 'Done'; }
+      if (execBtn)  execBtn.style.display = 'none';
+      if (skipBtn)  skipBtn.style.display = 'none';
+      _checkEscAllResolved(escIdx);
+    }, 1400);
+  }
 }
 
 // Toggle skip state for a single action
 function toggleEscActionSkip(escIdx, actionIdx) {
-  const row = document.getElementById(`mtEscAction${escIdx}_${actionIdx}`);
-  const btn = document.getElementById(`mtEscSkipBtn${escIdx}_${actionIdx}`);
-  if (!row || row.classList.contains('mt-esc-action-item--predone')) return;
+  const row     = document.getElementById(`mtEscAction${escIdx}_${actionIdx}`);
+  const skipBtn = document.getElementById(`mtEscSkipBtn${escIdx}_${actionIdx}`);
+  const execBtn = document.getElementById(`mtEscExecBtn${escIdx}_${actionIdx}`);
+  if (!row || row.classList.contains('mt-esc-action-item--done')) return;
   const isSkip = row.classList.toggle('mt-esc-action-item--skip');
-  if (btn) btn.textContent = isSkip ? 'Undo' : 'Skip';
-  _updateEscExecuteBtn(escIdx);
+  if (skipBtn) skipBtn.textContent = isSkip ? 'Undo' : 'Skip';
+  if (execBtn) execBtn.style.display = isSkip ? 'none' : '';
+  if (isSkip) _checkEscAllResolved(escIdx);
 }
 
-// Execute: animate non-skipped/non-re-escalated actions then dismiss
-function handleEscApprove(escIdx) {
-  const d = escalateData[escIdx];
-  if (!d) return;
-
-  const execBtn = document.getElementById(`mtEscApproveBtn${escIdx}`);
-  if (execBtn) execBtn.disabled = true;
-
-  // disable all skip buttons
-  d.actions.forEach((_, ai) => {
-    const btn = document.getElementById(`mtEscSkipBtn${escIdx}_${ai}`);
-    if (btn) btn.disabled = true;
-  });
-
-  // actions to execute: not pre-done, not skipped
-  const activeActions = d.actions.map((a, ai) => {
-    const row = document.getElementById(`mtEscAction${escIdx}_${ai}`);
-    const isSkipped = row && row.classList.contains('mt-esc-action-item--skip');
-    return { ...a, ai, skip: isSkipped };
-  }).filter(a => a.status !== 'done' && !a.skip);
-
-  // animate active actions
-  activeActions.forEach(a => {
-    const statusEl = document.getElementById(`mtEscStatus${escIdx}_${a.ai}`);
-    const execEl   = document.getElementById(`mtEscExec${escIdx}_${a.ai}`);
-    const row      = document.getElementById(`mtEscAction${escIdx}_${a.ai}`);
-    if (a.type === 'hu') {
-      if (row)      row.classList.add('exec-done');
-      if (execEl)   execEl.textContent = '✓ HU';
-      if (statusEl) { statusEl.className = 'mt-esc-action-status done'; statusEl.textContent = 'Done'; }
-    } else {
-      if (row)      row.classList.add('exec-running');
-      if (execEl)   execEl.textContent = '⟳ AI';
-      if (statusEl) { statusEl.className = 'mt-esc-action-status doing'; statusEl.textContent = 'Doing'; }
-      setTimeout(() => {
-        if (row)      { row.classList.remove('exec-running'); row.classList.add('exec-done'); }
-        if (execEl)   execEl.textContent = '✓ AI';
-        if (statusEl) { statusEl.className = 'mt-esc-action-status done'; statusEl.textContent = 'Done'; }
-      }, 1500);
-    }
-  });
-
-  const hasPendingAI = activeActions.some(a => a.type === 'ai');
-  const delay = hasPendingAI ? 2400 : 900;
-  setTimeout(() => {
-    const skipped = d.actions.filter(a => a.status !== 'done').length - activeActions.length;
-    const msg = skipped > 0
-      ? `已执行 ${activeActions.length} 条 Action（${skipped} 条已跳过），结果将同步给员工`
-      : '已执行，结果将同步给员工';
-    _dismissEscItem(escIdx);
-    closeModal();
-    showSnack(msg);
-  }, delay);
-}
-
-function openEscDonePanel(idx) {
-  // hide Execute / Already Done / Chat buttons
-  ['mtEscApproveBtn','mtEscAlreadyDoneBtn','mtEscChatBtn'].forEach(prefix => {
-    const el = document.getElementById(prefix + idx);
-    if(el) el.style.display = 'none';
-  });
-  const panel = document.getElementById('mtEscDonePanel' + idx);
-  if(panel) {
-    panel.classList.add('show');
-    const fb = document.getElementById('mtEscDoneFeedback' + idx);
-    if(fb) fb.focus();
-  }
-}
-
-function closeEscDonePanel(idx) {
-  const panel = document.getElementById('mtEscDonePanel' + idx);
-  if(panel) panel.classList.remove('show');
-  const fb = document.getElementById('mtEscDoneFeedback' + idx);
-  if(fb) fb.value = '';
-  // restore buttons
-  ['mtEscApproveBtn','mtEscAlreadyDoneBtn','mtEscChatBtn'].forEach(prefix => {
-    const el = document.getElementById(prefix + idx);
-    if(el) el.style.display = '';
-  });
-}
-
-function confirmEscDone(idx) {
-  const fb = document.getElementById('mtEscDoneFeedback' + idx);
-  const feedback = fb ? fb.value.trim() : '';
-  const msg = feedback
-    ? '✓ 已完成 · 反馈「' + feedback.slice(0, 28) + (feedback.length > 28 ? '…' : '') + '」已喂给 Agent'
-    : '✓ 已标记完成 · 结果将同步至 Memory';
+// Already Done: direct dismiss
+function handleEscAlreadyDone(idx) {
   _dismissEscItem(idx);
   closeModal();
-  showSnack(msg);
+  showSnack('✓ 已标记完成 · 结果将同步至 Memory');
 }
 
 
