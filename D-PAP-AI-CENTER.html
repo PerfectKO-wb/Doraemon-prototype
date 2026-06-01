@@ -1289,8 +1289,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
                 </ul>
               </div>
               <div class="pdm-action-row" id="pdmActionRow">
-                <button type="button" class="pdm-btn pdm-btn-execute" id="pdmAgentYes">Execute</button>
-                <button type="button" class="pdm-btn pdm-btn-done-inline" id="pdmAgentDone">Already Done</button>
+                <button type="button" class="pdm-btn pdm-btn-execute" id="pdmAgentYes">Approve</button>
                 <button type="button" class="pdm-btn pdm-btn-help" id="pdmAgentHelp" onclick="openPdmHelpPanel()">Help</button>
               </div>
             </div>
@@ -2193,7 +2192,7 @@ function switchPdmCase(n){
     card.classList.remove('resolving','resolved-msg');
     const st = document.getElementById('pdmAgentStatus');
     st.className = 'pdm-agent-status'; st.textContent = '';
-    ['pdmAgentYes','pdmAgentDone','pdmAgentHelp'].forEach(id => {
+    ['pdmAgentYes','pdmAgentHelp'].forEach(id => {
       const b = document.getElementById(id); if(b){ b.disabled = false; b.style.display = ''; }
     });
     // Reset rec-list: execution states only
@@ -2204,8 +2203,8 @@ function switchPdmCase(n){
     const e0 = document.getElementById('pdmRecExec0'); if(e0) e0.textContent = 'AI';
     const e1 = document.getElementById('pdmRecExec1'); if(e1) e1.textContent = 'HU';
     const e2 = document.getElementById('pdmRecExec2'); if(e2) e2.textContent = 'AI';
-    // Reset Execute button text
-    const yesBtn = document.getElementById('pdmAgentYes'); if(yesBtn) yesBtn.textContent = 'Execute';
+    // Reset Approve button text
+    const yesBtn = document.getElementById('pdmAgentYes'); if(yesBtn) yesBtn.textContent = 'Approve';
     // Badge restore
     if(pdmAgentPending > 0){
       const badge = document.getElementById('pdmAgentBadge');
@@ -2266,7 +2265,7 @@ if(user.view==='pdm'){
   }
 
   function _setAllAgentBtns(disabled){
-    ['pdmAgentYes','pdmAgentDone'].forEach(id=>{
+    ['pdmAgentYes'].forEach(id=>{
       const el = document.getElementById(id); if(el) el.disabled = disabled;
     });
     // lock per-action buttons while executing
@@ -2337,11 +2336,6 @@ if(user.view==='pdm'){
     }, 2800);
   });
 
-  // Done: directly dismiss
-  document.getElementById('pdmAgentDone').addEventListener('click', function(){
-    if(this.disabled) return;
-    _dismissAgentCard('✓ 已标记完成 · 结果将同步至 Memory。', 'ok', 3500);
-  });
 }
 
 /* ── DOING INPUT ── */
