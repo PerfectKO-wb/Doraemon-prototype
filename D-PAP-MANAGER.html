@@ -163,7 +163,7 @@
   }
   .todo-cards {
     display: grid;
-    grid-template-columns: 1fr 1px 1fr;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
     background: var(--surface-glass);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -1060,8 +1060,13 @@
 
       <div class="todo-divider-v"></div>
 
-      <!-- Task Card (渲染由 JS 控制) -->
+      <!-- Task Card -->
       <div class="todo-card" id="taskTodoCard" onclick="openDrawer('task')"></div>
+
+      <div class="todo-divider-v"></div>
+
+      <!-- Escalations Card -->
+      <div class="todo-card" id="escTodoCard" onclick="openDrawer('escalation')"></div>
     </div>
   </div>
 
@@ -1078,9 +1083,6 @@
       </button>
       <button class="tab-btn" onclick="switchTab('brain', this)">
         Brain<span class="tab-count">11</span>
-      </button>
-      <button class="tab-btn" id="aiTaskTabBtn" onclick="switchTab('aitask', this)">
-        Escalations<span class="tab-count" id="aiTaskTabCount">1</span>
       </button>
     </div>
 
@@ -1592,9 +1594,6 @@
     <div class="brain-detail-body" id="brainDetailBody"></div>
   </div>
 
-    <!-- AI Task Panel -->
-    <div class="tab-panel" id="tab-aitask"></div>
-
   </div><!-- /main-card -->
 </div><!-- /page -->
 
@@ -1895,6 +1894,12 @@ function openDrawer(type) {
 
     body.innerHTML = tasksHTML;
   }
+
+  if (type === 'escalation') {
+    titleEl.childNodes[0].textContent = 'Escalations  ';
+    countEl.textContent = escalateData.length;
+    body.innerHTML = buildEscalateHTML();
+  }
 }
 
 // ── AI Task Tab ──
@@ -1990,11 +1995,33 @@ function buildEscalateHTML() {
     </div>`;
 }
 
-function renderAiTaskTab() {
-  const panel = document.getElementById('tab-aitask');
-  if (panel) panel.innerHTML = buildEscalateHTML();
-  const badge = document.getElementById('aiTaskTabCount');
-  if (badge) badge.textContent = escalateData.length;
+function renderEscalationCard() {
+  const card = document.getElementById('escTodoCard');
+  if (!card) return;
+  const total = escalateData.length;
+  const first = escalateData[0];
+  if (total === 0) {
+    card.innerHTML = `
+      <div class="todo-card-hd">
+        <div class="todo-cat"><span class="cat-dot" style="background:#e0e0e0"></span>Escalations</div>
+        <div class="todo-card-count">0</div>
+      </div>
+      <div class="todo-card-title" style="color:var(--text-disabled)">暂无上报事项</div>
+      <div class="todo-card-meta"></div>
+    `;
+  } else {
+    card.innerHTML = `
+      <div class="todo-card-hd">
+        <div class="todo-cat"><span class="cat-dot" style="background:#fa8c16;border-color:#ffd591"></span>Escalations</div>
+        <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('escalation')">
+          ${total}
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+      <div class="todo-card-title">${first.title}</div>
+      <div class="todo-card-meta">来自 ${first.escalatorName} · ${first.time}</div>
+    `;
+  }
 }
 
 function toggleEscDetail(hdEl) {
@@ -2026,9 +2053,9 @@ function _dismissEscItem(idx) {
       el.style.opacity = '0';
       setTimeout(() => { el.style.maxHeight = '0'; el.style.padding = '0'; }, 50);
       setTimeout(() => { el.remove(); escalateData.splice(idx, 1);
-        const badge = document.getElementById('aiTaskTabCount');
-        if (badge) badge.textContent = escalateData.length;
-        renderTaskTodoCard();
+        const countEl = document.getElementById('modalCount');
+        if (countEl) countEl.textContent = escalateData.length;
+        renderEscalationCard();
       }, 320);
     });
   }
@@ -2497,7 +2524,7 @@ function showSnack(msg) {
 
 // ── Init ──
 renderTaskTodoCard();
-renderAiTaskTab();
+renderEscalationCard();
 </script>
 </body>
 </html>
