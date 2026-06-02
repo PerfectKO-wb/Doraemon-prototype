@@ -967,6 +967,10 @@ html,body{width:100%;height:100%;overflow:hidden;}
 .pdm-rec-list li.exec-running .pdm-rec-exec.ai{background:rgba(255,152,0,.15);color:#bf6000;animation:execPulse 1s ease-in-out infinite;}
 .pdm-rec-list li.exec-done .pdm-rec-exec.ai{background:rgba(76,175,80,.12);color:#2e7d32;}
 .pdm-rec-list li.exec-assigned .pdm-rec-exec.hu{background:rgba(21,101,192,.12);color:#1565c0;}
+.pdm-rec-list li.exec-todo .pdm-rec-exec.hu{background:rgba(0,0,0,.04);color:#888;border:1px solid rgba(0,0,0,.1);}
+.pdm-rec-list li.exec-todo .pdm-rec-item-text{color:#aaa;}
+@keyframes aCardSlideIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+.a-card-new{animation:aCardSlideIn .35s ease-out;border-left:2px solid #1565c0 !important;}
 @keyframes execPulse{0%,100%{opacity:1}50%{opacity:.45}}
 /* Done feedback panel */
 .pdm-done-panel{display:none;flex-direction:column;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,.1);}
@@ -2198,7 +2202,7 @@ function switchPdmCase(n){
     // Reset rec-list: execution states only
     [0,1,2].forEach(i => {
       const row = document.getElementById('pdmRecItem' + i);
-      if(row){ row.classList.remove('exec-running','exec-done','exec-assigned'); }
+      if(row){ row.classList.remove('exec-running','exec-done','exec-assigned','exec-todo'); }
     });
     const e0 = document.getElementById('pdmRecExec0'); if(e0) e0.textContent = 'AI';
     const e1 = document.getElementById('pdmRecExec1'); if(e1) e1.textContent = 'HU';
@@ -2277,63 +2281,42 @@ if(user.view==='pdm'){
     });
   }
 
-  // Execute: run checked actions + send escalated actions to decision-maker
+  // Approve: AI actions → doing, HU action → todo, create A card
   document.getElementById('pdmAgentYes').addEventListener('click', function(){
     if(this.disabled) return;
-    const checked   = _getCheckedItems();
-    const escalated = _getEscalatedItems();
-    if(!checked.length && !escalated.length) return;
     _setAllAgentBtns(true);
+    this.textContent = '处理中…';
 
-    const btn = this;
-    btn.textContent = '执行中…';
-
-    const checkedAI = checked.filter(it => it.type === 'ai').map(it => it.idx);
-    const checkedHU = checked.filter(it => it.type === 'hu').map(it => it.idx);
-
-    // Step 1: animate AI actions as running
-    checkedAI.forEach(i => {
+    // Step 1: mark states immediately
+    [0, 2].forEach(i => {
       document.getElementById('pdmRecItem' + i).classList.add('exec-running');
       document.getElementById('pdmRecExec' + i).textContent = '⟳ AI';
     });
+    document.getElementById('pdmRecItem1').classList.add('exec-todo');
+    document.getElementById('pdmRecExec1').textContent = 'TODO';
 
-    // Step 2: after 1.2s mark AI done, mark escalated as sent
+    // Step 2: create A card after 0.8s
     setTimeout(() => {
-      checkedAI.forEach(i => {
-        const row = document.getElementById('pdmRecItem' + i);
-        row.classList.remove('exec-running');
-        row.classList.add('exec-done');
-        document.getElementById('pdmRecExec' + i).textContent = '✓ AI';
-      });
-      escalated.forEach(it => {
-        const badge = document.getElementById('pdmRecEscBadge' + it.idx);
-        if(badge) badge.textContent = '↑ 已升级';
-      });
-    }, 1200);
-
-    // Step 3: after 1.8s assign HU actions
-    setTimeout(() => {
-      checkedHU.forEach(i => {
-        document.getElementById('pdmRecItem' + i).classList.add('exec-assigned');
-        document.getElementById('pdmRecExec' + i).textContent = '→ HU';
-      });
-    }, 1800);
-
-    // Step 4: after 2.8s dismiss with combined summary
-    setTimeout(() => {
-      const skipped = REC_ITEMS.length - checked.length - escalated.length;
-      let msg = '';
-      if(checked.length && escalated.length){
-        msg = `✓ 已执行 ${checked.length} 条 Action · ${escalated.length} 条已升级给决策者，结果将记录为新 Memory。`;
-      } else if(escalated.length){
-        msg = `↑ ${escalated.length} 条 Action 已升级给决策者处理。`;
-      } else {
-        msg = skipped > 0
-          ? `✓ 已执行 ${checked.length} 条 Action（${skipped} 条已跳过），结果将记录为新 Memory。`
-          : '✓ AI 已完成自动执行 · 人工任务已指派，结果将记录为新 Memory。';
+      const todoList = document.getElementById('pdmTodoList');
+      if (todoList) {
+        const card = document.createElement('div');
+        card.className = 'g-card todo-card a-card-new';
+        card.innerHTML = `
+          <div class="card-title" style="display:flex;align-items:center;gap:6px;">
+            <span style="flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:6px;background:rgba(21,101,192,.08);color:#1565c0;border:1px solid rgba(21,101,192,.2);">HU Task</span>
+            <span>同步技术组排查成就触发逻辑</span>
+          </div>
+          <div class="ddl-row"><span class="ddl-dot"></span>需技术组负责人确认 · Agent 推送</div>
+          <div class="card-desc" style="font-size:12px;color:rgba(0,0,0,.5);margin-top:4px;">来自「CP 逃离校园」紧急道具补偿任务</div>
+        `;
+        todoList.prepend(card);
       }
-      _dismissAgentCard(msg, escalated.length && !checked.length ? 'info' : 'ok', 3200);
-    }, 2800);
+    }, 800);
+
+    // Step 3: dismiss after 1.8s
+    setTimeout(() => {
+      _dismissAgentCard('✓ AI 执行中 · A卡已创建，请跟进技术组确认', 'ok', 3200);
+    }, 1800);
   });
 
 }
