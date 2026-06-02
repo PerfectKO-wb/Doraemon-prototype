@@ -856,6 +856,7 @@
   }
   .mt-esc-action-status.doing { display: inline-flex; align-items: center; color: #3a9e3a; border: 1.5px solid #3a9e3a; }
   .mt-esc-action-status.todo  { display: inline-flex; align-items: center; color: #aaa;    border: 1.5px solid #ccc; }
+  .mt-esc-action-status.done  { display: inline-flex; align-items: center; color: #fff; background: #3a9e3a; border: 1.5px solid #3a9e3a; }
   /* pre-done action row — no longer used with Help model; kept as safety */
   .mt-esc-action-item--predone .mt-esc-action-text  { color: #aaa; }
   .mt-esc-action-item--predone .mt-esc-action-exec  { opacity: .4; }
@@ -2075,7 +2076,9 @@ function approveEscTask(idx) {
     d.actions.forEach((a, j) => {
       const st = document.getElementById(`mtEscActionStatus${idx}_${j}`);
       if (!st) return;
-      if (a.type === 'ai') { st.className = 'mt-esc-action-status doing'; st.textContent = 'Doing'; }
+      // action index 2 (官方渠道发布补偿公告) is already done
+      if (j === 2)         { st.className = 'mt-esc-action-status done';  st.textContent = 'Done'; }
+      else if (a.type === 'ai') { st.className = 'mt-esc-action-status doing'; st.textContent = 'Doing'; }
       else                 { st.className = 'mt-esc-action-status todo';  st.textContent = 'To do'; }
     });
   }
