@@ -842,19 +842,20 @@
   .mt-esc-action-exec.ai { background: rgba(0,0,0,.07); color: rgba(0,0,0,.45); }
   .mt-esc-action-exec.hu { background: #e8f4ff; border: 1px solid #b3d9ff; color: #1565c0; }
   /* running/done states */
-  .mt-esc-action-item.exec-running .mt-esc-action-exec.ai { background: rgba(255,152,0,.15); color: #bf6000; animation: escActionPulse 1s ease-in-out infinite; }
+  .mt-esc-action-item.exec-running .mt-esc-action-exec.ai { background: rgba(255,152,0,.15); color: #bf6000; }
   .mt-esc-action-item.exec-done    .mt-esc-action-exec.ai { background: rgba(76,175,80,.12); color: #2e7d32; }
   .mt-esc-action-item.exec-done    .mt-esc-action-exec.hu { background: rgba(76,175,80,.12); color: #2e7d32; border-color: transparent; }
   @keyframes escActionPulse { 0%,100%{opacity:1} 50%{opacity:.4} }
   .mt-esc-action-text { flex: 1; min-width: 0; line-height: 1.5; }
   /* status badge */
   .mt-esc-action-status {
-    font-size: 10px; font-weight: 600; letter-spacing: .03em;
-    padding: 2px 7px; border-radius: 10px; flex-shrink: 0; display: none;
+    display: none; margin-left: auto; flex-shrink: 0;
+    font-size: 11px; font-weight: 500;
+    padding: 3px 10px; border-radius: 20px;
+    white-space: nowrap; background: transparent;
   }
-  .mt-esc-action-status.doing     { display: inline-flex; background: rgba(255,152,0,.12); color: #bf6000; }
-  .mt-esc-action-status.done      { display: inline-flex; background: rgba(76,175,80,.1);  color: #2e7d32; }
-  .mt-esc-action-status.escalated { display: inline-flex; background: rgba(255,152,0,.14); color: #bf6000; }
+  .mt-esc-action-status.doing { display: inline-flex; align-items: center; color: #3a9e3a; border: 1.5px solid #3a9e3a; }
+  .mt-esc-action-status.todo  { display: inline-flex; align-items: center; color: #aaa;    border: 1.5px solid #ccc; }
   /* pre-done action row — no longer used with Help model; kept as safety */
   .mt-esc-action-item--predone .mt-esc-action-text  { color: #aaa; }
   .mt-esc-action-item--predone .mt-esc-action-exec  { opacity: .4; }
@@ -1951,10 +1952,11 @@ function buildEscalateHTML() {
             <div class="mt-esc-block">
               <div class="mt-esc-block-label">Agent 建议 Actions</div>
               <ul class="mt-esc-action-list">
-                ${d.actions.map(a => `
-                  <li class="mt-esc-action-item">
+                ${d.actions.map((a, j) => `
+                  <li class="mt-esc-action-item" id="mtEscActionItem${i}_${j}">
                     <span class="mt-esc-action-exec ${a.type}">${a.type.toUpperCase()}</span>
                     <span class="mt-esc-action-text">${a.text}</span>
+                    <span class="mt-esc-action-status" id="mtEscActionStatus${i}_${j}"></span>
                   </li>`).join('')}
               </ul>
             </div>
@@ -2063,12 +2065,22 @@ function _dismissEscItem(idx) {
 
 // ── AI Task: Approve / Adjust ──
 function approveEscTask(idx) {
-  const btn = document.querySelector(`#mtEscActionBar${idx} .mt-esc-btn.execute`);
-  if (btn) { btn.disabled = true; btn.textContent = '⟳ Executing…'; }
-  setTimeout(() => {
-    _dismissEscItem(idx);
-    showSnack('✓ 已批准 · Agent 正在执行全部 Action');
-  }, 800);
+  // Hide Approve + Adjust buttons
+  const bar = document.getElementById(`mtEscActionBar${idx}`);
+  if (bar) bar.style.display = 'none';
+
+  // Set per-action status tags
+  const d = escalateData[idx];
+  if (d) {
+    d.actions.forEach((a, j) => {
+      const st = document.getElementById(`mtEscActionStatus${idx}_${j}`);
+      if (!st) return;
+      if (a.type === 'ai') { st.className = 'mt-esc-action-status doing'; st.textContent = 'Doing'; }
+      else                 { st.className = 'mt-esc-action-status todo';  st.textContent = 'To do'; }
+    });
+  }
+
+  showSnack('✓ 已批准 · Agent 正在执行全部 Action');
 }
 
 function adjustEscTask(idx, ref) {
