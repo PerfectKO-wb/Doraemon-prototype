@@ -1941,11 +1941,6 @@ function buildEscalateHTML() {
             </div>
 
             <div class="mt-esc-block">
-              <div class="mt-esc-block-label">员工备注</div>
-              <div class="mt-esc-block-text">${d.note}</div>
-            </div>
-
-            <div class="mt-esc-block">
               <div class="mt-esc-block-label">CP 诉求</div>
               ${d.cpItems.map(item => `<div class="mt-esc-block-item">${item}</div>`).join('')}
             </div>
