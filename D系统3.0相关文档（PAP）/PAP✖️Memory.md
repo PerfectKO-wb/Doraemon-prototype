@@ -183,7 +183,8 @@ Recommended Actions 为**只读**展示，员工无法在 action 维度进行操
 
 1. **按钮消失**：Approve 和 Help 按钮从卡片上移除，防止重复操作。
 2. **Action 状态标记**：每条 action 右侧出现状态 tag：
-   * `AI` 类 → 绿色描边 **Doing** tag，表示 Agent 正在自动执行。
+   * `AI` 类（正在执行）→ 绿色描边 **Doing** tag。
+   * `AI` 类（已完成）→ 绿色实心 **Done** tag。
    * `HU` 类 → 灰色描边 **To do** tag，表示等待人工跟进。
 3. **创建 A 卡**：`HU` 类 action 对应的人工任务以 A 卡形式出现在 Todo 列表顶部，包含任务标题、负责人确认要求及来源说明。
 4. **卡片保留**：Agent 卡片保持可见，展示当前执行中状态，不自动消失。
@@ -254,7 +255,7 @@ Todo 区并排展示三张卡片：**Interview / Task / Escalations**，以分�
 
 **Escalated 任务操作行为：**
 
-* **Approve**：批准并执行所有待处理 action，结果同步写入 Memory。
+* **Approve**：批准并执行所有待处理 action，Approve / Adjust 按钮消失，每条 action 右侧出现状态 tag（Doing / Done / To do），结果同步写入 Memory。
 * **Adjust**：关闭弹窗，将任务引用注入 Chat 输入框，开启与 AI 的对话以修改 action 或更新 Brain-doc。
 
 Escalated 任务处理完毕后，从 Escalations 弹窗中移除，Escalations 卡片计数同步更新。若所有上报事项处理完毕，卡片显示空态。
@@ -270,8 +271,7 @@ Escalated 任务处理完毕后，从 Escalations 弹窗中移除，Escalations 
 
 **典型对话流程（以 Escalated 任务为例）：**
 
-* 第 1 轮，决策者输入：`@[任务标题] 修改第一个 action，直接批量发放 140 张合成卡`，AI 回复：确认 action 已更新，回显更新后的 action 内容。
-* 第 2 轮，决策者输入：`执行`，AI 回复：执行成功，回复执行结果。
+* 决策者输入：`@[任务标题] 修改第一个 action，直接批量发放 140 张合成卡`，AI 回复：确认 action 已更新，回显更新后的 action 内容。
 
 > Memory 和 Brain-doc 的更新均在整个任务完成后触发，而非在单条对话消息发送时立即写入。Chat 是 Brain-doc 的唯一更新入口，员工侧不开放写入路径。
 
