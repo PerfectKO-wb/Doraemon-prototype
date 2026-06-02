@@ -969,6 +969,9 @@ html,body{width:100%;height:100%;overflow:hidden;}
 .pdm-rec-list li.exec-assigned .pdm-rec-exec.hu{background:rgba(21,101,192,.12);color:#1565c0;}
 .pdm-rec-list li.exec-todo .pdm-rec-exec.hu{background:rgba(0,0,0,.04);color:#888;border:1px solid rgba(0,0,0,.1);}
 .pdm-rec-list li.exec-todo .pdm-rec-item-text{color:#aaa;}
+.pdm-rec-status{display:none;margin-left:auto;flex-shrink:0;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap;}
+.pdm-rec-status.doing{display:inline-flex;align-items:center;gap:4px;background:rgba(255,152,0,.1);color:#bf6000;border:1px solid rgba(255,152,0,.25);}
+.pdm-rec-status.todo{display:inline-flex;align-items:center;background:rgba(0,0,0,.05);color:#888;border:1px solid rgba(0,0,0,.1);}
 @keyframes aCardSlideIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
 .a-card-new{animation:aCardSlideIn .35s ease-out;border-left:2px solid #1565c0 !important;}
 @keyframes execPulse{0%,100%{opacity:1}50%{opacity:.45}}
@@ -1281,14 +1284,17 @@ html,body{width:100%;height:100%;overflow:hidden;}
                   <li class="pdm-rec-item" id="pdmRecItem0">
                     <span class="pdm-rec-exec ai" id="pdmRecExec0">AI</span>
                     <span class="pdm-rec-item-text">批准 CS 工具向 153 名玩家批量发放 70 张「合成卡」</span>
+                    <span class="pdm-rec-status" id="pdmRecStatus0"></span>
                   </li>
                   <li class="pdm-rec-item" id="pdmRecItem1">
                     <span class="pdm-rec-exec hu" id="pdmRecExec1">HU</span>
                     <span class="pdm-rec-item-text">同步技术组排查成就触发逻辑（需技术组负责人确认）</span>
+                    <span class="pdm-rec-status" id="pdmRecStatus1"></span>
                   </li>
                   <li class="pdm-rec-item" id="pdmRecItem2">
                     <span class="pdm-rec-exec ai" id="pdmRecExec2">AI</span>
                     <span class="pdm-rec-item-text">官方渠道发布补偿公告，附预计修复时间</span>
+                    <span class="pdm-rec-status" id="pdmRecStatus2"></span>
                   </li>
                 </ul>
               </div>
@@ -2203,12 +2209,15 @@ function switchPdmCase(n){
     [0,1,2].forEach(i => {
       const row = document.getElementById('pdmRecItem' + i);
       if(row){ row.classList.remove('exec-running','exec-done','exec-assigned','exec-todo'); }
+      const st = document.getElementById('pdmRecStatus' + i);
+      if(st){ st.className = 'pdm-rec-status'; st.textContent = ''; }
     });
     const e0 = document.getElementById('pdmRecExec0'); if(e0) e0.textContent = 'AI';
     const e1 = document.getElementById('pdmRecExec1'); if(e1) e1.textContent = 'HU';
     const e2 = document.getElementById('pdmRecExec2'); if(e2) e2.textContent = 'AI';
-    // Reset Approve button text
+    // Reset Approve button text + restore action row
     const yesBtn = document.getElementById('pdmAgentYes'); if(yesBtn) yesBtn.textContent = 'Approve';
+    const actionRow = document.getElementById('pdmActionRow'); if(actionRow) actionRow.style.display = '';
     // Badge restore
     if(pdmAgentPending > 0){
       const badge = document.getElementById('pdmAgentBadge');
@@ -2285,15 +2294,18 @@ if(user.view==='pdm'){
   document.getElementById('pdmAgentYes').addEventListener('click', function(){
     if(this.disabled) return;
     _setAllAgentBtns(true);
-    this.textContent = '处理中…';
 
-    // Step 1: mark states immediately
+    // Hide buttons
+    document.getElementById('pdmActionRow').style.display = 'none';
+
+    // Step 1: mark states + show right-side status tags
     [0, 2].forEach(i => {
       document.getElementById('pdmRecItem' + i).classList.add('exec-running');
-      document.getElementById('pdmRecExec' + i).textContent = '⟳ AI';
+      const st = document.getElementById('pdmRecStatus' + i);
+      if (st) { st.className = 'pdm-rec-status doing'; st.textContent = '⟳ Doing'; }
     });
-    document.getElementById('pdmRecItem1').classList.add('exec-todo');
-    document.getElementById('pdmRecExec1').textContent = 'TODO';
+    const st1 = document.getElementById('pdmRecStatus1');
+    if (st1) { st1.className = 'pdm-rec-status todo'; st1.textContent = 'Todo'; }
 
     // Step 2: create A card after 0.8s
     setTimeout(() => {
