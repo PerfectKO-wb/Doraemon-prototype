@@ -829,6 +829,52 @@
         @media (max-width: 1200px) {
             .list-panel { width: 300px; }
         }
+        /* Company picker modal */
+        .cc-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.45);
+            z-index: 3000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity .18s;
+        }
+        .cc-overlay.open { opacity: 1; pointer-events: auto; }
+        .cc-modal {
+            background: #fff; border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.18);
+            width: 420px; padding: 28px 28px 24px;
+            transform: translateY(8px); transition: transform .18s;
+        }
+        .cc-overlay.open .cc-modal { transform: translateY(0); }
+        .cc-modal h3 {
+            font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 4px;
+        }
+        .cc-modal p {
+            font-size: 12.5px; color: #6b7280; margin: 0 0 18px; line-height: 1.5;
+        }
+        .cc-label {
+            font-size: 12px; font-weight: 600; color: #374151;
+            margin-bottom: 6px; display: block;
+        }
+        .cc-select {
+            width: 100%; padding: 9px 12px; border-radius: 8px;
+            border: 1.5px solid #d1d5db; font-size: 13px; color: #111827;
+            background: #f9fafb; cursor: pointer; outline: none;
+            transition: border-color .15s;
+        }
+        .cc-select:focus { border-color: #111827; background: #fff; }
+        .cc-footer {
+            display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;
+        }
+        .cc-btn-cancel {
+            padding: 8px 18px; border-radius: 8px; border: 1px solid #d1d5db;
+            background: #fff; font-size: 13px; font-weight: 500; color: #374151;
+            cursor: pointer; transition: background .15s;
+        }
+        .cc-btn-cancel:hover { background: #f3f4f6; }
+        .cc-btn-confirm {
+            padding: 8px 20px; border-radius: 8px; border: none;
+            background: #111827; font-size: 13px; font-weight: 600; color: #fff;
+            cursor: pointer; transition: background .15s;
+        }
+        .cc-btn-confirm:hover { background: #000; }
     </style>
 </head>
 <body>
@@ -839,9 +885,9 @@
             <div class="logo">
                 <div class="logo-mark">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                </div>
+        </div>
                 <span class="logo-text">Doraemon</span>
-            </div>
+        </div>
             <button class="sidebar-collapse" title="Collapse">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
             </button>
@@ -859,7 +905,7 @@
 
             <div class="nav-section">
                 <span>Expert agent</span>
-            </div>
+        </div>
             <div class="nav-item">
                 <span class="agent-dot tech">T</span>
                 <span>Tech</span>
@@ -879,19 +925,19 @@
                     <button title="New"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                     <button title="More"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
                 </div>
-            </div>
+                    </div>
             <div class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <span>AI Research</span>
-            </div>
+                    </div>
             <div class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
                 <span>Product Launch</span>
-            </div>
+                    </div>
 
             <div class="nav-section">
                 <span>Today</span>
-            </div>
+                </div>
             <div class="nav-item">
                 <span style="color:var(--text-secondary);font-size:13px;">Tech</span>
                 <button class="icon-btn" style="width:20px;height:20px;margin-left:auto;" title="More">
@@ -1010,7 +1056,7 @@
                     </div>
                     <div class="month-grid" id="monthGrid"></div>
                 </div>
-            </div>
+        </div>
 
             <div class="toolbar-right">
                 <span class="toolbar-hint">JPG / PNG / PDF</span>
@@ -1020,7 +1066,7 @@
                 </button>
                 <input type="file" id="fileInput" class="hidden-input" multiple accept=".jpg,.jpeg,.png,.pdf">
             </div>
-        </div>
+                </div>
 
         <div class="table-wrap">
             <div class="table-scroll" id="tableScroll">
@@ -1052,7 +1098,7 @@
             </div>
         </div>
     </main>
-</div>
+                </div>
 
 <!-- ========== Invoice viewer drawer (right side) ========== -->
 <div class="viewer-mask" id="viewerMask"></div>
@@ -1067,8 +1113,8 @@
                 <button id="zoomOut" title="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                 <span class="level" id="zoomLevel">100%</span>
                 <button id="zoomIn" title="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                </div>
             </div>
-        </div>
         <div class="viewer-body">
             <div class="viewer-parsing" id="viewerParsing" style="display:none;">
                 <div class="parsing-spinner"></div>
@@ -1085,7 +1131,7 @@
                     <div class="biller-col">
                         <div style="font-size:15px;"><strong>CTW株式会社</strong>&nbsp; 御中</div>
                         <div style="margin-top:18px; color:#333;">毎度ありがとうございます。下記の通りご請求申し上げます。</div>
-                    </div>
+            </div>
                     <div class="meta-col">
                         <div><span class="k">登録番号:</span>T4120001398652</div>
                         <div style="margin-top:4px;">グリコチャネルクリエイト株式会社</div>
@@ -1097,9 +1143,9 @@
                         <div>担当：岡辺 美穂</div>
                         <div style="display:flex; justify-content:flex-end; margin-top:8px;">
                             <div class="stamp">印印<br>日<br>印</div>
-                        </div>
+        </div>
                     </div>
-                </div>
+</div>
 
                 <div class="row" style="margin-top:8px;">
                     <div style="display:flex; align-items:center; gap:12px;">
@@ -1149,6 +1195,27 @@
 </aside>
 
 <div class="toast" id="toast"></div>
+
+<!-- Company Code Picker Modal -->
+<div class="cc-overlay" id="ccOverlay">
+    <div class="cc-modal">
+        <h3>Select Cost Company</h3>
+        <p>Please select the company that bears the cost for this invoice before uploading.</p>
+        <label class="cc-label" for="ccSelect">Company Code</label>
+        <select class="cc-select" id="ccSelect">
+            <option value="JP_CTW_INC">JP_CTW_INC</option>
+            <option value="US_CTW_INC">US_CTW_INC</option>
+            <option value="SG_CTW_INC">SG_CTW_INC</option>
+            <option value="KY_CTW_INC">KY_CTW_INC</option>
+            <option value="SH_WYYCX_INC">SH_WYYCX_INC</option>
+            <option value="HK_CTW_INC">HK_CTW_INC</option>
+        </select>
+        <div class="cc-footer">
+            <button class="cc-btn-cancel" id="ccCancelBtn">Cancel</button>
+            <button class="cc-btn-confirm" id="ccConfirmBtn">Continue &amp; Upload</button>
+        </div>
+    </div>
+</div>
 
 <script>
     // ========== Data ==========
@@ -1228,7 +1295,7 @@
                     <div class="list-card-meta">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         ${it.meta}
-                    </div>
+                </div>
                 </div>
                 ${it.dot ? '<span class="list-card-dot"></span>' : ''}
             </div>
@@ -1239,7 +1306,7 @@
                 <div class="list-card-content">
                     <div class="list-card-title" style="font-size:13px;">${je.id}</div>
                     <div class="list-card-desc">${je.sourceId} · ${je.currency}</div>
-                    <div><span class="je-conf-badge ${je.confLevel === 'low' ? 'low' : ''}">${je.confidence}% 置信度</span></div>
+                    <div></div>
                 </div>
                 <span class="list-card-dot" style="background:#d97706;top:14px;"></span>
             </div>`).join('')}`;
@@ -1310,7 +1377,7 @@
         showToast('Invoice removed');
     }
 
-    function addInvoiceFiles(list) {
+    function addInvoiceFiles(list, companyCode) {
         const stamp = nowStamp();
         const now = new Date();
         const blocked = [];
@@ -1322,7 +1389,7 @@
             if (deniedIdx !== -1) invoiceFiles.splice(deniedIdx, 1);
             const lower = f.name.toLowerCase();
             const type = (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg')) ? 'img' : 'pdf';
-            invoiceFiles.unshift({ id: nextId++, name: f.name, type, state: 'pending', time: stamp, month: now.getMonth() + 1, year: now.getFullYear() });
+            invoiceFiles.unshift({ id: nextId++, name: f.name, type, state: 'pending', time: stamp, month: now.getMonth() + 1, year: now.getFullYear(), companyCode: companyCode || 'JP_CTW_INC' });
             added++;
         });
         renderTable();
@@ -1447,12 +1514,38 @@
         toastTimer = setTimeout(() => el.classList.remove('visible'), 1800);
     }
 
-    // ========== Wire events ==========
-    document.getElementById('uploadBtn').addEventListener('click', () => {
+    // ========== Company Code Picker ==========
+    // Default: JP (simulating the logged-in user's company)
+    const USER_DEFAULT_COMPANY = 'JP_CTW_INC';
+
+    function openCcModal() {
+        document.getElementById('ccSelect').value = USER_DEFAULT_COMPANY;
+        document.getElementById('ccOverlay').classList.add('open');
+    }
+    function closeCcModal() {
+        document.getElementById('ccOverlay').classList.remove('open');
+    }
+
+    document.getElementById('ccCancelBtn').addEventListener('click', closeCcModal);
+    document.getElementById('ccOverlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('ccOverlay')) closeCcModal();
+    });
+    document.getElementById('ccConfirmBtn').addEventListener('click', () => {
+        const companyCode = document.getElementById('ccSelect').value;
+        closeCcModal();
+        document.getElementById('fileInput').dataset.pendingCompany = companyCode;
         document.getElementById('fileInput').click();
     });
+
+    // ========== Wire events ==========
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+        openCcModal();
+    });
     document.getElementById('fileInput').addEventListener('change', (e) => {
-        if (e.target.files && e.target.files.length) addInvoiceFiles(e.target.files);
+        if (e.target.files && e.target.files.length) {
+            const companyCode = e.target.dataset.pendingCompany || USER_DEFAULT_COMPANY;
+            addInvoiceFiles(e.target.files, companyCode);
+        }
         e.target.value = '';
     });
 
@@ -1487,5 +1580,6 @@
     renderTable();
     applyDateLabel();
 </script>
+
 </body>
 </html>
