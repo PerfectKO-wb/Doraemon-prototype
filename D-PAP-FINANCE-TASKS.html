@@ -13,15 +13,172 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0; padding: 0;
             min-height: 100vh;
-            background: #f5f5f7;
+            background: #e4e6ef;
+            background-image:
+                radial-gradient(ellipse 60% 40% at 20% 10%, rgba(200,210,240,.4) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 50% at 80% 80%, rgba(190,205,235,.3) 0%, transparent 65%);
             -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+
+        /* ── Desktop Client Window ── */
+        .desktop-stage {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+        }
+
+        .client-window {
+            width: min(960px, 96vw);
+            height: min(760px, 92vh);
+            background: #f0f1f5;
+            border-radius: 16px;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.6),
+                0 24px 80px rgba(31,38,135,0.18),
+                0 8px 24px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .window-titlebar {
+            flex-shrink: 0;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px 0 14px;
+            background: rgba(255,255,255,0.35);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .titlebar-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .window-controls {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .window-controls span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: block;
+        }
+        .wc-close  { background: #ff5f57; border: 0.5px solid rgba(0,0,0,0.08); }
+        .wc-min    { background: #febc2e; border: 0.5px solid rgba(0,0,0,0.08); }
+        .wc-max    { background: #28c840; border: 0.5px solid rgba(0,0,0,0.08); }
+
+        .titlebar-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .titlebar-icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: rgba(0,0,0,0.45);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+        .titlebar-icon-btn:hover {
+            background: rgba(0,0,0,0.05);
+            color: rgba(0,0,0,0.7);
+        }
+        .titlebar-icon-btn.active {
+            background: rgba(0,0,0,0.07);
+            color: rgba(0,0,0,0.78);
+        }
+        .f-tab-icon {
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1;
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.8px solid currentColor;
+            border-radius: 3px;
+            font-family: inherit;
+        }
+
+        .client-tabs {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .tab-panel {
+            display: none;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .tab-panel.active {
+            display: flex;
+            flex-direction: column;
+        }
+        .fsystem-viewport {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            background: #f0f1f3;
+        }
+        .fsystem-viewport::-webkit-scrollbar { width: 6px; height: 6px; }
+        .fsystem-viewport::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.12);
+            border-radius: 3px;
+        }
+        .fsystem-screenshot {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .fsystem-placeholder {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: rgba(0,0,0,0.35);
+            background: #f5f5f7;
+        }
+        .fsystem-placeholder-icon { font-size: 32px; opacity: 0.5; }
+        .fsystem-placeholder-title { font-size: 15px; font-weight: 600; color: rgba(0,0,0,0.5); }
+        .fsystem-placeholder-desc { font-size: 12px; }
+
+        .titlebar-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .ds3-ui-layer {
-            min-height: 100vh;
+            flex: 1;
+            min-height: 0;
             display: flex;
             flex-direction: column;
             position: relative;
+            overflow: hidden;
             background:
                 radial-gradient(ellipse 80% 50% at 20% 80%, rgba(120,119,198,0.06) 0%, transparent 50%),
                 radial-gradient(ellipse 60% 40% at 80% 20%, rgba(59,130,246,0.05) 0%, transparent 50%),
@@ -95,7 +252,6 @@
             height: 100%;
             overflow-y: auto;
             padding: 50px 40px 40px;
-            min-height: 100vh;
         }
         .scroll-inner::-webkit-scrollbar { width: 6px; }
         .scroll-inner::-webkit-scrollbar-thumb {
@@ -135,6 +291,10 @@
             line-height: 1.9;
             white-space: pre-wrap;
             transition: color 0.6s ease;
+        }
+        .greeting-line.reminder {
+            color: rgba(220,38,38,0.82);
+            font-weight: 600;
         }
         .typewriter-cursor {
             display: inline-block;
@@ -321,6 +481,10 @@
         .task-card.urgent .card-icon {
             background: rgba(239,68,68,0.06);
         }
+        .task-card.urgent .card-desc {
+            color: rgba(220,38,38,0.75);
+            font-weight: 600;
+        }
 
         .card-hint {
             display: none;
@@ -349,6 +513,12 @@
         .task-card.urgent .card-hint .dot {
             background: rgba(239,68,68,0.6);
         }
+
+        /* ── Payment task card ── */
+        .task-card.payment-task {
+            position: relative;
+        }
+
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(0.7); }
@@ -441,7 +611,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            z-index: 300;
+            z-index: 500;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -480,7 +650,7 @@
             box-shadow: 0 12px 48px rgba(31,38,135,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
             border-radius: 16px;
             padding: 16px 20px;
-            min-width: 240px;
+            min-width: 280px;
         }
         .test-panel.show { display: block; }
         .test-panel-title {
@@ -523,13 +693,50 @@
         }
 
         @media (max-width: 640px) {
+            .desktop-stage { padding: 12px; }
+            .client-window { width: 100%; height: 96vh; border-radius: 12px; }
             .scroll-inner { padding: 50px 20px 40px; }
             .date-main { font-size: 26px; }
         }
     </style>
 </head>
 <body>
-<div class="ds3-ui-layer">
+<div class="desktop-stage">
+<div class="client-window">
+
+    <!-- Window Title Bar -->
+    <div class="window-titlebar">
+        <div class="titlebar-left">
+            <div class="window-controls">
+                <span class="wc-close"></span>
+                <span class="wc-min"></span>
+                <span class="wc-max"></span>
+            </div>
+            <div class="titlebar-nav">
+                <button class="titlebar-icon-btn active" data-tab="home" title="PAP 任务" onclick="switchTab('home')">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"/></svg>
+                </button>
+                <button class="titlebar-icon-btn" data-tab="apps" title="应用" onclick="switchTab('apps')">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                </button>
+                <button class="titlebar-icon-btn" data-tab="fsystem" title="F System · 财务系统" onclick="switchTab('fsystem')">
+                    <span class="f-tab-icon">F</span>
+                </button>
+            </div>
+        </div>
+        <div class="titlebar-right">
+            <button class="titlebar-icon-btn" title="Launch">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M4.5 16.5c10-4 10-4 15-9"/><path d="M12 3l4 4-4 4"/><path d="M5 19h6"/></svg>
+            </button>
+            <button class="titlebar-icon-btn" title="Settings">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="client-tabs">
+    <div class="tab-panel active" id="tab-home">
+    <div class="ds3-ui-layer">
     <!-- User Badge -->
     <div class="user-badge">
         <button>
@@ -571,19 +778,40 @@
         </div>
     </div>
 
-    <!-- Test Case FAB -->
-    <div class="fab-btn">
-        <div class="test-panel" id="testPanel">
-            <div class="test-panel-title">🧪 Simulate Date Scenario</div>
-            <button class="test-btn active" id="btnToday" onclick="simulateDate('today')">📅 Today</button>
-            <button class="test-btn" onclick="simulateDate('mid')">⚠️ Mid-month (15th Morning)</button>
-            <button class="test-btn" onclick="simulateDate('end')">🔴 Month-end (Last Day Morning)</button>
-            <button class="test-btn" onclick="simulateDate('done')">🎉 Month-end Settlement</button>
-            <button class="test-btn" onclick="simulateDate('empty')">✨ No Review Tasks (All Cleared)</button>
+</div><!-- /ds3-ui-layer -->
+    </div><!-- /tab-home -->
+
+    <div class="tab-panel" id="tab-fsystem">
+        <div class="fsystem-viewport">
+            <img class="fsystem-screenshot" src="figma-fsystem-invoice.png" alt="F System · Invoice 管理">
         </div>
-        <button onclick="toggleTestPanel()">🧪 Test Case</button>
     </div>
+
+    <div class="tab-panel" id="tab-apps">
+        <div class="fsystem-placeholder">
+            <div class="fsystem-placeholder-icon">▦</div>
+            <div class="fsystem-placeholder-title">Apps</div>
+            <div class="fsystem-placeholder-desc">应用列表（原型占位）</div>
+        </div>
+    </div>
+
+    </div><!-- /client-tabs -->
+
+</div><!-- /client-window -->
+
+<!-- Test Case FAB (desktop background) -->
+<div class="fab-btn">
+    <div class="test-panel" id="testPanel">
+        <div class="test-panel-title">🧪 按类别付款提醒</div>
+        <button class="test-btn active" data-scenario="no-remind" onclick="simulateDate('no-remind')">5 月初 · 无提醒</button>
+        <button class="test-btn" data-scenario="remind-tech" onclick="simulateDate('remind-tech')">🔴 技术服务费 · 次月初</button>
+        <button class="test-btn" data-scenario="remind-cp_rs" onclick="simulateDate('remind-cp_rs')">🔴 CP / RS · 次月中</button>
+        <button class="test-btn" data-scenario="remind-ip_ad" onclick="simulateDate('remind-ip_ad')">🔴 IP / 广告费 · 次月末</button>
+    </div>
+    <button onclick="toggleTestPanel()">🧪 测试用例</button>
 </div>
+
+</div><!-- /desktop-stage -->
 
 <script>
     const today = new Date();
@@ -592,11 +820,10 @@
     const year = today.getFullYear();
     const weekDays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const monthNames = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+    const monthNamesEn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const currentUser = '张明';
 
     // ── Mock Data ──
-    const currencySymbol = { JPY: '¥', SGD: 'S$', USD: '$' };
-    function fmtAmt(inv) { return `${inv.currency} ${currencySymbol[inv.currency] || ''}${inv.amount}`; }
 
     // 待审核：所有财务可见
     const pendingInvoices = [
@@ -605,20 +832,154 @@
         { id: 'INV-2026-04-003', account: 'AWS Japan 合同会社', amount: '456,200', currency: 'JPY' },
     ];
 
-    // 已审核：仅显示当前用户审核通过的
-    const approvedInvoices = [
-        { id: 'INV-2026-04-010', account: 'Google Cloud Japan', amount: '89,100', currency: 'JPY', reviewer: '张明' },
-        { id: 'INV-2026-04-011', account: '株式会社マイナビ', amount: '55,000', currency: 'JPY', reviewer: '张明' },
+    function monthKeyFromDate(y, m) {
+        return `${y}-${monthNames[m]}`;
+    }
+
+    function monthLabelFromDate(m) {
+        return monthNamesEn[m];
+    }
+
+    /** 次月付款提醒节点（同一月度 Payment 任务在不同时段展示不同提醒） */
+    const PAYMENT_REMINDERS = {
+        tech: {
+            normalDesc: 'Invoices pending payment',
+            reminderDesc: 'Technical service fees due at the beginning of this month — please complete soon',
+            greetingText: 'Reminder: Technical service fees are due at the beginning of this month — please complete payment.',
+        },
+        cp_rs: {
+            normalDesc: 'Invoices pending payment',
+            reminderDesc: 'CP & RS payments due mid-month — please complete soon',
+            greetingText: 'Reminder: CP & RS payments are due mid-month — please complete payment soon.',
+        },
+        ip_ad: {
+            normalDesc: 'Invoices pending payment',
+            reminderDesc: 'IP & advertising fees due at month-end — please complete soon',
+            greetingText: 'Reminder: IP & advertising fees are due at month-end — please complete payment soon.',
+        },
+    };
+
+    const demoTaskMonth = month === 0 ? 11 : month - 1;
+    const demoTaskYear = month === 0 ? year - 1 : year;
+    const demoTaskKey = monthKeyFromDate(demoTaskYear, demoTaskMonth);
+
+    /** 打款任务：每月仅一条（F Expert approve 后创建） */
+    let paymentTasks = [
+        {
+            id: `pay-${demoTaskKey}`,
+            monthKey: demoTaskKey,
+            monthLabel: monthLabelFromDate(demoTaskMonth),
+            reviewer: '张明',
+            invoiceCount: 5,
+            consumed: false,
+            consumedBy: null,
+        },
     ];
 
-    // 打款：当前用户审核过的 invoice，每条独立卡片，月底查 JE 判断是否完成
-    const paymentInvoices = [
-        { id: 'INV-2026-03-045', account: 'Slack Technologies', amount: '2,150.00', currency: 'USD', jeLinked: false },
-        { id: 'INV-2026-03-046', account: 'Salesforce Japan', amount: '185,000', currency: 'JPY', jeLinked: false },
-        { id: 'INV-2026-03-048', account: 'Microsoft Singapore', amount: '3,800.00', currency: 'SGD', jeLinked: false },
-        { id: 'INV-2026-03-049', account: 'Oracle Corporation', amount: '45,000', currency: 'JPY', jeLinked: false },
-        { id: 'INV-2026-03-047', account: 'Adobe Systems', amount: '67,500', currency: 'JPY', jeLinked: true },
-    ];
+    function getDueMonth(task) {
+        const [ty, tm] = task.monthKey.split('-').map(Number);
+        const taskMonthIdx = tm - 1;
+        let dueMonth = taskMonthIdx + 1;
+        let dueYear = ty;
+        if (dueMonth > 11) {
+            dueMonth = 0;
+            dueYear += 1;
+        }
+        return { dueYear, dueMonth };
+    }
+
+    function getPaymentReminderPhase(simYear, simMonth, simDay, task, scenario) {
+        if (scenario === 'remind-tech') return 'tech';
+        if (scenario === 'remind-cp_rs') return 'cp_rs';
+        if (scenario === 'remind-ip_ad') return 'ip_ad';
+
+        const { dueYear, dueMonth } = getDueMonth(task);
+        if (simYear !== dueYear || simMonth !== dueMonth) return null;
+
+        const lastDay = getLastDayOfMonth(dueYear, dueMonth);
+        if (simDay >= 1 && simDay < 15) return 'tech';
+        if (simDay >= 15 && simDay < lastDay) return 'cp_rs';
+        if (simDay >= lastDay) return 'ip_ad';
+        return null;
+    }
+
+    function getPaymentReminderState(task, simYear, simMonth, simDay, scenario) {
+        const phase = getPaymentReminderPhase(simYear, simMonth, simDay, task, scenario);
+        if (!phase) {
+            return { isReminder: false, desc: PAYMENT_REMINDERS.tech.normalDesc, greetingText: null };
+        }
+        const info = PAYMENT_REMINDERS[phase];
+        return {
+            isReminder: true,
+            desc: info.reminderDesc,
+            greetingText: info.greetingText,
+        };
+    }
+
+    function getLastDayOfMonth(y, m) {
+        return new Date(y, m + 1, 0).getDate();
+    }
+
+    function ensurePaymentTask(taskYear, taskMonthIdx) {
+        const key = monthKeyFromDate(taskYear, taskMonthIdx);
+        paymentTasks = [{
+            id: `pay-${key}`,
+            monthKey: key,
+            monthLabel: monthLabelFromDate(taskMonthIdx),
+            reviewer: currentUser,
+            invoiceCount: 5,
+            consumed: false,
+            consumedBy: null,
+        }];
+    }
+
+    /** 次月 15 号及之后自动消费 */
+    function shouldAutoConsume(task, simYear, simMonth, simDay) {
+        const [ty, tm] = task.monthKey.split('-').map(Number);
+        let autoYear = ty;
+        let autoMonth = tm; // 1-based → next month 1-based
+        if (autoMonth === 12) {
+            autoMonth = 1;
+            autoYear += 1;
+        } else {
+            autoMonth += 1;
+        }
+        const autoMonthIdx = autoMonth - 1;
+        if (simYear > autoYear) return true;
+        if (simYear < autoYear) return false;
+        if (simMonth > autoMonthIdx) return true;
+        if (simMonth === autoMonthIdx && simDay >= 15) return true;
+        return false;
+    }
+
+    function resolvePaymentTasks(simYear, simMonth, simDay, skipAutoConsume) {
+        if (!skipAutoConsume) {
+            paymentTasks.forEach(task => {
+                if (task.reviewer !== currentUser || task.consumed) return;
+                if (shouldAutoConsume(task, simYear, simMonth, simDay)) {
+                    task.consumed = true;
+                    task.consumedBy = 'auto';
+                }
+            });
+        }
+        return paymentTasks.filter(t => t.reviewer === currentUser && !t.consumed);
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + tabId)?.classList.add('active');
+        document.querySelectorAll('.titlebar-nav .titlebar-icon-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabId);
+        });
+    }
+
+    function goToFSystem(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        switchTab('fsystem');
+    }
 
     // ── Render Date ──
     document.getElementById('dateMain').textContent =
@@ -647,75 +1008,54 @@
     }
 
     // ── Greeting ──
-    function getGreetingText(isSettlement, pendingReviewCount, pendingPaymentCount, scenario) {
-        if (isSettlement) return 'Hi, month-end settlement is done 🎉';
-        if (scenario === 'empty') return '当前没有需要处理的任务，请安心处理其他工作';
+    function getGreetingText(pendingReviewCount, pendingPaymentCount, activePaymentTasks, simYear, simMonth, simDay, scenario) {
+        const task = activePaymentTasks?.[0];
+        if (task) {
+            const reminder = getPaymentReminderState(task, simYear, simMonth, simDay, scenario);
+            if (reminder.isReminder) return reminder.greetingText;
+        }
         return `Hi, here are your tasks today: ${pendingReviewCount} pending review, ${pendingPaymentCount} pending payment.`;
     }
 
     typewrite(document.getElementById('greeting1'), 'Hi 👋', 200)
         .then(() => {
-            let pendingReviewCount = pendingInvoices.length;
-            let pendingPaymentCount = approvedInvoices.filter(inv => inv.reviewer === currentUser).length + paymentInvoices.filter(p => !p.jeLinked).length;
-            typewrite(document.getElementById('greeting2'), getGreetingText(false, pendingReviewCount, pendingPaymentCount), 100);
+            const pendingReviewCount = pendingInvoices.length;
+            const activeTasks = resolvePaymentTasks(year, 4, 5, false);
+            const pendingPaymentCount = activeTasks.length;
+            const greeting2 = getGreetingText(pendingReviewCount, pendingPaymentCount, activeTasks, year, 4, 5, 'normal');
+            const el = document.getElementById('greeting2');
+            el.classList.remove('reminder');
+            typewrite(el, greeting2, 100);
         });
 
+    let currentSimYear = year;
+    let currentSimMonth = month;
     let currentSimDay = dayOfMonth;
     let currentScenario = 'normal';
-    let isExpanded = false;
-
-    function toggleExpand() {
-        isExpanded = !isExpanded;
-        renderAll(currentSimDay, currentScenario);
-    }
 
     // ── Render ──
-    // scenario: 'normal' | 'settlement' (month-end 18:00 settlement – all reviews done, partial payments)
-    function renderAll(simDay, scenario) {
+    function renderAll(simYear, simMonth, simDay, scenario) {
+        currentSimYear = simYear;
+        currentSimMonth = simMonth;
         currentSimDay = simDay;
         currentScenario = scenario;
         const taskList = document.getElementById('taskList');
-        // Mid-month: 15th to day before last day
-        // Month-end: last day of month
-        const isMidMonth = simDay >= 15 && simDay < 28; // using 28 as mock last day in test panel
-        const isMonthEnd = simDay >= 28;
-        const isSettlement = scenario === 'settlement';
 
-        // Base counts
-        let pendingReviewCount = pendingInvoices.length;
-        
-        let pendingPaymentsList = [
-            ...approvedInvoices.filter(inv => inv.reviewer === currentUser),
-            ...paymentInvoices.filter(p => !p.jeLinked)
-        ];
-        
-        let paymentCompletedCount = paymentInvoices.filter(p => p.jeLinked).length;
+        const skipAutoConsume = scenario.startsWith('remind-');
 
-        // Empty scenario: no review tasks at all
-        if (scenario === 'empty') {
-            pendingReviewCount = 0;
-        }
+        const pendingReviewCount = pendingInvoices.length;
 
-        // Settlement mock modifications
-        if (isSettlement) {
-            let newApproved = pendingInvoices.map(inv => ({...inv, reviewer: currentUser}));
-            pendingPaymentsList = [...pendingPaymentsList, ...newApproved];
-            pendingReviewCount = 0;
-
-            // 1 payment completes
-            if (pendingPaymentsList.length > 0) {
-                pendingPaymentsList.shift(); // remove the first one to simulate it being paid
-                paymentCompletedCount += 1;
-            }
-        }
-        
-        let pendingPaymentCount = pendingPaymentsList.length;
+        const activePaymentTasks = resolvePaymentTasks(simYear, simMonth, simDay, skipAutoConsume);
+        const pendingPaymentCount = activePaymentTasks.length;
+        const consumedPaymentCount = paymentTasks.filter(
+            t => t.reviewer === currentUser && t.consumed
+        ).length;
 
         let html = '<div class="task-list">';
         let cardIdx = 0;
 
         // ── 1. Pending Review ──
-        const jeReviewCount = (scenario === 'empty') ? 0 : 2;
+        const jeReviewCount = 2;
         const hasReviewTasks = pendingReviewCount > 0 || jeReviewCount > 0;
 
         if (!hasReviewTasks) {
@@ -757,56 +1097,45 @@
             html += `</div>`;
         }
 
-        // ── 2. Pending Payment ──
-        if (scenario !== 'empty' && pendingPaymentsList.length > 0) {
+        // ── 2. Pending Payment（每月一条）──
+        if (activePaymentTasks.length > 0) {
             html += `<div class="section-label">💰 Pending Payment</div>`;
             html += `<div class="task-list">`;
-            
-            const displayList = isExpanded ? pendingPaymentsList : pendingPaymentsList.slice(0, 5);
 
-            displayList.forEach(inv => {
-                let cls = ' compact';
-                let hint = '';
-                if (isMonthEnd && !isSettlement) {
-                    cls += ' urgent';
-                    hint = `<div class="card-hint"><span class="dot"></span>Month-end approaching</div>`;
-                } else if (isMidMonth && !isSettlement) {
-                    cls += ' warning';
-                    hint = `<div class="card-hint"><span class="dot"></span>Remember to make payment</div>`;
-                }
-                
-                html += `
-                <a class="task-card${cls}" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
-                   style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
-                    <span class="card-icon">💰</span>
-                    <div class="card-body">
-                        <div class="card-title">${inv.account} Payment</div>
-                        <div class="card-desc">Payment Amount ${fmtAmt(inv)}</div>
-                        ${hint}
-                    </div>
-                    <span class="card-chevron">›</span>
-                </a>`;
-                cardIdx++;
-            });
+            const task = activePaymentTasks[0];
+            const reminder = getPaymentReminderState(task, simYear, simMonth, simDay, scenario);
 
-            if (pendingPaymentsList.length > 5) {
-                const btnText = isExpanded ? 'Show Less' : `View More (${pendingPaymentsList.length - 5} more)`;
-                html += `<button class="view-more-btn" onclick="toggleExpand()">${btnText}</button>`;
+            let cls = ' payment-task compact';
+            if (reminder.isReminder) {
+                cls += ' urgent';
             }
+
+            html += `
+            <a class="task-card${cls}" href="#" onclick="goToFSystem(event)"
+               style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s, box-shadow 0.2s, border-color 0.3s;">
+                <span class="card-icon">💰</span>
+                <div class="card-body">
+                    <div class="card-title">${task.monthLabel} Payment</div>
+                    <div class="card-desc">${reminder.desc}</div>
+                </div>
+                <span class="card-chevron">›</span>
+            </a>`;
+            cardIdx++;
+
             html += `</div>`;
         }
 
         // ── 3. Payment Completed ──
-        if (scenario !== 'empty' && (paymentCompletedCount > 0 || isSettlement)) {
+        if (consumedPaymentCount > 0) {
             html += `<div class="section-label">✅ Payment Completed</div>`;
             html += `<div class="task-list">`;
             html += `
-            <a class="task-card all-done" href="javascript:alert('跳转至 F System 的 Invoice 管理列表页');"
+            <a class="task-card all-done" href="#" onclick="goToFSystem(event)"
                style="transition: opacity 0.5s ease ${cardIdx * 80}ms, transform 0.5s ease ${cardIdx * 80}ms, background 0.2s;">
                 <span class="card-icon">✅</span>
                 <div class="card-body">
                     <div class="card-title">Payment Completed</div>
-                    <div class="card-desc">${paymentCompletedCount} invoice(s)</div>
+                    <div class="card-desc">${consumedPaymentCount} monthly task(s) completed</div>
                 </div>
             </a>`;
             html += `</div>`;
@@ -824,21 +1153,67 @@
             if (emptyCard) setTimeout(() => emptyCard.classList.add('visible'), 80);
         }, 100);
 
-        // Success banner
-        const successBanner = document.getElementById('successBanner');
-        successBanner.classList.remove('show');
-        if (isSettlement) {
-            document.getElementById('successTitle').textContent = 'Month-end Settlement Completed';
-            document.getElementById('successDesc').innerHTML =
-                `All invoices reviewed. ${paymentCompletedCount} payment(s) completed, <span style="color:#dc2626;font-weight:600">${pendingPaymentCount} still pending</span>.`;
-            successBanner.classList.add('show');
-        }
+        document.getElementById('successBanner').classList.remove('show');
 
-        document.getElementById('greeting2').textContent = getGreetingText(isSettlement, pendingReviewCount, pendingPaymentCount, scenario);
+        const greetingEl = document.getElementById('greeting2');
+        const task = activePaymentTasks[0];
+        greetingEl.textContent = getGreetingText(pendingReviewCount, pendingPaymentCount, activePaymentTasks, simYear, simMonth, simDay, scenario);
+        greetingEl.classList.toggle('reminder', !!(task && getPaymentReminderState(task, simYear, simMonth, simDay, scenario).isReminder));
     }
 
-    renderAll(dayOfMonth, 'normal');
-    document.getElementById('btnToday').textContent = `📅 Today (${monthNames[month]}/${dayOfMonth})`;
+    function setActiveTestBtn(scenario) {
+        document.querySelectorAll('.test-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.scenario === scenario);
+        });
+    }
+
+    function applyScenario(scenario) {
+        setActiveTestBtn(scenario);
+
+        let simYear = year, simMonth = month, simDay = dayOfMonth;
+        let scn = scenario;
+        let dateLabel;
+
+        switch (scenario) {
+            case 'no-remind': {
+                scn = 'normal';
+                simYear = year;
+                simMonth = 4;
+                simDay = 5;
+                ensurePaymentTask(simYear, simMonth);
+                dateLabel = `${monthNames[simMonth]}/05/${simYear}`;
+                document.getElementById('dateSub').textContent = '模拟：5 月初 · 无提醒';
+                break;
+            }
+            case 'remind-tech':
+            case 'remind-cp_rs':
+            case 'remind-ip_ad': {
+                const { dueYear, dueMonth } = getDueMonth(paymentTasks[0]);
+                simYear = dueYear;
+                simMonth = dueMonth;
+                if (scenario === 'remind-tech') {
+                    simDay = 1;
+                    document.getElementById('dateSub').textContent = '模拟：技术服务费 · 次月初';
+                } else if (scenario === 'remind-cp_rs') {
+                    simDay = 15;
+                    document.getElementById('dateSub').textContent = '模拟：CP / RS · 次月 15 日';
+                } else {
+                    simDay = getLastDayOfMonth(dueYear, dueMonth);
+                    document.getElementById('dateSub').textContent = '模拟：IP / 广告费 · 次月末';
+                }
+                paymentTasks.forEach(t => { t.consumed = false; t.consumedBy = null; });
+                dateLabel = `${monthNames[simMonth]}/${String(simDay).padStart(2,'0')}/${simYear}`;
+                break;
+            }
+            default:
+                dateLabel = `${monthNames[simMonth]}/${String(simDay).padStart(2,'0')}/${simYear}`;
+                document.getElementById('dateSub').textContent = weekDays[today.getDay()];
+        }
+        document.getElementById('dateMain').textContent = dateLabel;
+        renderAll(simYear, simMonth, simDay, scn);
+    }
+
+    applyScenario('no-remind');
 
     // ── Test Case Panel ──
     function toggleTestPanel() {
@@ -846,38 +1221,7 @@
     }
 
     function simulateDate(scenario) {
-        document.querySelectorAll('.test-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-
-        let simDay, scn = 'normal', dateLabel;
-        switch(scenario) {
-            case 'mid':
-                simDay = 15;
-                dateLabel = `${monthNames[month]}/15/${year}`;
-                document.getElementById('dateSub').textContent = 'Simulate: 15th Morning';
-                break;
-            case 'end':
-                simDay = 28;
-                dateLabel = `${monthNames[month]}/28/${year}`;
-                document.getElementById('dateSub').textContent = 'Simulate: Last Day Morning';
-                break;
-            case 'done':
-                simDay = 31; scn = 'settlement';
-                dateLabel = `${monthNames[month]}/28/${year}`;
-                document.getElementById('dateSub').textContent = 'Simulate: Settlement (18:00)';
-                break;
-            case 'empty':
-                simDay = dayOfMonth; scn = 'empty';
-                dateLabel = `${monthNames[month]}/${String(dayOfMonth).padStart(2,'0')}/${year}`;
-                document.getElementById('dateSub').textContent = weekDays[today.getDay()];
-                break;
-            default:
-                simDay = dayOfMonth;
-                dateLabel = `${monthNames[month]}/${String(dayOfMonth).padStart(2,'0')}/${year}`;
-                document.getElementById('dateSub').textContent = weekDays[today.getDay()];
-        }
-        document.getElementById('dateMain').textContent = dateLabel;
-        renderAll(simDay, scn);
+        applyScenario(scenario);
         document.getElementById('testPanel').classList.remove('show');
     }
 </script>
