@@ -433,7 +433,7 @@
             display: inline-flex; align-items: center; gap: 6px;
             font-size: 13px; font-weight: 500;
         }
-        .btn-primary:hover { background: #000; }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
         .btn-primary svg { width: 14px; height: 14px; }
 
         /* Tabs */
@@ -553,7 +553,7 @@
             white-space: nowrap;
         }
         .tag.denied { color: var(--error); background: var(--error-bg); border: 1px solid var(--error-border); }
-        .tag.checked { color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
+        .tag.approved { color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
         .tag.pending { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
         .tag.parsing { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
         .tag.confirmed { color: #0e7490; background: #ecfeff; border: 1px solid #a5f3fc; }
@@ -826,6 +826,219 @@
         /* Hidden file input */
         .hidden-input { display: none; }
 
+        /* Tab panels */
+        .tab-panel { display: none; flex: 1; flex-direction: column; min-height: 0; }
+        .tab-panel.active { display: flex; }
+
+        /* Checkbox column */
+        .col-chk { width: 40px; }
+        .inv-table .col-chk { text-align: center; }
+        .inv-table thead th.col-chk { text-align: center; }
+        .row-checkbox {
+            width: 16px; height: 16px; cursor: pointer; accent-color: var(--button-default);
+        }
+        .inv-table tbody tr.row-selected { background: #f0f7ff; }
+
+        /* Bulk action bar */
+        .bulk-bar {
+            height: 44px;
+            padding: 0 16px;
+            display: flex; align-items: center; gap: 12px;
+            background: var(--button-default); color: #fff;
+            flex-shrink: 0;
+            font-size: 13px;
+        }
+        .bulk-bar .bulk-count { font-weight: 600; }
+        .bulk-bar .bulk-sep { opacity: 0.4; }
+        .btn-check-action {
+            height: 30px; padding: 0 14px;
+            border-radius: 6px;
+            background: #fff; color: var(--button-default);
+            border: none; cursor: pointer;
+            font-size: 12px; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 5px;
+            font-family: inherit;
+        }
+        .btn-check-action:hover { background: #f0f0f0; }
+        .btn-check-action svg { width: 13px; height: 13px; }
+        .bulk-bar .bulk-deselect {
+            margin-left: auto;
+            background: transparent; border: 1px solid rgba(255,255,255,.4);
+            color: #fff;
+        }
+        .bulk-bar .bulk-deselect:hover { background: rgba(255,255,255,.1); }
+
+        /* Mail inbox source badge */
+        .source-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 1px 7px; border-radius: 4px;
+            font-size: 11px; font-weight: 500;
+            background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1;
+        }
+        .source-badge svg { width: 10px; height: 10px; }
+        .tag.needs-check { color: #7c3aed; background: #f5f3ff; border: 1px solid #ddd6fe; }
+        .col-source { width: 160px; }
+
+        /* Category filter */
+        .col-category { width: 160px; }
+        .th-filter {
+            display: inline-flex; align-items: center; gap: 4px;
+            cursor: pointer; user-select: none;
+        }
+        .th-filter svg { width: 12px; height: 12px; color: var(--text-disabled); flex-shrink: 0; }
+        .th-filter.active svg { color: var(--primary); }
+        .cat-pop {
+            position: fixed;
+            background: #fff;
+            border: 1px solid var(--border-divider);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            z-index: 300;
+            min-width: 180px;
+            padding: 4px 0;
+            display: none;
+        }
+        .cat-pop.open { display: block; }
+        .cat-pop-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 7px 12px;
+            font-size: 13px; color: var(--text-default);
+            cursor: pointer;
+        }
+        .cat-pop-item:hover { background: var(--bg-hover); }
+        .cat-pop-item input { accent-color: var(--button-default); cursor: pointer; }
+        .cat-pop-divider { height: 1px; background: var(--border-divider); margin: 4px 0; }
+        .cat-pop-clear {
+            padding: 6px 12px;
+            font-size: 12px; color: var(--primary);
+            cursor: pointer;
+        }
+        .cat-pop-clear:hover { background: var(--bg-hover); }
+
+        /* PIC filter */
+        .pic-select {
+            position: relative;
+            height: 32px;
+            padding: 0 10px;
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--bg-container);
+            font-size: 13px; color: var(--text-default);
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .pic-select:hover { border-color: var(--border-strong); }
+        .pic-select.active { border-color: var(--primary); background: #EFF6FF; color: var(--primary); }
+        .pic-select .ps-avatar {
+            width: 20px; height: 20px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 600; color: #fff;
+            flex-shrink: 0;
+        }
+        .pic-select svg { width: 12px; height: 12px; color: var(--text-secondary); flex-shrink: 0; }
+
+        .pic-pop {
+            display: none;
+            position: fixed;
+            z-index: 600;
+            min-width: 190px;
+            background: #fff;
+            border: 1px solid var(--border-default);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            padding: 6px 0;
+            overflow: hidden;
+        }
+        .pic-pop.open { display: block; }
+        .pic-pop-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 14px;
+            font-size: 13px; color: var(--text-default);
+            cursor: pointer;
+        }
+        .pic-pop-item:hover { background: var(--bg-hover); }
+        .pic-pop-item.selected { background: #EFF6FF; color: var(--primary); font-weight: 500; }
+        .pic-pop-item .pp-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 600; color: #fff;
+            flex-shrink: 0;
+        }
+        .pic-pop-item .pp-check {
+            margin-left: auto;
+            width: 14px; height: 14px;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        .col-pic { width: 100px; }
+        .pic-cell {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; color: var(--text-default);
+        }
+        .pic-cell .pc-avatar {
+            width: 22px; height: 22px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 600; color: #fff;
+            flex-shrink: 0;
+        }
+
+        .row-preview-pop {
+            position: fixed;
+            z-index: 500;
+            width: 500px;
+            max-height: calc(100vh - 60px);
+            background: #fff;
+            border: 1px solid var(--border-divider);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            pointer-events: auto;
+            opacity: 0;
+            transform: translateY(6px) scale(0.98);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .row-preview-pop.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .rpp-header {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-divider);
+            background: var(--bg-subtle);
+            flex-shrink: 0;
+        }
+        .rpp-icon {
+            width: 28px; height: 28px; border-radius: 6px;
+            background: var(--bg-container);
+            display: grid; place-items: center;
+            flex-shrink: 0;
+        }
+        .rpp-fname {
+            font-size: 13px; font-weight: 600; color: var(--text-default);
+            flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .rpp-meta {
+            display: flex; align-items: center; gap: 6px;
+            flex-shrink: 0;
+        }
+        .rpp-paper-wrap {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #f3f3f1;
+            padding: 16px;
+        }
+        .rpp-paper-wrap::-webkit-scrollbar { width: 6px; }
+        .rpp-paper-wrap::-webkit-scrollbar-thumb { background: #cfcfcd; border-radius: 3px; }
+        .rpp-paper-inner {
+            transform-origin: top left;
+        }
+
         @media (max-width: 1200px) {
             .list-panel { width: 300px; }
         }
@@ -1037,6 +1250,7 @@
         </div>
 
         <div class="main-toolbar">
+            <div style="display:flex;align-items:center;gap:8px;">
             <div class="date-select" id="dateSelect" aria-haspopup="dialog">
                 <span class="ph" id="dateLabel">Please select a month</span>
                 <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -1058,8 +1272,29 @@
                 </div>
         </div>
 
+            <!-- Category filter (Mail tab only) -->
+            <div class="pic-select" id="catFilterTrigger" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                <span id="catTriggerLabel">Category</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+
+            <!-- PIC filter -->
+            <div class="pic-select" id="picSelect" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                <span id="picLabel">PIC</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            </div><!-- end left filters -->
+
             <div class="toolbar-right">
-                <span class="toolbar-hint">JPG / PNG / PDF</span>
+                <span class="toolbar-hint" id="uploadHint">JPG / PNG / PDF</span>
+                <button class="btn-primary" id="recallBtn" style="display:none; background:#fff; color:#111; border:1.5px solid #111;">
+                    Recall
+                </button>
+                <button class="btn-primary" id="confirmMailBtn" style="display:none;">
+                    Confirm
+                </button>
                 <button class="btn-primary" id="uploadBtn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Upload Invoice
@@ -1068,32 +1303,84 @@
             </div>
                 </div>
 
-        <div class="table-wrap">
-            <div class="table-scroll" id="tableScroll">
-                <table class="inv-table">
-                    <colgroup>
-                        <col class="col-type">
-                        <col class="col-title">
-                        <col class="col-state">
-                        <col class="col-time">
-                        <col class="col-ops">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th class="col-type">Type</th>
-                            <th class="col-title">Invoice Title</th>
-                            <th class="col-state">State</th>
-                            <th class="col-time">Upload time</th>
-                            <th class="col-ops">Operation</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody"></tbody>
-                </table>
-                <div class="table-empty" id="emptyState" style="display:none;">
-                    <div class="icon-box">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <!-- Tab bar -->
+        <div class="tab-bar">
+            <button class="tab-item active" id="tabUploaded" data-tab="uploaded">
+                Uploaded
+                <span class="tab-count" id="tabUploadedCount">8</span>
+            </button>
+            <button class="tab-item" id="tabMailInbox" data-tab="mail-inbox">
+                Mail
+                <span class="tab-count" id="tabMailInboxCount">5</span>
+            </button>
+        </div>
+
+        <!-- ===== Tab: Uploaded ===== -->
+        <div class="tab-panel active" id="panelUploaded">
+            <div class="table-wrap">
+                <div class="table-scroll" id="tableScroll">
+                    <table class="inv-table">
+                        <colgroup>
+                            <col class="col-type">
+                            <col class="col-title">
+                            <col class="col-state">
+                            <col class="col-time">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="col-type">Type</th>
+                                <th class="col-title">Invoice Title</th>
+                                <th class="col-state">State</th>
+                                <th class="col-time">Upload time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                    </table>
+                    <div class="table-empty" id="emptyState" style="display:none;">
+                        <div class="icon-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        </div>
+                        <div class="zh-hint">No invoices. Please upload.</div>
                     </div>
-                    <div class="zh-hint">当前无发票，请上传发票</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Tab: Mail Inbox ===== -->
+        <div class="tab-panel" id="panelMailInbox">
+            <div class="table-wrap" style="margin-top:0; border-radius: 0 0 12px 12px;">
+                <div class="table-scroll" id="mailTableScroll">
+                    <table class="inv-table" id="mailTable">
+                        <colgroup>
+                            <col class="col-chk">
+                            <col class="col-type">
+                            <col class="col-title">
+                            <col class="col-source">
+                            <col class="col-category">
+                            <col class="col-pic">
+                            <col class="col-state">
+                            <col class="col-time">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="col-chk"><input type="checkbox" id="chkAll" class="row-checkbox" title="Select all"></th>
+                                <th class="col-type">Type</th>
+                                <th class="col-title">File Name</th>
+                                <th class="col-source">Source Mailbox</th>
+                                <th class="col-category">Category</th>
+                                <th class="col-pic">PIC</th>
+                                <th class="col-state">State</th>
+                                <th class="col-time">Received At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mailTbody"></tbody>
+                    </table>
+                    <div class="table-empty" id="mailEmptyState" style="display:none;">
+                        <div class="icon-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <div class="zh-hint">No mail invoices pending review.</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1196,6 +1483,13 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Category filter popover -->
+<div class="cat-pop" id="catPop"></div>
+<div class="pic-pop" id="picPop"></div>
+
+<!-- Row hover preview popover -->
+<div class="row-preview-pop" id="rowPreviewPop"></div>
+
 <!-- Company Code Picker Modal -->
 <div class="cc-overlay" id="ccOverlay">
     <div class="cc-modal">
@@ -1246,19 +1540,20 @@
             meta: 'Parsing · 4 vouchers',
             icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>',
             dot: true,
-            href: 'F-PAP-VOUCHER-COLLECTION.html'
+            href: 'F-PAP-VOUCHER-COLLECTION.html',
+            hidden: true
         },
     ];
 
     let invoiceFiles = [
-        { id: 1, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied', time: '2026-04-30 13:25', month: 3, year: 2026 },
-        { id: 2, name: 'zthd_zhidingshengxing_ban.png', type: 'img', state: 'checked', time: '2026-04-30 13:25', month: 3, year: 2026 },
-        { id: 3, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied', time: '2026-04-30 13:25', month: 3, year: 2026 },
-        { id: 4, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'checked', time: '2026-03-30 13:25', month: 3, year: 2026 },
-        { id: 5, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending', time: '2026-03-30 13:25', month: 3, year: 2026 },
-        { id: 6, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending', time: '2026-03-30 13:25', month: 3, year: 2026 },
-        { id: 7, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending', time: '2026-03-30 13:25', month: 3, year: 2026 },
-        { id: 8, name: '202604091330-jmd.pdf', type: 'pdf', state: 'pending', time: '2026-02-30 13:25', month: 2, year: 2026 }
+        { id: 1, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied',   time: '2026-04-30 13:25', month: 3, year: 2026, selected: false, category: 'Tech' },
+        { id: 2, name: 'zthd_zhidingshengxing_ban.png', type: 'img', state: 'approved', time: '2026-04-30 13:25', month: 3, year: 2026, selected: false, category: 'Ads' },
+        { id: 3, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied',   time: '2026-04-30 13:25', month: 3, year: 2026, selected: false, category: 'Finance' },
+        { id: 4, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'approved', time: '2026-03-30 13:25', month: 3, year: 2026, selected: false, category: 'Tech' },
+        { id: 5, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending',  time: '2026-03-30 13:25', month: 3, year: 2026, selected: false, category: 'Ads' },
+        { id: 6, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending',  time: '2026-03-30 13:25', month: 3, year: 2026, selected: false, category: 'Finance' },
+        { id: 7, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending',  time: '2026-03-30 13:25', month: 3, year: 2026, selected: false, category: 'Tech' },
+        { id: 8, name: '202604091330-jmd.pdf',           type: 'pdf', state: 'pending',  time: '2026-02-30 13:25', month: 2, year: 2026, selected: false, category: 'Ads' }
     ];
 
     let nextId = 9;
@@ -1270,8 +1565,8 @@
     const monthsEN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
     const STATE_LABELS = {
-        pending: 'Pending', denied: 'Denied', checked: 'Checked',
-        parsing: 'Parsing', confirmed: 'Confirmed'
+        pending: 'Pending', denied: 'Denied', approved: 'Approved',
+        parsing: 'Parsing', confirmed: 'Confirmed', 'needs-check': 'Needs Check'
     };
 
     // ========== Render helpers ==========
@@ -1286,7 +1581,7 @@
 
     function renderList() {
         const body = document.getElementById('listBody');
-        const navHtml = listItems.map(it => `
+        const navHtml = listItems.filter(it => !it.hidden).map(it => `
             <div class="list-card ${it.active ? 'active' : ''}" data-key="${it.key}">
                 <div class="list-card-icon">${it.icon}</div>
                 <div class="list-card-content">
@@ -1340,15 +1635,8 @@
         }
         emptyEl.style.display = 'none';
 
-        const opsCell = (f) => `<td class="col-ops">
-                    <span class="ops-row">
-                        <button class="ops-btn" data-act="view" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                        ${f.state === 'pending' ? `<button class="ops-btn danger" data-act="delete" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
-                    </span>
-                </td>`;
-
-        tbody.innerHTML = list.map(f => `
-            <tr data-id="${f.id}">
+        tbody.innerHTML = list.map(f => {
+            return `<tr data-id="${f.id}">
                 <td class="col-type">${fileIcon(f.type)}</td>
                 <td class="col-title">
                     <span class="file-cell">
@@ -1357,17 +1645,12 @@
                 </td>
                 <td class="col-state"><span class="tag ${f.state}">${STATE_LABELS[f.state] || f.state}</span></td>
                 <td class="col-time">${f.time}</td>
-                ${opsCell(f)}
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
 
         tbody.querySelectorAll('tr').forEach(tr => {
             const id = Number(tr.dataset.id);
-            tr.addEventListener('click', (e) => {
-                const act = e.target.closest('[data-act]')?.dataset.act;
-                if (act === 'delete') removeFile(id);
-                else openViewer(id);
-            });
+            tr.addEventListener('click', () => openViewer(id));
         });
     }
 
@@ -1419,6 +1702,7 @@
                 applyDateLabel();
                 closeMonthPop();
                 renderTable();
+                renderMailTable();
             });
         });
     }
@@ -1445,25 +1729,36 @@
     // ========== Invoice Viewer ==========
     let activeRowId = null;
     let parsingTimer = null;
-    function openViewer(id) {
-        const f = invoiceFiles.find(x => x.id === id);
+    function openViewer(id, mailId) {
+        let f, stateLabels, isMailFile = false;
+        if (mailId != null) {
+            f = mailFiles.find(x => x.id === mailId);
+            stateLabels = MAIL_STATE_LABELS;
+            isMailFile = true;
+        } else {
+            f = invoiceFiles.find(x => x.id === id);
+            stateLabels = STATE_LABELS;
+        }
         if (!f) return;
         document.getElementById('viewerName').textContent = f.name;
         const tag = document.getElementById('viewerTag');
         tag.className = `tag ${f.state}`;
-        tag.textContent = STATE_LABELS[f.state] || f.state;
+        tag.textContent = stateLabels[f.state] || f.state;
         zoom = 100;
         applyZoom();
         document.getElementById('viewerMask').classList.add('open');
         document.getElementById('viewerDrawer').classList.add('open');
-        activeRowId = id;
+        activeRowId = isMailFile ? null : id;
         document.querySelectorAll('#tbody tr').forEach(tr => {
-            tr.classList.toggle('active', Number(tr.dataset.id) === id);
+            tr.classList.toggle('active', !isMailFile && Number(tr.dataset.id) === id);
         });
-        applyParsingState(f);
+        document.querySelectorAll('#mailTbody tr').forEach(tr => {
+            tr.classList.toggle('active', isMailFile && tr.dataset.mid === mailId);
+        });
+        applyParsingState(f, isMailFile);
     }
 
-    function applyParsingState(f) {
+    function applyParsingState(f, isMailFile) {
         const overlay = document.getElementById('viewerParsing');
         const paper = document.getElementById('invoicePaper');
         if (parsingTimer) { clearTimeout(parsingTimer); parsingTimer = null; }
@@ -1476,11 +1771,8 @@
                 paper.style.visibility = '';
                 const tag = document.getElementById('viewerTag');
                 tag.className = `tag ${f.state}`;
-                tag.textContent = STATE_LABELS[f.state] || f.state;
-                renderTable();
-                document.querySelectorAll('#tbody tr').forEach(tr => {
-                    tr.classList.toggle('active', Number(tr.dataset.id) === f.id);
-                });
+                tag.textContent = isMailFile ? (MAIL_STATE_LABELS[f.state] || f.state) : (STATE_LABELS[f.state] || f.state);
+                if (isMailFile) renderMailTable(); else renderTable();
                 showToast('Invoice parsed successfully');
                 parsingTimer = null;
             }, 2000);
@@ -1512,6 +1804,189 @@
         el.classList.add('visible');
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => el.classList.remove('visible'), 1800);
+    }
+
+    // ========== Category filter ==========
+    let selectedCategories = new Set(); // empty = show all
+    const CURRENT_USER_ID = 'yi'; // mock: logged-in user
+    const PIC_LIST = [
+        { id: 'yi',   name: '仪 恺',   color: '#3B82F6', initials: '仪' },
+        { id: 'huang',name: '黄威伟',   color: '#10B981', initials: '黄' },
+        { id: 'wang', name: '王凯旋',   color: '#8B5CF6', initials: '王' },
+        { id: 'okino',name: '興野 一平', color: '#F59E0B', initials: '興' },
+        { id: 'zou',  name: '邹卓洋',   color: '#EC4899', initials: '邹' },
+        { id: 'qiu',  name: '邱奕凯',   color: '#6366F1', initials: '邱' },
+    ];
+    let selectedPic = CURRENT_USER_ID; // default: current user
+
+    function allCategories() {
+        return [...new Set(mailFiles.map(f => f.category).filter(Boolean))].sort();
+    }
+
+    function openCatPop() {
+        const trigger = document.getElementById('catFilterTrigger');
+        const pop = document.getElementById('catPop');
+        const cats = allCategories();
+        const rect = trigger.getBoundingClientRect();
+
+        pop.innerHTML = `
+            <div class="cat-pop-item cat-pop-clear" id="catClearBtn">Show all</div>
+            <div class="cat-pop-divider"></div>
+            ${cats.map(c => `
+                <label class="cat-pop-item">
+                    <input type="checkbox" value="${c}" ${selectedCategories.has(c) ? 'checked' : ''}>
+                    ${c}
+                </label>`).join('')}
+        `;
+        pop.style.left = rect.left + 'px';
+        pop.style.top = (rect.bottom + 4) + 'px';
+        pop.classList.add('open');
+
+        pop.querySelectorAll('input[type=checkbox]').forEach(chk => {
+            chk.addEventListener('change', () => {
+                if (chk.checked) selectedCategories.add(chk.value);
+                else selectedCategories.delete(chk.value);
+                updateCatTrigger();
+                renderMailTable();
+            });
+        });
+        document.getElementById('catClearBtn').addEventListener('click', () => {
+            selectedCategories.clear();
+            updateCatTrigger();
+            closeCatPop();
+            renderMailTable();
+        });
+    }
+
+    function closeCatPop() {
+        document.getElementById('catPop').classList.remove('open');
+    }
+
+    function updateCatTrigger() {
+        const t = document.getElementById('catFilterTrigger');
+        const lbl = document.getElementById('catTriggerLabel');
+        if (!t) return;
+        const hasFilter = selectedCategories.size > 0;
+        t.classList.toggle('active', hasFilter);
+        if (lbl) lbl.textContent = hasFilter ? [...selectedCategories].join(', ') : 'Category';
+    }
+
+    // ========== PIC filter ==========
+    function openPicPop() {
+        const trigger = document.getElementById('picSelect');
+        const pop = document.getElementById('picPop');
+        const rect = trigger.getBoundingClientRect();
+        pop.innerHTML = `
+            <div class="pic-pop-item ${!selectedPic ? 'selected' : ''}" data-pic="">
+                <span class="pp-avatar" style="background:#6B7280;font-size:10px;">G</span>
+                All
+                ${!selectedPic ? '<svg class="pp-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+            </div>
+            <div style="height:1px;background:var(--border-divider);margin:4px 0;"></div>
+            ${PIC_LIST.map(p => `
+                <div class="pic-pop-item ${selectedPic === p.id ? 'selected' : ''}" data-pic="${p.id}">
+                    <span class="pp-avatar" style="background:${p.color}">${p.initials}</span>
+                    ${p.id === CURRENT_USER_ID ? `${p.name} <span style="font-size:11px;color:var(--text-disabled);margin-left:2px;">@me</span>` : p.name}
+                    ${selectedPic === p.id ? '<svg class="pp-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                </div>`).join('')}
+        `;
+        pop.style.left = rect.left + 'px';
+        pop.style.top = (rect.bottom + 4) + 'px';
+        pop.classList.add('open');
+
+        pop.querySelectorAll('.pic-pop-item').forEach(item => {
+            item.addEventListener('click', () => {
+                selectedPic = item.dataset.pic || null;
+                updatePicTrigger();
+                closePicPop();
+                renderMailTable();
+            });
+        });
+    }
+    function closePicPop() {
+        document.getElementById('picPop').classList.remove('open');
+    }
+    function updatePicTrigger() {
+        const sel = document.getElementById('picSelect');
+        const lbl = document.getElementById('picLabel');
+        if (selectedPic) {
+            const p = PIC_LIST.find(x => x.id === selectedPic);
+            if (p) {
+                const label = p.id === CURRENT_USER_ID ? '@me' : p.name;
+                lbl.innerHTML = `<span class="ps-avatar" style="background:${p.color}">${p.initials}</span> ${label}`;
+                sel.classList.add('active');
+            }
+        } else {
+            lbl.textContent = 'PIC';
+            sel.classList.remove('active');
+        }
+    }
+
+    // ========== Row preview popover ==========
+    const PREVIEW_POP = document.getElementById('rowPreviewPop');
+    let previewVisible = false;
+    let hidePopTimer = null;
+
+    function showRowPreview(e, { name, type, stateClass, stateLabel }) {
+        clearTimeout(hidePopTimer);
+        const icon = type === 'img' ? ICON_IMG : ICON_PDF;
+        const paperHTML = document.getElementById('invoicePaper').innerHTML;
+        PREVIEW_POP.innerHTML = `
+            <div class="rpp-header">
+                <div class="rpp-icon">${icon}</div>
+                <div class="rpp-fname">${name}</div>
+                <div class="rpp-meta">
+                    <span class="tag ${stateClass}" style="font-size:11px;padding:1px 8px;">${stateLabel}</span>
+                </div>
+            </div>
+            <div class="rpp-paper-wrap" id="rppPaperWrap">
+                <div class="rpp-paper-inner" id="rppPaperInner">
+                    <div class="invoice-paper" style="width:780px;">${paperHTML}</div>
+                </div>
+            </div>
+        `;
+        repositionPreview(e);
+        PREVIEW_POP.classList.add('visible');
+        previewVisible = true;
+
+        // scale paper to fit popover width (500px - 32px padding)
+        requestAnimationFrame(() => {
+            const wrap = document.getElementById('rppPaperWrap');
+            const inner = document.getElementById('rppPaperInner');
+            if (wrap && inner) {
+                const scale = (wrap.clientWidth) / 780;
+                inner.style.transform = `scale(${scale})`;
+                inner.style.width = '780px';
+                // adjust wrap height to match scaled content
+                const paperEl = inner.firstElementChild;
+                if (paperEl) {
+                    inner.style.height = paperEl.scrollHeight * scale + 'px';
+                }
+            }
+        });
+    }
+
+    PREVIEW_POP.addEventListener('mouseenter', () => clearTimeout(hidePopTimer));
+    PREVIEW_POP.addEventListener('mouseleave', () => {
+        hidePopTimer = setTimeout(hideRowPreview, 80);
+    });
+
+    function repositionPreview(e) {
+        const popW = 500;
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const popH = Math.min(PREVIEW_POP.offsetHeight || 500, vh - 60);
+        let x = e.clientX + 20;
+        let y = e.clientY - 60;
+        if (x + popW > vw - 12) x = e.clientX - popW - 16;
+        if (y + popH > vh - 12) y = vh - popH - 12;
+        if (y < 8) y = 8;
+        PREVIEW_POP.style.left = x + 'px';
+        PREVIEW_POP.style.top = y + 'px';
+    }
+
+    function hideRowPreview() {
+        PREVIEW_POP.classList.remove('visible');
+        previewVisible = false;
     }
 
     // ========== Company Code Picker ==========
@@ -1549,6 +2024,159 @@
         e.target.value = '';
     });
 
+    // ========== Mail Inbox Data ==========
+    let mailFiles = [
+        { id: 'm1', name: 'AWS_Invoice_2026-05_JP.pdf',     type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-31 09:12', selected: false, category: 'Tech',    pic: 'yi' },
+        { id: 'm2', name: 'GCP_May2026_Invoice.pdf',        type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-30 18:44', selected: false, category: 'Tech',    pic: 'huang' },
+        { id: 'm3', name: 'Slack_Business_2026-05.pdf',     type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-30 11:22', selected: false, category: 'Ads',     pic: 'wang' },
+        { id: 'm4', name: 'Adobe_CC_Invoice_SG_May.pdf',    type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-29 16:05', selected: false, category: 'Finance', pic: 'okino' },
+        { id: 'm5', name: 'Notion_Team_Invoice_2026.pdf',   type: 'pdf', source: 'billing@ctw.inc', state: 'parsing',     receivedAt: '2026-05-28 10:33', selected: false, category: 'Ads',     pic: 'zou' },
+    ];
+
+    const MAIL_STATE_LABELS = {
+        'needs-check': 'Needs Check',
+        'parsing': 'Pending',
+        'confirmed': 'Confirmed',
+        'denied': 'Denied',
+    };
+
+    function getMailSelected() { return mailFiles.filter(f => f.selected); }
+
+    function filteredMailFiles() {
+        let list = [...mailFiles].sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
+        if (selectedMonth != null) {
+            list = list.filter(f => {
+                const d = new Date(f.receivedAt);
+                return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+            });
+        }
+        if (selectedCategories.size > 0) {
+            list = list.filter(f => selectedCategories.has(f.category));
+        }
+        if (selectedPic) {
+            list = list.filter(f => f.pic === selectedPic);
+        }
+        return list;
+    }
+
+    function renderMailTable() {
+        const tbody = document.getElementById('mailTbody');
+        const emptyEl = document.getElementById('mailEmptyState');
+        const chkAll = document.getElementById('chkAll');
+
+        const list = filteredMailFiles();
+
+        if (!list.length) {
+            tbody.innerHTML = '';
+            emptyEl.style.display = 'flex';
+            return;
+        }
+        emptyEl.style.display = 'none';
+
+        const checkableCount = list.filter(f => f.state === 'needs-check' || f.state === 'parsing').length;
+        const checkedCount = list.filter(f => f.selected && (f.state === 'needs-check' || f.state === 'parsing')).length;
+        chkAll.indeterminate = checkedCount > 0 && checkedCount < checkableCount;
+        chkAll.checked = checkableCount > 0 && checkedCount === checkableCount;
+
+        tbody.innerHTML = list.map(f => {
+            const canCheck = f.state === 'needs-check' || f.state === 'parsing';
+            return `<tr data-mid="${f.id}" class="${f.selected ? 'row-selected' : ''}">
+                <td class="col-chk">
+                    <input type="checkbox" class="row-checkbox mail-chk" data-mid="${f.id}" ${f.selected ? 'checked' : ''} ${!canCheck ? 'disabled style="opacity:0.3;"' : ''}>
+                </td>
+                <td class="col-type">${fileIcon(f.type)}</td>
+                <td class="col-title">
+                    <span class="file-cell"><span class="fname">${f.name}</span></span>
+                </td>
+                <td class="col-source">${f.source}</td>
+                <td class="col-category" style="font-size:12px;color:var(--text-secondary);">${f.category || '—'}</td>
+                <td class="col-pic">${(() => { const p = PIC_LIST.find(x => x.id === f.pic); return p ? `<span class="pic-cell"><span class="pc-avatar" style="background:${p.color}">${p.initials}</span>${p.name}</span>` : '—'; })()}</td>
+                <td class="col-state"><span class="tag ${f.state}">${MAIL_STATE_LABELS[f.state] || f.state}</span></td>
+                <td class="col-time">${f.receivedAt}</td>
+            </tr>`;
+        }).join('');
+
+        // row checkbox events
+        tbody.querySelectorAll('.mail-chk').forEach(chk => {
+            chk.addEventListener('change', () => {
+                const mid = chk.dataset.mid;
+                const f = mailFiles.find(x => x.id === mid);
+                if (f) f.selected = chk.checked;
+                renderMailTable();
+            });
+        });
+
+        // hover to preview
+        let mailHoverTimer = null;
+        tbody.querySelectorAll('tr[data-mid]').forEach(tr => {
+            tr.addEventListener('mouseenter', (e) => {
+                if (e.target.closest('.mail-chk')) return;
+                const mid = tr.dataset.mid;
+                mailHoverTimer = setTimeout(() => {
+                    const f = mailFiles.find(x => x.id === mid);
+                    if (f) showRowPreview(e, {
+                        name: f.name, type: f.type,
+                        stateClass: f.state,
+                        stateLabel: MAIL_STATE_LABELS[f.state] || f.state,
+                    });
+                }, 350);
+            });
+            tr.addEventListener('mousemove', (e) => { if (!e.target.closest('.mail-chk')) repositionPreview(e); });
+            tr.addEventListener('mouseleave', () => { clearTimeout(mailHoverTimer); hidePopTimer = setTimeout(hideRowPreview, 80); });
+            tr.addEventListener('click', (e) => {
+                if (e.target.closest('.mail-chk')) return;
+                openViewer(null, tr.dataset.mid);
+            });
+        });
+
+        // update count badge
+        document.getElementById('tabMailInboxCount').textContent = mailFiles.filter(f => f.state === 'needs-check').length;
+
+        // update button disabled states based on selection
+        const selectedItems = list.filter(f => f.selected);
+        const hasPending    = selectedItems.some(f => f.state === 'parsing');
+        const hasNeedsCheck = selectedItems.some(f => f.state === 'needs-check');
+        const confirmBtn = document.getElementById('confirmMailBtn');
+        const recallBtn  = document.getElementById('recallBtn');
+        if (selectedItems.length === 0) {
+            confirmBtn.disabled = false;
+            recallBtn.disabled  = false;
+        } else {
+            confirmBtn.disabled = hasPending;
+            recallBtn.disabled  = hasNeedsCheck;
+        }
+
+        updateCatTrigger();
+    }
+
+    function confirmMailCheck() {
+        const ids = getMailSelected().filter(f => f.state === 'needs-check').map(f => f.id);
+        if (!ids.length) return;
+        ids.forEach(id => {
+            const f = mailFiles.find(x => x.id === id);
+            if (f) { f.state = 'parsing'; f.selected = false; }
+        });
+        renderMailTable();
+        showToast(`${ids.length} file${ids.length > 1 ? 's' : ''} confirmed — sent to parsing`);
+    }
+
+    // ========== Tab switching ==========
+    let activeTab = 'uploaded';
+    function switchTab(tab) {
+        activeTab = tab;
+        document.querySelectorAll('.tab-item').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+        document.getElementById('panelUploaded').classList.toggle('active', tab === 'uploaded');
+        document.getElementById('panelMailInbox').classList.toggle('active', tab === 'mail-inbox');
+        const isUploaded = tab === 'uploaded';
+        document.getElementById('uploadBtn').style.display = isUploaded ? '' : 'none';
+        document.getElementById('uploadHint').style.display = isUploaded ? '' : 'none';
+        document.getElementById('recallBtn').style.display = isUploaded ? 'none' : '';
+        document.getElementById('confirmMailBtn').style.display = isUploaded ? 'none' : '';
+        document.getElementById('catFilterTrigger').style.display = isUploaded ? 'none' : '';
+        document.getElementById('picSelect').style.display = isUploaded ? 'none' : '';
+        if (tab === 'mail-inbox') renderMailTable();
+    }
+
     document.getElementById('dateSelect').addEventListener('click', (e) => {
         const pop = document.getElementById('monthPop');
         if (pop.classList.contains('open')) closeMonthPop();
@@ -1561,6 +2189,8 @@
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('#dateSelect')) closeMonthPop();
+        if (!e.target.closest('#catFilterTrigger') && !e.target.closest('#catPop')) closeCatPop();
+        if (!e.target.closest('#picSelect') && !e.target.closest('#picPop')) closePicPop();
     });
 
     document.getElementById('viewerClose').addEventListener('click', closeViewer);
@@ -1575,10 +2205,46 @@
         }
     });
 
-    // ========== Init ==========
+    document.getElementById('catFilterTrigger').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('catPop').classList.contains('open') ? closeCatPop() : openCatPop();
+    });
+
+    document.getElementById('picSelect').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('picPop').classList.contains('open') ? closePicPop() : openPicPop();
+    });
+    updatePicTrigger();
+
     renderList();
     renderTable();
     applyDateLabel();
+
+    // Tab switching
+    document.querySelectorAll('.tab-item[data-tab]').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // Mail Inbox: select-all
+    document.getElementById('chkAll').addEventListener('change', (e) => {
+        mailFiles.forEach(f => { if (f.state === 'needs-check' || f.state === 'parsing') f.selected = e.target.checked; });
+        renderMailTable();
+    });
+
+    // Bulk action: confirm check
+    document.getElementById('confirmMailBtn').addEventListener('click', confirmMailCheck);
+
+    document.getElementById('recallBtn').addEventListener('click', () => {
+        const ids = mailFiles.filter(f => f.selected && f.state === 'parsing').map(f => f.id);
+        if (!ids.length) { showToast('Select pending invoices to recall'); return; }
+        ids.forEach(id => {
+            const f = mailFiles.find(x => x.id === id);
+            if (f) { f.state = 'needs-check'; f.selected = false; }
+        });
+        renderMailTable();
+        showToast(`${ids.length} invoice${ids.length > 1 ? 's' : ''} recalled`);
+    });
+
 </script>
 
 </body>
