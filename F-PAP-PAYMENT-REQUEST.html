@@ -1272,6 +1272,12 @@
                 </div>
         </div>
 
+            <!-- PIC filter (Mail tab only) -->
+            <div class="pic-select" id="picSelect" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                <span id="picLabel">PIC</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
             </div><!-- end left filters -->
 
             <div class="toolbar-right">
@@ -1343,6 +1349,7 @@
                             <col class="col-type">
                             <col class="col-title">
                             <col class="col-source">
+                            <col class="col-pic">
                             <col class="col-state">
                             <col class="col-time">
                         </colgroup>
@@ -1352,6 +1359,7 @@
                                 <th class="col-type">Type</th>
                                 <th class="col-title">File Name</th>
                                 <th class="col-source">Source Mailbox</th>
+                                <th class="col-pic">PIC</th>
                                 <th class="col-state">State</th>
                                 <th class="col-time">Received At</th>
                             </tr>
@@ -1490,6 +1498,8 @@
         </div>
     </div>
 </div>
+
+<div class="pic-pop" id="picPop"></div>
 
 <script>
     // ========== Data ==========
@@ -1786,6 +1796,67 @@
         toastTimer = setTimeout(() => el.classList.remove('visible'), 1800);
     }
 
+    // ========== PIC filter ==========
+    const CURRENT_USER_ID = 'yi'; // mock: logged-in user
+    const PIC_LIST = [
+        { id: 'yi',   name: '仪 恺',   color: '#3B82F6', initials: '仪' },
+        { id: 'huang',name: '黄威伟',   color: '#10B981', initials: '黄' },
+        { id: 'wang', name: '王凯旋',   color: '#8B5CF6', initials: '王' },
+        { id: 'okino',name: '興野 一平', color: '#F59E0B', initials: '興' },
+        { id: 'zou',  name: '邹卓洋',   color: '#EC4899', initials: '邹' },
+        { id: 'qiu',  name: '邱奕凯',   color: '#6366F1', initials: '邱' },
+    ];
+    let selectedPic = CURRENT_USER_ID; // default: current user
+
+    function openPicPop() {
+        const trigger = document.getElementById('picSelect');
+        const pop = document.getElementById('picPop');
+        const rect = trigger.getBoundingClientRect();
+        pop.innerHTML = `
+            <div class="pic-pop-item ${!selectedPic ? 'selected' : ''}" data-pic="">
+                <span class="pp-avatar" style="background:#6B7280;font-size:10px;">G</span>
+                All
+                ${!selectedPic ? '<svg class="pp-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+            </div>
+            <div style="height:1px;background:var(--border-divider);margin:4px 0;"></div>
+            ${PIC_LIST.map(p => `
+                <div class="pic-pop-item ${selectedPic === p.id ? 'selected' : ''}" data-pic="${p.id}">
+                    <span class="pp-avatar" style="background:${p.color}">${p.initials}</span>
+                    ${p.id === CURRENT_USER_ID ? `${p.name} <span style="font-size:11px;color:var(--text-disabled);margin-left:2px;">@me</span>` : p.name}
+                    ${selectedPic === p.id ? '<svg class="pp-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                </div>`).join('')}
+        `;
+        pop.style.left = rect.left + 'px';
+        pop.style.top = (rect.bottom + 4) + 'px';
+        pop.classList.add('open');
+        pop.querySelectorAll('.pic-pop-item').forEach(item => {
+            item.addEventListener('click', () => {
+                selectedPic = item.dataset.pic || null;
+                updatePicTrigger();
+                closePicPop();
+                renderMailTable();
+            });
+        });
+    }
+    function closePicPop() {
+        document.getElementById('picPop').classList.remove('open');
+    }
+    function updatePicTrigger() {
+        const sel = document.getElementById('picSelect');
+        const lbl = document.getElementById('picLabel');
+        if (selectedPic) {
+            const p = PIC_LIST.find(x => x.id === selectedPic);
+            if (p) {
+                const label = p.id === CURRENT_USER_ID ? '@me' : p.name;
+                lbl.innerHTML = `<span class="ps-avatar" style="background:${p.color}">${p.initials}</span> ${label}`;
+                sel.classList.add('active');
+            }
+        } else {
+            lbl.textContent = 'PIC';
+            sel.classList.remove('active');
+        }
+    }
+
     // ========== Row preview popover ==========
     const PREVIEW_POP = document.getElementById('rowPreviewPop');
     let previewVisible = false;
@@ -1914,6 +1985,9 @@
                 return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
             });
         }
+        if (selectedPic) {
+            list = list.filter(f => f.pic === selectedPic);
+        }
         return list;
     }
 
@@ -1947,6 +2021,7 @@
                     <span class="file-cell"><span class="fname">${f.name}</span></span>
                 </td>
                 <td class="col-source">${f.source}</td>
+                <td class="col-pic">${(() => { const p = PIC_LIST.find(x => x.id === f.pic); return p ? `<span class="pic-cell"><span class="pc-avatar" style="background:${p.color}">${p.initials}</span>${p.name}</span>` : '—'; })()}</td>
                 <td class="col-state"><span class="tag ${f.state}">${MAIL_STATE_LABELS[f.state] || f.state}</span></td>
                 <td class="col-time">${f.receivedAt}</td>
             </tr>`;
@@ -2028,6 +2103,7 @@
         document.getElementById('uploadHint').style.display = isUploaded ? '' : 'none';
         document.getElementById('recallBtn').style.display = isUploaded ? 'none' : '';
         document.getElementById('confirmMailBtn').style.display = isUploaded ? 'none' : '';
+        document.getElementById('picSelect').style.display = isUploaded ? 'none' : '';
         if (tab === 'mail-inbox') renderMailTable();
     }
 
@@ -2043,6 +2119,7 @@
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('#dateSelect')) closeMonthPop();
+        if (!e.target.closest('#picSelect') && !e.target.closest('#picPop')) closePicPop();
     });
 
     document.getElementById('viewerClose').addEventListener('click', closeViewer);
@@ -2056,6 +2133,12 @@
             closeMonthPop();
         }
     });
+
+    document.getElementById('picSelect').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('picPop').classList.contains('open') ? closePicPop() : openPicPop();
+    });
+    updatePicTrigger();
 
     renderList();
     renderTable();
