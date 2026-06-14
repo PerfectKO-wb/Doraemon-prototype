@@ -719,7 +719,8 @@ const navItems = [
     desc: 'Upload reimbursement vouchers',
     meta: 'Parsing · 4 vouchers',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>`,
-    href: 'F-PAP-VOUCHER-COLLECTION.html'
+    href: 'F-PAP-VOUCHER-COLLECTION.html',
+    hidden: true
   }
 ];
 
@@ -741,7 +742,7 @@ function confLabel(score) {
 function renderList() {
   const body = document.getElementById('listBody');
 
-  const navHtml = navItems.map(it => `
+  const navHtml = navItems.filter(it => !it.hidden).map(it => `
     <div class="list-card" onclick="window.location='${it.href}'" style="cursor:pointer;">
       <div class="list-card-icon">${it.icon}</div>
       <div class="list-card-content">

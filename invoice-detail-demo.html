@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Detail — 方案四 Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Design Tokens ── */
+:root {
+  --text-default:   #131825;
+  --text-secondary: #73726e;
+  --text-disabled:  #ababa9;
+  --bg-base:        #f9fafb;
+  --bg-container:   #ffffff;
+  --bg-hover:       #efefef;
+  --bg-hover2:      #dbdbdb;
+  --border-divider: #e5e7eb;
+  --border-default: #d9d9d9;
+  --primary:        #1C64F2;
+  --error:          #f5222d;
+  --error-bg:       #fff1f0;
+  --green:          #52c41a;
+  --green-bg:       #f6ffed;
+  --font: 'Inter', 'Noto Sans JP', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg-base); color: var(--text-default); height: 100vh; overflow: hidden; display: flex; font-size: 13px; }
+
+/* ── Left list panel ── */
+.list-panel {
+  width: 268px; min-width: 268px;
+  background: var(--bg-container);
+  border-right: 1px solid var(--border-divider);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.lp-head { padding: 14px 16px; border-bottom: 1px solid var(--border-divider); }
+.lp-title { font-size: 14px; font-weight: 600; }
+.lp-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.lp-scroll { flex: 1; overflow-y: auto; padding: 8px; }
+.inv-card {
+  border: 1px solid var(--border-divider); border-radius: 8px;
+  padding: 9px 12px; cursor: pointer; margin-bottom: 5px;
+  transition: background .12s;
+}
+.inv-card:hover { background: var(--bg-hover); }
+.inv-card.active { background: #eff6ff; border-color: #93c5fd; }
+.inv-card-title { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-card-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+.inv-card-amount { font-size: 12px; font-weight: 600; margin-top: 4px; }
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 10px;
+}
+.badge-pending  { background: #fff7e6; color: #d46b08; }
+.badge-reviewed { background: var(--green-bg); color: #389e0d; }
+.badge-waiting  { background: var(--text-default); color: #fff; }
+
+/* ── Right: detail panel ── */
+.detail-panel {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--bg-container);
+}
+/* Header */
+.dp-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; height: 52px;
+  border-bottom: 1px solid var(--border-divider); flex-shrink: 0;
+}
+.dp-head-left  { display: flex; align-items: center; gap: 10px; }
+.dp-head-title { font-size: 14px; font-weight: 600; }
+.dp-head-right { display: flex; align-items: center; gap: 8px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 30px; padding: 0 12px; border-radius: 6px;
+  border: 1px solid transparent; font-family: var(--font);
+  font-size: 12px; font-weight: 500; cursor: pointer; transition: all .12s;
+  white-space: nowrap;
+}
+.btn-sm { height: 26px; padding: 0 10px; }
+.btn-ghost  { background: transparent; border-color: var(--border-default); color: var(--text-default); }
+.btn-ghost:hover  { background: var(--bg-hover); }
+.btn-primary { background: var(--text-default); color: #fff; }
+.btn-primary:hover { background: #2d3748; }
+.btn-danger  { background: #fff; border-color: var(--border-default); color: var(--error); }
+.btn-danger:hover  { background: var(--error-bg); border-color: var(--error); }
+
+/* Body */
+.dp-body { flex: 1; display: flex; overflow: hidden; }
+
+/* PDF pane */
+.pdf-pane {
+  width: 43%; min-width: 43%;
+  border-right: 1px solid var(--border-divider);
+  background: #e8eaed; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; overflow: hidden;
+}
+.pdf-placeholder { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 12px; }
+.pdf-placeholder svg { width: 40px; height: 40px; color: var(--text-disabled); }
+.pdf-placeholder img { width: 100%; height: 100%; object-fit: contain; }
+
+/* Form pane */
+.form-pane { flex: 1; overflow-y: auto; overflow-x: hidden; }
+.form-pane::-webkit-scrollbar { width: 4px; }
+.form-pane::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+/* Summary header */
+.iv-sum-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 12px; border-bottom: 1px solid var(--border-divider);
+}
+.iv-sum-title { font-size: 15px; font-weight: 700; }
+.demo-tag {
+  font-size: 10px; font-weight: 600; letter-spacing: .03em;
+  background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 10px;
+}
+
+/* ── Section ── */
+.sec { }
+.sec-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 20px 8px 17px;
+  background: #f3f4f6;
+  border-top: 1px solid var(--border-divider);
+  border-bottom: 1px solid var(--border-divider);
+  border-left: 3px solid var(--text-default);
+  cursor: pointer; user-select: none;
+}
+.sec-hd-left { display: flex; align-items: center; gap: 8px; }
+.sec-hd-title {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-secondary);
+}
+.sec-hd-info { font-size: 10px; color: var(--text-disabled); }
+.sec-chevron { width: 14px; height: 14px; color: var(--text-secondary); transition: transform .2s; flex-shrink: 0; }
+.sec-hd.is-collapsed .sec-chevron { transform: rotate(-90deg); }
+.sec-bd { overflow: hidden; transition: max-height .25s ease; }
+.sec-bd.is-collapsed { max-height: 0 !important; }
+.sec-bd-inner { padding: 6px 0; }
+
+/* ── Field rows ── */
+.field-row {
+  display: grid; grid-template-columns: 132px 1fr;
+  gap: 6px; padding: 5px 20px; align-items: start; min-height: 30px;
+}
+.field-row.stacked   { grid-template-columns: 1fr; }
+.field-row.opt-field { display: none; }
+.sec.show-opt .opt-field { display: grid; }
+.sec.show-opt .opt-field.stacked { display: grid; grid-template-columns: 1fr; }
+
+.field-label {
+  font-size: 12px; color: var(--text-secondary);
+  padding-top: 3px; white-space: nowrap;
+}
+.field-row.stacked .field-label { padding-top: 0; margin-bottom: 5px; }
+
+.field-val-wrap { display: flex; align-items: flex-start; gap: 0; min-width: 0; }
+.field-val {
+  font-size: 13px; color: var(--text-default); flex: 1; min-width: 0;
+  border-radius: 4px; padding: 2px 6px; cursor: pointer;
+  line-height: 1.5; word-break: break-word;
+  transition: background .1s;
+}
+.field-val:hover   { background: var(--bg-hover); }
+.field-val.empty   { color: var(--text-disabled); font-style: italic; }
+.field-val.req-empty { color: var(--error); }
+.field-val.req-empty::after { content: '  required'; font-size: 10px; opacity: .7; }
+.field-val.readonly { cursor: default; color: var(--text-secondary); }
+.field-val.readonly:hover { background: transparent; }
+
+/* Inputs (hidden by default, shown when editing) */
+.field-input, .field-select, .field-date, .field-textarea {
+  display: none; width: 100%;
+  font-family: var(--font); font-size: 13px; color: var(--text-default);
+  border: 1.5px solid var(--primary); border-radius: 6px;
+  padding: 3px 8px; outline: none; background: #fff;
+}
+.field-textarea { min-height: 68px; resize: vertical; padding: 6px 8px; line-height: 1.5; }
+.field-row.editing .field-val { display: none; }
+.field-row.editing .active-inp { display: block; }
+.field-row.editing .field-val-wrap { display: block; }
+
+/* ── Optional toggle ── */
+.opt-toggle {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 20px 8px;
+  font-size: 11px; color: var(--text-disabled); cursor: pointer; user-select: none;
+}
+.opt-toggle:hover { color: var(--text-secondary); }
+.opt-toggle-icon { width: 11px; height: 11px; transition: transform .2s; }
+.sec.show-opt .opt-toggle-icon { transform: rotate(180deg); }
+
+/* ── Line items sub-section ── */
+.li-wrap { padding: 6px 20px 12px; }
+.li-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.li-label { font-size: 12px; color: var(--text-secondary); }
+.li-actions { display: flex; gap: 6px; }
+.li-toggle-row {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-secondary);
+  cursor: pointer; padding: 3px 0;
+  user-select: none;
+}
+.li-toggle-row:hover { color: var(--text-default); }
+.li-tog-chevron { width: 12px; height: 12px; transition: transform .2s; }
+.li-wrap.li-open .li-tog-chevron { transform: rotate(180deg); }
+.li-table-wrap {
+  display: none; overflow-x: auto; min-width: 0;
+  border: 1px solid var(--border-divider); border-radius: 6px; margin-top: 6px;
+}
+.li-wrap.li-open .li-table-wrap { display: block; }
+.li-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 640px; }
+.li-table th {
+  padding: 6px 10px; text-align: left; background: #f9fafb;
+  color: var(--text-secondary); font-weight: 500; white-space: nowrap;
+  border-bottom: 1px solid var(--border-divider);
+}
+.li-table td {
+  padding: 6px 10px; border-bottom: 1px solid var(--border-divider);
+  color: var(--text-default); vertical-align: middle;
+}
+.li-table tr:last-child td { border-bottom: none; }
+.li-table .li-cell { cursor: text; border-radius: 3px; }
+.li-wrap.li-edit-mode .li-cell { outline: 1px dashed var(--border-default); background: #fefce8; }
+.li-wrap.li-edit-mode .li-cell:focus { outline: 2px solid var(--primary); background: #fff; }
+.li-del-btn { font-size: 11px; color: var(--text-disabled); cursor: pointer; padding: 2px; border-radius: 3px; border: none; background: none; }
+.li-del-btn:hover { color: var(--error); background: var(--error-bg); }
+.li-add-row { font-size: 11px; color: var(--text-secondary); cursor: pointer; padding: 6px 10px; border-top: 1px solid var(--border-divider); display: flex; align-items: center; gap: 4px; }
+.li-add-row:hover { background: var(--bg-hover); }
+
+/* ── Readonly info row (Submitter) ── */
+.ro-row {
+  display: grid; grid-template-columns: 132px 1fr;
+  gap: 6px; padding: 5px 20px; align-items: start; min-height: 30px;
+}
+.ro-label { font-size: 12px; color: var(--text-secondary); padding-top: 3px; }
+.ro-value { font-size: 13px; color: var(--text-secondary); padding: 2px 6px; line-height: 1.5; }
+
+/* ── Footer ── */
+.dp-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-top: 1px solid var(--border-divider);
+  background: var(--bg-container); flex-shrink: 0;
+}
+.dp-foot-right { display: flex; gap: 8px; }
+
+/* ── UX tip banner ── */
+.tip-banner {
+  margin: 10px 20px 0;
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px;
+  padding: 8px 12px; font-size: 11px; color: #1e40af; line-height: 1.5;
+}
+.tip-banner strong { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ── Left: invoice list ── -->
+<aside class="list-panel">
+  <div class="lp-head">
+    <div class="lp-title">Invoice Review</div>
+    <div class="lp-sub">3 pending · 1 reviewed</div>
+  </div>
+  <div class="lp-scroll">
+    <div class="inv-card active">
+      <div class="inv-card-title">JP_麻布プラザ株式会社_20260315</div>
+      <div class="inv-card-meta">
+        <span>JP · CTW INC</span>
+        <span class="badge badge-pending">Pending</span>
+      </div>
+      <div class="inv-card-amount">¥ 12,430 JPY</div>
+    </div>
+    <div class="inv-card">
+      <div class="inv-card-title">US_CloudVendor_Invoice_0501</div>
+      <div class="inv-card-meta">
+        <span>US · CTW US INC</span>
+        <span class="badge badge-pending">Pending</span>
+      </div>
+      <div class="inv-card-amount">$ 2,400.00 USD</div>
+    </div>
+    <div class="inv-card">
+      <div class="inv-card-title">SG_TechSolutions_Apr2026</div>
+      <div class="inv-card-meta">
+        <span>SG · CTW G123 SINGAPORE</span>
+        <span class="badge badge-reviewed">Reviewed</span>
+      </div>
+      <div class="inv-card-amount">S$ 5,600.00 SGD</div>
+    </div>
+    <div class="inv-card">
+      <div class="inv-card-title">CN_上海威优易橙信技术_0412</div>
+      <div class="inv-card-meta">
+        <span>CN · SHANGHAI WEIYOUYI</span>
+        <span class="badge badge-pending">Pending</span>
+      </div>
+      <div class="inv-card-amount">¥ 58,000.00 CNY</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Right: detail panel ── -->
+<main class="detail-panel">
+
+  <!-- Header -->
+  <div class="dp-head">
+    <div class="dp-head-left">
+      <div class="dp-head-title">JP_麻布プラザ株式会社_20260315</div>
+      <span class="badge badge-waiting">Waiting</span>
+    </div>
+    <div class="dp-head-right">
+      <button class="btn btn-ghost btn-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        原型备注
+      </button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="dp-body">
+
+    <!-- PDF pane -->
+    <div class="pdf-pane">
+      <div class="pdf-placeholder">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+        </svg>
+        <span>PDF Preview</span>
+      </div>
+    </div>
+
+    <!-- Form pane -->
+    <div class="form-pane" id="formPane">
+
+      <!-- Summary title -->
+      <div class="iv-sum-hd">
+        <span class="iv-sum-title">Summary</span>
+        <span class="demo-tag">方案四 · Collapsible + Inline Edit</span>
+      </div>
+
+      <!-- UX tip -->
+      <div class="tip-banner">
+        <strong>交互说明：</strong> 点击任意字段值进入 Inline 编辑；点击 Section 标题折叠/展开；
+        Bank Info / Fee Recognition 默认收起；点击「Show optional」显示选填空字段。
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SECTION I · Overview  (expanded by default)
+      ══════════════════════════════════════════ -->
+      <div class="sec" id="sec-overview">
+        <div class="sec-hd" id="hd-overview" onclick="toggleSec('overview')">
+          <div class="sec-hd-left">
+            <span class="sec-hd-title">Overview</span>
+            <span class="sec-hd-info" id="info-overview"></span>
+          </div>
+          <svg class="sec-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="sec-bd" id="bd-overview">
+          <div class="sec-bd-inner">
+
+            <!-- Description (stacked textarea) -->
+            <div class="field-row stacked" data-field="description" data-req>
+              <div class="field-label">Description :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">件名「CMアウト作業 2026.3月」。異世界のんびり農家ドーリーミニライフTVCM1 TVCM作業（税抜11,300円・消費税10%・税込12,430円）</span>
+                <textarea class="field-textarea" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">件名「CMアウト作業 2026.3月」。異世界のんびり農家ドーリーミニライフTVCM1 TVCM作業（税抜11,300円・消費税10%・税込12,430円）</textarea>
+              </div>
+            </div>
+
+            <!-- Region -->
+            <div class="field-row" data-field="region" data-req>
+              <div class="field-label">Region :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">Japan (JP)</span>
+                <select class="field-select" onblur="stopEdit(this)" onchange="stopEdit(this)">
+                  <option value="JP" selected>Japan (JP)</option>
+                  <option value="US">United States (US)</option>
+                  <option value="SG">Singapore (SG)</option>
+                  <option value="CN">China (CN)</option>
+                  <option value="TW">Taiwan (TW)</option>
+                  <option value="KY">Cayman Islands (KY)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Company -->
+            <div class="field-row" data-field="company" data-req>
+              <div class="field-label">Company :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">CTW INC</span>
+                <select class="field-select" onblur="stopEdit(this)" onchange="stopEdit(this)">
+                  <option value="CTW INC" selected>CTW INC</option>
+                  <option value="CTW US INC">CTW US INC</option>
+                  <option value="CTW G123 SINGAPORE PTE LTD">CTW G123 SINGAPORE PTE LTD</option>
+                  <option value="AINEKOX CO LTD.">AINEKOX CO LTD.</option>
+                  <option value="SHANGHAI WEIYOUYI CHUXIN TECH CO LTD">SHANGHAI WEIYOUYI CHUXIN TECH CO LTD</option>
+                  <option value="CTW CAYMAN">CTW CAYMAN</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Vendor Name -->
+            <div class="field-row" data-field="vendorName" data-req>
+              <div class="field-label">Vendor Name :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">麻布プラザ株式会社</span>
+                <input class="field-input" value="麻布プラザ株式会社" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Invoice No. -->
+            <div class="field-row" data-field="invoiceNo" data-req>
+              <div class="field-label">Invoice No. :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">26000671-001(01)</span>
+                <input class="field-input" value="26000671-001(01)" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Purpose -->
+            <div class="field-row" data-field="purpose" data-req>
+              <div class="field-label">Purpose :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">TVCM制作費 - 2026年3月分</span>
+                <input class="field-input" value="TVCM制作費 - 2026年3月分" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Invoice Date -->
+            <div class="field-row" data-field="invoiceDate" data-req>
+              <div class="field-label">Invoice Date :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">2026-03-15</span>
+                <input class="field-date" type="date" value="2026-03-15" onblur="stopEdit(this)" onchange="stopEdit(this)">
+              </div>
+            </div>
+
+            <!-- Accounting Date -->
+            <div class="field-row" data-field="accountingDate" data-req>
+              <div class="field-label">Accounting Date :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">2026-03-31</span>
+                <input class="field-date" type="date" value="2026-03-31" onblur="stopEdit(this)" onchange="stopEdit(this)">
+              </div>
+            </div>
+
+            <!-- Due Date (optional, hidden by default) -->
+            <div class="field-row opt-field" data-field="dueDate">
+              <div class="field-label">Due Date :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">2026-04-15</span>
+                <input class="field-date" type="date" value="2026-04-15" onblur="stopEdit(this)" onchange="stopEdit(this)">
+              </div>
+            </div>
+
+          </div><!-- /sec-bd-inner -->
+          <div class="opt-toggle" onclick="toggleOpt('overview')">
+            <svg class="opt-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            <span id="opt-lbl-overview">Show 1 optional field</span>
+          </div>
+        </div><!-- /sec-bd -->
+      </div><!-- /sec-overview -->
+
+
+      <!-- ══════════════════════════════════════════
+           SECTION II · Amount  (expanded)
+      ══════════════════════════════════════════ -->
+      <div class="sec" id="sec-amount">
+        <div class="sec-hd" id="hd-amount" onclick="toggleSec('amount')">
+          <div class="sec-hd-left">
+            <span class="sec-hd-title">Amount</span>
+          </div>
+          <svg class="sec-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="sec-bd" id="bd-amount">
+          <div class="sec-bd-inner">
+
+            <!-- Currency -->
+            <div class="field-row" data-field="currency" data-req>
+              <div class="field-label">Currency :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">JPY</span>
+                <select class="field-select" onblur="stopEdit(this)" onchange="stopEdit(this)">
+                  <option value="JPY" selected>JPY</option>
+                  <option value="USD">USD</option>
+                  <option value="SGD">SGD</option>
+                  <option value="CNY">CNY</option>
+                  <option value="TWD">TWD</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Total Amount -->
+            <div class="field-row" data-field="totalAmount" data-req>
+              <div class="field-label">Total Amount :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">¥ 12,430</span>
+                <input class="field-input" type="number" value="12430" onblur="stopEditAmount(this, '¥ ')" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Excl. Tax Amount -->
+            <div class="field-row" data-field="exclTax" data-req>
+              <div class="field-label">Excl. Tax Amount :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">¥ 11,300</span>
+                <input class="field-input" type="number" value="11300" onblur="stopEditAmount(this, '¥ ')" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Tax Amount -->
+            <div class="field-row" data-field="taxAmount" data-req>
+              <div class="field-label">Tax Amount :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">¥ 1,130</span>
+                <input class="field-input" type="number" value="1130" onblur="stopEditAmount(this, '¥ ')" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Line Items sub-section -->
+            <div class="li-wrap" id="liWrap">
+              <div class="li-top">
+                <span class="li-label">Line Items :</span>
+                <div class="li-actions">
+                  <button class="btn btn-ghost btn-sm" id="liEditBtn" onclick="toggleLiEdit()">Edit</button>
+                  <button class="btn btn-ghost btn-sm" id="liAddBtn" onclick="addLiRow()" style="display:none;">+ Row</button>
+                </div>
+              </div>
+              <div class="li-toggle-row" onclick="toggleLi()">
+                <svg class="li-tog-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                <span id="liSummary">1 item — ¥ 12,430 (incl. tax)</span>
+              </div>
+              <div class="li-table-wrap">
+                <table class="li-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Item</th>
+                      <th>Description</th>
+                      <th>Service Period</th>
+                      <th>Excl. Tax</th>
+                      <th>Tax Rate</th>
+                      <th style="text-align:right">Incl. Tax</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="liTbody">
+                    <tr data-li="0">
+                      <td>1</td>
+                      <td class="li-cell" contenteditable="false">TVCM1制作</td>
+                      <td class="li-cell" contenteditable="false">CMアウト作業</td>
+                      <td class="li-cell" contenteditable="false">2026-03</td>
+                      <td class="li-cell" contenteditable="false">¥ 11,300</td>
+                      <td class="li-cell" contenteditable="false">10%</td>
+                      <td class="li-cell" contenteditable="false" style="text-align:right">¥ 12,430</td>
+                      <td><button class="li-del-btn" onclick="delLiRow(this)">✕</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="li-add-row" id="liAddRowBtn" style="display:none;" onclick="addLiRow()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                  Add row
+                </div>
+              </div>
+            </div><!-- /li-wrap -->
+
+            <!-- Optional: Accrual Tax Rate -->
+            <div class="field-row opt-field" data-field="accrualTax">
+              <div class="field-label">Accrual Tax Rate :</div>
+              <div class="field-val-wrap">
+                <span class="field-val empty" onclick="startEdit(this)">—</span>
+                <input class="field-input" type="number" placeholder="e.g. 10" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Optional: Amount Paid -->
+            <div class="field-row opt-field" data-field="amountPaid">
+              <div class="field-label">Amount Paid :</div>
+              <div class="field-val-wrap">
+                <span class="field-val empty" onclick="startEdit(this)">—</span>
+                <input class="field-input" type="number" placeholder="Prepaid invoices only" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Optional: Amount Due -->
+            <div class="field-row opt-field" data-field="amountDue">
+              <div class="field-label">Amount Due :</div>
+              <div class="field-val-wrap">
+                <span class="field-val empty" onclick="startEdit(this)">—</span>
+                <input class="field-input" type="number" placeholder="Prepaid invoices only" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+          </div>
+          <div class="opt-toggle" onclick="toggleOpt('amount')">
+            <svg class="opt-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            <span id="opt-lbl-amount">Show 3 optional fields</span>
+          </div>
+        </div>
+      </div><!-- /sec-amount -->
+
+
+      <!-- ══════════════════════════════════════════
+           SECTION III · Bank Info  (collapsed by default)
+      ══════════════════════════════════════════ -->
+      <div class="sec" id="sec-bank">
+        <div class="sec-hd is-collapsed" id="hd-bank" onclick="toggleSec('bank')">
+          <div class="sec-hd-left">
+            <span class="sec-hd-title">Bank Info</span>
+            <span class="sec-hd-info">10 fields · click to expand</span>
+          </div>
+          <svg class="sec-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="sec-bd is-collapsed" id="bd-bank" style="max-height:0">
+          <div class="sec-bd-inner">
+
+            <!-- Bank Name -->
+            <div class="field-row" data-field="bankName" data-req>
+              <div class="field-label">Bank Name :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">三井住友銀行</span>
+                <input class="field-input" value="三井住友銀行" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Branch Name -->
+            <div class="field-row" data-field="branchName" data-req>
+              <div class="field-label">Branch Name :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">麻布支店</span>
+                <input class="field-input" value="麻布支店" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Account Type (JP only) -->
+            <div class="field-row" data-field="accountType" data-req>
+              <div class="field-label">Account Type :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">普通預金</span>
+                <select class="field-select" onblur="stopEdit(this)" onchange="stopEdit(this)">
+                  <option value="">— Select —</option>
+                  <option value="普通預金" selected>普通預金</option>
+                  <option value="当座預金">当座預金</option>
+                  <option value="定期預金">定期預金</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Account No. -->
+            <div class="field-row" data-field="accountNo" data-req>
+              <div class="field-label">Account No. :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">1234567</span>
+                <input class="field-input" value="1234567" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Account Name -->
+            <div class="field-row" data-field="accountName" data-req>
+              <div class="field-label">Account Name :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">アザブプラザ(カ</span>
+                <input class="field-input" value="アザブプラザ(カ" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Bank Code -->
+            <div class="field-row" data-field="bankCode" data-req>
+              <div class="field-label">Bank Code :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">0009</span>
+                <input class="field-input" value="0009" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Branch Code -->
+            <div class="field-row" data-field="branchCode" data-req>
+              <div class="field-label">Branch Code :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">210</span>
+                <input class="field-input" value="210" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Account Name (Kana) -->
+            <div class="field-row" data-field="accountNameKana" data-req>
+              <div class="field-label">Account Name (Kana) :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">アザブプラザカブシキガイシャ</span>
+                <input class="field-input" value="アザブプラザカブシキガイシャ" placeholder="半角カタカナ" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Bank Name (Kana) -->
+            <div class="field-row" data-field="bankNameKana" data-req>
+              <div class="field-label">Bank Name (Kana) :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">ミツイスミトモ</span>
+                <input class="field-input" value="ミツイスミトモ" placeholder="半角カタカナ" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- Payer Bank -->
+            <div class="field-row" data-field="payerBank">
+              <div class="field-label">Payer Bank :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">三井住友銀行 (法人)</span>
+                <input class="field-input" value="三井住友銀行 (法人)" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+            <!-- SWIFT Code (optional) -->
+            <div class="field-row opt-field" data-field="swiftCode">
+              <div class="field-label">SWIFT Code :</div>
+              <div class="field-val-wrap">
+                <span class="field-val empty" onclick="startEdit(this)">—</span>
+                <input class="field-input" placeholder="8 or 11 chars" onblur="stopEdit(this)" onkeydown="keyEdit(event,this)">
+              </div>
+            </div>
+
+          </div>
+          <div class="opt-toggle" onclick="toggleOpt('bank')">
+            <svg class="opt-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            <span id="opt-lbl-bank">Show 1 optional field</span>
+          </div>
+        </div>
+      </div><!-- /sec-bank -->
+
+
+      <!-- ══════════════════════════════════════════
+           SECTION IV · Fee Recognition  (collapsed)
+      ══════════════════════════════════════════ -->
+      <div class="sec" id="sec-recog">
+        <div class="sec-hd is-collapsed" id="hd-recog" onclick="toggleSec('recog')">
+          <div class="sec-hd-left">
+            <span class="sec-hd-title">Fee Recognition</span>
+            <span class="sec-hd-info">5 fields · click to expand</span>
+          </div>
+          <svg class="sec-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="sec-bd is-collapsed" id="bd-recog" style="max-height:0">
+          <div class="sec-bd-inner">
+
+            <!-- Allocation Required -->
+            <div class="field-row" data-field="allocReq">
+              <div class="field-label">Allocation Required :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">No</span>
+                <select class="field-select" onblur="stopEdit(this)" onchange="stopEdit(this)">
+                  <option value="">— Select —</option>
+                  <option value="No" selected>No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Recognition Policy -->
+            <div class="field-row" data-field="recognition">
+              <div class="field-label">Recognition :</div>
+              <div class="field-val-wrap">
+                <span class="field-val" onclick="startEdit(this)">IMMEDIATE</span>
+                <select class="field-select" onblur="stopEdit(this)" onchange="stopEdit(this)">
+                  <option value="">— Select —</option>
+                  <option value="IMMEDIATE" selected>IMMEDIATE</option>
+                  <option value="PREPAID_MONTHLY">PREPAID_MONTHLY</option>
+                  <option value="PREPAID_DAILY">PREPAID_DAILY</option>
+                  <option value="ACCRUAL_BY_SERVICE_PERIOD">ACCRUAL_BY_SERVICE_PERIOD</option>
+                  <option value="MONTHLY_BY_LINE_ITEM">MONTHLY_BY_LINE_ITEM</option>
+                  <option value="SCHEDULED_BY_DOCUMENT">SCHEDULED_BY_DOCUMENT</option>
+                  <option value="USAGE_BASED">USAGE_BASED</option>
+                  <option value="MILESTONE_BASED">MILESTONE_BASED</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Allocation Method (optional) -->
+            <div class="field-row opt-field" data-field="allocation">
+              <div class="field-label">Allocation :</div>
+              <div class="field-val-wrap">
+                <span class="field-val empty" onclick="startEdit(this)">—</span>
+                <select class="field-select" onblur="stopEdit(this)" onchange="stopEdit(this)">
+                  <option value="">— Select —</option>
+                  <option value="MONTHLY_EQUAL">MONTHLY_EQUAL</option>
+                  <option value="DAILY_PRORATA">DAILY_PRORATA</option>
+                  <option value="MONTHLY_BY_LINE_ITEM">MONTHLY_BY_LINE_ITEM</option>
+                  <option value="BY_LINE_ITEM_PERIOD">BY_LINE_ITEM_PERIOD</option>
+                  <option value="BY_EXPLICIT_SCHEDULE">BY_EXPLICIT_SCHEDULE</option>
+                  <option value="USAGE_BASED">USAGE_BASED</option>
+                  <option value="MANUAL">MANUAL</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Service Period Start (optional) -->
+            <div class="field-row opt-field" data-field="spStart">
+              <div class="field-label">Service Period Start :</div>
+              <div class="field-val-wrap">
+                <span class="field-val empty" onclick="startEdit(this)">—</span>
+                <input class="field-date" type="date" onblur="stopEdit(this)" onchange="stopEdit(this)">
+              </div>
+            </div>
+
+            <!-- Service Period End (optional) -->
+            <div class="field-row opt-field" data-field="spEnd">
+              <div class="field-label">Service Period End :</div>
+              <div class="field-val-wrap">
+                <span class="field-val empty" onclick="startEdit(this)">—</span>
+                <input class="field-date" type="date" onblur="stopEdit(this)" onchange="stopEdit(this)">
+              </div>
+            </div>
+
+          </div>
+          <div class="opt-toggle" onclick="toggleOpt('recog')">
+            <svg class="opt-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            <span id="opt-lbl-recog">Show 3 optional fields</span>
+          </div>
+        </div>
+      </div><!-- /sec-recog -->
+
+
+      <!-- ══════════════════════════════════════════
+           SECTION V · Submitter  (always expanded, no toggle)
+      ══════════════════════════════════════════ -->
+      <div class="sec" id="sec-submitter">
+        <div class="sec-hd" style="cursor:default; border-left-color: var(--text-disabled);">
+          <div class="sec-hd-left">
+            <span class="sec-hd-title" style="color:var(--text-disabled);">Submitter</span>
+          </div>
+        </div>
+        <div class="sec-bd" id="bd-submitter" style="max-height:300px;">
+          <div class="sec-bd-inner">
+            <div class="ro-row">
+              <div class="ro-label">Applicant :</div>
+              <div class="ro-value">田中 花子</div>
+            </div>
+            <div class="ro-row">
+              <div class="ro-label">Application Date :</div>
+              <div class="ro-value">2026-03-20</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bottom padding -->
+      <div style="height:24px;"></div>
+
+    </div><!-- /form-pane -->
+  </div><!-- /dp-body -->
+
+  <!-- Footer -->
+  <div class="dp-foot">
+    <button class="btn btn-danger">Reject</button>
+    <div class="dp-foot-right">
+      <button class="btn btn-ghost">Save Draft</button>
+      <button class="btn btn-primary">Approve</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ── Section toggle ── */
+function toggleSec(id) {
+  const hd = document.getElementById('hd-' + id);
+  const bd = document.getElementById('bd-' + id);
+  const isNowCollapsed = hd.classList.toggle('is-collapsed');
+  bd.classList.toggle('is-collapsed');
+  if (!isNowCollapsed) {
+    // expand: measure content height and set max-height
+    bd.style.maxHeight = bd.scrollHeight + 'px';
+    // after transition, remove fixed max-height so content can grow
+    bd.addEventListener('transitionend', () => {
+      if (!bd.classList.contains('is-collapsed')) bd.style.maxHeight = '9999px';
+    }, { once: true });
+  } else {
+    // collapse: reset to scrollHeight first for smooth transition
+    bd.style.maxHeight = bd.scrollHeight + 'px';
+    requestAnimationFrame(() => { bd.style.maxHeight = '0'; });
+  }
+}
+
+/* ── Inline edit ── */
+function startEdit(valEl) {
+  const row = valEl.closest('.field-row');
+  const inp = row.querySelector('.field-input, .field-select, .field-date, .field-textarea');
+  if (!inp) return;
+  // close any other open edit
+  document.querySelectorAll('.field-row.editing').forEach(r => {
+    if (r !== row) cancelEdit(r);
+  });
+  row.classList.add('editing');
+  inp.classList.add('active-inp');
+  requestAnimationFrame(() => {
+    inp.focus();
+    if (inp.type !== 'date' && inp.tagName !== 'SELECT' && inp.select) inp.select();
+  });
+}
+
+function stopEdit(inp) {
+  const row = inp.closest('.field-row');
+  if (!row || !row.classList.contains('editing')) return;
+  const valEl = row.querySelector('.field-val');
+  let displayVal = '';
+  if (inp.tagName === 'SELECT') {
+    displayVal = inp.options[inp.selectedIndex]?.text || '';
+    if (displayVal === '— Select —') displayVal = '';
+  } else if (inp.type === 'date') {
+    displayVal = inp.value;
+  } else {
+    displayVal = inp.value.trim();
+  }
+  valEl.textContent = displayVal || '—';
+  valEl.className = 'field-val' + (
+    !displayVal
+      ? (row.hasAttribute('data-req') ? ' req-empty' : ' empty')
+      : ''
+  );
+  inp.classList.remove('active-inp');
+  row.classList.remove('editing');
+}
+
+function stopEditAmount(inp, prefix) {
+  const row = inp.closest('.field-row');
+  if (!row || !row.classList.contains('editing')) return;
+  const valEl = row.querySelector('.field-val');
+  const num = parseFloat(inp.value);
+  const displayVal = isNaN(num) ? '' : prefix + num.toLocaleString();
+  valEl.textContent = displayVal || '—';
+  valEl.className = 'field-val' + (!displayVal ? ' req-empty' : '');
+  inp.classList.remove('active-inp');
+  row.classList.remove('editing');
+}
+
+function cancelEdit(row) {
+  const inp = row.querySelector('.field-input, .field-select, .field-date, .field-textarea');
+  if (inp) inp.classList.remove('active-inp');
+  row.classList.remove('editing');
+}
+
+function keyEdit(e, inp) {
+  if (e.key === 'Enter' && inp.tagName !== 'TEXTAREA') { e.preventDefault(); stopEdit(inp); }
+  if (e.key === 'Escape') { cancelEdit(inp.closest('.field-row')); }
+}
+
+/* ── Optional fields toggle ── */
+function toggleOpt(secId) {
+  const sec = document.getElementById('sec-' + secId);
+  const lbl = document.getElementById('opt-lbl-' + secId);
+  const isOpen = sec.classList.toggle('show-opt');
+  // count optional fields
+  const count = sec.querySelectorAll('.opt-field').length;
+  lbl.textContent = isOpen
+    ? `Hide optional fields`
+    : `Show ${count} optional field${count !== 1 ? 's' : ''}`;
+  // re-measure section body height after toggle
+  const bd = document.getElementById('bd-' + secId);
+  if (bd && !bd.classList.contains('is-collapsed')) {
+    bd.style.maxHeight = bd.scrollHeight + 'px';
+    setTimeout(() => { bd.style.maxHeight = '9999px'; }, 280);
+  }
+}
+
+/* ── Line items ── */
+function toggleLi() {
+  const wrap = document.getElementById('liWrap');
+  wrap.classList.toggle('li-open');
+  const bd = document.getElementById('bd-amount');
+  if (bd && !bd.classList.contains('is-collapsed')) {
+    setTimeout(() => { bd.style.maxHeight = bd.scrollHeight + 'px'; setTimeout(() => bd.style.maxHeight = '9999px', 280); }, 10);
+  }
+}
+
+let liEditMode = false;
+function toggleLiEdit() {
+  const wrap = document.getElementById('liWrap');
+  const btn = document.getElementById('liEditBtn');
+  const addBtn = document.getElementById('liAddBtn');
+  const addRow = document.getElementById('liAddRowBtn');
+  liEditMode = !liEditMode;
+  if (liEditMode) {
+    wrap.classList.add('li-open', 'li-edit-mode');
+    btn.textContent = 'Done';
+    addBtn.style.display = 'inline-flex';
+    addRow.style.display = 'flex';
+    wrap.querySelectorAll('.li-cell').forEach(c => c.contentEditable = 'true');
+  } else {
+    wrap.classList.remove('li-edit-mode');
+    btn.textContent = 'Edit';
+    addBtn.style.display = 'none';
+    addRow.style.display = 'none';
+    wrap.querySelectorAll('.li-cell').forEach(c => c.contentEditable = 'false');
+    updateLiSummary();
+  }
+}
+
+function addLiRow() {
+  const tbody = document.getElementById('liTbody');
+  const rowCount = tbody.querySelectorAll('tr').length + 1;
+  const tr = document.createElement('tr');
+  tr.dataset.li = rowCount - 1;
+  tr.innerHTML = `
+    <td>${rowCount}</td>
+    <td class="li-cell" contenteditable="true"></td>
+    <td class="li-cell" contenteditable="true"></td>
+    <td class="li-cell" contenteditable="true"></td>
+    <td class="li-cell" contenteditable="true"></td>
+    <td class="li-cell" contenteditable="true"></td>
+    <td class="li-cell" contenteditable="true" style="text-align:right"></td>
+    <td><button class="li-del-btn" onclick="delLiRow(this)">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  tr.querySelector('.li-cell').focus();
+  const bd = document.getElementById('bd-amount');
+  if (bd) { setTimeout(() => bd.style.maxHeight = '9999px', 10); }
+}
+
+function delLiRow(btn) {
+  const tr = btn.closest('tr');
+  tr.remove();
+  // renumber
+  document.querySelectorAll('#liTbody tr').forEach((r, i) => {
+    r.cells[0].textContent = i + 1;
+    r.dataset.li = i;
+  });
+  updateLiSummary();
+}
+
+function updateLiSummary() {
+  const rows = document.querySelectorAll('#liTbody tr');
+  document.getElementById('liSummary').textContent = `${rows.length} item${rows.length !== 1 ? 's' : ''}`;
+}
+</script>
+</body>
+</html>

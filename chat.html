@@ -280,7 +280,10 @@
             <!-- Today -->
             <div class="sidebar-section" style="margin-top:16px;">
                 <div class="sidebar-section-label">Today</div>
-                <div class="sidebar-item active">
+                <div class="sidebar-item" id="sidebarXRelease">
+                    <span class="sidebar-item-text">X 官号上线发布任务</span>
+                </div>
+                <div class="sidebar-item active" id="sidebarDefault">
                     <span class="sidebar-item-text">AI Assistant Help</span>
                 </div>
                 <div class="sidebar-item">
@@ -367,6 +370,54 @@
                 { role: 'user', text: '<span class="mention-tag">@A</span>&nbsp;创建一个A票&nbsp;<span class="mention-tag">@W</span>&nbsp;同步w文档建一份', html: true },
                 { role: 'ai',   text: "I'd be happy to help you create a project plan for the Q3 marketing campaign." }
             ]
+        },
+
+        'x-release': {
+            title: 'X 官号上线发布任务',
+            placeholder: '输入发布文案或指令…',
+            messages: [
+                { role: 'ai', text: '你好，林晨曦。我是 Minion Agent，「逃离校园」X 官号上线发布流程已就绪，当前进度如下：\n\n✅ 1. Upload follower of the official account — 已完成\n✅ 2.2 Prepare SNS banner — 已完成\n⏳ 2.1 Prepare text — 等待你提供\n⏳ 2.3 Setup Sending Time — 等待你设置\n🔲 3. Test with own X account — 待执行\n\n请先提供发布文案（Release Text），我来协助你完善并提交 Adnext。' },
+                { role: 'user', text: '文案如下：\n\n「逃离校园」今日正式上线！打破课堂束缚，开启你的冒险旅程。限时首发活动进行中，立即体验 →' },
+                { role: 'ai', text: '收到文案！我帮你检查了一下：\n\n> 「逃离校园」今日正式上线！打破课堂束缚，开启你的冒险旅程。限时首发活动进行中，立即体验 →\n\n✅ 字数：52 字（X 平台限制 280 字符，符合要求）\n✅ CTA 明确，带有紧迫感\n⚠️ 建议加上 hashtag，例如 #逃离校园 #新游上线\n\n已在 Adnext 中创建草稿，等你确认后提交。\n\n接下来请设置发送时间（Sending Time）。建议参考历史数据：\n① 今日 20:00（晚高峰，互动率最高）\n② 今日 12:00（午休时段）\n③ 明日 09:00（早间流量）' },
+                { role: 'user', text: '加上 hashtag，发送时间选今天 20:00' },
+                { role: 'ai', text: '已更新文案：\n\n「逃离校园」今日正式上线！打破课堂束缚，开启你的冒险旅程。限时首发活动进行中，立即体验 → #逃离校园 #新游上线\n\n发送时间已设置为：今日 20:00\n\n📋 当前任务摘要\n• 文案：已确认 ✅\n• SNS Banner：已完成 ✅\n• Sending Time：今日 20:00 ✅\n• Follower Upload：已完成 ✅\n\n最后一步：我将用你自己的 X 账号进行测试发送，确认格式无误后正式推送。是否现在执行？', html: false },
+            ],
+            responses: {
+                '执行': '正在用测试账号 @DavidChen_test 发送测试帖……\n\n✅ 测试发送成功！预览链接：x.com/preview/draft-abc123\n\n所有检查项通过，已将正式发布任务排入队列，将于今日 20:00 自动推送。任务完成 🎉',
+                '确认': '已确认执行测试发送。正在处理……\n\n✅ 测试发送成功！所有检查项通过，正式发布任务已排入队列，将于今日 20:00 自动推送。',
+                '取消': '已暂停发布流程。任务草稿已保存，你可以随时回来继续。',
+            }
+        },
+
+        'need-input': {
+            title: 'Minion · 受众分组确认',
+            placeholder: '输入受众分组信息…',
+            messages: [
+                { role: 'ai', text: '你好，我是 Minion Agent。\n\n在执行「逃离校园」X 通知发布任务时，需要你提供以下信息才能继续：\n\n**① 分组类型**\n请选择目标受众的发送方式：\n· `all_followers` — 向所有关注者发送\n· `segment_id` — 指定某个分组 ID\n· `tag_list` — 按标签列表筛选\n\n**② 若选择 `segment_id`，请提供具体 ID**\n例如：`seg_jp_lvl2`、`seg_active_30d`\n\n**③ 若选择 `tag_list`，请列出标签**\n例如：`active_30d, jp_user, vip_lv3`\n\n请直接回复你的选择，我来记录并继续执行。' },
+                { role: 'user', text: '分组类型选 segment_id，ID 是 seg_jp_active_30d' },
+                { role: 'ai', text: '✅ 已记录你的输入：\n\n| 字段 | 值 |\n|---|---|\n| 分组类型 | `segment_id` |\n| Segment ID | `seg_jp_active_30d` |\n\n在我继续执行之前，请二次确认以上信息是否正确：\n\n· **分组类型**：`segment_id`\n· **Segment ID**：`seg_jp_active_30d`\n\n此分组将用于本次 X 通知的发送目标。确认无误后请回复「确认」，如需修改请直接告知。' },
+            ],
+            responses: {
+                '确认': '✅ 已确认。\n\nMinion 正在继续执行「在 Adnext 创建发布内容」：\n· 受众分组：`seg_jp_active_30d`（共约 12,400 名用户）\n· Banner 模板：标准上线模板\n· 发送时间：待后续步骤确认\n\n执行完成后我会再次通知你。此对话任务已标记为完成 ✅',
+                '修改': '没问题，请告诉我正确的分组类型或 ID，我重新记录。',
+                '取消': '已暂停，等你随时回来继续。',
+            }
+        },
+
+        'review-draft': {
+            title: 'Minion · X 文案审阅',
+            placeholder: '输入选择或修改意见…',
+            messages: [
+                { role: 'ai', text: '你好，我是 Minion Agent。\n\n「逃离校园」X 通知文案已生成完毕，请从以下 3 个版本中选择一个（或提出修改意见）：\n\n---\n**V1** · 功能导向\n> 🎮 Escape Campus is LIVE! Build your ultimate campus, challenge rivals, and claim your throne. Download now and grab your launch rewards — limited time only! #EscapeCampus #GameLaunch\n\n---\n**V2** · 情感驱动\n> 🚀 The wait is over — Escape Campus launches TODAY! Outsmart, outbuild, and outlast. Grab your exclusive launch bonus now. #EscapeCampus\n\n---\n**V3** · 简洁号召\n> 🏫 Escape Campus officially launches now! Build your dream campus & challenge the world. Download & get your free starter pack! #GameLaunch #EscapeCampus\n\n---\n请回复 **V1 / V2 / V3**，或告诉我修改方向（例如"V2 基础上加上下载链接"）。' },
+                { role: 'user', text: 'V2，加上下载链接' },
+                { role: 'ai', text: '✅ 已更新 V2 文案，加入下载链接：\n\n> 🚀 The wait is over — Escape Campus launches TODAY! Outsmart, outbuild, and outlast. Grab your exclusive launch bonus now 👉 g123.com/escape-campus #EscapeCampus\n\n字数：145 字符（X 平台上限 280，✅ 符合）\n\n在我将此文案提交至 Adnext 发布流程之前，请二次确认：\n\n**最终文案（V2 修改版）**\n> 🚀 The wait is over — Escape Campus launches TODAY! Outsmart, outbuild, and outlast. Grab your exclusive launch bonus now 👉 g123.com/escape-campus #EscapeCampus\n\n确认无误请回复「确认」，如需继续修改请直接告知。' },
+            ],
+            responses: {
+                '确认': '✅ 文案已确认。\n\nMinion 正在将以下内容提交至 Adnext：\n· **文案**：V2 修改版（含下载链接）\n· **发送时间**：将在下一步骤中由你设置\n· **受众**：seg_jp_active_30d\n\n任务进入下一阶段，执行完成后会再通知你。此对话任务已标记为完成 ✅',
+                '修改': '没问题，请告诉我修改方向，我立刻更新文案。',
+                'V1': '已切换到 V1 版本。请确认或继续修改。',
+                'V3': '已切换到 V3 版本。请确认或继续修改。',
+            }
         },
 
         'email-reply-1': {
@@ -530,14 +581,15 @@
             sendBtn.classList.add('active');
         }
     } else {
-        if (preset.title) {
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            const activeItem = document.querySelector('.sidebar-item.active') || document.querySelector('.sidebar-section .sidebar-item');
-            if (activeItem) {
-                activeItem.classList.add('active');
-                const textEl = activeItem.querySelector('.sidebar-item-text');
-                if (textEl) textEl.textContent = preset.title;
-            }
+        /* Activate correct sidebar item */
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        if (sceneName === 'x-release') {
+            const el = document.getElementById('sidebarXRelease');
+            if (el) el.classList.add('active');
+            document.title = 'X 官号上线发布任务 · Doraemon';
+        } else {
+            const el = document.getElementById('sidebarDefault');
+            if (el) el.classList.add('active');
         }
         if (preset.placeholder) {
             chatTextarea.placeholder = preset.placeholder;

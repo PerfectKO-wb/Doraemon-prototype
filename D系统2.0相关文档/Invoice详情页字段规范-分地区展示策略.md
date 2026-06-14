@@ -75,22 +75,33 @@
 | Service Period | `service_period_start` / `service_period_end` | 服务期间，用于费用摊销判断 | 📅 日期选择器（开始 + 结束各一个） | ⚪ / ✅ |
 | Accounting Date | `accounting_date` | 入账日期，决定进哪个月的账 | 📝 日期选择器（AI 从不识别，0/179，必须手填） | ✅ / ✅ |
 | Bank Name | `ext_data.bank_account.bank_name` | **收款方**银行名称（结构化），转账必要信息 | ✏️ 文本输入 | ✅ / ⚪ |
-| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称（JP 内汇必填） | ✏️ 文本输入 | ✅ / ⚪ |
-| Account Type | `ext_data.bank_account.account_type` | **收款方**账户类型，JP 专用枚举 | 🔽 下拉选择（普通預金 / 当座預金 / 定期預金） | ✅ / ⚪ |
+| Branch Name | `ext_data.bank_account.branch_name` | **收款方**支行名称（JP 内汇必填，SWIFT 有值时选填） | ✏️ 文本输入 | ✅ / ⚪ |
+| Account Type | `ext_data.bank_account.account_type` | **收款方**账户类型，JP 专用枚举；SWIFT Code 无值时必填，有值时选填 | 🔽 下拉选择（普通預金 / 当座預金 / 定期預金） | ✅ / ⚪ |
 | Account No. | `ext_data.bank_account.account_no` | **收款方**口座番号（7位） | ✏️ 文本输入（限 7 位数字） | ✅ / ⚪ |
 | Account Name | `ext_data.bank_account.account_name` | **收款方**账户名称（JP 需片假名）；PURCHASE 下为供应商账户名，SALE 下为 CTW 收款账户名 | ✏️ 文本输入 | ✅ / ⚪ |
 | Bank Code | `ext_data.payment_rail.bank_code` | 银行代码（4位，JP 金融机构代码） | ✏️ 文本输入（限 4 位数字） | ✅ / ⚪ |
 | Branch Code | `ext_data.payment_rail.branch_code` | 支行代码（3位） | ✏️ 文本输入（限 3 位数字） | ✅ / ⚪ |
-| Account Name (Kana) | `ext_data.payment_rail.account_name_kana` | 口座名義（半角片假名）；日本内汇银行系统格式要求，AI 识别率 5%，多数需财务补填 | ✏️ 文本输入（半角片假名格式，AI 识别率 5%，多数需财务补填） | ⚪ / —（SALE 方向不展示）|
-| Bank Name (Kana) | `ext_data.payment_rail.bank_name_kana` | 銀行名（半角片假名），部分银行系统报文要求 | ✏️ 文本输入（半角片假名格式） | ⚪ / —（SALE 方向不展示）|
+| Account Name (Kana) | `ext_data.payment_rail.account_name_kana` | 口座名義（半角片假名）；日本内汇银行系统格式要求，AI 识别率 5%，多数需财务补填；**SWIFT Code 无值时必填，有值时选填** | ✏️ 文本输入（半角片假名格式，AI 识别率 5%，多数需财务补填） | ✅ / —（SALE 方向不展示）|
+| Bank Name (Kana) | `ext_data.payment_rail.bank_name_kana` | 銀行名（半角片假名），部分银行系统报文要求；**SWIFT Code 无值时必填，有值时选填** | ✏️ 文本输入（半角片假名格式） | ✅ / —（SALE 方向不展示）|
 | SWIFT Code | `ext_data.payment_rail.swift_code` | 国际汇款时使用；JP 内汇通常不需要，但对外付款或特殊场景下可填写 | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
 | Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款银行；仅在发票正文提及时 AI 识别 | ✏️ 文本输入（可手动填写/修改；输入框右侧提供快速填充图标，选择预设后同步填入 Payer Bank + Payer Account） | ⚪ / ⚪ |
 | Payer Account | `payer_account_name` | 付款方账户名称，与 `payer_bank_name` 配套使用，明确付款主体 | ✏️ 文本输入（可手动填写/修改；通过 Payer Bank 快速填充联动写入） | ⚪ / ⚪ |
-| Allocation Required | `allocation_required` | 是否需要跨期分摊，控制 Allocation 字段的显示；Yes = 需要摊销，显示 Allocation；No = 不摊销，Allocation 隐藏 | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
-| Allocation | `allocation_method` | 摊销计算方式，仅 allocation_required=Yes 时展示；枚举值：MONTHLY_EQUAL（按月平均）/ DAILY_PRORATA（按天比例）/ MONTHLY_BY_LINE_ITEM（明细行已按月拆分）/ BY_LINE_ITEM_PERIOD（行项目按非月度期间拆分）/ BY_EXPLICIT_SCHEDULE（按单据 schedule）/ USAGE_BASED（按用量分摊）/ MANUAL（证据不足，人工处理） | 🔽 下拉选择（7 个枚举值，条件展示） | ⚪ / ⚪ |
-| Recognition | `recognition_policy` | 费用确认策略，决定 AI 生成几条 JE 及所属期间；枚举值：IMMEDIATE（立即确认）/ PREPAID_MONTHLY（预付按月摊）/ PREPAID_DAILY（预付按天摊）/ ACCRUAL_BY_SERVICE_PERIOD（按可见服务期计提）/ MONTHLY_BY_LINE_ITEM（月度明细行即确认依据）/ SCHEDULED_BY_DOCUMENT（按单据 schedule 确认）/ USAGE_BASED（按用量/消耗确认）/ MILESTONE_BASED（按里程碑验收确认） | 🔽 下拉选择（8 个枚举值） | ⚪ / ⚪ |
+| Finance Payout | `requires_finance_payout` | 是否需要财务打款流程：true = 需要（走银行打款）；false = 不需要（如已付清、银行自动扣款）。为 false 时银行账号字段非必填 | 🔽 下拉选择（Required / Not Required） | ✅ / ✅ |
+| Amortization Periods | `amortization_period_count` | 整张发票默认分几期确认费用（如预付 12 个月 SaaS → 12）；行级 `amortization_period_count` 可覆盖此默认值 | 🔢 数字输入 | ⚪ / ⚪ |
+| Accrual Tax Rate | `accrual_tax_rate` | 费用分期摊销时使用的税率（%）；一次性确认或无分期计税需求时通常为 null | 🔢 数字输入（%） | ⚪ / ⚪ |
+| Amount Paid | `amount_paid` | 已实际支付的金额（仅预付款类型 invoice 才有值，其他情况不显示此行） | 🔢 数字输入 | ⚪ / ⚪ |
+| Amount Due | `amount_due` | 待付余额 = total_amount − amount_paid（仅预付款类型 invoice 才有值，显示时标红提醒） | 🔢 数字输入 | ⚪ / ⚪ |
+| Allocation Required | `allocation_required` | 是否需要跨期分摊，控制 Allocation 字段的显示；Yes = 需要摊销，显示 Allocation；No = 不摊销，Allocation 隐藏。顶层为整票默认值，行级优先 | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
+| Allocation | `allocation_method` | 摊销计算方式，仅 allocation_required=Yes 时展示；枚举值：MONTHLY_EQUAL（按月平均）/ DAILY_PRORATA（按天比例）/ MONTHLY_BY_LINE_ITEM（明细行已按月拆分）/ BY_LINE_ITEM_PERIOD（行项目按非月度期间拆分）/ BY_EXPLICIT_SCHEDULE（按单据 schedule）/ USAGE_BASED（按用量分摊）/ MANUAL（证据不足，人工处理）。顶层为整票默认值，行级优先 | 🔽 下拉选择（7 个枚举值，条件展示） | ⚪ / ⚪ |
+| Recognition | `recognition_policy` | 费用确认策略，决定 AI 生成几条 JE 及所属期间；枚举值：IMMEDIATE（立即确认）/ PREPAID_MONTHLY（预付按月摊）/ PREPAID_DAILY（预付按天摊）/ ACCRUAL_BY_SERVICE_PERIOD（按可见服务期计提）/ MONTHLY_BY_LINE_ITEM（月度明细行即确认依据）/ SCHEDULED_BY_DOCUMENT（按单据 schedule 确认）/ USAGE_BASED（按用量/消耗确认）/ MILESTONE_BASED（按里程碑验收确认）。顶层为整票默认值，行级优先 | 🔽 下拉选择（8 个枚举值） | ⚪ / ⚪ |
+| (Line Item) Alloc. Req. | `line_items[*].allocation_required` | 行级是否分摊（1=Yes / 0=No），优先于顶层 allocation_required | 🔽 下拉（行内），Line Items 表格列 | ⚪ / ⚪ |
+| (Line Item) Allocation | `line_items[*].allocation_method` | 行级分摊方法，优先于顶层 allocation_method，枚举值同上 | 🔽 下拉（行内），Line Items 表格列 | ⚪ / ⚪ |
+| (Line Item) Recognition | `line_items[*].recognition_policy` | 行级费用确认策略，优先于顶层 recognition_policy，枚举值同上 | 🔽 下拉（行内），Line Items 表格列 | ⚪ / ⚪ |
+| (Line Item) Periods | `line_items[*].amortization_period_count` | 行级摊销期数，可与顶层不同 | 🔢 数字输入（行内），Line Items 表格列 | ⚪ / ⚪ |
 
-> ⚠️ **bank_account 必填规则**：`bank_name`、`branch_name`、`account_no`、`account_name`（JP 还需 `account_type`、`bank_code`、`branch_code`）在 **PURCHASE** 方向为供应商（收款方）银行账户，是银行转账的必要信息，均为必填；**SALE** 方向为 CTW 收款账户，客户依此打款，此时 bank_account 字段调整为选填（CTW 账户信息由系统预置，财务可按需补填）。JP 专用字段 `account_name_kana`、`bank_name_kana` 在 PURCHASE 方向为选填，SALE 方向不展示。
+> ⚠️ **bank_account 必填规则**：`bank_name`、`branch_name`、`account_no`、`account_name`（JP 还需 `account_type`、`bank_code`、`branch_code`）在 **PURCHASE** 方向为供应商（收款方）银行账户，是银行转账的必要信息，均为必填；**SALE** 方向为 CTW 收款账户，客户依此打款，此时 bank_account 字段调整为选填（CTW 账户信息由系统预置，财务可按需补填）。
+>
+> ⚠️ **SWIFT Code 联动规则（JP 专用）**：JP 地区的 `branch_name`、`account_type`、`account_name_kana`（`ext_data.payment_rail`）、`bank_name_kana`（`ext_data.payment_rail`）四个字段，当 **SWIFT Code 无值**时为**必填**（内汇场景，银行系统严格要求完整路由信息）；当 **SWIFT Code 有值**时降为**选填**（境外汇款走 SWIFT，不依赖本地路由格式）。
 >
 > ⚠️ **line_items 内部必填规则**：有明细行时，每行的 `item_name`、`tax_inclusive_amount`、`tax_rate` 为必填；`amount_excluding_tax`、`description`、`service_period` 为选填。
 >
@@ -142,9 +153,18 @@
 | Wire Routing | `ext_data.payment_rail.wire_routing` | **收款方路由**：Wire 路由号，电汇专用 | ✏️ 文本输入（限 9 位数字） | ⚪ / —（SALE 方向不展示）|
 | Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款账户 | ✏️ 文本输入（可手动填写/修改；输入框右侧提供快速填充图标，选择预设后同步填入 Payer Bank + Payer Account） | ⚪ / ⚪ |
 | Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入（可手动填写/修改；通过 Payer Bank 快速填充联动写入） | ⚪ / ⚪ |
+| Finance Payout | `requires_finance_payout` | 同 JP | 🔽 下拉选择（Required / Not Required） | ✅ / ✅ |
+| Amortization Periods | `amortization_period_count` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
+| Accrual Tax Rate | `accrual_tax_rate` | 同 JP | 🔢 数字输入（%） | ⚪ / ⚪ |
+| Amount Paid | `amount_paid` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
+| Amount Due | `amount_due` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
 | Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
 | Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
 | Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
+| (Line Item) Alloc. Req. | `line_items[*].allocation_required` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Allocation | `line_items[*].allocation_method` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Recognition | `line_items[*].recognition_policy` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Periods | `line_items[*].amortization_period_count` | 同 JP（行级摊销期数） | 🔢 数字输入（行内） | ⚪ / ⚪ |
 
 > ⚠️ US 付款路由必填联动：`ach_routing` 和 `wire_routing` 至少填一个；若两者均为空且 `swift_code` 也为空，则无法发起付款。bank_account 联动逻辑同 JP。
 
@@ -199,9 +219,18 @@
 | PayNow UEN | `ext_data.payment_rail.paynow_uen` | **SG 特有**：PayNow UEN，本地快速转账标识 | ✏️ 文本输入（AI 暂不识别，需财务补填） | ⚪ / —（SALE 方向不展示）|
 | Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款银行 | 🔽 下拉选择（【待确认】从 CTW 固定银行账户中选择） | ⚪ / ⚪ |
 | Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入 | ⚪ / ⚪ |
+| Finance Payout | `requires_finance_payout` | 同 JP | 🔽 下拉选择（Required / Not Required） | ✅ / ✅ |
+| Amortization Periods | `amortization_period_count` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
+| Accrual Tax Rate | `accrual_tax_rate` | 同 JP | 🔢 数字输入（%） | ⚪ / ⚪ |
+| Amount Paid | `amount_paid` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
+| Amount Due | `amount_due` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
 | Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
 | Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
 | Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
+| (Line Item) Alloc. Req. | `line_items[*].allocation_required` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Allocation | `line_items[*].allocation_method` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Recognition | `line_items[*].recognition_policy` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Periods | `line_items[*].amortization_period_count` | 同 JP（行级摊销期数） | 🔢 数字输入（行内） | ⚪ / ⚪ |
 
 > ⚠️ SG 付款路由说明：`swift_code`、`bank_code`、`paynow_uen` 三个路由字段视具体付款方式填写其中一种。bank_account 联动逻辑同 JP。
 
@@ -252,9 +281,18 @@
 | SWIFT Code | `ext_data.payment_rail.swift_code` | **CN 对外付款**：中国银行对外汇款时使用 | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
 | Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW 出款银行 | 🔽 下拉选择（【待确认】从 CTW 固定银行账户中选择） | ⚪ / ⚪ |
 | Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入 | ⚪ / ⚪ |
+| Finance Payout | `requires_finance_payout` | 同 JP | 🔽 下拉选择（Required / Not Required） | ✅ / ✅ |
+| Amortization Periods | `amortization_period_count` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
+| Accrual Tax Rate | `accrual_tax_rate` | 同 JP | 🔢 数字输入（%） | ⚪ / ⚪ |
+| Amount Paid | `amount_paid` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
+| Amount Due | `amount_due` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
 | Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
 | Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
 | Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
+| (Line Item) Alloc. Req. | `line_items[*].allocation_required` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Allocation | `line_items[*].allocation_method` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Recognition | `line_items[*].recognition_policy` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Periods | `line_items[*].amortization_period_count` | 同 JP（行级摊销期数） | 🔢 数字输入（行内） | ⚪ / ⚪ |
 
 > ⚠️ CN 付款路由：`swift_code` 为对外汇款路由字段（选填），实际跨境付款时需填写。bank_account 联动逻辑同 JP。
 
@@ -311,9 +349,18 @@
 | SWIFT Code | `ext_data.payment_rail.swift_code` | 实际样本使用 SWIFT 汇款，为 TW 主要付款路由 | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
 | Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 AINEKOX 出款银行 | ✏️ 文本输入（可手动填写/修改；输入框右侧提供快速填充图标，选择预设后同步填入 Payer Bank + Payer Account） | ⚪ / ⚪ |
 | Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 AINEKOX 实体名称，与 `payer_bank_name` 配套 | ✏️ 文本输入（可手动填写/修改；通过 Payer Bank 快速填充联动写入） | ⚪ / ⚪ |
+| Finance Payout | `requires_finance_payout` | 同 JP | 🔽 下拉选择（Required / Not Required） | ✅ / ✅ |
+| Amortization Periods | `amortization_period_count` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
+| Accrual Tax Rate | `accrual_tax_rate` | 同 JP | 🔢 数字输入（%） | ⚪ / ⚪ |
+| Amount Paid | `amount_paid` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
+| Amount Due | `amount_due` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
 | Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
 | Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
 | Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
+| (Line Item) Alloc. Req. | `line_items[*].allocation_required` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Allocation | `line_items[*].allocation_method` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Recognition | `line_items[*].recognition_policy` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Periods | `line_items[*].amortization_period_count` | 同 JP（行级摊销期数） | 🔢 数字输入（行内） | ⚪ / ⚪ |
 
 > ⚠️ TW 付款路由：当前样本使用 SWIFT 汇款，`swift_code` 为选填路由字段（可依实际付款方式决定是否填写）；`bank_code` / `branch_code` 为本地转账备用字段，暂无样本支撑，AI 不识别时由财务手填。bank_account 联动逻辑同 JP。
 
@@ -367,9 +414,18 @@
 | SWIFT Code | `ext_data.payment_rail.swift_code` | **KY 对外付款主要路由**：离岸结算均走 SWIFT 国际电汇 | ✏️ 文本输入（8 或 11 位） | ⚪ / —（SALE 方向不展示）|
 | Payer Bank | `payer_bank_name` | 发票付款方银行。PURCHASE 下为 CTW CAYMAN 出款银行 | ✏️ 文本输入（可手动填写/修改；输入框右侧提供快速填充图标，选择预设后同步填入 Payer Bank + Payer Account） | ⚪ / ⚪ |
 | Payer Account | `payer_account_name` | 付款方账户名称。PURCHASE 下为 CTW CAYMAN，与 `payer_bank_name` 配套 | ✏️ 文本输入（可手动填写/修改；通过 Payer Bank 快速填充联动写入） | ⚪ / ⚪ |
+| Finance Payout | `requires_finance_payout` | 同 JP | 🔽 下拉选择（Required / Not Required） | ✅ / ✅ |
+| Amortization Periods | `amortization_period_count` | 同 JP | 🔢 数字输入 | ⚪ / ⚪ |
+| Accrual Tax Rate | `accrual_tax_rate` | 同 JP | 🔢 数字输入（%） | ⚪ / ⚪ |
+| Amount Paid | `amount_paid` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
+| Amount Due | `amount_due` | 同 JP（仅预付款类型才有值） | 🔢 数字输入 | ⚪ / ⚪ |
 | Allocation Required | `allocation_required` | 同 JP | 🔽 下拉选择（Yes / No） | ⚪ / ⚪ |
 | Allocation | `allocation_method` | 同 JP，allocation_required=Yes 时展示 | 🔽 下拉选择（枚举值同 JP，条件展示） | ⚪ / ⚪ |
 | Recognition | `recognition_policy` | 同 JP | 🔽 下拉选择（枚举值同 JP） | ⚪ / ⚪ |
+| (Line Item) Alloc. Req. | `line_items[*].allocation_required` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Allocation | `line_items[*].allocation_method` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Recognition | `line_items[*].recognition_policy` | 同 JP（行级） | 🔽 下拉（行内） | ⚪ / ⚪ |
+| (Line Item) Periods | `line_items[*].amortization_period_count` | 同 JP（行级摊销期数） | 🔢 数字输入（行内） | ⚪ / ⚪ |
 
 > ⚠️ KY 付款路由：对外付款走 SWIFT 国际电汇，`swift_code` 为主要路由字段（选填，实际付款时需填写）。无本地银行代码体系，`bank_code` / `branch_code` 不适用。bank_account 联动逻辑同 JP。
 
@@ -423,14 +479,14 @@
 | `accounting_date` | Accounting Date | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填 | 📝 日期选择器（必须手填，AI 从不识别） |
 | **收款方银行** | | | | | | | | | |
 | `ext_data.bank_account.bank_name` | Bank Name | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | ✏️ 文本输入（收款方银行名称） |
-| `ext_data.bank_account.branch_name` | Branch Name | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | P: 展示地区必填 ｜ S: 选填 | ✏️ 文本输入 |
-| `ext_data.bank_account.account_type` | Account Type | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | P: JP 必填 ｜ S: 选填 | 🔽 下拉选择（普通預金 / 当座預金 / 定期預金，仅 JP） |
+| `ext_data.bank_account.branch_name` | Branch Name | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | P: JP — SWIFT 无值时必填，有值时选填；其他展示地区选填 ｜ S: 选填 | ✏️ 文本输入 |
+| `ext_data.bank_account.account_type` | Account Type | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | P: JP — SWIFT 无值时必填，有值时选填 ｜ S: 选填 | 🔽 下拉选择（普通預金 / 当座預金 / 定期預金，仅 JP） |
 | `ext_data.bank_account.account_no` | Account No. | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | ✏️ 文本输入（收款方账号） |
 | `ext_data.bank_account.account_name` | Account Name | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 全地区必填 ｜ S: 选填 | ✏️ 文本输入（收款方账户持有人） |
 | `ext_data.payment_rail.bank_code` | Bank Code | ✅ | ❌ | ⚪ | ❌ | ⚪ | ❌ | P: JP 必填，其他选填 ｜ S: 全地区选填 | ✏️ 文本输入 |
 | `ext_data.payment_rail.branch_code` | Branch Code | ✅ | ❌ | ⚪ | ❌ | ⚪ | ❌ | P: JP 必填，其他选填 ｜ S: 全地区选填 | ✏️ 文本输入 |
-| `ext_data.payment_rail.account_name_kana` | Account Name (Kana) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | P: JP 选填 ｜ S: 不展示 | ✏️ 文本输入（半角片假名） |
-| `ext_data.payment_rail.bank_name_kana` | Bank Name (Kana) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | P: JP 选填 ｜ S: 不展示 | ✏️ 文本输入（半角片假名） |
+| `ext_data.payment_rail.account_name_kana` | Account Name (Kana) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | P: JP — SWIFT 无值时必填，有值时选填 ｜ S: 不展示 | ✏️ 文本输入（半角片假名） |
+| `ext_data.payment_rail.bank_name_kana` | Bank Name (Kana) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | P: JP — SWIFT 无值时必填，有值时选填 ｜ S: 不展示 | ✏️ 文本输入（半角片假名） |
 | `ext_data.payment_rail.swift_code` | SWIFT Code | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | P: 选填 ｜ S: 不展示 | ✏️ 文本输入（8 或 11 位） |
 | `ext_data.payment_rail.ach_routing` | ACH Routing | ❌ | ⚪ | ❌ | ❌ | ❌ | ❌ | P: 选填 ｜ S: 不展示 | ✏️ 文本输入（9 位） |
 | `ext_data.payment_rail.wire_routing` | Wire Routing | ❌ | ⚪ | ❌ | ❌ | ❌ | ❌ | P: 选填 ｜ S: 不展示 | ✏️ 文本输入（9 位） |
@@ -439,9 +495,18 @@
 | `payer_bank_name` | Payer Bank | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | ✏️ 文本输入（支持手动填写；右侧快速填充图标可一键预填 Payer Bank + Payer Account） |
 | `payer_account_name` | Payer Account | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | ✏️ 文本输入（支持手动填写；可由 Payer Bank 快速填充联动写入） |
 | **费用确认** | | | | | | | | | |
-| `allocation_required` | Allocation Required | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | 🔽 下拉选择（Yes / No） |
-| `allocation_method` | Allocation | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | 选填（allocation_required=Yes 时展示） | 🔽 下拉选择（MONTHLY_EQUAL / DAILY_PRORATA / MONTHLY_BY_LINE_ITEM / BY_LINE_ITEM_PERIOD / BY_EXPLICIT_SCHEDULE / USAGE_BASED / MANUAL） |
-| `recognition_policy` | Recognition | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | 🔽 下拉选择（IMMEDIATE / PREPAID_MONTHLY / PREPAID_DAILY / ACCRUAL_BY_SERVICE_PERIOD / MONTHLY_BY_LINE_ITEM / SCHEDULED_BY_DOCUMENT / USAGE_BASED / MILESTONE_BASED） |
+| `requires_finance_payout` | Finance Payout | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 全地区必填 | 🔽 下拉选择（Required / Not Required） |
+| `amortization_period_count`（顶层） | Amortization Periods | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | 🔢 数字输入（整票默认摊销期数） |
+| `accrual_tax_rate` | Accrual Tax Rate | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填 | 🔢 数字输入（%） |
+| `amount_paid` | Amount Paid | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填（仅预付款类型才有值） | 🔢 数字输入 |
+| `amount_due` | Amount Due | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填（仅预付款类型才有值） | 🔢 数字输入 |
+| `allocation_required` | Allocation Required | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填（顶层默认值，行级优先） | 🔽 下拉选择（Yes / No） |
+| `allocation_method` | Allocation | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | ⚪ 条件展示 | 选填（allocation_required=Yes 时展示；顶层默认值，行级优先） | 🔽 下拉选择（MONTHLY_EQUAL / DAILY_PRORATA / MONTHLY_BY_LINE_ITEM / BY_LINE_ITEM_PERIOD / BY_EXPLICIT_SCHEDULE / USAGE_BASED / MANUAL） |
+| `recognition_policy` | Recognition | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填（顶层默认值，行级优先） | 🔽 下拉选择（IMMEDIATE / PREPAID_MONTHLY / PREPAID_DAILY / ACCRUAL_BY_SERVICE_PERIOD / MONTHLY_BY_LINE_ITEM / SCHEDULED_BY_DOCUMENT / USAGE_BASED / MILESTONE_BASED） |
+| `line_items[*].allocation_required` | (Line Item) Alloc. Req. | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填（行级，优先于顶层） | 🔽 下拉（行内） |
+| `line_items[*].allocation_method` | (Line Item) Allocation | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填（行级，优先于顶层） | 🔽 下拉（行内） |
+| `line_items[*].recognition_policy` | (Line Item) Recognition | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填（行级，优先于顶层） | 🔽 下拉（行内） |
+| `line_items[*].amortization_period_count` | (Line Item) Periods | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | 选填（行级，可与顶层不同） | 🔢 数字输入（行内） |
 | **提交人** | | | | | | | | | |
 | `applicant` | Applicant | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 只读（系统确保有值）｜ S: 只读 | 只读（上传者，系统自动填充） |
 | `application_date` | Application Date | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | P: 只读（系统确保有值）｜ S: 只读 | 只读（上传时间，系统自动填充） |
@@ -471,14 +536,14 @@
 | Due Date | 选填 | **不展示** |
 | Service Period | 选填 | **必填** |
 | Bank Name | 必填 | 选填 |
-| Branch Name | 展示地区必填 | 选填 |
-| Account Type | JP 必填 | 选填 |
+| Branch Name | JP — SWIFT 无值时必填，有值时选填；其他地区选填 | 选填 |
+| Account Type | JP — SWIFT 无值时必填，有值时选填 | 选填 |
 | Account No. | 必填 | 选填 |
 | Account Name | 必填 | 选填 |
 | Bank Code | JP 必填，其他选填 | 选填 |
 | Branch Code | JP 必填，其他选填 | 选填 |
-| Account Name (Kana) | JP 选填 | **不展示** |
-| Bank Name (Kana) | JP 选填 | **不展示** |
+| Account Name (Kana) | JP — SWIFT 无值时必填，有值时选填 | **不展示** |
+| Bank Name (Kana) | JP — SWIFT 无值时必填，有值时选填 | **不展示** |
 | SWIFT Code | 选填 | **不展示** |
 | ACH Routing | 选填 | **不展示** |
 | Wire Routing | 选填 | **不展示** |
@@ -493,10 +558,14 @@
 | `company_code` | Company | AINEKOX CO LTD. / SHANGHAI WEIYOUYI CHUXIN TECH CO LTD / CTW G123 SINGAPORE PTE LTD / CTW INC / CTW US INC / CTW CAYMAN | 随 Region 自动填充，可手动修改 |
 | `currency` | Currency | JPY / USD / SGD / CNY / TWD | 随 Region 联动默认值 |
 | `payment_type` | Payment Type | ADMINISTRATIVE / NON_ADMINISTRATIVE | 默认选中 NON_ADMINISTRATIVE |
+| `requires_finance_payout` | Finance Payout | Required（true）/ Not Required（false）| 控制银行字段必填状态；为 false 时提示"Bank account fields are not required for this invoice." |
 | `ext_data.bank_account.account_type` | Account Type | 普通預金 / 当座預金 / 定期預金 | 仅 JP 展示；PURCHASE 方向必填，SALE 方向选填 |
 | `recognition_policy` | Recognition | IMMEDIATE / PREPAID_MONTHLY / PREPAID_DAILY / ACCRUAL_BY_SERVICE_PERIOD / MONTHLY_BY_LINE_ITEM / SCHEDULED_BY_DOCUMENT / USAGE_BASED / MILESTONE_BASED | 选填；对 Service Period 必填的影响见上方说明 |
 | `allocation_method` | Allocation | MONTHLY_EQUAL / DAILY_PRORATA / MONTHLY_BY_LINE_ITEM / BY_LINE_ITEM_PERIOD / BY_EXPLICIT_SCHEDULE / USAGE_BASED / MANUAL | 仅 allocation_required=Yes 时展示 |
 | `allocation_required` | Allocation Required | Yes / No | 控制 allocation_method 的显示与否 |
+| `line_items[*].recognition_policy` | (Line Item) Recognition | 同 recognition_policy 枚举值 | 行级，优先于顶层 recognition_policy |
+| `line_items[*].allocation_method` | (Line Item) Allocation | 同 allocation_method 枚举值 | 行级，优先于顶层 allocation_method |
+| `line_items[*].allocation_required` | (Line Item) Alloc. Req. | Yes（1）/ No（0）| 行级，优先于顶层 allocation_required |
 
 #### Payer Bank 快速填充交互说明
 
@@ -530,18 +599,19 @@
 
 ### 🔢 数字输入（AI 有值时回填，识别错误时可修正）
 - `total_amount`（必填）、`amount_excluding_tax`（必填）、`tax_amount`（必填）、`tax_rate`（选填）
+- 新增（顶层）：`accrual_tax_rate`（选填，分期摊销税率）、`amortization_period_count`（选填，整票默认摊销期数）、`amount_paid`（选填，预付款类型才有值）、`amount_due`（选填，预付款类型才有值）
 
 ### ✏️ 文本输入（AI 有值时回填，缺失或识别错误时可修正）
 - 必填：`vendor_name`、`invoice_number`、`invoice_description`（多行文本）、`payment_purpose`
 - 选填：`tax_registration_no`（JP 必填，其他选填）
 - 收款方银行（必填）：`ext_data.bank_account.bank_name`、`ext_data.bank_account.account_no`、`ext_data.bank_account.account_name`
 - 收款方银行（JP 必填，其他展示地区必填）：`ext_data.bank_account.branch_name`（US 不展示）
-- 收款方路由（JP 必填）：`ext_data.payment_rail.bank_code`、`ext_data.payment_rail.branch_code`、`ext_data.payment_rail.account_name_kana`、`ext_data.payment_rail.bank_name_kana`
+- 收款方路由（JP — SWIFT 无值时必填，有值时选填）：`ext_data.payment_rail.bank_code`、`ext_data.payment_rail.branch_code`、`ext_data.payment_rail.account_name_kana`、`ext_data.payment_rail.bank_name_kana`
 - 收款方路由（选填）：`ext_data.payment_rail.swift_code`（US/SG/CN/TW）、`ext_data.payment_rail.ach_routing`、`ext_data.payment_rail.wire_routing`（US）、`ext_data.payment_rail.paynow_uen`（SG）
 - 打款方（选填）：`payer_bank_name`（文本输入 + 快速填充，选后同步写入 `payer_account_name`）、`payer_account_name`（文本输入，也可由快速填充联动写入）
 
 ### ✏️ 可编辑表格（逐行修改，支持新增/删除行）
-- `line_items[*]`：每行字段包括 `item_name`（品名）、`tax_inclusive_amount`（含税金额）、`tax_rate`（税率）、`amount_excluding_tax`（税前金额）、`description`（明细说明）、`service_period_start` / `service_period_end`（明细服务期间）
+- `line_items[*]`：每行字段包括 `item_name`（品名）、`tax_inclusive_amount`（含税金额）、`tax_rate`（税率）、`amount_excluding_tax`（税前金额）、`description`（明细说明）、`service_period_start` / `service_period_end`（明细服务期间）、`allocation_required`（行级是否分摊）、`allocation_method`（行级分摊方法）、`recognition_policy`（行级费用确认策略）、`amortization_period_count`（行级摊销期数）。其中后四个字段行级优先于顶层 Fee Recognition 中的同名字段。
 
 ---
 
@@ -559,5 +629,47 @@ Fee Recognition 区块包含三个字段，适用于所有地区：Allocation Re
 **Recognition 有 8 个枚举值：** IMMEDIATE（立即确认，不做跨期处理）、PREPAID_MONTHLY（预付费用按月摊销）、PREPAID_DAILY（预付费用按天摊销）、ACCRUAL_BY_SERVICE_PERIOD（按可见服务期计提确认）、MONTHLY_BY_LINE_ITEM（月度行项目本身即确认依据）、SCHEDULED_BY_DOCUMENT（按单据提供的 schedule 确认）、USAGE_BASED（按用量消耗确认）、MILESTONE_BASED（按交付物或里程碑验收确认）。
 
 **Recognition 联动 Service Period 必填状态。** 选 PREPAID_MONTHLY、PREPAID_DAILY 或 ACCRUAL_BY_SERVICE_PERIOD 时，Header 级 Service Period 升级为必填并高亮提示。选 MONTHLY_BY_LINE_ITEM 时，Header 级 Service Period 不适用，改为 Line Items 每行的 service_period 升级为必填。其余策略（IMMEDIATE、SCHEDULED_BY_DOCUMENT、USAGE_BASED、MILESTONE_BASED）不对 Service Period 产生额外必填要求。
+
+**两层规则关系（顶层 → 行级）。** 顶层的 `allocation_required`、`allocation_method`、`recognition_policy` 作为整张发票的默认规则。`line_items[*]` 中每一行也拥有同名字段，行级值优先于顶层，用于对单独行进行更精细的控制。因此，行级字段为空时，继承顶层的值；行级字段有值时，覆盖顶层。
+
+---
+
+## 十、新增字段说明（顶层 + 行级扩展）
+
+> 这批字段是对原有发票结构的扩展，分为"仅顶层有"和"顶层 + 行级都有"两类。
+
+### 10.1 仅顶层（Top-level only）字段
+
+| 字段路径 | 前端显示名 | 含义 | 手填方式 | 必填 |
+|---|---|---|---|---|
+| `requires_finance_payout` | Finance Payout | 是否需要财务打款流程：true = 需要（走银行打款）；false = 不需要（已付清、银行自动扣款、仅记账）。为 false 时，银行账号字段变为非必填。 | 🔽 下拉（Required / Not Required） | ✅ / ✅ |
+| `amount_paid` | Amount Paid | 已实际支付的金额。仅在预付款类型 invoice 才有实际值（非预付款时为 null，不显示）。 | 🔢 数字输入 | ⚪ / ⚪ |
+| `amount_due` | Amount Due | 待付余额 = total_amount − amount_paid。仅在预付款类型 invoice 才有实际值，显示时标红提醒。 | 🔢 数字输入 | ⚪ / ⚪ |
+| `accrual_tax_rate` | Accrual Tax Rate | 费用分期应计 / 摊销时使用的税率（%）。一次性确认或无分期计税需求时通常为 null。 | 🔢 数字输入（%） | ⚪ / ⚪ |
+| `amortization_period_count`（顶层） | Amortization Periods | 整张发票默认分几期确认费用（例：预付 12 个月 SaaS → 12）。行级的同名字段可覆盖此默认值。 | 🔢 数字输入 | ⚪ / ⚪ |
+
+**`amount_paid` / `amount_due` 显示逻辑：** 仅当两者至少有一个字段不为 null 时，在详情页中显示这两行；否则隐藏，不占布局。
+
+**`requires_finance_payout` 交互逻辑：** 选 "Not Required" 后，页面显示"Bank account fields are not required for this invoice."提示，银行账号相关字段的必填校验自动放宽。
+
+---
+
+### 10.2 顶层 + 行级（Top-level + line_items[]）共有字段
+
+> 顶层字段为整张发票的默认规则；行级字段为每一行的实际规则，优先于顶层。
+
+| 字段路径 | 前端显示名 | 含义 | 所在位置 |
+|---|---|---|---|
+| `allocation_required` | Allocation Required / (Line Item) Alloc. Req. | 是否需要跨期分摊（1 = Yes / 0 = No）。顶层控制整张发票默认；行级可逐行覆盖。 | 顶层：Fee Recognition 区块；行级：Line Items 表格列 |
+| `allocation_method` | Allocation / (Line Item) Allocation | 分摊方法，枚举值同九章所列（7 个值）。顶层为默认；行级优先。 | 顶层：Fee Recognition 区块；行级：Line Items 表格列 |
+| `recognition_policy` | Recognition / (Line Item) Recognition | 费用确认策略，枚举值同九章所列（8 个值）。顶层为默认；行级优先。 | 顶层：Fee Recognition 区块；行级：Line Items 表格列 |
+| `amortization_period_count` | Amortization Periods / (Line Item) Periods | 摊销期数。顶层为整张发票默认；行级可为每行设置不同期数。 | 顶层：Fee Recognition 区块；行级：Line Items 表格列 |
+
+**行级字段在 Line Items 表格中的展示方式：** 在明细行表格中新增 4 列（Alloc. Req.、Allocation、Recognition、Periods），支持逐行独立设置。表格横向滚动以容纳额外列。
+
+**优先级规则：**
+1. 行级字段有值 → 使用行级字段
+2. 行级字段为空 → 继承顶层字段默认值
+3. 顶层字段也为空 → 系统默认（recognition_policy = IMMEDIATE，allocation_required = No）
 
 

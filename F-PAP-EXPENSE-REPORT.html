@@ -1,0 +1,2925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F Expert · Expense Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-base: #f0f2f5;
+    --bg-container: #ffffff;
+    --bg-hover: #f5f6f8;
+    --bg-active: #eef0f3;
+    --bg-subtle: #f7f8fa;
+    --text-default: #0f172a;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+    --text-disabled: #94a3b8;
+    --border-divider: #e2e8f0;
+    --border-default: #cbd5e1;
+    --border-strong: #94a3b8;
+    --button-default: #1e293b;
+    --primary: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --accent: #6366f1;
+    --error: #ef4444; --error-bg: #fef2f2; --error-border: #fecaca;
+    --success: #16a34a; --success-bg: #f0fdf4; --success-border: #bbf7d0;
+    --warn: #d97706; --warn-bg: #fffbeb; --warn-border: #fde68a;
+    --teal-grad: linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);
+    --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
+    --shadow-sm: 0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04);
+    --shadow-md: 0 4px 12px rgba(15,23,42,.1), 0 2px 4px rgba(15,23,42,.06);
+    --shadow-lg: 0 16px 40px rgba(15,23,42,.14), 0 4px 12px rgba(15,23,42,.08);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; }
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+    font-size:14px; color:var(--text-default);
+    background:var(--bg-base); height:100vh; overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+}
+button { font-family:inherit; }
+.app { display:flex; width:100%; height:100vh; }
+
+/* ========= Sidebar ========= */
+/* ===== Narrow icon sidebar ===== */
+.sidebar {
+    width: 56px; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center;
+    height: 100vh; background: var(--bg-container);
+    border-right: 1px solid var(--border-divider);
+}
+.sb-logo {
+    width: 34px; height: 34px; margin: 12px 0 4px;
+    border-radius: 10px;
+    background: linear-gradient(135deg,#0ea5e9,#0284c7);
+    display: grid; place-items: center; color: #fff;
+    flex-shrink: 0; cursor: pointer;
+}
+.sb-logo svg { width: 20px; height: 20px; }
+.sb-actions {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; padding: 4px 0 6px;
+}
+.sb-icon {
+    width: 36px; height: 36px; border: none; background: none;
+    border-radius: 8px; cursor: pointer;
+    display: grid; place-items: center;
+    color: var(--text-secondary); flex-shrink: 0;
+}
+.sb-icon:hover { background: var(--bg-hover); }
+.sb-icon svg { width: 17px; height: 17px; }
+.sb-sep {
+    width: 24px; height: 1px; background: var(--border-divider);
+    flex-shrink: 0; margin: 2px 0 4px;
+}
+.sb-agents {
+    flex: 1; overflow-y: auto;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 5px; padding: 4px 0;
+}
+.sb-agents::-webkit-scrollbar { display: none; }
+.sb-agent {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: none; cursor: pointer;
+    display: grid; place-items: center;
+    color: #fff; font-size: 11px; font-weight: 700; font-family: inherit;
+    flex-shrink: 0; position: relative;
+    transition: transform .12s, box-shadow .12s;
+}
+.sb-agent:hover { transform: scale(1.08); }
+.sb-agent.active { box-shadow: 0 0 0 2px var(--bg-container), 0 0 0 3.5px #10b981; }
+.sb-dot {
+    position: absolute; top: 1px; right: 1px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #22c55e; border: 1.5px solid var(--bg-container);
+    pointer-events: none;
+}
+.sb-bottom {
+    border-top: 1px solid var(--border-divider);
+    padding: 10px 0; width: 100%;
+    display: flex; justify-content: center; flex-shrink: 0;
+}
+.sb-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-size: 12px; font-weight: 600;
+    cursor: pointer; overflow: hidden;
+    background: linear-gradient(135deg,#7c3aed,#5b21b6);
+}
+.nav-section {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 12px 6px; font-size: 11px; font-weight: 500;
+    color: var(--text-disabled); letter-spacing: 0.3px;
+}
+.nav-section .section-actions { display: flex; gap: 4px; }
+.nav-section .section-actions button {
+    width: 18px; height: 18px; display: grid; place-items: center;
+    border: none; background: none; border-radius: 4px;
+    color: var(--text-disabled); cursor: pointer;
+}
+.nav-section .section-actions button:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.nav-section .section-actions svg { width: 13px; height: 13px; }
+.nav-item {
+    display: flex; align-items: center; gap: 10px;
+    height: 34px; padding: 0 10px; border-radius: 8px; cursor: pointer;
+    color: var(--text-default); font-size: 13px;
+    transition: background .12s;
+}
+.nav-item:hover { background: var(--bg-hover); }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-secondary); }
+.nav-item.active { background: var(--bg-active); }
+.nav-item .nav-badge {
+    margin-left: auto; background: #ef4444; color: #fff;
+    font-size: 10px; font-weight: 700; border-radius: 8px;
+    padding: 1px 6px; min-width: 18px; text-align: center;
+}
+/* Sub-nav items (2nd level) */
+.nav-sub {
+    display: flex; align-items: center; gap: 8px;
+    height: 30px; padding: 0 10px 0 28px; border-radius: 6px; cursor: pointer;
+    color: var(--text-secondary); font-size: 12px;
+    transition: background .12s;
+}
+.nav-sub:hover { background: var(--bg-hover); color: var(--text-default); }
+.nav-sub.active { background: var(--bg-active); color: var(--primary); font-weight: 600; }
+.nav-sub svg { width: 13px; height: 13px; flex-shrink: 0; color: inherit; }
+.nav-sub .nav-badge {
+    margin-left: auto; background: #ef4444; color: #fff;
+    font-size: 10px; font-weight: 700; border-radius: 8px;
+    padding: 1px 5px; min-width: 16px; text-align: center;
+}
+.icon-btn {
+    border: none; background: none; cursor: pointer;
+    border-radius: 5px; display: grid; place-items: center;
+    color: var(--text-secondary); padding: 0;
+}
+.icon-btn:hover { background: var(--bg-hover); color: var(--text-default); }
+
+/* ========= List panel (2nd level nav) ========= */
+.list-panel {
+    width: 340px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    height: 100vh; background: var(--bg-container);
+    border-right: 1px solid var(--border-divider);
+}
+.lp-header {
+    padding: 10px 16px 14px;
+    border-bottom: 1px solid var(--border-divider);
+}
+.expert-row {
+    display: flex; align-items: center; gap: 12px; padding: 6px 0;
+}
+.expert-avatar {
+    width: 44px; height: 44px; border-radius: 14px;
+    background: linear-gradient(135deg,#10b981,#059669);
+    display: grid; place-items: center; flex-shrink: 0;
+    color: #fff; font-size: 20px; font-weight: 700;
+    font-family: 'Urbanist', sans-serif;
+}
+.expert-title-col { flex: 1; min-width: 0; }
+.expert-title {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 17px; font-weight: 700; line-height: 24px;
+}
+.avatar-stack { display: flex; align-items: center; margin-top: 4px; }
+.avatar-chip {
+    width: 22px; height: 22px; border-radius: 11px;
+    border: 1.5px solid #fff; margin-left: -6px;
+    display: grid; place-items: center;
+    color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0;
+}
+.avatar-chip:first-child { margin-left: 0; }
+.avatar-more {
+    height: 22px; min-width: 28px; border-radius: 11px;
+    border: 1.5px solid #fff; margin-left: -6px;
+    background: var(--bg-active); padding: 0 6px;
+    display: grid; place-items: center;
+    font-size: 11px; color: var(--text-secondary); font-weight: 500;
+}
+.lp-filter-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.chip {
+    height: 32px; padding: 0 12px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border-default); background: var(--bg-container); font-family: inherit;
+    color: var(--text-default);
+}
+.chip:hover { background: var(--bg-hover); }
+.chip.solid { background: var(--button-default); color: #fff; border-color: var(--button-default); }
+.lp-filter-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 14px;
+}
+.lp-search {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 10px;
+    height: 34px; padding: 0 10px;
+    border: 1px solid var(--border-default); border-radius: 8px;
+    background: var(--bg-container);
+}
+.lp-search svg { width:14px; height:14px; color:var(--text-disabled); flex-shrink:0; }
+.lp-search input {
+    flex: 1; border: none; outline: none;
+    font: inherit; font-size: 13px;
+    color: var(--text-default); background: transparent;
+}
+.lp-search input::placeholder { color: var(--text-disabled); }
+.lp-count { padding: 8px 16px 4px; font-size: 13px; color: var(--text-secondary); }
+.lp-body { flex: 1; overflow-y: auto; }
+.list-card {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; cursor: pointer; position: relative;
+    transition: background .1s;
+}
+.list-card + .list-card { border-top: 1px solid var(--border-divider); }
+.list-card:hover { background: var(--bg-hover); }
+.list-card.active { background: var(--bg-active); }
+.list-card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--bg-subtle); display: grid; place-items: center;
+    color: var(--text-secondary); flex-shrink: 0;
+}
+.list-card-icon svg { width: 20px; height: 20px; }
+.list-card-content { flex: 1; min-width: 0; }
+.list-card-title {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 14px; font-weight: 600; line-height: 20px;
+}
+.list-card-title .chev { width: 14px; height: 14px; color: var(--text-disabled); }
+.list-card-desc { font-size: 12px; line-height: 18px; color: var(--text-secondary); margin-top: 2px; }
+.list-card-meta {
+    font-size: 11px; color: var(--text-disabled); margin-top: 6px;
+    display: flex; align-items: center; gap: 6px;
+}
+.list-card-meta svg { width: 12px; height: 12px; }
+.list-card-dot {
+    position: absolute; top: 18px; right: 16px;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--primary);
+}
+
+/* ========= Main ========= */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+#listSection { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+
+/* ========= Header ========= */
+.main-title { font-size:16px; font-weight:700; letter-spacing:-.2px; }
+.header-actions { display:flex; align-items:center; gap:8px; }
+.btn-primary {
+    height:34px; padding:0 16px; border-radius:8px; border:none;
+    background:linear-gradient(135deg,#3b82f6,#2563eb);
+    color:#fff; font:inherit; font-size:13px; font-weight:600;
+    cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+    box-shadow:0 1px 4px rgba(59,130,246,.4);
+    transition:all .18s;
+}
+.btn-primary:hover { background:linear-gradient(135deg,#2563eb,#1d4ed8); box-shadow:0 2px 8px rgba(59,130,246,.5); transform:translateY(-1px); }
+.btn-primary svg { width:13px; height:13px; }
+.btn-ghost {
+    height:34px; padding:0 14px; border-radius:8px;
+    border:1.5px solid var(--border-default);
+    background:var(--bg-container); color:var(--text-default);
+    font:inherit; font-size:13px; font-weight:500; cursor:pointer;
+    transition:all .15s;
+}
+.btn-ghost:hover { background:var(--bg-hover); border-color:var(--border-strong); }
+
+/* ========= Main toolbar (tabs + actions, one row) ========= */
+.main-toolbar {
+    display:flex; align-items:center; padding:0 24px; gap:8px;
+    border-bottom:1px solid var(--border-divider);
+    background:var(--bg-container); flex-shrink:0; height:48px;
+    flex-wrap:nowrap;
+}
+.status-tabs-inline { display:flex; align-items:center; gap:0; flex:1; }
+.s-tab {
+    padding:0 14px; height:48px; font-size:13px; font-weight:500;
+    color:var(--text-secondary); border:none; background:none;
+    cursor:pointer; font-family:inherit; position:relative;
+    transition:color .15s; white-space:nowrap;
+}
+.s-tab:hover { color:var(--text-default); }
+.s-tab.active { color:var(--text-default); font-weight:600; }
+.s-tab.active::after {
+    content:''; position:absolute; bottom:0; left:10px; right:10px;
+    height:2px; background:var(--button-default); border-radius:1px;
+}
+.s-tab .tc {
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:18px; height:16px; padding:0 5px; border-radius:8px;
+    background:var(--bg-active); font-size:10px; font-weight:600;
+    color:var(--text-secondary); margin-left:5px;
+}
+.s-tab.active .tc { background:var(--button-default); color:#fff; }
+
+/* ========= List view ========= */
+.list-view { flex:1; overflow:hidden; display:flex; flex-direction:column; min-height:0; padding:0 24px 20px; }
+.list-view::-webkit-scrollbar { width:6px; }
+.list-view::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+.er-table-wrap {
+    flex:1; border:1px solid var(--border-divider); border-radius:12px;
+    overflow:hidden; display:flex; flex-direction:column; min-height:0;
+}
+.er-table-scroll { flex:1; overflow-y:auto; }
+.er-table-scroll::-webkit-scrollbar { width:5px; }
+.er-table-scroll::-webkit-scrollbar-thumb { background:#e2e2df; border-radius:3px; }
+.er-table { width:100%; border-collapse:collapse; table-layout:fixed; }
+.er-table thead th {
+    padding:10px 16px; background:var(--bg-subtle);
+    font-size:12px; font-weight:600; color:var(--text-secondary);
+    text-align:left; border-bottom:1px solid var(--border-divider);
+    white-space:nowrap; position:relative;
+}
+.er-table thead th:not(:last-child)::after {
+    content:""; width:1px; height:12px; background:var(--border-divider);
+    position:absolute; right:0; top:50%; transform:translateY(-50%);
+}
+.er-table tbody tr {
+    border-bottom:1px solid var(--border-divider); cursor:pointer; transition:background .15s;
+}
+.er-table tbody tr:last-child { border-bottom:none; }
+.er-table tbody tr:hover td { background:var(--bg-hover); }
+.er-table td {
+    padding:10px 16px; font-size:13px; color:var(--text-default); vertical-align:middle;
+}
+.er-table .col-emp  { width:200px; }
+.er-table .col-period { width:110px; }
+.er-table .col-submitted { width:110px; color:var(--text-secondary); }
+.er-table .col-invoices { width:80px; text-align:center; color:var(--text-secondary); }
+.er-table .col-amount { width:130px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums; }
+.er-table .col-status { width:130px; }
+.er-table .col-note { color:var(--text-secondary); font-size:12px; }
+.er-note-text { display:flex; align-items:flex-start; gap:5px; line-height:1.45; }
+.er-note-text svg { flex-shrink:0; margin-top:2px; }
+.er-emp-cell { display:flex; align-items:center; gap:10px; }
+.er-avatar {
+    width:32px; height:32px; border-radius:9px;
+    background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    display:grid; place-items:center; color:#fff;
+    font-size:12px; font-weight:700; flex-shrink:0;
+}
+.er-emp-name { font-weight:600; font-size:13px; }
+.er-emp-sub { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+.er-reject-hint {
+    font-size:11px; color:#5b21b6; margin-top:3px;
+    display:flex; align-items:flex-start; gap:4px;
+}
+.er-reject-hint.red { color:#b91c1c; }
+.er-reject-hint svg { flex-shrink:0; margin-top:1px; }
+.tag {
+    display:inline-flex; align-items:center; justify-content:center;
+    height:26px; padding:0 11px; border-radius:8px;
+    font-size:12px; font-weight:500; white-space:nowrap; letter-spacing:.1px;
+}
+.tag.draft         { background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; }
+.tag.pending       { background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; }
+.tag.reviewing     { background:#fef9ee; color:#b45309; border:1px solid #fcd34d; }
+.tag.approved      { background:#f0fdf4; color:#16a34a; border:1px solid #86efac; }
+.tag.rejected      { background:#fff1f2; color:#dc2626; border:1px solid #fca5a5; }
+.tag.needs-revision{ background:#faf5ff; color:#7c3aed; border:1px solid #ddd6fe; }
+.tag.oa-rejected   { background:#fff1f2; color:#dc2626; border:1px solid #fca5a5; }
+
+/* ========= Detail / Wizard ========= */
+.detail-view {
+    display:none; flex:1; flex-direction:column; overflow:hidden;
+}
+.detail-view.open { display:flex; }
+
+.wizard-header {
+    height:58px; display:flex; align-items:center;
+    padding:0 24px; border-bottom:1px solid var(--border-divider);
+    background:var(--bg-container); flex-shrink:0; gap:12px;
+    box-shadow:0 1px 0 var(--border-divider);
+}
+.wizard-back {
+    width:32px; height:32px; border:1.5px solid var(--border-default);
+    background:var(--bg-container); border-radius:8px;
+    cursor:pointer; color:var(--text-secondary);
+    display:grid; place-items:center; transition:all .15s;
+}
+.wizard-back:hover { background:var(--bg-hover); color:var(--text-default); border-color:var(--border-strong); }
+.wizard-back svg { width:16px; height:16px; }
+.wizard-title { font-size:15px; font-weight:700; flex:1; letter-spacing:-.1px; }
+
+/* Step indicators */
+.step-bar {
+    display:flex; align-items:center; padding:0 32px;
+    gap:0; border-bottom:1px solid var(--border-divider);
+    background:var(--bg-container); flex-shrink:0; height:58px;
+}
+.step-item {
+    display:flex; align-items:center; gap:10px; flex:1;
+}
+.step-item:last-child { flex:0 0 auto; }
+.step-num {
+    width:26px; height:26px; border-radius:50%;
+    display:grid; place-items:center;
+    font-size:11px; font-weight:700;
+    border:2px solid var(--border-default);
+    color:var(--text-disabled); background:var(--bg-container);
+    flex-shrink:0; transition:all .2s;
+}
+.step-item.active .step-num {
+    border-color:transparent;
+    background:linear-gradient(135deg,#3b82f6,#6366f1);
+    color:#fff;
+    box-shadow:0 2px 8px rgba(99,102,241,.4);
+}
+.step-item.done .step-num { border-color:var(--success); background:var(--success); color:#fff; }
+.step-label { font-size:12px; font-weight:500; color:var(--text-disabled); white-space:nowrap; }
+.step-item.active .step-label { color:#1d4ed8; font-weight:700; }
+.step-item.done .step-label { color:var(--text-secondary); }
+.step-connector { flex:1; height:2px; background:var(--border-divider); margin:0 10px; border-radius:1px; }
+.step-connector.done { background:var(--success); }
+
+.wizard-body { flex:1; overflow:auto; }
+.wizard-body::-webkit-scrollbar { width:6px; }
+.wizard-body::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+.wizard-footer {
+    padding:14px 24px; border-top:1px solid var(--border-divider);
+    background:var(--bg-container); flex-shrink:0;
+    display:flex; align-items:center; justify-content:space-between;
+    box-shadow:0 -1px 0 var(--border-divider);
+}
+
+/* ========= Step panels ========= */
+.step-panel { display:none; padding:24px; }
+.step-panel.active { display:block; }
+
+/* Upload zone */
+.upload-grid { display:flex; flex-direction:column; gap:12px; margin-bottom:20px; }
+.upload-zone {
+    border:2px dashed var(--border-default); border-radius:14px;
+    padding:32px 20px; text-align:center; cursor:pointer;
+    background:var(--bg-subtle); transition:all .2s;
+    position:relative;
+}
+.upload-zone:hover { border-color:var(--primary); background:#eff6ff; box-shadow:0 0 0 4px rgba(59,130,246,.08); }
+
+.upload-zone.has-file { border-color:#16a34a; background:#f0fdf4; border-style:solid; box-shadow:0 0 0 3px rgba(22,163,74,.08); }
+.upload-zone.has-file.upload-zone-vc { border-color:#86efac; background:#f0fdf4; box-shadow:none; }
+.upload-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.uz-icon {
+    width:52px; height:52px; border-radius:14px;
+    background:var(--bg-container); border:1px solid var(--border-divider);
+    display:grid; place-items:center; margin:0 auto 14px;
+    box-shadow:var(--shadow-sm);
+}
+.uz-icon svg { width:22px; height:22px; color:var(--text-secondary); }
+.uz-title { font-size:14px; font-weight:700; margin-bottom:6px; }
+.uz-sub { font-size:12px; color:var(--text-secondary); line-height:1.5; }
+.uz-badge {
+    display:inline-flex; align-items:center; gap:5px; margin-top:14px;
+    padding:5px 12px; border-radius:20px;
+    background:#dcfce7; color:#15803d; font-size:12px; font-weight:600;
+    border:1px solid #bbf7d0;
+}
+.uz-badge svg { width:12px; height:12px; }
+/* Optional (Payment Voucher) compact strip */
+.upload-zone-vc {
+    padding:14px 18px; border-radius:10px; border-width:1.5px;
+    border-color:var(--border-divider); background:var(--bg-surface);
+    display:flex; align-items:center; gap:14px; text-align:left;
+}
+.upload-zone-vc:hover { border-color:var(--text-disabled); background:var(--bg-hover); box-shadow:none; }
+.upload-zone-vc .uz-icon {
+    width:36px; height:36px; border-radius:9px; flex-shrink:0; margin:0;
+    box-shadow:none; background:var(--bg-subtle);
+}
+.upload-zone-vc .uz-icon svg { width:16px; height:16px; }
+.upload-zone-vc .uz-title { font-size:12px; font-weight:600; margin-bottom:2px; color:var(--text-secondary); }
+.upload-zone-vc .uz-sub { font-size:11px; color:var(--text-disabled); line-height:1.4; }
+.upload-zone-vc .uz-badge { margin-top:0; font-size:11px; padding:3px 9px; }
+.upload-zone-vc .uz-text { flex:1; min-width:0; }
+
+/* Parsed records table */
+.section-title {
+    font-size:11px; font-weight:700; color:var(--text-secondary);
+    letter-spacing:.6px; text-transform:uppercase; margin-bottom:12px;
+    display:flex; align-items:center; gap:8px;
+}
+.section-title .ai-badge {
+    background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe;
+    font-size:10px; padding:2px 7px; border-radius:20px;
+    font-weight:700; text-transform:none; letter-spacing:0;
+}
+.records-table { width:100%; border-collapse:collapse; font-size:13px; }
+.records-table th {
+    text-align:left; padding:9px 12px; font-size:11px; font-weight:600;
+    color:var(--text-secondary); background:var(--bg-subtle);
+    border-bottom:1px solid var(--border-divider); letter-spacing:.2px;
+}
+.records-table th:first-child { border-radius:8px 0 0 0; }
+.records-table th:last-child { border-radius:0 8px 0 0; }
+.records-table td { padding:9px 12px; border-bottom:1px solid var(--border-divider); vertical-align:middle; }
+.records-table tr:last-child td { border-bottom:none; }
+.records-table tr:hover td { background:#f8faff; }
+.confidence-high { color:#16a34a; }
+.confidence-med { color:#d97706; }
+.type-pill {
+    display:inline-flex; align-items:center; gap:4px; height:24px; padding:0 10px;
+    border-radius:20px; font-size:11px; font-weight:600;
+    background:#ede9fe; color:#5b21b6; border:1px solid #ddd6fe;
+    cursor:pointer; transition:all .15s;
+}
+.type-pill:hover { background:#ddd6fe; border-color:#c4b5fd; }
+.type-pill svg { width:10px; height:10px; }
+.manual-row td { background:#fffbeb !important; }
+.add-row-btn {
+    display:flex; align-items:center; gap:7px; margin-top:10px;
+    padding:8px 12px; border:1.5px dashed var(--border-default);
+    border-radius:8px; color:var(--text-secondary); font-size:13px;
+    font-weight:500; background:none; cursor:pointer; width:100%;
+    font-family:inherit; transition:all .15s;
+}
+.add-row-btn:hover { border-color:var(--primary); color:var(--primary); background:#eff6ff; }
+.add-row-btn svg { width:14px; height:14px; }
+
+/* Match view — new design */
+.match-layout-v2 { display:grid; grid-template-columns:220px 1fr; gap:16px; align-items:start; }
+
+/* Invoice summary cards (left) */
+.inv-card-list { display:flex; flex-direction:column; gap:8px; position:sticky; top:0; }
+.inv-card {
+    border:1.5px solid var(--border-divider); border-radius:12px;
+    padding:12px 14px; background:var(--bg-container);
+    cursor:pointer; transition:all .18s; box-shadow:var(--shadow-xs);
+}
+.inv-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); }
+.inv-card.ok  { border-color:#86efac; background:#f0fdf4; }
+.inv-card.warn{ border-color:#fde68a; background:#fffbeb; }
+.inv-card.err { border-color:#fecaca; background:#fef2f2; }
+.inv-card.none{ border-color:var(--border-divider); background:var(--bg-subtle); }
+.ic-id { font-size:12px; font-weight:700; margin-bottom:3px; }
+.ic-desc { font-size:11px; color:var(--text-secondary); margin-bottom:6px; line-height:1.4; }
+.ic-amounts { display:flex; flex-direction:column; gap:2px; }
+.ic-row { display:flex; justify-content:space-between; font-size:11px; }
+.ic-row .lbl { color:var(--text-secondary); }
+.ic-row .val { font-weight:600; }
+.ic-diff {
+    margin-top:6px; font-size:10px; font-weight:700; padding:3px 8px;
+    border-radius:20px; text-align:center;
+}
+.ic-diff.ok   { background:#dcfce7; color:#15803d; }
+.ic-diff.warn { background:#fef3c7; color:#d97706; }
+.ic-diff.err  { background:#fee2e2; color:#dc2626; }
+.ic-diff.none { background:var(--bg-active); color:var(--text-disabled); }
+
+/* Unassigned summary card */
+.unassigned-card {
+    border:1.5px dashed var(--border-default); border-radius:12px;
+    padding:10px 14px; background:var(--bg-subtle);
+    font-size:11px; color:var(--text-secondary);
+}
+.unassigned-card .uc-count { font-size:12px; font-weight:700; color:var(--text-default); margin-bottom:2px; }
+
+/* Transaction table (right) */
+.txn-table-wrap {
+    border:1px solid var(--border-divider); border-radius:12px;
+    overflow:hidden; background:var(--bg-container);
+    box-shadow:var(--shadow-xs);
+}
+.txn-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+.txn-table th {
+    text-align:left; padding:9px 12px; font-size:11px; font-weight:600;
+    color:var(--text-secondary); border-bottom:1px solid var(--border-divider);
+    background:var(--bg-subtle); white-space:nowrap; letter-spacing:.2px;
+}
+.txn-table td { padding:9px 12px; border-bottom:1px solid var(--border-divider); vertical-align:middle; }
+.txn-table tr:last-child td { border-bottom:none; }
+.txn-table tr.row-unassigned td { background:#fffbeb; }
+.txn-table tr.row-confirmed td { background:#f0fdf4; }
+.txn-table tr:hover td { background:#f8faff; }
+
+/* Invoice assignment pill */
+.inv-assign-pill {
+    display:inline-flex; align-items:center; gap:5px;
+    height:24px; padding:0 8px 0 6px; border-radius:6px;
+    font-size:11px; font-weight:600; cursor:pointer;
+    border:1.5px solid transparent; transition:all .12s;
+    white-space:nowrap; position:relative;
+}
+.inv-assign-pill:hover { opacity:.85; }
+.inv-assign-pill svg { width:10px; height:10px; }
+/* colour variants by invoice slot */
+.iap-0  { background:#dbeafe; color:#1d4ed8; border-color:#bfdbfe; }
+.iap-1  { background:#f3e8ff; color:#7c3aed; border-color:#ddd6fe; }
+.iap-2  { background:#d1fae5; color:#065f46; border-color:#a7f3d0; }
+.iap-none { background:var(--bg-active); color:var(--text-secondary); border-color:var(--border-default); }
+.iap-none:hover { border-color:var(--primary); color:var(--primary); }
+
+/* Assignment popover */
+.assign-pop {
+    position:absolute; top:calc(100% + 4px); left:0; z-index:500;
+    background:#fff; border:1px solid var(--border-default);
+    border-radius:8px; box-shadow:var(--shadow-md);
+    min-width:190px; overflow:hidden; display:none;
+}
+.assign-pop.open { display:block; }
+.ap-item {
+    display:flex; align-items:center; gap:8px;
+    padding:8px 12px; cursor:pointer; font-size:12px;
+    border-bottom:1px solid var(--border-divider);
+}
+.ap-item:last-child { border-bottom:none; }
+.ap-item:hover { background:var(--bg-hover); }
+.ap-item.active { background:#eff6ff; }
+.ap-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.ap-label { flex:1; font-weight:500; }
+.ap-check { color:var(--primary); margin-left:auto; }
+.ap-check svg { width:12px; height:12px; }
+
+/* Confirmed badge */
+.confirmed-chip {
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:10px; font-weight:600; color:#15803d;
+    background:#dcfce7; border:1px solid #a7f3d0;
+    padding:1px 6px; border-radius:4px;
+}
+.confirmed-chip svg { width:9px; height:9px; }
+
+/* ===== Expense Item Section (inside mount point) ===== */
+.ei-section {
+    padding:12px 14px 10px;
+    border-bottom:1px solid var(--border-divider);
+    transition:background .15s;
+}
+.ei-section:last-of-type { border-bottom:none; }
+.ei-section-toolbar {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:8px;
+}
+.ei-status-badge {
+    font-size:11px; font-weight:600; padding:2px 9px;
+    border-radius:20px; white-space:nowrap;
+}
+.ei-del-btn {
+    display:flex; align-items:center; gap:4px;
+    border:none; background:none; cursor:pointer;
+    color:var(--text-disabled); font:inherit; font-size:11px;
+    padding:2px 4px; border-radius:5px; transition:color .12s, background .12s;
+}
+.ei-del-btn:hover { color:#dc2626; background:#fee2e2; }
+.ei-warn-row {
+    margin-top:6px; padding:5px 10px; border-radius:6px;
+    font-size:11px; background:#fffbeb; border:1px solid #fde68a; color:#92400e;
+}
+/* Pill-style doc links */
+.ei-links-row {
+    display:flex; flex-direction:column; gap:6px; margin-top:10px;
+    padding-top:10px; border-top:1px solid var(--border-divider);
+}
+.ei-links-group {
+    display:flex; align-items:center; flex-wrap:wrap; gap:5px;
+}
+.ei-links-label {
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:10px; font-weight:700; color:var(--text-disabled);
+    text-transform:uppercase; letter-spacing:.4px;
+    white-space:nowrap; min-width:52px; flex-shrink:0;
+}
+.doc-pill {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 6px; border-radius:6px; font-size:11px; font-weight:600;
+    border:1px solid; white-space:nowrap;
+}
+.doc-pill-inv { background:#fff0f0; border-color:#fecaca; color:#b91c1c; }
+.doc-pill-vc  { background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+.doc-pill-conflict { background:#fee2e2; border-color:#f87171; color:#dc2626; }
+.pill-btn {
+    border:none; background:rgba(0,0,0,.06); cursor:pointer; color:inherit;
+    font:inherit; font-size:10px; padding:0 4px; border-radius:3px;
+    transition:background .1s; line-height:1.4;
+}
+.pill-btn:hover { background:rgba(0,0,0,.14); }
+.pill-btn-del { color:inherit; opacity:.7; }
+.pill-btn-del:hover { background:#fca5a5; color:#fff; opacity:1; }
+.add-pill-btn {
+    display:inline-flex; align-items:center; gap:3px;
+    border:1px dashed var(--border-default); background:none; cursor:pointer;
+    color:var(--text-secondary); font:inherit; font-size:11px;
+    padding:2px 8px; border-radius:6px; transition:background .12s, color .12s;
+}
+.add-pill-btn:hover { background:var(--bg-hover); color:var(--text-default); border-color:var(--border-strong); }
+.unassigned-section {
+    border:1.5px dashed var(--border-default); border-radius:14px;
+    margin-bottom:10px; overflow:hidden; background:var(--bg-subtle);
+}
+.unassigned-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; background:var(--bg-subtle); gap:8px;
+}
+.unassigned-row {
+    display:flex; align-items:center; gap:8px; padding:7px 14px;
+    border-top:1px solid var(--border-divider); font-size:12px;
+    background:#fffbeb;
+}
+.ua-assign-btn {
+    border:1.5px solid var(--primary); background:#eff6ff; color:var(--primary);
+    border-radius:6px; cursor:pointer; padding:2px 9px; font-size:11px;
+    font-weight:600; font-family:inherit; white-space:nowrap;
+    transition:background .12s;
+}
+.ua-assign-btn:hover { background:#dbeafe; }
+.ua-new-btn {
+    border:1.5px solid var(--border-default); background:none;
+    color:var(--text-secondary); border-radius:6px; cursor:pointer;
+    padding:2px 9px; font-size:11px; font-family:inherit;
+    white-space:nowrap; transition:background .12s;
+}
+.ua-new-btn:hover { background:var(--bg-hover); }
+
+/* ===== Mount Point (Invoice-first grouping) ===== */
+.mount-point {
+    border-radius:12px; margin-bottom:14px; overflow:hidden;
+    box-shadow:var(--shadow-xs); transition:border-color .2s;
+}
+.mp-header {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px; background:var(--bg-subtle);
+    border-bottom:1px solid var(--border-divider);
+}
+.mp-label-block { flex-shrink:0; display:flex; align-items:center; gap:6px; }
+.mp-label {
+    font-size:13px; font-weight:800; color:var(--text-default);
+    background:var(--bg-container); border:1.5px solid var(--border-divider);
+    border-radius:8px; padding:3px 10px; white-space:nowrap;
+    letter-spacing:-.1px;
+}
+.mp-inv-icon {
+    width:26px; height:26px; border-radius:6px;
+    background:#ffe4e6; display:grid; place-items:center;
+    color:#f87171; flex-shrink:0;
+}
+.mp-inv-info {
+    display:flex; align-items:center; gap:8px; flex:1; min-width:0;
+    overflow:hidden;
+}
+.mp-inv-id {
+    font-size:11px; font-weight:700; color:var(--text-secondary);
+    background:#f1f5f9; border:1px solid var(--border-divider);
+    border-radius:4px; padding:1px 6px; white-space:nowrap; flex-shrink:0;
+}
+.mp-inv-file {
+    font-size:12px; font-weight:600; color:var(--text-default);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.mp-inv-date { font-size:11px; white-space:nowrap; flex-shrink:0; }
+.mp-inv-amount {
+    font-size:14px; font-weight:700; color:var(--text-default);
+    white-space:nowrap; flex-shrink:0;
+}
+.mp-conflict-label {
+    display:flex; align-items:center; gap:8px;
+    padding:7px 14px; font-size:12px; font-weight:600; color:#dc2626;
+    background:#fff5f5; border-bottom:1px solid #fecaca;
+}
+.mp-items { padding:0; }
+.mp-docs {
+    padding:10px 14px 12px;
+    border-bottom:1px solid var(--border-divider);
+    background:var(--bg-subtle);
+}
+.mp-items-header {
+    display:flex; align-items:center; gap:5px;
+    padding:7px 14px 5px;
+    font-size:10px; font-weight:700; color:var(--text-disabled);
+    text-transform:uppercase; letter-spacing:.5px;
+    border-bottom:1px solid var(--border-divider);
+}
+.ei-fields-row {
+    display:flex; gap:10px; align-items:flex-end;
+}
+.ei-field-label {
+    display:flex; flex-direction:column; gap:3px;
+    font-size:11px; font-weight:600; color:var(--text-secondary);
+    flex:1; min-width:0;
+}
+.field-cn {
+    font-size:10px; font-weight:400; color:var(--text-disabled);
+    margin-left:3px;
+}
+.ei-field-input {
+    border:1px solid var(--border-default); border-radius:7px;
+    padding:5px 8px; font:inherit; font-size:12px;
+    color:var(--text-default); background:var(--bg-container);
+    outline:none; transition:border-color .15s; width:100%;
+    box-sizing:border-box;
+}
+.ei-field-input:focus { border-color:var(--primary); box-shadow:0 0 0 2px rgba(99,102,241,.12); }
+/* Conflict flash animation */
+@keyframes flashRed {
+    0%   { background:#fff5f5; }
+    50%  { background:#fee2e2; }
+    100% { background:#fff5f5; }
+}
+/* Conflict banner */
+.conflict-banner {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:11px 14px; margin-bottom:14px;
+    background:#fef2f2; border:1.5px solid #f87171; border-radius:10px;
+    font-size:13px; color:#b91c1c;
+}
+.conflict-banner svg { flex-shrink:0; margin-top:1px; }
+
+/* Draft preview */
+.report-preview {
+    background:var(--bg-container); border:1px solid var(--border-divider);
+    border-radius:14px; overflow:hidden; box-shadow:var(--shadow-sm);
+}
+.report-header-section {
+    padding:20px 24px; border-bottom:1px solid var(--border-divider);
+    display:grid; grid-template-columns:1fr 1fr; gap:14px;
+    background:var(--bg-subtle);
+}
+.report-field { display:flex; flex-direction:column; gap:3px; }
+.rf-label { font-size:11px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.4px; }
+.rf-value { font-size:14px; font-weight:600; }
+.report-table-wrap { overflow:auto; }
+.report-table { width:100%; border-collapse:collapse; font-size:12px; }
+.report-table th {
+    background:var(--bg-subtle); padding:9px 14px; text-align:left;
+    font-size:11px; font-weight:600; color:var(--text-secondary);
+    border-bottom:1px solid var(--border-divider); white-space:nowrap;
+    letter-spacing:.2px;
+}
+.report-table td { padding:9px 14px; border-bottom:1px solid var(--border-divider); vertical-align:middle; }
+.report-table tr.group-start td { border-top:2px solid var(--border-default); }
+.report-table .merged-cell { background:#f8faff; color:var(--text-secondary); font-size:11px; font-weight:600; }
+.report-total {
+    padding:16px 24px; border-top:2px solid var(--border-divider);
+    display:flex; align-items:center; justify-content:flex-end; gap:16px;
+    background:var(--bg-subtle);
+}
+.total-label { font-size:13px; font-weight:600; color:var(--text-secondary); }
+.total-amount { font-size:22px; font-weight:800; color:#0f172a; letter-spacing:-.5px; }
+
+/* Empty state */
+.empty-state { padding:60px 24px; text-align:center; color:var(--text-disabled); }
+.empty-state svg { width:40px; height:40px; margin-bottom:12px; }
+.empty-state p { font-size:13px; }
+
+/* Toast */
+.toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:#0f172a; color:#fff; padding:11px 20px; border-radius:10px;
+    font-size:13px; font-weight:600; opacity:0; transition:all .25s;
+    pointer-events:none; z-index:9999;
+    box-shadow:0 8px 24px rgba(15,23,42,.3);
+}
+.toast.visible { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ===== Modal ===== */
+.modal-overlay {
+    position:fixed; inset:0; background:rgba(15,23,42,.45);
+    display:flex; align-items:center; justify-content:center;
+    z-index:2000; opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal {
+    background:var(--bg-container); border-radius:16px; padding:24px;
+    box-shadow:0 24px 64px rgba(15,23,42,.2); width:440px; max-width:95vw;
+}
+.modal-title { font-size:16px; font-weight:700; margin-bottom:6px; }
+.modal-sub { font-size:13px; color:var(--text-secondary); margin-bottom:20px; line-height:1.5; }
+.modal-actions { display:flex; justify-content:flex-end; gap:8px; padding-top:4px; }
+.vc-picker-row {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:10px;
+    border:1px solid var(--border-divider); background:var(--bg-surface);
+    transition:background .15s, border-color .15s;
+}
+.vc-picker-row:hover { background:var(--bg-hover); border-color:var(--primary); }
+.vc-picker-icon {
+    width:32px; height:32px; border-radius:8px; flex-shrink:0;
+    background:#eff6ff; display:flex; align-items:center; justify-content:center;
+}
+.vc-picker-info { flex:1; min-width:0; }
+.vc-picker-name { font-size:13px; font-weight:600; color:var(--text-default); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.vc-picker-meta { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+.vc-picker-btn { padding:5px 14px; border-radius:7px; font-size:12px; font-weight:600;
+    border:1px solid var(--primary); background:var(--primary); color:#fff;
+    cursor:pointer; white-space:nowrap; flex-shrink:0; transition:opacity .15s; }
+.vc-picker-btn:hover { opacity:.85; }
+.vc-picker-empty { font-size:13px; color:var(--text-disabled); text-align:center; padding:20px 0; }
+
+/* ===== Test Case FAB ===== */
+.tc-fab {
+    position:fixed; bottom:24px; left:24px; z-index:1000;
+    display:flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg,#6366f1,#4f46e5);
+    color:#fff; padding:10px 18px; border-radius:24px;
+    font-size:13px; font-weight:600; cursor:pointer;
+    box-shadow:0 4px 16px rgba(99,102,241,.4);
+    transition:all .18s; user-select:none;
+}
+.tc-fab:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(99,102,241,.5); }
+.tc-fab svg { width:16px; height:16px; }
+.tc-panel {
+    position:fixed; bottom:74px; left:24px; z-index:1001;
+    width:320px; background:var(--bg-container);
+    border:1px solid var(--border-divider); border-radius:16px;
+    box-shadow:0 8px 32px rgba(15,23,42,.16);
+    display:none; flex-direction:column; overflow:hidden;
+}
+.tc-panel.open { display:flex; }
+.tc-panel-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px 10px; border-bottom:1px solid var(--border-divider);
+}
+.tc-panel-title { font-size:13px; font-weight:700; color:var(--text-default); }
+.tc-close {
+    width:24px; height:24px; border:none; background:none; cursor:pointer;
+    display:grid; place-items:center; color:var(--text-secondary); border-radius:6px;
+}
+.tc-close:hover { background:var(--bg-hover); }
+.tc-close svg { width:14px; height:14px; }
+.tc-option {
+    display:flex; align-items:flex-start; gap:12px;
+    padding:14px 16px; cursor:pointer; transition:background .12s;
+    border-bottom:1px solid var(--border-divider);
+}
+.tc-option:last-child { border-bottom:none; }
+.tc-option:hover { background:var(--bg-hover); }
+.tc-option.active { background:var(--bg-active); }
+.tc-opt-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
+.tc-opt-body { flex:1; min-width:0; }
+.tc-opt-title { font-size:13px; font-weight:700; margin-bottom:3px; }
+.tc-opt-desc { font-size:11px; color:var(--text-secondary); line-height:1.6; }
+.tc-check {
+    width:20px; height:20px; border-radius:50%; background:#6366f1;
+    display:grid; place-items:center; flex-shrink:0; margin-top:2px;
+}
+.tc-check svg { width:11px; height:11px; stroke:#fff; }
+
+/* Info box */
+.info-box {
+    display:flex; gap:10px; padding:12px 15px; border-radius:10px;
+    border:1px solid var(--warn-border); background:var(--warn-bg);
+    font-size:12px; color:#92400e; margin-bottom:16px; font-weight:500;
+}
+.info-box svg { width:15px; height:15px; flex-shrink:0; margin-top:1px; }
+.info-box.blue { border-color:#bfdbfe; background:#eff6ff; color:#1e40af; }
+
+/* Select */
+select.inline-select {
+    border:none; background:none; font:inherit; font-size:12px;
+    color:var(--text-default); cursor:pointer; outline:none;
+    appearance:none; -webkit-appearance:none; padding-right:14px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 0 center;
+}
+
+/* Editable inline */
+.editable {
+    border:none; background:transparent; font:inherit; font-size:12px;
+    color:var(--text-default); outline:none; border-bottom:1px dashed transparent;
+    transition:border-color .15s; padding:0; width:100%;
+}
+.editable:hover { border-bottom-color:var(--border-strong); }
+.editable:focus { border-bottom-color:var(--primary); }
+
+/* Step split layout (Steps 2 & 3 doc preview) */
+.step-split { display:flex; height:100%; overflow:hidden; }
+.step-main { flex:1; overflow-y:auto; padding:24px; min-width:0; }
+.step-main::-webkit-scrollbar { width:5px; }
+.step-main::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+.step-doc-pane {
+    width:300px; flex-shrink:0; border-left:1px solid var(--border-divider);
+    display:flex; flex-direction:column; background:var(--bg-container); overflow:hidden;
+}
+.sdp-header {
+    height:44px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 14px; border-bottom:1px solid var(--border-divider); flex-shrink:0;
+    background:var(--bg-subtle);
+}
+.sdp-title { font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.5px; }
+.sdp-tabs { display:flex; gap:0; }
+.sdp-tab {
+    height:44px; padding:0 10px; border:none; background:none; font:inherit;
+    font-size:11px; font-weight:500; color:var(--text-secondary); cursor:pointer;
+    position:relative; transition:color .15s;
+}
+.sdp-tab:hover { color:var(--text-default); }
+.sdp-tab.active { color:#1d4ed8; font-weight:700; }
+.sdp-tab.active::after {
+    content:''; position:absolute; bottom:0; left:6px; right:6px;
+    height:2px; background:linear-gradient(90deg,#3b82f6,#6366f1); border-radius:1px;
+}
+.sdp-body { flex:1; overflow-y:auto; padding:12px; background:var(--bg-subtle); }
+.sdp-body::-webkit-scrollbar { width:4px; }
+.sdp-body::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:2px; }
+
+/* ===== Document Preview Modal ===== */
+.doc-modal-overlay {
+    position:fixed; inset:0; background:rgba(15,23,42,.55);
+    z-index:9000; display:none; align-items:center; justify-content:center;
+    backdrop-filter:blur(2px);
+}
+.doc-modal-overlay.open { display:flex; }
+.doc-modal {
+    width:700px; max-width:92vw; max-height:88vh;
+    background:var(--bg-container); border-radius:18px; overflow:hidden;
+    box-shadow:0 32px 96px rgba(0,0,0,.32); display:flex; flex-direction:column;
+    animation:modalIn .18s ease;
+}
+@keyframes modalIn { from { transform:scale(.94) translateY(12px); opacity:0; } to { transform:none; opacity:1; } }
+.doc-modal-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; border-bottom:1px solid var(--border-divider);
+    background:var(--bg-subtle); flex-shrink:0; gap:12px;
+}
+.doc-modal-title-wrap { display:flex; align-items:center; gap:8px; min-width:0; }
+.doc-modal-tag {
+    font-size:10px; font-weight:700; padding:2px 7px; border-radius:5px;
+    flex-shrink:0; text-transform:uppercase; letter-spacing:.4px;
+}
+.doc-modal-close {
+    border:none; background:none; cursor:pointer; color:var(--text-secondary);
+    padding:5px; border-radius:7px; display:grid; place-items:center;
+    transition:background .12s; flex-shrink:0;
+}
+.doc-modal-close:hover { background:var(--bg-hover); color:var(--text-default); }
+.doc-modal-body { flex:1; overflow-y:auto; padding:20px; }
+.doc-modal-body::-webkit-scrollbar { width:5px; }
+.doc-modal-body::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+.doc-modal-meta {
+    display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;
+    padding:10px 14px; background:var(--bg-subtle); border-radius:10px;
+    border:1px solid var(--border-divider); font-size:12px;
+}
+.doc-modal-meta-item { display:flex; flex-direction:column; gap:2px; }
+.doc-modal-meta-label { font-size:10px; font-weight:700; color:var(--text-disabled); text-transform:uppercase; }
+.doc-modal-meta-value { font-weight:600; color:var(--text-default); }
+
+/* Bill preview inside pane */
+.bill-pane-mock {
+    background:#fff; border-radius:10px; border:1px solid var(--border-divider);
+    overflow:hidden; box-shadow:var(--shadow-md);
+}
+.bpm-header {
+    padding:14px 14px 12px; text-align:center; color:#fff;
+}
+.bpm-app { font-size:10px; opacity:.85; margin-bottom:2px; font-weight:600; letter-spacing:.3px; }
+.bpm-title { font-size:13px; font-weight:700; }
+.bpm-amount { font-size:24px; font-weight:800; margin-top:4px; letter-spacing:-.5px; }
+.bpm-count { font-size:10px; opacity:.8; margin-top:3px; }
+.bpm-group-label {
+    padding:6px 12px; font-size:10px; font-weight:700;
+    color:var(--text-secondary); background:var(--bg-subtle);
+    border-bottom:1px solid var(--border-divider); letter-spacing:.4px;
+    text-transform:uppercase;
+}
+.bpm-row {
+    display:flex; align-items:center; gap:8px; padding:7px 12px;
+    border-bottom:1px solid var(--border-divider); font-size:11px;
+}
+.bpm-row:last-child { border-bottom:none; }
+.bpm-icon { font-size:14px; flex-shrink:0; }
+.bpm-info { flex:1; min-width:0; }
+.bpm-merchant { font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bpm-date { font-size:10px; color:var(--text-disabled); margin-top:1px; }
+.bpm-amount-cell { font-size:11px; font-weight:700; flex-shrink:0; }
+
+/* Invoice pane mock */
+.inv-pane-mock {
+    background:#fff; border-radius:10px; border:1px solid var(--border-divider);
+    padding:14px; box-shadow:var(--shadow-md); font-size:11px;
+}
+.ipm-top { margin-bottom:10px; padding-bottom:10px; border-bottom:2px solid #0f172a; display:flex; justify-content:space-between; align-items:flex-start; }
+.ipm-type { font-size:9px; color:var(--text-secondary); margin-bottom:2px; text-transform:uppercase; letter-spacing:.4px; }
+.ipm-title { font-size:13px; font-weight:800; color:#0f172a; }
+.ipm-no { font-size:9px; color:var(--text-secondary); margin-top:3px; }
+.ipm-stamp {
+    width:44px; height:44px; border-radius:50%; border:2px solid #dc2626;
+    display:grid; place-items:center; color:#dc2626; font-size:8px;
+    font-weight:700; text-align:center; line-height:1.3; flex-shrink:0;
+}
+.ipm-field { display:flex; gap:6px; margin-bottom:5px; }
+.ipm-lbl { color:var(--text-secondary); width:72px; flex-shrink:0; }
+.ipm-val { font-weight:600; flex:1; }
+.ipm-divider { height:1px; background:var(--border-divider); margin:8px 0; }
+.ipm-items { width:100%; border-collapse:collapse; font-size:9px; margin-bottom:6px; }
+.ipm-items th { border:1px solid var(--border-strong); padding:3px 5px; background:var(--bg-subtle); font-weight:600; text-align:center; }
+.ipm-items td { border:1px solid var(--border-default); padding:3px 5px; text-align:center; }
+.ipm-total { display:flex; justify-content:space-between; padding-top:6px; border-top:1.5px solid var(--text-default); font-weight:700; font-size:12px; }
+.inv-select-hint {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    height:140px; color:var(--text-disabled); font-size:12px; gap:8px; text-align:center;
+}
+.inv-select-hint svg { width:28px; height:28px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ========== Sidebar ========== -->
+<aside class="sidebar">
+    <div class="sb-logo" title="Doraemon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="sb-actions">
+        <button class="sb-icon" title="New Chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button class="sb-icon" title="Workspace">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </button>
+    </div>
+    <div class="sb-sep"></div>
+    <div class="sb-agents">
+        <button class="sb-agent" style="background:#ef4444" title="Alarm Agent">A<span class="sb-dot"></span></button>
+        <button class="sb-agent" style="background:#1e3a5f" title="D Expert">D</button>
+        <button class="sb-agent active" style="background:linear-gradient(135deg,#10b981,#059669)" title="F Expert">F</button>
+        <button class="sb-agent" style="background:#f43f5e" title="HR Agent"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></button>
+        <button class="sb-agent" style="background:#f97316" title="X Agent">X</button>
+        <button class="sb-agent" style="background:#ec4899" title="P Agent"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="7" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="5" cy="17" r="2"/><circle cx="19" cy="17" r="2"/></svg></button>
+        <button class="sb-agent" style="background:#2563eb" title="Tech Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
+        <button class="sb-agent" style="background:#4d7c0f" title="Ops Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+        <button class="sb-agent" style="background:#0d9488" title="CS Agent">CS</button>
+        <button class="sb-agent" style="background:#16a34a" title="Partner Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <button class="sb-agent" style="background:#ea580c" title="Analytics Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+        <button class="sb-agent" style="background:#7c3aed" title="Voice Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+    </div>
+    <div class="sb-bottom">
+        <div class="sb-avatar" title="仪 恺">仪</div>
+    </div>
+</aside>
+
+<!-- ========== List panel (2nd-level nav) ========== -->
+<section class="list-panel">
+    <div class="lp-header">
+        <div class="expert-row">
+            <div class="expert-avatar">F</div>
+            <div class="expert-title-col">
+                <div class="expert-title">
+                    F Expert
+                    <svg class="info-icon" style="width:16px;height:16px;color:var(--text-disabled);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </div>
+                <div class="avatar-stack">
+                    <div class="avatar-chip" style="background:#1C64F2;">i</div>
+                    <div class="avatar-chip" style="background:#F59E0B;">A</div>
+                    <div class="avatar-chip" style="background:#8B5CF6;">S</div>
+                    <div class="avatar-chip" style="background:#EC4899;">D</div>
+                    <div class="avatar-chip" style="background:#10B981;">L</div>
+                    <div class="avatar-more">+99</div>
+                </div>
+            </div>
+        </div>
+        <div class="lp-filter-row"><button class="chip solid">Waiting</button></div>
+    </div>
+    <div class="lp-search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9a9a98" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="search">
+    </div>
+    <div class="lp-count"><strong>103</strong> total</div>
+    <div class="lp-body">
+        <div class="list-card" onclick="location.href='F-PAP-PAYMENT-REQUEST.html'">
+            <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
+            <div class="list-card-content">
+                <div class="list-card-title">Invoice Collection <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Submit payment request</div>
+                <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending · 26 invoices</div>
+            </div>
+            <span class="list-card-dot"></span>
+        </div>
+        <div class="list-card" onclick="location.href='F-PAP-PAYMENT-REVIEW.html'">
+            <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11.5" cy="14.5" r="2.5"/><line x1="15" y1="18" x2="13.5" y2="16.5"/></svg></div>
+            <div class="list-card-content">
+                <div class="list-card-title">Invoice Review <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Review and approve invoices</div>
+                <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending · 18 invoices</div>
+            </div>
+            <span class="list-card-dot"></span>
+        </div>
+        <div class="list-card active">
+            <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+            <div class="list-card-content">
+                <div class="list-card-title">Expense Report <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Submit monthly expense reports</div>
+                <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Draft · 2 reports</div>
+            </div>
+        </div>
+        <div class="list-card" onclick="location.href='F-PAP-EXPENSE-REVIEW.html'">
+            <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></div>
+            <div class="list-card-content">
+                <div class="list-card-title">Expense Review <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Finance review of expense reports</div>
+                <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending · 2 reports</div>
+            </div>
+            <span class="list-card-dot"></span>
+        </div>
+        <div class="list-card" onclick="location.href='F-PAP-JE-REVIEW-CHAT.html'">
+            <div class="list-card-content">
+                <div class="list-card-title" style="font-size:13px;">JE-DRAFT-2026-0502</div>
+                <div class="list-card-desc">INV-2026-089 · JPY</div>
+            </div>
+            <span class="list-card-dot" style="background:#d97706;top:14px;"></span>
+        </div>
+    </div>
+</section>
+
+<!-- ========== Main ========== -->
+<div class="main" id="mainArea">
+
+    <!-- LIST VIEW -->
+    <div id="listSection">
+        <div class="main-toolbar" style="justify-content:space-between;">
+            <div class="status-tabs-inline">
+                <button class="s-tab active" onclick="switchListTab(this,'all')">All <span class="tc" id="ct-all">6</span></button>
+                <button class="s-tab" onclick="switchListTab(this,'draft')">Draft <span class="tc" id="ct-draft">2</span></button>
+                <button class="s-tab" onclick="switchListTab(this,'pending')">Pending <span class="tc" id="ct-pending">1</span></button>
+                <button class="s-tab" onclick="switchListTab(this,'approved')">Approved <span class="tc" id="ct-approved">1</span></button>
+                <button class="s-tab" onclick="switchListTab(this,'needs-revision')">Needs Revision <span class="tc" id="ct-needs-revision">1</span></button>
+                <button class="s-tab" onclick="switchListTab(this,'oa-rejected')">Rejected <span class="tc" id="ct-oa-rejected">1</span></button>
+            </div>
+            <button class="btn-primary" onclick="openNewReportModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New Report
+            </button>
+        </div>
+        <div class="list-view">
+            <div class="er-table-wrap">
+                <table class="er-table">
+                    <thead>
+                        <tr>
+                            <th class="col-emp">Employee</th>
+                            <th class="col-period">Period</th>
+                            <th class="col-submitted">Submitted</th>
+                            <th class="col-invoices">Invoices</th>
+                            <th class="col-amount">Amount</th>
+                            <th class="col-status">Status</th>
+                            <th class="col-note">Notes</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="er-table-scroll">
+                    <table class="er-table">
+                        <tbody id="expenseCards"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WIZARD / DETAIL VIEW -->
+    <div class="detail-view" id="detailSection">
+        <div class="wizard-header">
+            <button class="wizard-back" onclick="closeWizard()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <span class="wizard-title" id="wizardTitle">New Expense Report — May 2026</span>
+        </div>
+
+        <!-- Step bar -->
+        <div class="step-bar" id="stepBar">
+            <div class="step-item active" id="step-ind-1">
+                <div class="step-num">1</div>
+                <div class="step-label">Upload Files</div>
+            </div>
+            <div class="step-connector" id="conn-1"></div>
+            <div class="step-item" id="step-ind-2">
+                <div class="step-num">2</div>
+                <div class="step-label">Organize Items</div>
+            </div>
+            <div class="step-connector" id="conn-2"></div>
+            <div class="step-item" id="step-ind-3">
+                <div class="step-num">3</div>
+                <div class="step-label">Preview & Submit</div>
+            </div>
+        </div>
+
+        <div class="wizard-body">
+            <!-- STEP 1: Upload -->
+            <div class="step-panel active" id="panel-1">
+                <div class="info-box blue" style="margin-bottom:20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <span>Upload your invoices (required). Payment vouchers / monthly bill screenshots are optional — if uploaded, AI will help match them to your expense items in Step 2.</span>
+                </div>
+                <div class="upload-grid">
+                    <!-- Primary: Invoices (required) -->
+                    <div class="upload-zone has-file" id="uzInv">
+                        <input type="file" accept="image/*,.pdf" multiple onchange="markUploaded('uzInv','uz-inv-badge')">
+                        <div class="uz-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                        <div class="uz-title">
+                            Invoices
+                            <span style="margin-left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#fef9c3;color:#a16207;vertical-align:middle;">Required</span>
+                        </div>
+                        <div class="uz-sub">PDF or image, batch upload 发票（必传）</div>
+                        <div class="uz-badge" id="uz-inv-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            3 invoices uploaded
+                        </div>
+                    </div>
+
+                    <!-- Secondary: Payment Voucher (optional) — compact row -->
+                    <div class="upload-zone upload-zone-vc has-file" id="uzBill">
+                        <input type="file" accept="image/*" onchange="markUploaded('uzBill','uz-bill-badge')">
+                        <div class="uz-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                        <div class="uz-text">
+                            <div class="uz-title">
+                                Payment Voucher
+                                <span style="margin-left:6px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg-subtle);color:var(--text-disabled);border:1px solid var(--border-divider);vertical-align:middle;">Optional</span>
+                            </div>
+                            <div class="uz-sub">Alipay / WeChat bill screenshot — 付款凭证（选传）</div>
+                        </div>
+                        <div class="uz-badge" id="uz-bill-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            bill_may2026.png · parsed 36 records
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Organize Items -->
+            <div class="step-panel" id="panel-2">
+                <div class="step-main" id="itemsMain" style="overflow-y:auto;padding:24px;"></div>
+            </div>
+
+            <!-- STEP 3: Preview -->
+            <div class="step-panel" id="panel-3">
+                <div class="info-box" style="margin-bottom:20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span>Review your expense report draft below. You can edit any field inline before submitting to finance for review.</span>
+                </div>
+                <div class="report-preview">
+                    <div class="report-header-section">
+                        <div class="report-field"><span class="rf-label">Employee</span><span class="rf-value">仪 恺</span></div>
+                        <div class="report-field"><span class="rf-label">Department</span><span class="rf-value">Finance</span></div>
+                        <div class="report-field"><span class="rf-label">Period</span><span class="rf-value">May 2026</span></div>
+                        <div class="report-field"><span class="rf-label">Submit Date</span><span class="rf-value">2026-06-04</span></div>
+                    </div>
+                    <div class="report-table-wrap">
+                        <table class="report-table" id="reportTable">
+                            <thead>
+                                <tr>
+                                    <th>Invoice Date<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">开票日期</span></th>
+                                    <th>Expense Date<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">消费日期</span></th>
+                                    <th>Description<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">费用内容支出说明</span></th>
+                                    <th>Amount (¥)<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">金额（人民币元）</span></th>
+                                    <th>Invoice Amount<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">发票金额</span></th>
+                                    <th>Actual Desc<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">实际内容支出说明</span></th>
+                                    <th>Remarks<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">备注</span></th>
+                                    <th>Invoice<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">关联发票</span></th>
+                                    <th>Payment Voucher<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">付款凭证</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="report-total">
+                        <span class="total-label">Total</span>
+                        <span class="total-amount">¥ 5,094.72</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-footer">
+            <button class="btn-ghost" id="prevBtn" onclick="prevStep()">← Back</button>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button class="btn-ghost" onclick="closeWizard()">Save Draft</button>
+                <button class="btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Hidden file inputs for invoice / voucher upload -->
+<input type="file" id="uploadInvInput"  accept=".pdf,image/*" multiple style="display:none">
+<input type="file" id="uploadVcInput"   accept="image/*,.pdf" multiple style="display:none">
+
+<!-- Document Preview Modal -->
+<div id="docModal" class="doc-modal-overlay" onclick="closeDocModal()">
+    <div class="doc-modal" onclick="event.stopPropagation()">
+        <div class="doc-modal-header">
+            <div class="doc-modal-title-wrap">
+                <span id="docModalTag" class="doc-modal-tag"></span>
+                <span id="docModalTitle" style="font-size:14px;font-weight:700;color:var(--text-default);"></span>
+            </div>
+            <button class="doc-modal-close" onclick="closeDocModal()" title="关闭">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="doc-modal-body" id="docModalBody"></div>
+    </div>
+</div>
+
+<!-- Test Case FAB -->
+<div class="tc-fab" id="tcFab" onclick="toggleTcPanel()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+    Test Case
+</div>
+<div class="tc-panel" id="tcPanel">
+    <div class="tc-panel-header">
+        <span class="tc-panel-title">切换场景 / Switch Scenario</span>
+        <button class="tc-close" onclick="toggleTcPanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="tc-option active" id="tc-opt-surrogate" onclick="switchScenario('surrogate')">
+        <div class="tc-opt-icon">🔁</div>
+        <div class="tc-opt-body">
+            <div class="tc-opt-title">替票场景</div>
+            <div class="tc-opt-desc">一张发票涵盖多条报销事项<br>无付款凭证</div>
+        </div>
+        <div class="tc-check" id="tc-check-surrogate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+    </div>
+    <div class="tc-option" id="tc-opt-onebyone" onclick="switchScenario('onebyone')">
+        <div class="tc-opt-icon">🧾</div>
+        <div class="tc-opt-body">
+            <div class="tc-opt-title">一单一票场景</div>
+            <div class="tc-opt-desc">每张发票对应一笔流水，全部已关联凭证</div>
+        </div>
+        <div class="tc-check" id="tc-check-onebyone" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+    </div>
+    <div class="tc-option" id="tc-opt-withvc" onclick="switchScenario('withvc')" style="border:1.5px dashed #f59e0b;background:#fffbeb;">
+        <div class="tc-opt-icon">🔗</div>
+        <div class="tc-opt-body">
+            <div class="tc-opt-title" style="color:#92400e;">Invoice + Voucher（含未关联）</div>
+            <div class="tc-opt-desc">Invoice 和 Voucher 都上传了<br>2 张凭证 AI 未匹配 → 显示未关联提示</div>
+        </div>
+        <div class="tc-check" id="tc-check-withvc" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+    </div>
+    <div class="tc-option" id="tc-opt-conflict" onclick="switchScenario('conflict')" style="border:1.5px dashed #f87171;background:#fff5f5;">
+        <div class="tc-opt-icon">⚠️</div>
+        <div class="tc-opt-body">
+            <div class="tc-opt-title" style="color:#dc2626;">冲突演示</div>
+            <div class="tc-opt-desc">INV-001 被两个事项同时引用<br>验证双处标红 + 提交阻断效果</div>
+        </div>
+        <div class="tc-check" id="tc-check-conflict" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+    </div>
+</div>
+
+<!-- Voucher picker modal -->
+<div class="modal-overlay" id="vcPickerModal" onclick="closeVcPickerModal()">
+    <div class="modal" style="width:480px;" onclick="event.stopPropagation()">
+        <div class="modal-title">Add Payment Voucher <span style="font-size:13px;font-weight:400;color:var(--text-secondary);">付款凭证</span></div>
+        <div class="modal-sub">Select from already-uploaded vouchers, or upload a new one.</div>
+
+        <!-- Already uploaded list -->
+        <div id="vcPickerList" style="margin-bottom:14px;max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+
+        <!-- Divider + Upload New -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <div style="flex:1;height:1px;background:var(--border-divider);"></div>
+            <span style="font-size:11px;color:var(--text-disabled);white-space:nowrap;">or</span>
+            <div style="flex:1;height:1px;background:var(--border-divider);"></div>
+        </div>
+        <button class="btn-ghost" style="width:100%;height:38px;justify-content:center;gap:8px;display:flex;align-items:center;" onclick="uploadNewVcForItem()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload New Voucher
+        </button>
+
+        <div class="modal-actions" style="margin-top:16px;">
+            <button class="btn-ghost" onclick="closeVcPickerModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Invoice picker modal -->
+<div class="modal-overlay" id="invPickerModal" onclick="closeInvPickerModal()">
+    <div class="modal" style="width:500px;" onclick="event.stopPropagation()">
+        <div class="modal-title" id="invPickerTitle">Add Invoice <span style="font-size:13px;font-weight:400;color:var(--text-secondary);">关联发票</span></div>
+        <div class="modal-sub">Select from already-uploaded invoices, or upload a new one.</div>
+
+        <div id="invPickerList" style="margin-bottom:14px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <div style="flex:1;height:1px;background:var(--border-divider);"></div>
+            <span style="font-size:11px;color:var(--text-disabled);white-space:nowrap;">or</span>
+            <div style="flex:1;height:1px;background:var(--border-divider);"></div>
+        </div>
+        <button class="btn-ghost" style="width:100%;height:38px;justify-content:center;gap:8px;display:flex;align-items:center;" onclick="uploadNewInvForMount()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload New Invoice
+        </button>
+
+        <div class="modal-actions" style="margin-top:16px;">
+            <button class="btn-ghost" onclick="closeInvPickerModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- New Report — pick period modal -->
+<div class="modal-overlay" id="newReportModal" onclick="closeNewReportModal()">
+    <div class="modal" style="width:400px;" onclick="event.stopPropagation()">
+        <div class="modal-title">New Expense Report</div>
+        <div class="modal-sub">Select the month this report covers.</div>
+        <div style="margin-bottom:20px;">
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">
+                Period <span style="font-weight:400;color:var(--text-disabled);">报销月份</span>
+            </label>
+            <select id="newReportPeriod"
+                style="width:100%;height:38px;border:1px solid var(--border-default);border-radius:8px;
+                       padding:0 12px;font:inherit;font-size:13px;color:var(--text-default);
+                       background:var(--bg-container);outline:none;cursor:pointer;"
+                onfocus="this.style.borderColor='var(--primary)'"
+                onblur="this.style.borderColor='var(--border-default)'">
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-ghost" onclick="closeNewReportModal()">Cancel</button>
+            <button class="btn-primary" onclick="confirmNewReport()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Create Report
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== Data ==========
+const CATEGORIES = ['餐饮','零食','团建类','办公用品','员工福利','业务招待','差旅费','飞机票/火车票','打车费','住宿费','车辆费（停车）','车辆费（充电）','车辆费（洗车）'];
+
+const MERCHANT_MAP = [
+    { kw:['停车','道闸','路侧'], cat:'车辆费（停车）' },
+    { kw:['充电','充电桩'], cat:'车辆费（充电）' },
+    { kw:['洗车'], cat:'车辆费（洗车）' },
+    { kw:['滴滴','打车','高德出行','曹操'], cat:'打车费' },
+    { kw:['美团','饿了么','海底捞','麦当劳','肯德基','星巴克','餐'], cat:'餐饮' },
+    { kw:['12306','东方航空','南方航空','高铁'], cat:'飞机票/火车票' },
+    { kw:['携程','如家','汉庭','酒店','宾馆'], cat:'住宿费' },
+    { kw:['711','全家','便利蜂','罗森'], cat:'零食' },
+    { kw:['住房补贴'], cat:'员工福利' },
+];
+
+function guessCategory(merchant) {
+    for (const m of MERCHANT_MAP) {
+        if (m.kw.some(k => merchant.includes(k))) return m.cat;
+    }
+    return '办公用品';
+}
+
+const MOCK_RECORDS = [
+    { date:'2026/5/9',  merchant:'洗车费',              amount:88,   cat:'车辆费（洗车）', remarks:'' },
+    { date:'2026/5/15', merchant:'洗车费',              amount:88,   cat:'车辆费（洗车）', remarks:'' },
+    { date:'2026/5/22', merchant:'洗车费',              amount:88,   cat:'车辆费（洗车）', remarks:'' },
+    { date:'2026/5/1',  merchant:'停车费（世纪公园）',   amount:56,   cat:'车辆费（停车）', remarks:'' },
+    { date:'2026/5/2',  merchant:'停车费（滨江）',       amount:40,   cat:'车辆费（停车）', remarks:'' },
+    { date:'2026/5/3',  merchant:'停车费（滨江·陌家）', amount:45,   cat:'车辆费（停车）', remarks:'' },
+    { date:'2026/5/7',  merchant:'停车费（世纪汇）',     amount:40,   cat:'车辆费（停车）', remarks:'' },
+    { date:'2026/5/8',  merchant:'停车费（恒丰路）',     amount:30,   cat:'车辆费（停车）', remarks:'' },
+    { date:'2026/5/9',  merchant:'停车费（滨江·金科路）',amount:60,   cat:'车辆费（停车）', remarks:'' },
+    { date:'2026/5/10', merchant:'停车费（嘉定绿洲）',   amount:30,   cat:'车辆费（停车）', remarks:'' },
+    { date:'2026/5/1',  merchant:'餐费',                amount:29,   cat:'餐饮', remarks:'' },
+    { date:'2026/5/2',  merchant:'餐费',                amount:32,   cat:'餐饮', remarks:'' },
+    { date:'2026/5/3',  merchant:'餐费',                amount:35,   cat:'餐饮', remarks:'' },
+    { date:'2026/5/4',  merchant:'餐费',                amount:33,   cat:'餐饮', remarks:'' },
+    { date:'2026/5/1',  merchant:'住房补贴',             amount:1700, cat:'员工福利', remarks:'' },
+    { date:'2026/5/16', merchant:'住房补贴',             amount:329,  cat:'员工福利', remarks:'' },
+    { date:'2026/5/4',  merchant:'充电',                 amount:135.26, cat:'车辆费（充电）', remarks:'' },
+    { date:'2026/5/7',  merchant:'充电',                 amount:129.29, cat:'车辆费（充电）', remarks:'' },
+    { date:'2026/5/9',  merchant:'充电',                 amount:132.35, cat:'车辆费（充电）', remarks:'' },
+    { date:'2026/5/12', merchant:'充电',                 amount:137.24, cat:'车辆费（充电）', remarks:'' },
+];
+
+const MOCK_INVOICES = [
+    { id:'INV-001', date:'2026/6/12', amount:1645,    desc:'车辆费（停车/洗车）替票',  file:'13.pdf',         path:'员工报销单据/发票/2026_06_12_24/13.pdf' },
+    { id:'INV-002', date:'2026/6/12', amount:2000,    desc:'住房补贴发票',             file:'14.pdf',         path:'员工报销单据/发票/2026_06_12_24/14.pdf' },
+    { id:'INV-003', date:'2026/6/12', amount:1083.88, desc:'充电服务费发票',            file:'24.pdf',         path:'员工报销单据/发票/2026_06_12_24/24.pdf' },
+];
+
+const MOCK_MATCH = [
+    { invIdx:0, txnRange:[0,13], status:'candidate', label:'替票建议', confirmed:false },
+    { invIdx:1, txnRange:[14,15], status:'matched',   label:'自动匹配', confirmed:true },
+    { invIdx:2, txnRange:[16,19], status:'candidate', label:'替票建议', confirmed:false },
+];
+
+const EXPENSE_REPORTS = [
+    { id:'ER-2026-05', name:'仪 恺', email:'kai.yi@ctw.inc', month:'May 2026', amount:'¥5,094.72', status:'draft',
+      submitted:'2026-06-04', invoices:3 },
+    { id:'ER-2026-04', name:'仪 恺', email:'kai.yi@ctw.inc', month:'Apr 2026', amount:'¥3,812.00', status:'pending',
+      submitted:'2026-05-03', invoices:5 },
+    { id:'ER-2026-03', name:'仪 恺', email:'kai.yi@ctw.inc', month:'Mar 2026', amount:'¥4,210.50', status:'approved',
+      submitted:'2026-04-02', invoices:4 },
+    { id:'ER-2026-02', name:'仪 恺', email:'kai.yi@ctw.inc', month:'Feb 2026', amount:'¥2,980.00', status:'draft',
+      submitted:'2026-03-05', invoices:2 },
+    { id:'ER-2026-01', name:'仪 恺', email:'kai.yi@ctw.inc', month:'Jan 2026', amount:'¥1,560.00', status:'needs-revision',
+      submitted:'2026-02-03', invoices:2,
+      rejectedBy:'finance',
+      rejectReason:'第3行停车费发票金额（¥320）与报销金额（¥280）不符，请重新上传正确发票。' },
+    { id:'ER-2025-12', name:'仪 恺', email:'kai.yi@ctw.inc', month:'Dec 2025', amount:'¥3,200.00', status:'oa-rejected',
+      submitted:'2026-01-05', invoices:3,
+      rejectedBy:'oa',
+      rejectReason:'OA审批意见：业务招待费超出季度限额，当前申请金额 ¥3,200，本季度剩余额度 ¥1,800。请拆分或调整报销金额后重新提交。',
+      oaApprover:'刘经理', oaRejectDate:'2026-01-08' },
+];
+
+// ========== List rendering ==========
+let currentListTab = 'all';
+
+function switchListTab(btn, tab) {
+    document.querySelectorAll('.s-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentListTab = tab;
+    renderList();
+}
+
+const STATUS_LABELS = {
+    draft: 'Draft',
+    pending: 'Pending',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    'needs-revision': 'Needs Revision',
+    'oa-rejected': 'Rejected',
+};
+
+function renderList() {
+    // Update tab counts
+    ['all','draft','pending','approved','needs-revision','oa-rejected'].forEach(s => {
+        const el = document.getElementById(`ct-${s}`);
+        if (!el) return;
+        const count = s === 'all' ? EXPENSE_REPORTS.length : EXPENSE_REPORTS.filter(r => r.status === s).length;
+        el.textContent = count;
+    });
+
+    const filtered = currentListTab === 'all' ? EXPENSE_REPORTS : EXPENSE_REPORTS.filter(r => r.status === currentListTab);
+    const tbody = document.getElementById('expenseCards');
+    if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 0;color:var(--text-disabled);font-size:13px;">No expense reports found</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = filtered.map(r => {
+        // Inline rejection hint shown under the employee cell
+        let rejectHint = '';
+        if (r.status === 'needs-revision' && r.rejectReason) {
+            rejectHint = `<div class="er-reject-hint">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Finance: ${r.rejectReason}</span>
+            </div>`;
+        }
+        if (r.status === 'oa-rejected' && r.rejectReason) {
+            rejectHint = `<div class="er-reject-hint red">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>OA (${r.oaApprover}): ${r.rejectReason}</span>
+            </div>`;
+        }
+
+
+        return `<tr onclick="openReport('${r.id}')">
+            <td class="col-emp">
+                <div class="er-emp-cell">
+                    <div>
+                        <div class="er-emp-name">${r.name}</div>
+                        <div class="er-emp-sub">${r.email || ''}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="col-period">${r.month}</td>
+            <td class="col-submitted">${r.submitted}</td>
+            <td class="col-invoices">${r.invoices}</td>
+            <td class="col-amount">${r.amount}</td>
+            <td class="col-status"><span class="tag ${r.status}">${STATUS_LABELS[r.status]||r.status}</span></td>
+            <td class="col-note">${rejectHint}</td>
+        </tr>`;
+    }).join('');
+}
+
+function openWizardForRevision(id) {
+    const r = EXPENSE_REPORTS.find(x => x.id === id);
+    if (!r) return;
+    document.getElementById('wizardTitle').textContent = `${r.name} · ${r.month} — Revising`;
+    openWizard('new');
+}
+
+function openReport(id) {
+    const r = EXPENSE_REPORTS.find(x => x.id === id);
+    if (!r) return;
+    document.getElementById('wizardTitle').textContent = `${r.name} · ${r.month}`;
+    // Show at step 3 (preview) for existing report
+    openWizard('existing');
+    goToStep(3);
+}
+
+// ========== Wizard ==========
+let currentStep = 1;
+
+function openWizard(mode, period) {
+    document.getElementById('listSection').style.display = 'none';
+    document.getElementById('detailSection').classList.add('open');
+    if (mode === 'new') {
+        const label = period || 'New Report';
+        document.getElementById('wizardTitle').textContent = `New Expense Report — ${label}`;
+        goToStep(1);
+    }
+}
+
+function openNewReportModal() {
+    // Populate month options: current month back 12 months
+    const sel = document.getElementById('newReportPeriod');
+    sel.innerHTML = '';
+    const now = new Date();
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    for (let i = 0; i < 13; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const label = `${months[d.getMonth()]} ${d.getFullYear()}`;
+        const opt = document.createElement('option');
+        opt.value = label;
+        opt.textContent = label;
+        if (i === 1) opt.selected = true; // default: last month
+        sel.appendChild(opt);
+    }
+    document.getElementById('newReportModal').classList.add('open');
+}
+function closeNewReportModal() {
+    document.getElementById('newReportModal').classList.remove('open');
+}
+function confirmNewReport() {
+    const period = document.getElementById('newReportPeriod').value;
+    closeNewReportModal();
+    openWizard('new', period);
+}
+
+function closeWizard() {
+    document.getElementById('detailSection').classList.remove('open');
+    document.getElementById('listSection').style.display = '';
+    showToast('Draft saved');
+}
+
+function goToStep(n) {
+    currentStep = n;
+    // Panels
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`panel-${n}`).classList.add('active');
+    // Indicators
+    for (let i = 1; i <= 3; i++) {
+        const ind = document.getElementById(`step-ind-${i}`);
+        const conn = document.getElementById(`conn-${i}`);
+        ind.className = 'step-item' + (i === n ? ' active' : i < n ? ' done' : '');
+        if (i < 3) conn.className = 'step-connector' + (i < n ? ' done' : '');
+    }
+    // Step-specific renders
+    if (n === 2) renderItems();
+    if (n === 3) renderReport();
+    // Buttons
+    document.getElementById('prevBtn').style.visibility = n === 1 ? 'hidden' : 'visible';
+    const nextBtn = document.getElementById('nextBtn');
+    if (n === 3) {
+        const conflicts = getConflictedInvIndices();
+        if (conflicts.size > 0) {
+            nextBtn.textContent = '⚠ 存在冲突，无法提交';
+            nextBtn.style.background = '#ef4444';
+            nextBtn.style.cursor = 'not-allowed';
+            nextBtn.style.opacity = '0.85';
+        } else {
+            nextBtn.textContent = '✓ Submit to Finance';
+            nextBtn.style.background = '';
+            nextBtn.style.cursor = '';
+            nextBtn.style.opacity = '';
+        }
+    } else {
+        nextBtn.textContent = 'Next →';
+        nextBtn.style.background = '';
+        nextBtn.style.cursor = '';
+        nextBtn.style.opacity = '';
+    }
+}
+
+function nextStep() {
+    if (currentStep === 3) {
+        // Hard block if invoice conflicts exist
+        const conflicted = getConflictedInvIndices();
+        if (conflicted.size > 0) {
+            const names = [...conflicted].map(i => MOCK_INVOICES[i]?.id || `Invoice ${i+1}`).join('、');
+            showToast(`⚠ 提交失败：发票冲突未解决 (${names})`);
+            // Flash the conflict banner if visible
+            const banner = document.querySelector('.conflict-banner');
+            if (banner) {
+                banner.style.animation = 'none';
+                banner.offsetHeight; // reflow
+                banner.style.animation = 'flashRed 0.5s 2';
+            }
+            return;
+        }
+        showToast('Report submitted to finance for review');
+        closeWizard();
+        return;
+    }
+    goToStep(currentStep + 1);
+}
+function prevStep() { if (currentStep > 1) goToStep(currentStep - 1); }
+
+// ========== Step 2: Organize Items ==========
+
+// Central data model: each expense item = one row in the final report
+// Invoices are linked at the MOUNT POINT level (MOUNT_EXTRAS).
+// Payment Vouchers are linked at the EXPENSE ITEM level (ei.voucherIndices).
+let EXPENSE_ITEMS = [
+    { id:'EI-001', primaryInvIdx:0, invDate:'2026/6/12', expDate:'2026/5/15', desc:'5月停车洗车费替票', amount:1645,    actualDesc:'车辆费（停车/洗车）', remarks:'', voucherIndices:[] },
+    { id:'EI-002', primaryInvIdx:1, invDate:'2026/6/12', expDate:'2026/5/01', desc:'5月住房补贴',       amount:2000,    actualDesc:'住房补贴服务费',      remarks:'', voucherIndices:[] },
+    { id:'EI-003', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/04', desc:'5月新能源充电费',   amount:1083.88, actualDesc:'充电服务费',          remarks:'', voucherIndices:[] },
+];
+let eiNextId = 4;
+let MOCK_VOUCHERS = []; // payment voucher records, separate from bill transactions
+
+// Mount point invoice links: { [invIdx]: { invIndices: [...] } }
+let MOUNT_EXTRAS = {
+    0: { invIndices: [0] },
+    1: { invIndices: [1] },
+    2: { invIndices: [2] },
+};
+
+function getMountExtras(invIdx) {
+    if (!MOUNT_EXTRAS[invIdx]) MOUNT_EXTRAS[invIdx] = { invIndices: [invIdx] };
+    return MOUNT_EXTRAS[invIdx];
+}
+
+// ---- Conflict detection ----
+// An invoice is conflicted if it appears in MOUNT_EXTRAS of MORE THAN ONE different mount point.
+function getConflictedInvIndices() {
+    const invMountSet = {};
+    Object.entries(MOUNT_EXTRAS).forEach(([mountIdx, extras]) => {
+        extras.invIndices.forEach(invIdx => {
+            if (!invMountSet[invIdx]) invMountSet[invIdx] = new Set();
+            invMountSet[invIdx].add(parseInt(mountIdx));
+        });
+    });
+    const result = new Set();
+    Object.entries(invMountSet).forEach(([k, mountSet]) => {
+        if (mountSet.size > 1) result.add(parseInt(k));
+    });
+    return result;
+}
+
+function getMountInvTotal(invIdx) {
+    return getMountExtras(invIdx).invIndices.reduce((s,i) => s + (MOCK_INVOICES[i]?.amount || 0), 0);
+}
+function getMountItemsTotal(invIdx) {
+    return EXPENSE_ITEMS.filter(ei => ei.primaryInvIdx === invIdx)
+        .reduce((s,ei) => s + (ei.amount || 0), 0);
+}
+function getMountStatus(invIdx, conflicted) {
+    if (conflicted && getMountExtras(invIdx).invIndices.some(i => conflicted.has(i)))
+        return { cls:'conflict', text:'⚠ Invoice conflict' };
+    const invTotal = getMountInvTotal(invIdx);
+    const itemsTotal = getMountItemsTotal(invIdx);
+    if (invTotal === 0) return { cls:'warn', text:'No invoice' };
+    if (itemsTotal > invTotal + 0.5) return { cls:'err', text:`✗ Over ¥${(itemsTotal - invTotal).toFixed(0)}` };
+    return { cls:'ok', text:'✓ Matched' };
+}
+
+function getUnlinkedVcIndices() {
+    const linked = new Set(EXPENSE_ITEMS.flatMap(ei => ei.voucherIndices || []));
+    return MOCK_VOUCHERS.map((_, i) => i).filter(i => !linked.has(i));
+}
+
+function renderItems() {
+    const container = document.getElementById('itemsMain');
+    if (!container) return;
+
+    const conflicted = getConflictedInvIndices();
+    const unlinkedVcs = getUnlinkedVcIndices();
+
+    let html = '';
+
+    // Conflict banner
+    if (conflicted.size > 0) {
+        html += `<div class="conflict-banner">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div>
+                <strong>Invoice used in multiple expenses</strong> — the same invoice cannot be linked to more than one expense. Remove the duplicate before submitting.
+                <span style="color:#b91c1c;font-weight:700;"> (${conflicted.size} conflict${conflicted.size > 1 ? 's' : ''})</span>
+            </div>
+        </div>`;
+    }
+
+    // Unlinked voucher warning
+    if (unlinkedVcs.length > 0) {
+        const vcChips = unlinkedVcs.map(vcIdx => {
+            const r = MOCK_VOUCHERS[vcIdx];
+            if (!r) return '';
+            return `<span class="doc-pill doc-pill-vc" style="border-color:#f59e0b;background:#fffbeb;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                ${r.merchant}<span style="opacity:.7;"> ¥${r.amount.toFixed(0)}</span>
+                <button class="pill-btn" onclick="showDocModal('vc',${vcIdx})" title="View">View</button>
+            </span>`;
+        }).join('');
+        html += `<div class="conflict-banner" style="background:#fffbeb;border-color:#f59e0b;color:#92400e;margin-bottom:12px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div>
+                <strong>Unlinked Payment Voucher${unlinkedVcs.length > 1 ? 's' : ''}</strong> — ${unlinkedVcs.length} voucher(s) uploaded but not linked to any expense item. Go to the relevant item and click "+ Add Voucher".
+                <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${vcChips}</div>
+            </div>
+        </div>`;
+    }
+
+    if (conflicted.size === 0) {
+        html += `<div class="info-box blue" style="margin-bottom:16px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Each invoice is a mount point. AI has auto-generated expense items per invoice. You can add more invoices or items, and link payment vouchers to each item.</span>
+        </div>`;
+    }
+
+    // Render mount points — one per invoice
+    MOCK_INVOICES.forEach((inv, invIdx) => {
+        const isMountConflict = conflicted.has(invIdx);
+        const itemsUnder = EXPENSE_ITEMS.filter(ei => ei.primaryInvIdx === invIdx);
+        html += buildMountPoint(inv, invIdx, itemsUnder, isMountConflict, conflicted);
+    });
+
+    // Items whose primaryInvIdx is out of range (edge case)
+    const orphans = EXPENSE_ITEMS.filter(ei =>
+        ei.primaryInvIdx < 0 || ei.primaryInvIdx >= MOCK_INVOICES.length);
+    if (orphans.length > 0) {
+        html += `<div class="ei-orphan-section">`;
+        orphans.forEach((ei, idx) => { html += buildItemCard(ei, EXPENSE_ITEMS.indexOf(ei), conflicted); });
+        html += `</div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+function buildMountPoint(inv, invIdx, items, isMountConflict, conflicted) {
+    const conflictBorderStyle = isMountConflict
+        ? 'border:2px solid #f87171;background:#fff5f5;'
+        : 'border:2px solid var(--border-divider);background:var(--bg-container);';
+
+    const conflictHeader = isMountConflict
+        ? `<div class="mp-conflict-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Invoice already linked to another expense — remove duplicate before submitting
+          </div>` : '';
+
+    // Mount-level status
+    const mStatus = getMountStatus(invIdx, conflicted);
+    const sbStyle = mStatus.cls === 'ok'
+        ? 'background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;'
+        : mStatus.cls === 'conflict' || mStatus.cls === 'err'
+        ? 'background:#fee2e2;color:#dc2626;border:1px solid #fecaca;'
+        : 'background:#fef3c7;color:#d97706;border:1px solid #fde68a;';
+
+    const extras = getMountExtras(invIdx);
+    const invTotal = getMountInvTotal(invIdx);
+    const itemsTotal = getMountItemsTotal(invIdx);
+    const amtDiff = itemsTotal - invTotal;
+
+    // Invoice pills for this mount point
+    const invPills = extras.invIndices.map(linkedInvIdx => {
+        const lInv = MOCK_INVOICES[linkedInvIdx];
+        if (!lInv) return '';
+        const isConflict = conflicted && conflicted.has(linkedInvIdx);
+        return `<span class="doc-pill ${isConflict ? 'doc-pill-conflict' : 'doc-pill-inv'}">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            ${isConflict ? '<span style="font-weight:800;">⚠</span> ' : ''}${lInv.id}
+            <span style="opacity:.7;">¥${lInv.amount.toFixed(0)}</span>
+            <button class="pill-btn" onclick="showDocModal('inv',${linkedInvIdx})" title="View">View</button>
+            ${extras.invIndices.length > 1 ? `<button class="pill-btn pill-btn-del" onclick="removeInvFromMount(${invIdx},${linkedInvIdx})" title="Remove">×</button>` : ''}
+        </span>`;
+    }).join('');
+
+    const amtWarnHtml = amtDiff > 0.5
+        ? `<div class="ei-warn-row" style="margin:0 14px 8px;">⚠ Expense total ¥${itemsTotal.toFixed(2)} exceeds invoice total ¥${invTotal.toFixed(2)} (over by ¥${amtDiff.toFixed(2)})</div>`
+        : '';
+
+    const itemsHtml = items.map(ei => buildItemCard(ei, EXPENSE_ITEMS.indexOf(ei), conflicted)).join('');
+
+    return `<div class="mount-point" style="${conflictBorderStyle}">
+        <div class="mp-header">
+            <div class="mp-label-block">
+                <span class="mp-label">Expense ${invIdx + 1}</span>
+            </div>
+            <span class="ei-status-badge" style="${sbStyle};margin-left:auto;">${mStatus.text}</span>
+            <div class="mp-inv-amount">¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</div>
+        </div>
+        ${conflictHeader}
+
+        <!-- Invoices — one section per mount point -->
+        <div class="mp-docs">
+            <div class="ei-links-group">
+                <span class="ei-links-label">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Invoices <span class="field-cn">关联发票</span>
+                </span>
+                ${invPills}
+                <button class="add-pill-btn" onclick="attachInvToMount(${invIdx})">+ Add Invoice</button>
+            </div>
+        </div>
+        ${amtWarnHtml}
+
+        <!-- Expense item list -->
+        ${items.length > 0 ? `<div class="mp-items-header">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Expense Items <span style="font-weight:400;color:var(--text-disabled);">${items.length}</span> <span class="field-cn" style="margin-left:2px;">报销事项</span>
+        </div>` : ''}
+        <div class="mp-items">${itemsHtml}</div>
+        <button class="add-row-btn" style="border-radius:0 0 10px 10px;border:none;border-top:1px dashed var(--border-divider);width:100%;margin-top:0;"
+            onclick="addItemUnderMount(${invIdx})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Item under Expense ${invIdx + 1}
+        </button>
+    </div>`;
+}
+
+function buildItemCard(ei, idx, conflicted) {
+    const invIdx = ei.primaryInvIdx;
+    const mStatus = getMountStatus(invIdx, conflicted);
+    const isMountConflict = mStatus.cls === 'conflict';
+    const sectionBorder = isMountConflict
+        ? 'border-left:3px solid #f87171;background:#fffafa;'
+        : 'border-left:3px solid #e2e8f0;';
+
+    return `<div class="ei-section" id="ei-card-${ei.id}" style="${sectionBorder}">
+        <div class="ei-section-toolbar">
+            <span style="font-size:11px;color:var(--text-disabled);">Expense Item <span class="field-cn" style="margin-left:2px;">报销事项</span></span>
+            <button class="ei-del-btn" onclick="removeExpenseItem('${ei.id}')" title="Delete this expense item">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                Delete
+            </button>
+        </div>
+        <div class="ei-fields-row">
+            <label class="ei-field-label">Expense Date <span class="field-cn">消费日期</span>
+                <input class="ei-field-input" type="text" value="${ei.expDate||''}"
+                    onchange="EXPENSE_ITEMS[${idx}].expDate=this.value;" placeholder="YYYY/M/D">
+            </label>
+            <label class="ei-field-label">Amount (¥) <span class="field-cn">报销金额</span>
+                <input class="ei-field-input" type="number" min="0" step="0.01" value="${ei.amount||''}"
+                    onchange="EXPENSE_ITEMS[${idx}].amount=parseFloat(this.value)||0;renderItems();" placeholder="0.00">
+            </label>
+            <label class="ei-field-label" style="flex:2.5;">Description <span class="field-cn">费用内容支出说明</span>
+                <input class="ei-field-input" type="text" value="${ei.desc||''}"
+                    onchange="EXPENSE_ITEMS[${idx}].desc=this.value;" placeholder="Employee note">
+            </label>
+        </div>
+        <div class="ei-fields-row" style="margin-top:6px;">
+            <label class="ei-field-label" style="flex:2.5;">Actual Description <span class="field-cn">实际内容支出说明</span>
+                <input class="ei-field-input" type="text" value="${ei.actualDesc||''}"
+                    onchange="EXPENSE_ITEMS[${idx}].actualDesc=this.value;" placeholder="AI pre-filled, editable">
+            </label>
+            <label class="ei-field-label" style="flex:1.5;">Remarks <span class="field-cn">备注</span>
+                <input class="ei-field-input" type="text" value="${ei.remarks||''}"
+                    onchange="EXPENSE_ITEMS[${idx}].remarks=this.value;" placeholder="—">
+            </label>
+        </div>
+        <div class="ei-links-group" style="margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--border-divider);">
+            <span class="ei-links-label">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Payment Voucher <span class="field-cn">付款凭证</span>
+            </span>
+            ${(ei.voucherIndices||[]).map(vcIdx => {
+                const r = MOCK_VOUCHERS[vcIdx];
+                if (!r) return '';
+                return `<span class="doc-pill doc-pill-vc">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    ${r.merchant}<span style="opacity:.7;"> ¥${r.amount.toFixed(0)}</span>
+                    <button class="pill-btn" onclick="showDocModal('vc',${vcIdx})" title="View">View</button>
+                    <button class="pill-btn pill-btn-del" onclick="removeVcFromItem('${ei.id}',${vcIdx})" title="Remove">×</button>
+                </span>`;
+            }).join('')}
+            ${(ei.voucherIndices||[]).length === 0
+                ? `<span style="font-size:11px;color:var(--text-disabled);">None (optional)</span><button class="add-pill-btn" onclick="attachVcToItem('${ei.id}')">+ Add Voucher</button>`
+                : `<button class="add-pill-btn" onclick="attachVcToItem('${ei.id}')" title="Replace existing voucher">↺ Replace</button>`
+            }
+        </div>
+    </div>`;
+}
+
+// Toggle expand/collapse
+function toggleEI(id) {
+    const ei = EXPENSE_ITEMS.find(x => x.id === id);
+    if (ei) { ei.expanded = !ei.expanded; renderItems(); }
+}
+
+// Remove an expense item
+function removeExpenseItem(id) {
+    if (!confirm('Delete this expense item?')) return;
+    const idx = EXPENSE_ITEMS.findIndex(x => x.id === id);
+    if (idx >= 0) { EXPENSE_ITEMS.splice(idx, 1); renderItems(); }
+}
+
+// Remove an invoice from a mount point's extras
+function removeInvFromMount(invIdx, targetInvIdx) {
+    const extras = getMountExtras(invIdx);
+    if (extras.invIndices.length <= 1) { showToast('至少保留一张发票'); return; }
+    extras.invIndices = extras.invIndices.filter(i => i !== targetInvIdx);
+    renderItems();
+}
+
+// Remove a payment voucher from an expense item
+function removeVcFromItem(itemId, vcIdx) {
+    const ei = EXPENSE_ITEMS.find(x => x.id === itemId);
+    if (!ei) return;
+    ei.voucherIndices = (ei.voucherIndices || []).filter(i => i !== vcIdx);
+    renderItems();
+}
+
+// Attach an additional invoice to a mount point — opens picker modal
+let _pendingInvMountIdx = null;
+
+function attachInvToMount(invIdx) {
+    _pendingInvMountIdx = invIdx;
+    openInvPickerModal();
+}
+
+function openInvPickerModal() {
+    const extras = getMountExtras(_pendingInvMountIdx);
+    const alreadyLinked = new Set(extras.invIndices || []);
+
+    // Invoices not yet in this mount point
+    const available = MOCK_INVOICES.map((inv, i) => ({inv, i}))
+        .filter(({i}) => !alreadyLinked.has(i));
+
+    const listEl = document.getElementById('invPickerList');
+    if (available.length === 0) {
+        listEl.innerHTML = `<div class="vc-picker-empty">All uploaded invoices are already linked.<br>Use "Upload New" below.</div>`;
+    } else {
+        listEl.innerHTML = available.map(({inv, i}) => `
+        <div class="vc-picker-row">
+            <div class="vc-picker-icon" style="background:#fff0f0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="vc-picker-info">
+                <div class="vc-picker-name">${inv.id} · ${inv.desc || inv.file}</div>
+                <div class="vc-picker-meta">${inv.date}${inv.amount ? ' · ¥' + inv.amount.toLocaleString('zh') : ''}</div>
+            </div>
+            <button class="vc-picker-btn" style="background:#dc2626;border-color:#dc2626;" onclick="selectInvForMount(${i})">Select</button>
+        </div>`).join('');
+    }
+
+    document.getElementById('invPickerModal').classList.add('open');
+}
+
+function closeInvPickerModal() {
+    document.getElementById('invPickerModal').classList.remove('open');
+    _pendingInvMountIdx = null;
+}
+
+function selectInvForMount(invIdx) {
+    if (_pendingInvMountIdx === null) return;
+    const extras = getMountExtras(_pendingInvMountIdx);
+    if (!extras.invIndices.includes(invIdx)) extras.invIndices.push(invIdx);
+    closeInvPickerModal();
+    renderItems();
+    showToast('Invoice linked.');
+}
+
+function uploadNewInvForMount() {
+    const input = document.getElementById('uploadInvInput');
+    input.value = '';
+    input.click();
+}
+
+document.getElementById('uploadInvInput').addEventListener('change', function() {
+    if (_pendingInvMountIdx === null || !this.files.length) return;
+    const extras = getMountExtras(_pendingInvMountIdx);
+    Array.from(this.files).forEach(file => {
+        const newIdx = MOCK_INVOICES.length;
+        const newId  = `INV-${String(newIdx + 1).padStart(3,'0')}`;
+        MOCK_INVOICES.push({
+            id: newId,
+            date: new Date().toLocaleDateString('zh', {year:'numeric',month:'numeric',day:'numeric'}).replace(/\//g,'/'),
+            amount: 0,
+            desc: file.name.replace(/\.[^.]+$/, ''),
+            file: file.name,
+            path: URL.createObjectURL(file),
+            _uploaded: true,
+        });
+        if (!extras.invIndices.includes(newIdx)) extras.invIndices.push(newIdx);
+    });
+    closeInvPickerModal();
+    renderItems();
+    showToast(`Uploaded ${this.files.length} invoice(s) — please fill in the amount.`);
+    _pendingInvMountIdx = null;
+});
+
+// Attach a payment voucher to a specific expense item — opens picker modal
+let _pendingVcItemId = null;
+
+function attachVcToItem(itemId) {
+    _pendingVcItemId = itemId;
+    openVcPickerModal();
+}
+
+function openVcPickerModal() {
+    const ei = EXPENSE_ITEMS.find(x => x.id === _pendingVcItemId);
+    const isReplace = ei && (ei.voucherIndices || []).length > 0;
+
+    // Build list of all MOCK_VOUCHERS not already linked to THIS item but available
+    const alreadyLinked = new Set(EXPENSE_ITEMS.flatMap(e => e.voucherIndices || []));
+    // Show vouchers that are: (a) unlinked anywhere, OR (b) already on this item (to allow re-select)
+    const thisItemVcs = new Set(ei ? ei.voucherIndices || [] : []);
+    const available = MOCK_VOUCHERS.map((v, i) => ({v, i}))
+        .filter(({i}) => !alreadyLinked.has(i) || thisItemVcs.has(i));
+
+    const listEl = document.getElementById('vcPickerList');
+    if (available.length === 0) {
+        listEl.innerHTML = `<div class="vc-picker-empty">No uploaded vouchers available.<br>Use "Upload New" below.</div>`;
+    } else {
+        listEl.innerHTML = available.map(({v, i}) => `
+        <div class="vc-picker-row">
+            <div class="vc-picker-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            </div>
+            <div class="vc-picker-info">
+                <div class="vc-picker-name">${v.merchant || v.file || 'Voucher'}</div>
+                <div class="vc-picker-meta">${v.date}${v.amount ? ' · ¥' + v.amount.toFixed(0) : ''}</div>
+            </div>
+            <button class="vc-picker-btn" onclick="selectVcForItem(${i})">${thisItemVcs.has(i) ? 'Selected' : 'Select'}</button>
+        </div>`).join('');
+    }
+
+    // Modal title
+    const modal = document.getElementById('vcPickerModal');
+    modal.querySelector('.modal-title').innerHTML =
+        (isReplace ? 'Replace Payment Voucher' : 'Add Payment Voucher') +
+        ' <span style="font-size:13px;font-weight:400;color:var(--text-secondary);">付款凭证</span>';
+    modal.classList.add('open');
+}
+
+function closeVcPickerModal() {
+    document.getElementById('vcPickerModal').classList.remove('open');
+    _pendingVcItemId = null;
+}
+
+function selectVcForItem(vcIdx) {
+    const ei = EXPENSE_ITEMS.find(x => x.id === _pendingVcItemId);
+    if (!ei) return;
+    ei.voucherIndices = [vcIdx]; // one voucher per item
+    closeVcPickerModal();
+    renderItems();
+    showToast('Payment voucher linked.');
+}
+
+function uploadNewVcForItem() {
+    const input = document.getElementById('uploadVcInput');
+    input.value = '';
+    input.click();
+}
+
+document.getElementById('uploadVcInput').addEventListener('change', function() {
+    if (!_pendingVcItemId || !this.files.length) return;
+    const ei = EXPENSE_ITEMS.find(x => x.id === _pendingVcItemId);
+    if (!ei) return;
+    if (!ei.voucherIndices) ei.voucherIndices = [];
+    const file = this.files[0]; // one voucher per item
+    const newIdx = MOCK_VOUCHERS.length;
+    MOCK_VOUCHERS.push({
+        date: new Date().toLocaleDateString('zh', {year:'numeric',month:'numeric',day:'numeric'}).replace(/\//g,'/'),
+        merchant: file.name.replace(/\.[^.]+$/, ''),
+        amount: 0,
+        file: file.name,
+        path: URL.createObjectURL(file),
+    });
+    ei.voucherIndices = [newIdx]; // replace any existing
+    closeVcPickerModal();
+    renderItems();
+    showToast('Payment voucher uploaded and linked.');
+    _pendingVcItemId = null;
+});
+
+// Add a new expense item under a specific mount point (invoice)
+function addItemUnderMount(invIdx) {
+    const inv = MOCK_INVOICES[invIdx];
+    if (!inv) return;
+    const newId = `EI-${String(eiNextId++).padStart(3,'0')}`;
+    EXPENSE_ITEMS.push({
+        id: newId,
+        primaryInvIdx: invIdx,
+        invDate: inv.date,
+        expDate: inv.date,
+        desc: '',
+        amount: 0,
+        actualDesc: '',
+        remarks: '',
+        voucherIndices: [],
+    });
+    renderItems();
+    setTimeout(() => {
+        const card = document.getElementById(`ei-card-${newId}`);
+        if (card) card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }, 60);
+}
+
+// Preview panel — bill screenshots
+let activeBillTab = 0;
+
+function renderOrgBillTabs() {
+    const tabsEl = document.getElementById('orgDocTabs');
+    if (!tabsEl) return;
+    tabsEl.innerHTML = BILL_SCREENSHOTS.map((s, i) =>
+        `<button class="sdp-tab ${i===activeBillTab?'active':''}" onclick="switchOrgBillTab(${i})">${s.app} ${i+1}</button>`
+    ).join('');
+}
+
+function showOrgBillPreview() {
+    activeBillTab = 0;
+    renderOrgBillTabs();
+    const titleEl = document.getElementById('orgDocTitle');
+    if (titleEl) titleEl.textContent = '📋 流水截图';
+    renderOrgBillBody();
+}
+
+function switchOrgBillTab(idx) {
+    activeBillTab = idx;
+    renderOrgBillTabs();
+    renderOrgBillBody();
+}
+
+function renderOrgBillBody() {
+    const bodyEl = document.getElementById('orgDocBody');
+    if (!bodyEl) return;
+    const s = BILL_SCREENSHOTS[activeBillTab];
+    bodyEl.innerHTML = `
+    <div style="padding:8px 10px 0;">
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">
+            <span style="font-size:10px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${s.file}">${s.file}</span>
+        </div>
+        <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border-divider);">
+            <div style="padding:6px 10px;background:${s.appColor};color:#fff;font-size:10px;font-weight:600;">
+                ${s.app} · ${s.period} 账单截图
+            </div>
+            <img src="${s.path}" alt="${s.file}" style="width:100%;display:block;max-height:460px;object-fit:contain;background:#f8fafc;"
+                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <div style="display:none;align-items:center;justify-content:center;height:120px;background:#f8fafc;flex-direction:column;gap:6px;color:var(--text-disabled);font-size:11px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8" cy="9" r="2"/><path d="M2 17l5-5 4 4 3-3 6 6"/></svg>
+                <span>${s.file}</span>
+            </div>
+        </div>
+    </div>`;
+}
+
+// Preview panel — invoice PDF
+function showOrgInvPreview(invIdx) { showDocModal('inv', invIdx); }
+
+// ========== Document Preview Modal ==========
+function showDocModal(type, idx) {
+    const tagEl   = document.getElementById('docModalTag');
+    const titleEl = document.getElementById('docModalTitle');
+    const bodyEl  = document.getElementById('docModalBody');
+
+    if (type === 'inv') {
+        const inv = MOCK_INVOICES[idx];
+        if (!inv) return;
+        tagEl.textContent  = '发票';
+        tagEl.style.cssText = 'background:#ffe4e6;color:#e11d48;';
+        titleEl.textContent = `${inv.id} · ${inv.file}`;
+        bodyEl.innerHTML = `
+        <div class="doc-modal-meta">
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">发票编号</span><span class="doc-modal-meta-value">${inv.id}</span></div>
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">开票日期</span><span class="doc-modal-meta-value">${inv.date}</span></div>
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">发票金额</span><span class="doc-modal-meta-value" style="color:#0f172a;">¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</span></div>
+            <div class="doc-modal-meta-item" style="flex:1;"><span class="doc-modal-meta-label">描述</span><span class="doc-modal-meta-value">${inv.desc}</span></div>
+        </div>
+        <embed src="${inv.path}" type="application/pdf" width="100%" height="520px"
+            style="border-radius:10px;border:1px solid var(--border-divider);display:block;">
+        <div style="margin-top:12px;display:flex;justify-content:center;">
+            <a href="${inv.path}" target="_blank"
+               style="font-size:12px;color:var(--primary);display:inline-flex;align-items:center;gap:4px;">
+               在新窗口打开
+               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+        </div>`;
+
+    } else if (type === 'vc') {
+        const r = MOCK_VOUCHERS[idx];
+        if (!r) return;
+        tagEl.textContent  = '付款凭证';
+        tagEl.style.cssText = 'background:#eff6ff;color:#1d4ed8;';
+        titleEl.textContent = `${r.merchant} · ${r.date}`;
+
+        // Use uploaded path if available, otherwise fall back to BILL_SCREENSHOTS by index
+        const previewPath = r.path || (BILL_SCREENSHOTS[idx] ? BILL_SCREENSHOTS[idx].path : null);
+        const scMeta = BILL_SCREENSHOTS[idx] || null;
+        bodyEl.innerHTML = `
+        <div class="doc-modal-meta">
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">商户</span><span class="doc-modal-meta-value">${r.merchant}</span></div>
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">日期</span><span class="doc-modal-meta-value">${r.date}</span></div>
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">金额</span><span class="doc-modal-meta-value" style="color:#0f172a;">¥${r.amount.toFixed(2)}</span></div>
+            ${r.cat ? `<div class="doc-modal-meta-item"><span class="doc-modal-meta-label">类型</span><span class="doc-modal-meta-value">${r.cat}</span></div>` : ''}
+        </div>
+        ${previewPath ? `
+        <div style="border-radius:10px;overflow:hidden;border:1px solid var(--border-divider);">
+            ${scMeta ? `<div style="padding:6px 12px;background:linear-gradient(90deg,${scMeta.appColor});color:#fff;font-size:11px;font-weight:700;">${scMeta.app} · ${scMeta.period} 账单截图</div>` : `<div style="padding:6px 12px;background:#334155;color:#fff;font-size:11px;font-weight:700;">${r.file || r.merchant}</div>`}
+            <img src="${previewPath}" alt="${r.merchant}"
+                style="width:100%;display:block;max-height:480px;object-fit:contain;background:#f8fafc;"
+                onerror="this.style.display='none';this.nextSibling.style.display='flex';">
+            <div style="display:none;align-items:center;justify-content:center;height:100px;background:#f8fafc;flex-direction:column;gap:5px;color:var(--text-disabled);font-size:11px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>${r.file || r.merchant}</span>
+            </div>
+        </div>
+        <div style="margin-top:10px;display:flex;justify-content:center;">
+            <a href="${previewPath}" target="_blank"
+               style="font-size:12px;color:var(--primary);display:inline-flex;align-items:center;gap:4px;">
+               在新窗口打开
+               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+        </div>` : `
+        <div style="padding:40px 0;text-align:center;color:var(--text-disabled);">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="margin-bottom:10px;opacity:.4;"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">${r.merchant}</div>
+            <div style="font-size:12px;">${r.date} · ¥${r.amount.toFixed(2)}</div>
+            <div style="font-size:11px;margin-top:12px;color:#94a3b8;">凭证截图未上传（演示数据）</div>
+        </div>`}`;
+    }
+
+    document.getElementById('docModal').classList.add('open');
+}
+
+function closeDocModal() {
+    document.getElementById('docModal').classList.remove('open');
+}
+
+function addManualRow() {} // legacy stub
+
+// ========== Bill screenshots data ==========
+const BILL_SCREENSHOTS = [
+    {
+        file: '微信图片_20260612130548_129_2.jpg',
+        path: '员工报销单据/订单流水/微信图片_20260612130548_129_2.jpg',
+        app: '微信', appColor: 'linear-gradient(135deg,#07c160,#06ae56)',
+        period: '2026年5月',
+    },
+    {
+        file: '微信图片_20260612130549_130_2.jpg',
+        path: '员工报销单据/订单流水/微信图片_20260612130549_130_2.jpg',
+        app: '微信', appColor: 'linear-gradient(135deg,#07c160,#06ae56)',
+        period: '2026年5月',
+    },
+    {
+        file: '微信图片_20260612130550_131_2.jpg',
+        path: '员工报销单据/订单流水/微信图片_20260612130550_131_2.jpg',
+        app: '微信', appColor: 'linear-gradient(135deg,#07c160,#06ae56)',
+        period: '2026年5月',
+    },
+    {
+        file: '微信图片_20260612130551_132_2.jpg',
+        path: '员工报销单据/订单流水/微信图片_20260612130551_132_2.jpg',
+        app: '微信', appColor: 'linear-gradient(135deg,#07c160,#06ae56)',
+        period: '2026年5月',
+    },
+    {
+        file: '微信图片_20260612130552_133_2.jpg',
+        path: '员工报销单据/订单流水/微信图片_20260612130552_133_2.jpg',
+        app: '微信', appColor: 'linear-gradient(135deg,#07c160,#06ae56)',
+        period: '2026年5月',
+    },
+];
+
+// (bill preview rendered by new renderOrgBillBody/showOrgBillPreview in Step 2 Organize section above)
+
+const INV_COLORS = [
+    { bg:'#dbeafe', color:'#1d4ed8', border:'#bfdbfe', dot:'#3b82f6' },
+    { bg:'#f3e8ff', color:'#7c3aed', border:'#ddd6fe', dot:'#8b5cf6' },
+    { bg:'#d1fae5', color:'#065f46', border:'#a7f3d0', dot:'#10b981' },
+];
+
+// (old match state removed — matching replaced by EXPENSE_ITEMS grouping)
+
+function renderMatch() { /* legacy stub */ }
+
+// --- old match functions removed (replaced by EXPENSE_ITEMS grouping) ---
+function _old_renderInvCards_removed() {
+    const el = document.getElementById('invCardList');
+    let html = '';
+    MOCK_INVOICES.forEach((inv, i) => {
+        const assigned = MOCK_RECORDS.filter((_, ri) => txnAssignments[ri] === i);
+        const assignedTotal = assigned.reduce((s, r) => s + r.amount, 0);
+        const diff = inv.amount - assignedTotal;
+        const isOk = Math.abs(diff) < 0.01;
+        const cls = assigned.length === 0 ? 'none' : isOk ? 'ok' : (Math.abs(diff) < 100 ? 'warn' : 'err');
+        const diffLabel = assigned.length === 0 ? 'No transactions' : isOk ? '✓ Match' : `Δ ¥${diff > 0 ? '+' : ''}${diff.toFixed(2)}`;
+        const col = INV_COLORS[i];
+        const isSelected = selectedInvPreview === i;
+        html += `<div class="inv-card ${cls}" onclick="showInvPreview(${i})"
+            style="${isSelected ? 'outline:2px solid '+col.dot+';outline-offset:1px;' : ''}cursor:pointer;">
+            <div class="ic-id" style="color:${col.color};">📄 ${inv.id}
+                <span style="float:right;font-size:10px;font-weight:400;color:var(--text-secondary);">查看原件 →</span>
+            </div>
+            <div class="ic-desc">${inv.desc}</div>
+            <div class="ic-amounts">
+                <div class="ic-row"><span class="lbl">Invoice amount</span><span class="val">¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</span></div>
+                <div class="ic-row"><span class="lbl">Assigned (${assigned.length} rows)</span><span class="val">¥${assignedTotal.toFixed(2)}</span></div>
+            </div>
+            <div class="ic-diff ${cls}">${diffLabel}</div>
+        </div>`;
+    });
+    // Unassigned summary
+    const unassigned = MOCK_RECORDS.filter((_, i) => txnAssignments[i] === null);
+    const unassignedTotal = unassigned.reduce((s, r) => s + r.amount, 0);
+    html += `<div class="unassigned-card">
+        <div class="uc-count">No Invoice · ${unassigned.length} rows</div>
+        <div>¥${unassignedTotal.toFixed(2)}</div>
+    </div>`;
+    el.innerHTML = html;
+}
+
+// ===== Invoice preview pane (Step 3) =====
+let selectedInvPreview = null;
+
+function _old_showInvPreview_removed(idx) {
+    selectedInvPreview = idx;
+    renderInvCards(); // refresh outline
+    renderInvPreviewPane(idx);
+}
+
+function renderInvPreviewPane(idx) {
+    const bodyEl = document.getElementById('invPreviewBody');
+    const tabsEl = document.getElementById('invPreviewTabs');
+    if (!bodyEl) return;
+
+    // Tabs
+    if (tabsEl) {
+        tabsEl.innerHTML = MOCK_INVOICES.map((inv, i) =>
+            `<button class="sdp-tab ${i===idx?'active':''}" onclick="showInvPreview(${i})">${inv.id}</button>`
+        ).join('');
+    }
+
+    const inv = MOCK_INVOICES[idx];
+    const col = INV_COLORS[idx];
+    const assigned = MOCK_RECORDS.filter((_, ri) => txnAssignments[ri] === idx);
+    const rowTotal = assigned.reduce((s,r) => s+r.amount, 0);
+    const diff = inv.amount - rowTotal;
+    const taxRate = 9;
+    const taxAmt = inv.amount / (1 + taxRate/100) * (taxRate/100);
+    const preAmt = inv.amount - taxAmt;
+
+    bodyEl.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:4px 2px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="2.5" width="14" height="19" rx="2" fill="#ffeded" stroke="#f87171"/><text x="10.5" y="16" font-size="5" font-weight="700" fill="#dc2626" text-anchor="middle" font-family="sans-serif">PDF</text></svg>
+        <span style="font-size:11px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${inv.file}">${inv.file}</span>
+        <span style="font-size:10px;padding:1px 6px;border-radius:20px;background:${col.bg};color:${col.color};font-weight:600;">${inv.id}</span>
+    </div>
+    <div style="border-radius:10px;overflow:hidden;border:1px solid var(--border-divider);box-shadow:var(--shadow-md);background:#fff;">
+        <embed src="${inv.path}" type="application/pdf" width="100%" height="460px"
+            style="display:block;"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div style="display:none;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:10px;color:var(--text-secondary);font-size:12px;background:#f8fafc;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="2.5" width="14" height="19" rx="2" fill="#ffeded" stroke="#f87171"/><text x="10.5" y="14" font-size="5" font-weight="700" fill="#dc2626" text-anchor="middle" font-family="sans-serif">PDF</text></svg>
+            <div style="text-align:center;">
+                <div style="font-weight:600;margin-bottom:4px;">${inv.file}</div>
+                <a href="${inv.path}" target="_blank" style="color:var(--primary);font-size:11px;text-decoration:none;">在新窗口中打开 →</a>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+        <span style="background:${col.bg};color:${col.color};padding:1px 8px;border-radius:20px;font-weight:600;border:1px solid ${col.border};">${inv.id}</span>
+        <span>${inv.desc}</span>
+        <span style="margin-left:auto;font-weight:600;color:#0f172a;">¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</span>
+    </div>
+    ${Math.abs(diff)>0.01?`<div style="margin-top:7px;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:500;background:#fffbeb;border:1px solid #fde68a;color:#92400e;">
+        ⚠ 发票金额与已分配行合计差异 Δ¥${diff.toFixed(2)}（发票 ¥${inv.amount.toFixed(2)} / 行合计 ¥${rowTotal.toFixed(2)}）
+    </div>`:''}
+    `;
+}
+
+function _old_renderTxnTable_removed() {
+    const tbody = document.getElementById('txnTableBody');
+    tbody.innerHTML = MOCK_RECORDS.map((r, i) => {
+        const invIdx = txnAssignments[i];
+        const inv = invIdx !== null ? MOCK_INVOICES[invIdx] : null;
+        const col = invIdx !== null ? INV_COLORS[invIdx] : null;
+        const confirmed = txnConfirmed[i];
+        const isManual = !!r.manual;
+        const rowCls = invIdx === null ? 'row-unassigned' : (confirmed ? 'row-confirmed' : '');
+        const pillCls = invIdx !== null ? `iap-${invIdx}` : 'iap-none';
+        const pillLabel = inv ? inv.id : 'No Invoice';
+
+        // Date cell — editable if manual
+        const dateCell = isManual
+            ? `<input class="editable" value="${r.date}" placeholder="5/--"
+                style="width:60px;font-size:12px;"
+                onchange="MOCK_RECORDS[${i}].date=this.value;renderInvCards();">`
+            : `<span style="color:var(--text-secondary);white-space:nowrap;">${r.date.replace('2026/','')}</span>`;
+
+        // Merchant cell — editable if manual
+        const merchantCell = isManual
+            ? `<input class="editable" value="${r.merchant}" placeholder="商户/描述"
+                style="min-width:100px;"
+                onchange="MOCK_RECORDS[${i}].merchant=this.value;">`
+            : r.merchant;
+
+        // Category cell — always a clickable pill (editable)
+        const catCell = `<div class="type-pill" onclick="toggleCatDropMatch(${i})"
+            style="${isManual?'background:#fffbeb;border:1px dashed #fde68a;':''}">
+            ${r.cat}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>`;
+
+        // Amount cell — editable if manual
+        const amountCell = isManual
+            ? `<span style="display:flex;align-items:center;justify-content:flex-end;gap:2px;">
+                ¥<input class="editable" value="${r.amount}" placeholder="0.00"
+                style="width:60px;text-align:right;font-weight:600;"
+                onchange="MOCK_RECORDS[${i}].amount=parseFloat(this.value)||0;renderInvCards();">
+               </span>`
+            : `<span style="font-weight:600;">¥${r.amount.toFixed(2)}</span>`;
+
+        // Manual badge
+        const manualBadge = isManual
+            ? `<span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;background:#fffbeb;color:#d97706;border:1px solid #fde68a;margin-left:4px;">手动</span>`
+            : '';
+
+        return `<tr class="${rowCls}" id="txn-row-${i}">
+            <td style="white-space:nowrap;">${dateCell}${manualBadge}</td>
+            <td>${catCell}</td>
+            <td>${merchantCell}</td>
+            <td style="text-align:right;">${amountCell}</td>
+            <td>
+                <div style="position:relative;display:inline-block;">
+                    <div class="inv-assign-pill ${pillCls}" onclick="toggleAssignPop(${i},event)">
+                        ${col ? `<span style="width:8px;height:8px;border-radius:50%;background:${col.dot};flex-shrink:0;display:inline-block;"></span>` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`}
+                        ${pillLabel}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="assign-pop ${openPopIdx === i ? 'open' : ''}" id="pop-${i}">
+                        ${MOCK_INVOICES.map((inv2, j) => `
+                        <div class="ap-item ${txnAssignments[i]===j?'active':''}" onclick="setAssignment(${i},${j})">
+                            <span class="ap-dot" style="background:${INV_COLORS[j].dot};"></span>
+                            <span class="ap-label">${inv2.id} — ${inv2.desc}</span>
+                            ${txnAssignments[i]===j ? `<span class="ap-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>` : ''}
+                        </div>`).join('')}
+                        <div class="ap-item ${txnAssignments[i]===null?'active':''}" onclick="setAssignment(${i},null)">
+                            <span class="ap-dot" style="background:#d1d5db;"></span>
+                            <span class="ap-label" style="color:var(--text-secondary);">No Invoice</span>
+                            ${txnAssignments[i]===null ? `<span class="ap-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td style="white-space:nowrap;">
+                ${confirmed
+                    ? `<span class="confirmed-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Confirmed</span>`
+                    : `<button style="height:22px;padding:0 8px;border-radius:5px;border:1.5px solid #10b981;background:#ecfdf5;color:#15803d;font:inherit;font-size:11px;font-weight:600;cursor:pointer;" onclick="confirmRow(${i})">Confirm</button>`
+                }
+                <button onclick="deleteMatchRow(${i})" style="border:none;background:none;cursor:pointer;color:var(--text-disabled);padding:0 0 0 6px;" title="Delete row">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('txnCount').textContent = MOCK_RECORDS.length;
+}
+
+// (old match functions removed)
+
+// ========== Step 3: Report preview (driven by EXPENSE_ITEMS) ==========
+function renderReport() {
+    const tbody = document.getElementById('reportTbody');
+    let totalAmt = 0;
+    let html = '';
+
+    EXPENSE_ITEMS.forEach((ei, idx) => {
+        const extras = getMountExtras(ei.primaryInvIdx);
+        const invs = extras.invIndices.map(i => MOCK_INVOICES[i]).filter(Boolean);
+        const vcIdxs = ei.voucherIndices || [];
+        const vcs  = vcIdxs.map(i => MOCK_VOUCHERS[i]).filter(Boolean);
+        const amt = ei.amount || 0;
+        totalAmt += amt;
+
+        // Invoice Date: all dates joined with "+"
+        const invDateStr = invs.length > 0
+            ? invs.map(inv => inv.date).join(' + ')
+            : (ei.invDate || '—');
+
+        // Invoice Amount: additive display e.g. "188+88" then total
+        const invAmtStr = invs.length > 1
+            ? `<span style="font-size:11px;">${invs.map(inv => inv.amount % 1 === 0 ? inv.amount : inv.amount.toFixed(2)).join('+')}</span><br><span style="font-weight:700;">= ¥${invs.reduce((s,inv)=>s+inv.amount,0).toFixed(2)}</span>`
+            : invs.length === 1
+            ? `¥${invs[0].amount.toFixed(2)}`
+            : '—';
+
+        // Invoice links
+        const invLinks = invs.length > 0
+            ? invs.map((inv, i) => `<button onclick="showDocModal('inv',${extras.invIndices[i]})" style="background:none;border:none;padding:0;color:#2563eb;font-size:12px;cursor:pointer;text-decoration:underline;">${inv.id}</button>`).join('<br>')
+            : '—';
+
+        // Payment Voucher links (from item level)
+        const vcLinks = vcs.length > 0
+            ? vcs.map((vc, i) => `<button onclick="showDocModal('vc',${vcIdxs[i]})" style="background:none;border:none;padding:0;color:#7c3aed;font-size:12px;cursor:pointer;text-decoration:underline;">${vc.merchant || 'Voucher'}</button>`).join('<br>')
+            : '<span style="color:var(--text-disabled);font-size:11px;">—</span>';
+
+        html += `<tr class="group-start">
+            <td style="color:var(--text-secondary);font-size:11px;">${invDateStr}</td>
+            <td style="color:var(--text-secondary);">${ei.expDate || '—'}</td>
+            <td><input class="editable" value="${ei.desc}" onchange="EXPENSE_ITEMS[${idx}].desc=this.value" style="min-width:120px;" placeholder="Description"></td>
+            <td style="font-weight:700;">¥${amt.toFixed(2)}</td>
+            <td style="color:var(--text-secondary);">${invAmtStr}</td>
+            <td style="color:var(--text-secondary);font-size:12px;">${ei.actualDesc || '—'}</td>
+            <td><input class="editable" value="${ei.remarks||''}" onchange="EXPENSE_ITEMS[${idx}].remarks=this.value" style="min-width:60px;" placeholder="—"></td>
+            <td style="font-size:12px;">${invLinks}</td>
+            <td style="font-size:12px;">${vcLinks}</td>
+        </tr>`;
+    });
+
+    tbody.innerHTML = html;
+
+    const totalEl = document.querySelector('.total-amount');
+    if (totalEl) totalEl.textContent = `¥ ${totalAmt.toLocaleString('zh', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+}
+
+// ========== Upload mock ==========
+function markUploaded(zoneId, badgeId) {
+    // already marked as uploaded in static HTML for demo
+}
+
+// ========== Toast ==========
+let toastTimer;
+function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('visible'), 2200);
+}
+
+// ========== Test Case FAB ==========
+let currentScenario = 'surrogate';
+
+// ---- Scenario A: 替票（多笔付款，汇总一张发票）—— 无付款凭证 ----
+const SCENARIO_SURROGATE = {
+    records: [],
+    invoices: [
+        { id:'INV-001', date:'2026/6/12', amount:1645,    desc:'车辆费（停车/洗车）替票', file:'13.pdf', path:'员工报销单据/发票/2026_06_12_24/13.pdf' },
+        { id:'INV-002', date:'2026/6/12', amount:2000,    desc:'住房补贴发票',            file:'14.pdf', path:'员工报销单据/发票/2026_06_12_24/14.pdf' },
+        { id:'INV-003', date:'2026/6/12', amount:1083.88, desc:'充电服务费发票',           file:'24.pdf', path:'员工报销单据/发票/2026_06_12_24/24.pdf' },
+    ],
+    mountExtras: {
+        0: { invIndices:[0] },
+        1: { invIndices:[1] },
+        2: { invIndices:[2] },
+    },
+    items: [
+        { id:'EI-001', primaryInvIdx:0, invDate:'2026/6/12', expDate:'2026/5/01', desc:'5月停车费',   amount:900,    actualDesc:'停车场停车费', remarks:'5/1–5/15 多次停车', voucherIndices:[] },
+        { id:'EI-002', primaryInvIdx:0, invDate:'2026/6/12', expDate:'2026/5/16', desc:'5月洗车费',   amount:745,    actualDesc:'洗车服务费',   remarks:'5/16–5/31 含停车', voucherIndices:[] },
+        { id:'EI-003', primaryInvIdx:1, invDate:'2026/6/12', expDate:'2026/5/01', desc:'5月住房补贴', amount:2000,   actualDesc:'住房补贴服务费', remarks:'', voucherIndices:[] },
+        { id:'EI-004', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/04', desc:'5/4 充电',    amount:270.54, actualDesc:'充电服务费', remarks:'', voucherIndices:[] },
+        { id:'EI-005', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/07', desc:'5/7 充电',    amount:270.54, actualDesc:'充电服务费', remarks:'', voucherIndices:[] },
+        { id:'EI-006', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/09', desc:'5/9 充电',    amount:271.60, actualDesc:'充电服务费', remarks:'', voucherIndices:[] },
+        { id:'EI-007', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/12', desc:'5/12 充电',   amount:271.20, actualDesc:'充电服务费', remarks:'', voucherIndices:[] },
+    ],
+    eiNextId: 8,
+};
+
+// ---- Scenario B: 一单一票（每张发票对应一笔消费，含付款凭证）----
+const SCENARIO_ONEBYONE = {
+    records: [
+        { date:'2026/5/8',  merchant:'滴滴出行',     amount:89,   cat:'交通费', remarks:'', manual:false },
+        { date:'2026/5/12', merchant:'餐厅·新荣记',   amount:228,  cat:'餐饮费', remarks:'', manual:false },
+        { date:'2026/5/15', merchant:'中国国航',      amount:1380, cat:'差旅费', remarks:'', manual:false },
+        { date:'2026/5/15', merchant:'北京华贸酒店',  amount:528,  cat:'差旅费', remarks:'', manual:false },
+        { date:'2026/5/16', merchant:'北京地铁',      amount:45,   cat:'交通费', remarks:'', manual:false },
+        { date:'2026/5/16', merchant:'餐厅·京味轩',   amount:95,   cat:'餐饮费', remarks:'', manual:false },
+        { date:'2026/5/17', merchant:'中国国航',      amount:1150, cat:'差旅费', remarks:'', manual:false },
+    ],
+    invoices: [
+        { id:'INV-001', date:'2026/5/8',  amount:89,   desc:'滴滴打车发票',      file:'didi_20260508.pdf',  path:'员工报销单据/发票/2026_05/didi_20260508.pdf' },
+        { id:'INV-002', date:'2026/5/12', amount:228,  desc:'商务午餐发票',      file:'lunch_20260512.pdf', path:'员工报销单据/发票/2026_05/lunch_20260512.pdf' },
+        { id:'INV-003', date:'2026/5/15', amount:1380, desc:'上海→北京机票发票', file:'flight_sh_bj.pdf',   path:'员工报销单据/发票/2026_05/flight_sh_bj.pdf' },
+        { id:'INV-004', date:'2026/5/15', amount:528,  desc:'北京酒店住宿发票',  file:'hotel_bj.pdf',       path:'员工报销单据/发票/2026_05/hotel_bj.pdf' },
+        { id:'INV-005', date:'2026/5/16', amount:45,   desc:'北京地铁&公交发票', file:'transit_bj.pdf',     path:'员工报销单据/发票/2026_05/transit_bj.pdf' },
+        { id:'INV-006', date:'2026/5/16', amount:95,   desc:'客户拜访餐费发票',  file:'dinner_bj.pdf',      path:'员工报销单据/发票/2026_05/dinner_bj.pdf' },
+        { id:'INV-007', date:'2026/5/17', amount:1150, desc:'北京→上海机票发票', file:'flight_bj_sh.pdf',   path:'员工报销单据/发票/2026_05/flight_bj_sh.pdf' },
+    ],
+    mountExtras: {
+        0: { invIndices:[0] },
+        1: { invIndices:[1] },
+        2: { invIndices:[2] },
+        3: { invIndices:[3] },
+        4: { invIndices:[4] },
+        5: { invIndices:[5] },
+        6: { invIndices:[6] },
+    },
+    items: [
+        { id:'EI-001', primaryInvIdx:0, invDate:'2026/5/8',  expDate:'2026/5/8',  desc:'日常通勤打车',       amount:89,   actualDesc:'滴滴出行-北京',    remarks:'', voucherIndices:[0] },
+        { id:'EI-002', primaryInvIdx:1, invDate:'2026/5/12', expDate:'2026/5/12', desc:'商务午餐-供应商沟通', amount:228,  actualDesc:'餐厅消费-微信支付', remarks:'', voucherIndices:[1] },
+        { id:'EI-003', primaryInvIdx:2, invDate:'2026/5/15', expDate:'2026/5/15', desc:'上海→北京出差机票',   amount:1380, actualDesc:'中国国航-机票',    remarks:'', voucherIndices:[2] },
+        { id:'EI-004', primaryInvIdx:3, invDate:'2026/5/15', expDate:'2026/5/15', desc:'北京出差住宿',        amount:528,  actualDesc:'北京华贸酒店',     remarks:'', voucherIndices:[3] },
+        { id:'EI-005', primaryInvIdx:4, invDate:'2026/5/16', expDate:'2026/5/16', desc:'北京地铁&公交',       amount:45,   actualDesc:'北京地铁APP',      remarks:'', voucherIndices:[4] },
+        { id:'EI-006', primaryInvIdx:5, invDate:'2026/5/16', expDate:'2026/5/16', desc:'客户拜访餐费',        amount:95,   actualDesc:'餐厅消费-支付宝',  remarks:'', voucherIndices:[5] },
+        { id:'EI-007', primaryInvIdx:6, invDate:'2026/5/17', expDate:'2026/5/17', desc:'北京→上海返程机票',   amount:1150, actualDesc:'中国国航-机票',    remarks:'', voucherIndices:[6] },
+    ],
+    eiNextId: 8,
+};
+
+// ---- Scenario C: 冲突演示 — 挂载点1额外引用了 INV-001 ----
+const SCENARIO_CONFLICT = {
+    records: [],
+    invoices: [
+        { id:'INV-001', date:'2026/6/12', amount:1645,    desc:'车辆费（停车/洗车）替票', file:'13.pdf', path:'员工报销单据/发票/2026_06_12_24/13.pdf' },
+        { id:'INV-002', date:'2026/6/12', amount:2000,    desc:'住房补贴发票',            file:'14.pdf', path:'员工报销单据/发票/2026_06_12_24/14.pdf' },
+        { id:'INV-003', date:'2026/6/12', amount:1083.88, desc:'充电服务费发票',           file:'24.pdf', path:'员工报销单据/发票/2026_06_12_24/24.pdf' },
+    ],
+    mountExtras: {
+        0: { invIndices:[0]    },
+        1: { invIndices:[1, 0] },  // ← 挂载点1 额外引用 INV-001 → 冲突
+        2: { invIndices:[2]    },
+    },
+    items: [
+        { id:'EI-001', primaryInvIdx:0, invDate:'2026/6/12', expDate:'2026/5/15', desc:'5月停车洗车费', amount:1000,    actualDesc:'车辆费（停车/洗车）', remarks:'', voucherIndices:[] },
+        { id:'EI-002', primaryInvIdx:1, invDate:'2026/6/12', expDate:'2026/5/01', desc:'5月住房补贴',   amount:2000,    actualDesc:'住房补贴服务费',      remarks:'', voucherIndices:[] },
+        { id:'EI-003', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/04', desc:'5月充电费',     amount:1083.88, actualDesc:'充电服务费',          remarks:'', voucherIndices:[] },
+    ],
+    eiNextId: 4,
+};
+
+// ---- Scenario D: Invoice + Voucher，含未关联凭证 ----
+// AI matched 2 vouchers to items, 2 vouchers uploaded but unlinked → warning shown
+const SCENARIO_WITHVC = {
+    records: [], // no separate bill transactions in this scenario
+    vouchers: [
+        { date:'2026/5/9',  merchant:'滴滴出行',  amount:89,   file:'didi_pay.jpg',    path:null },
+        { date:'2026/5/12', merchant:'新荣记·餐厅', amount:228,  file:'xinrongjii.jpg',  path:null },
+        { date:'2026/5/15', merchant:'携程旅行',   amount:1380, file:'flight_pay.jpg',  path:null },
+        { date:'2026/5/16', merchant:'北京地铁',   amount:45,   file:'metro_pay.jpg',   path:null },
+    ],
+    invoices: [
+        { id:'INV-001', date:'2026/5/9',  amount:89,   desc:'滴滴打车发票',  file:'didi.pdf',   path:'员工报销单据/发票/2026_05/didi.pdf' },
+        { id:'INV-002', date:'2026/5/12', amount:228,  desc:'商务午餐发票',  file:'lunch.pdf',  path:'员工报销单据/发票/2026_05/lunch.pdf' },
+        { id:'INV-003', date:'2026/5/15', amount:1380, desc:'差旅机票发票',  file:'flight.pdf', path:'员工报销单据/发票/2026_05/flight.pdf' },
+    ],
+    mountExtras: {
+        0: { invIndices:[0] },
+        1: { invIndices:[1] },
+        2: { invIndices:[2] },
+    },
+    // vouchers[0] & [1] are AI-auto-linked; vouchers[2] & [3] are unlinked → triggers warning
+    items: [
+        { id:'EI-001', primaryInvIdx:0, invDate:'2026/5/9',  expDate:'2026/5/9',  desc:'日常通勤打车',   amount:89,   actualDesc:'滴滴出行-北京',  remarks:'', voucherIndices:[0] },
+        { id:'EI-002', primaryInvIdx:1, invDate:'2026/5/12', expDate:'2026/5/12', desc:'商务午餐',       amount:228,  actualDesc:'新荣记-微信支付', remarks:'', voucherIndices:[1] },
+        { id:'EI-003', primaryInvIdx:2, invDate:'2026/5/15', expDate:'2026/5/15', desc:'出差机票（沪京）', amount:1380, actualDesc:'中国国航',       remarks:'', voucherIndices:[] },
+    ],
+    eiNextId: 4,
+};
+function toggleTcPanel() {
+    document.getElementById('tcPanel').classList.toggle('open');
+}
+
+function switchScenario(name) {
+    if (name === currentScenario) {
+        toggleTcPanel();
+        return;
+    }
+    currentScenario = name;
+
+    const scMap = { surrogate: SCENARIO_SURROGATE, onebyone: SCENARIO_ONEBYONE, conflict: SCENARIO_CONFLICT, withvc: SCENARIO_WITHVC };
+    const sc = scMap[name];
+    if (!sc) return;
+
+    // Deep-clone items to avoid mutations carrying over
+    EXPENSE_ITEMS.length = 0;
+    sc.items.forEach(it => EXPENSE_ITEMS.push(JSON.parse(JSON.stringify(it))));
+    eiNextId = sc.eiNextId;
+
+    MOCK_RECORDS.length = 0;
+    sc.records.forEach(r => MOCK_RECORDS.push({...r}));
+
+    MOCK_VOUCHERS.length = 0;
+    (sc.vouchers || []).forEach(v => MOCK_VOUCHERS.push({...v}));
+
+    // Snapshot first to avoid self-overwrite if sc.invoices === MOCK_INVOICES
+    const srcInvoices = sc.invoices.map(inv => ({...inv}));
+    MOCK_INVOICES.length = 0;
+    srcInvoices.forEach(inv => MOCK_INVOICES.push(inv));
+
+    // Reset and clone mount extras
+    Object.keys(MOUNT_EXTRAS).forEach(k => delete MOUNT_EXTRAS[k]);
+    Object.entries(sc.mountExtras).forEach(([k, v]) => {
+        MOUNT_EXTRAS[parseInt(k)] = JSON.parse(JSON.stringify(v));
+    });
+
+    // Update FAB active indicators
+    document.querySelectorAll('.tc-option').forEach(el => el.classList.remove('active'));
+    ['surrogate','onebyone','conflict','withvc'].forEach(k => {
+        const el = document.getElementById(`tc-check-${k}`);
+        if (el) el.style.display = k === name ? '' : 'none';
+    });
+    document.getElementById(`tc-opt-${name}`).classList.add('active');
+
+    // Reset wizard state and re-render list
+    document.getElementById('listSection').style.display = '';
+    document.getElementById('detailSection').classList.remove('open');
+    renderList();
+
+    toggleTcPanel();
+    const labels = { surrogate:'已切换：替票场景（无凭证）', onebyone:'已切换：一单一票场景（含凭证）', conflict:'已切换：冲突演示场景', withvc:'已切换：Invoice + Voucher 场景（含未关联凭证提示）' };
+    showToast(labels[name] || '已切换场景');
+}
+
+// ========== Init ==========
+renderList();
+</script>
+</body>
+</html>

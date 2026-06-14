@@ -1,0 +1,3067 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAP 决策者视图</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #edeef7;
+    --surface-glass: rgba(255,255,255,0.5);
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --border-disabled: #d9d9d9;
+    --text-default: #131825;
+    --text-heading: #202536;
+    --text-secondary: #73726e;
+    --text-disabled: #ababa9;
+    --text-tertiary: #b7b7b7;
+    --accent: #131825;
+    --green: #52c41a;
+    --green-bg: #f6ffed;
+    --green-border: #b7eb8f;
+    --orange: #f59e0b;
+    --blue: #3b82f6;
+    --shadow-sm: 0 1px 4px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 24px rgba(0,0,0,.08);
+    --radius-md: 12px;
+    /* legacy aliases */
+    --text-primary: #131825;
+    --text-tertiary: #b7b7b7;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(200,210,240,.35) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(190,205,235,.25) 0%, transparent 65%);
+    font-family: 'Inter', 'PingFang SC', 'Noto Sans SC', sans-serif;
+    color: var(--text-default);
+    font-size: 14px;
+    line-height: 1.57;
+    overflow: hidden;
+  }
+
+  /* ─── App Layout (left + right) ─── */
+  .app-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Left panel — 68% of viewport */
+  .left-panel {
+    flex: 0 0 68%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 14px 20px 0 14px;
+  }
+
+  /* Right panel — 32% of viewport, persistent chat */
+  .right-panel {
+    flex: 0 0 32%;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border-left: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .rp-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .rp-title {
+    font-size: 15px; font-weight: 600; color: var(--text-heading);
+  }
+  .rp-edit-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-tertiary); display: flex; align-items: center;
+    padding: 4px; border-radius: 6px; transition: color .12s;
+  }
+  .rp-edit-btn:hover { color: var(--text-secondary); }
+  .rp-body {
+    flex: 1; overflow-y: auto;
+    padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .rp-empty {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
+    color: var(--text-tertiary);
+  }
+  .rp-empty-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: #f3f4f8;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rp-empty-text { font-size: 12px; text-align: center; line-height: 1.6; }
+  .rp-ft {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ─── Role Badge ─── */
+  .role-badge {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 4px;
+    width: 183px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-bottom: 12px;
+  }
+  .role-badge .avatar {
+    width: 40px; height: 40px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .role-badge .name-row { display: flex; flex-direction: column; padding-left: 8px; }
+  .role-badge .uname { font-size: 14px; font-weight: 500; color: var(--text-default); line-height: 22px; }
+  .role-badge .urole { font-size: 12px; font-weight: 400; color: var(--text-disabled); line-height: 18px; }
+
+  /* ─── Page Layout ─── */
+  .page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ─── Todo Section ─── */
+  .todo-section {
+    flex-shrink: 0;
+    padding-bottom: 10px;
+  }
+  .todo-header {
+    display: flex; align-items: center; gap: 4px;
+    padding: 0 2px 8px;
+  }
+  .todo-label {
+    font-size: 14px; font-weight: 700;
+    color: var(--text-heading); letter-spacing: 0;
+  }
+  .todo-count {
+    font-size: 12px; font-weight: 400;
+    color: var(--text-secondary);
+  }
+  .todo-cards {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    background: var(--surface-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .todo-divider-v {
+    background: var(--border);
+    align-self: stretch;
+  }
+  .todo-card {
+    padding: 12px;
+    cursor: pointer;
+    transition: background .12s;
+    position: relative;
+  }
+  .todo-card:hover { background: rgba(255,255,255,.3); }
+  .todo-card-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .todo-cat {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 400; color: var(--text-disabled);
+  }
+  .cat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .cat-dot.green { background: #52c41a; border: .5px solid #b7eb8f; }
+  .cat-dot.orange { background: #ffa940; border: .5px solid #ffd591; }
+  .todo-card-count {
+    display: flex; align-items: center; gap: 3px;
+    font-size: 14px; color: #9fa2a8; letter-spacing: .1em;
+    cursor: pointer;
+  }
+  .todo-card-title {
+    font-size: 14px; font-weight: 500; color: var(--text-heading);
+    margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 22px;
+  }
+  .todo-card-meta {
+    font-size: 12px; color: var(--text-disabled);
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* ─── Main Card ─── */
+  .main-card {
+    flex: 1;
+    background: var(--surface-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    box-shadow: 0 -2px 20px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  /* ─── Tabs ─── */
+  .tabs-bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 6px;
+    border-bottom: 1px solid #dedee0;
+    flex-shrink: 0;
+  }
+  .tab-btn {
+    padding: 18px 12px;
+    font-size: 14px; font-weight: 500; color: var(--text-default);
+    border: none; background: none; cursor: pointer;
+    border-bottom: 1.5px solid transparent;
+    margin-bottom: -1px;
+    transition: opacity .15s, border-color .15s;
+    white-space: nowrap; opacity: .5;
+  }
+  .tab-btn:hover { opacity: .8; }
+  .tab-btn.active {
+    font-weight: 700; opacity: 1;
+    border-bottom-color: var(--text-default);
+  }
+  .tab-count {
+    margin-left: 2px; font-size: 14px; font-weight: inherit;
+  }
+
+  /* ─── Tab Panels ─── */
+  .tab-panel { display: none; flex: 1; overflow: hidden; }
+  .tab-panel.active { display: flex; flex-direction: column; overflow-y: auto; }
+
+  /* ─── Goal Tab ─── */
+  .goal-panel { padding: 0; }
+
+  .goal-item {
+    border-bottom: 1px solid var(--border);
+  }
+  .goal-header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 18px;
+    padding: 24px;
+    cursor: pointer;
+    transition: background .12s;
+    user-select: none;
+  }
+  .goal-header-row:hover { background: rgba(0,0,0,.02); }
+  .goal-header-left {
+    display: flex; align-items: center; gap: 18px; flex: 1; min-width: 0;
+  }
+  .goal-header-right {
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .goal-chevron {
+    color: var(--text-tertiary);
+    transition: transform .2s;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .goal-item.expanded .goal-chevron { transform: rotate(90deg); }
+
+  /* Circular badge */
+  .circ-badge {
+    position: relative;
+    width: 44px; height: 44px;
+    flex-shrink: 0;
+  }
+  .circ-badge svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+  .circ-badge .badge-num {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 500; color: #000;
+  }
+
+  .goal-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .goal-title {
+    font-size: 14px; font-weight: 500; color: var(--text-heading);
+    line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .goal-desc {
+    font-size: 12px; font-weight: 400; color: var(--text-disabled); line-height: 18px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .goal-metrics {
+    display: flex; gap: 12px; align-items: center;
+  }
+  .metric-col {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    width: 75px;
+  }
+  .metric-num {
+    font-size: 20px; font-weight: 400; color: var(--text-heading); line-height: 24px;
+  }
+  .metric-label {
+    font-size: 12px; font-weight: 400; color: var(--text-disabled);
+    line-height: 18px;
+  }
+
+  /* ─── Sub-task tree ─── */
+  .subtask-tree {
+    padding: 0 24px 24px 24px;
+    display: flex; flex-direction: column; gap: 24px;
+  }
+
+  .task-group { }
+
+  .task-group-title {
+    font-size: 14px; font-weight: 500; color: var(--text-heading);
+    line-height: 22px; margin-bottom: 16px;
+  }
+
+  .task-group-rows {
+    display: flex; flex-direction: column; gap: 16px;
+    padding-left: 32px;
+    border-left: 2px solid var(--border-disabled);
+  }
+
+  .task-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+  }
+  .task-row:hover .task-chat-btn { opacity: 1; }
+
+  /* executor icon */
+  .exec-icon {
+    width: 20px; height: 20px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-tertiary);
+  }
+  .exec-icon.ai {
+    font-size: 9px; font-weight: 700; color: var(--blue, #3b82f6);
+    letter-spacing: 0;
+  }
+
+  .task-title-cell {
+    flex: 1; min-width: 0;
+    font-size: 14px; font-weight: 400; color: var(--text-default);
+    line-height: 18px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .task-title-cell.done-title {
+    text-decoration: line-through; color: var(--text-tertiary);
+  }
+
+  /* right column group */
+  .task-right {
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .task-assignee {
+    font-size: 14px; color: var(--text-secondary);
+    line-height: 18px; white-space: nowrap;
+    width: 56px; text-align: right;
+  }
+  .task-date {
+    font-size: 14px; color: var(--text-disabled);
+    line-height: 18px; font-variant-numeric: tabular-nums;
+    white-space: nowrap; width: 56px; text-align: right;
+  }
+
+  /* status tags — exact Figma spec */
+  .stag {
+    font-size: 12px; font-weight: 400;
+    width: 48px; height: 22px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 4px; padding: 0 8px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  /* Done: gray bordered box */
+  .stag.done { border: 1px solid var(--border); color: var(--text-tertiary); }
+  /* To do: gray bordered box, slightly darker text */
+  .stag.todo { border: 1px solid var(--border); color: var(--text-secondary); }
+  /* Doing: green chip */
+  .stag.doing { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+  /* Review: yellow */
+  .stag.review { background: #fffbe6; border: 1px solid #ffe58f; color: #d48806; }
+
+  /* ── State: Minion blocked, awaiting human input ── */
+  .stag.needs-input {
+    width: 72px; padding: 0;
+    background: #fff7ed; border: 1px solid #fed7aa; color: #c2410c;
+  }
+  .task-row.needs-input-row .exec-icon.ai {
+    background: #fff7ed; border-color: #fed7aa; color: #c2410c;
+  }
+  /* ── State: awaiting verification / acceptance ── */
+  .stag.pending-verify {
+    width: 48px; padding: 0;
+    background: #f5f3ff; border: 1px solid #c4b5fd; color: #6d28d9;
+  }
+  .task-row.pending-verify-row .exec-icon.ai {
+    background: #f5f3ff; border-color: #c4b5fd; color: #6d28d9;
+  }
+  /* pulsing dot for needs-input */
+  .needs-dot {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; background: #f97316; margin-right: 4px; flex-shrink: 0;
+    animation: pulse-dot 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .4; transform: scale(.7); }
+  }
+  .goto-chat-btn {
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-default); cursor: pointer; flex-shrink: 0;
+    border: none; background: none; padding: 0;
+    opacity: 0; transition: opacity .12s;
+  }
+  .task-row:hover .goto-chat-btn { opacity: 1; }
+  .needs-input-row .goto-chat-btn:hover { color: #c2410c; }
+  .pending-verify-row .goto-chat-btn:hover { color: #6d28d9; }
+
+  /* chat-ref bubble */
+  .task-chat-btn {
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-default); cursor: pointer; flex-shrink: 0;
+    border: none; background: none; padding: 0;
+    opacity: 0; transition: opacity .12s;
+  }
+  .task-row:hover .task-chat-btn { opacity: 1; }
+  .task-chat-btn:hover { color: #3b82f6; }
+
+  /* run button */
+  .run-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 3px;
+    font-size: 12px; font-weight: 500; color: #3b82f6;
+    background: #eff6ff; border: 1px solid #bfdbfe;
+    width: 48px; height: 22px; border-radius: 4px; cursor: pointer;
+    transition: background .12s; white-space: nowrap; flex-shrink: 0;
+  }
+  .run-btn:hover { background: #dbeafe; }
+
+  /* ── Task dependency styles ── */
+  .task-dep {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; color: #a0a0a8;
+    background: #f4f4f6; border: 1px solid #e5e5ea;
+    border-radius: 4px; padding: 1px 6px;
+    white-space: nowrap; flex-shrink: 0;
+    vertical-align: middle; margin-left: 4px;
+  }
+  .task-dep svg { opacity: .55; flex-shrink: 0; }
+
+  /* blocked = dependency not yet met */
+  .task-row.dep-blocked { opacity: .55; }
+  .task-row.dep-blocked .run-btn {
+    opacity: .4; pointer-events: none; cursor: not-allowed;
+  }
+
+  /* connector line between chained rows */
+  .dep-chain { position: relative; }
+
+  /* ── Rich tooltip for Needs Input / Needs Review badges ── */
+  .tip-box {
+    position: fixed; z-index: 9999;
+    background: #1c1c1e; color: #fff;
+    border-radius: 8px; padding: 10px 12px;
+    min-width: 210px; max-width: 280px;
+    font-size: 12px; line-height: 1.5;
+    pointer-events: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,.25);
+    opacity: 0; transform: translateY(4px);
+    transition: opacity .12s, transform .12s;
+  }
+  .tip-box.visible { opacity: 1; transform: translateY(0); }
+  .tip-row { margin-bottom: 6px; }
+  .tip-row:last-child { margin-bottom: 0; }
+  .tip-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; opacity: .45; margin-bottom: 1px;
+  }
+  .tip-val { font-weight: 400; opacity: .9; }
+  .dep-chain .task-row { position: relative; }
+  .dep-chain .task-row + .task-row::before {
+    content: '';
+    position: absolute;
+    left: 19px; top: -16px;
+    width: 1px; height: 16px;
+    background: #d1d5db;
+  }
+
+  .accept-btn {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 12px; font-weight: 500; color: var(--green);
+    background: var(--green-bg); border: 1px solid var(--green-border);
+    padding: 1px 8px; height: 22px; border-radius: 4px; cursor: pointer;
+    transition: background .12s; flex-shrink: 0;
+  }
+  .accept-btn:hover { background: #d9f7be; }
+
+  /* ─── Dashboard Tab ─── */
+  .dash-list { }
+  .dash-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background .12s;
+  }
+  .dash-row:last-child { border-bottom: none; }
+  .dash-row:hover { background: rgba(0,0,0,.02); }
+  .dash-row-name { font-size: 14px; color: var(--text-primary); }
+  .dash-row-action { font-size: 12px; color: var(--text-tertiary); display: flex; align-items: center; gap: 4px; }
+
+  /* ─── Brain Tab ─── */
+  .brain-list { }
+  .brain-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px; gap: 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background .12s;
+  }
+  .brain-item:last-child { border-bottom: none; }
+  .brain-item:hover { background: rgba(0,0,0,.02); }
+  .brain-item-left { flex: 1; min-width: 0; }
+  .brain-item-title { font-size: 14px; color: var(--text-primary); margin-bottom: 10px; font-weight: 500; }
+  .brain-from-row { display: flex; align-items: flex-start; gap: 2px; }
+  .brain-from-label { font-size: 10px; color: var(--text-tertiary); letter-spacing: .06em; margin-right: 8px; margin-top: 4px; flex-shrink: 0; }
+  .brain-chips { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+  .brain-chip { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .brain-chip-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+  }
+  .brain-chip-name { font-size: 10px; color: var(--text-primary); white-space: nowrap; }
+  .brain-chip-role { font-size: 9px; color: var(--text-tertiary); white-space: nowrap; }
+  .brain-item-right {
+    display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+    color: var(--text-tertiary); font-size: 12px;
+  }
+  .brain-item-right svg { flex-shrink: 0; }
+  .brain-mention-btn {
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    color: var(--text-tertiary); font-size: 12px; padding: 4px;
+    border-radius: 6px; transition: background .12s, color .12s;
+  }
+  .brain-mention-btn:hover { background: rgba(0,0,0,.05); color: var(--text-secondary); }
+
+  /* ─── Brain Detail Page ─── */
+  .brain-detail {
+    display: none; position: absolute; inset: 0;
+    background: #f8f7f4; border-radius: inherit; z-index: 50;
+    overflow-y: auto; padding-bottom: 100px;
+  }
+  .brain-detail.open { display: block; }
+  .brain-detail-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px 0; position: sticky; top: 0;
+    background: rgba(248,247,244,.92); backdrop-filter: blur(6px); z-index: 2;
+  }
+  .brain-back-btn {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; letter-spacing: .04em;
+    color: var(--text-tertiary); background: none; border: none; cursor: pointer;
+    padding: 6px 0; transition: color .12s;
+  }
+  .brain-back-btn:hover { color: var(--text-primary); }
+  .brain-detail-ver { font-size: 11px; color: var(--text-tertiary); }
+  .brain-detail-body { padding: 24px 28px 0; }
+  .brain-detail-title-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+  }
+  .brain-detail-title {
+    font-size: 22px; font-weight: 700; color: var(--text-primary); line-height: 1.3;
+  }
+  .brain-edit-btn {
+    background: none; border: none; cursor: pointer; padding: 4px;
+    color: var(--text-tertiary); border-radius: 6px; transition: background .12s, color .12s;
+    display: flex; align-items: center;
+  }
+  .brain-edit-btn:hover { background: rgba(0,0,0,.06); color: var(--text-primary); }
+  .brain-section { margin-bottom: 28px; }
+  .brain-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em;
+    color: var(--text-tertiary); margin-bottom: 10px;
+  }
+  .brain-section-text {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.7;
+  }
+  .brain-detail-chips { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+  .brain-detail-chip { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .brain-detail-chip-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+  }
+  .brain-detail-chip-name { font-size: 11px; color: var(--text-primary); white-space: nowrap; font-weight: 500; }
+  .brain-detail-chip-role { font-size: 10px; color: var(--text-tertiary); white-space: nowrap; letter-spacing: .03em; }
+  .brain-bullets { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .brain-bullets li {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+    padding-left: 14px; position: relative;
+  }
+  .brain-bullets li::before {
+    content: '•'; position: absolute; left: 0; color: var(--text-tertiary);
+  }
+  .brain-quote {
+    border-left: 2px solid #d0ccc8; padding: 8px 14px; margin-top: 12px;
+    font-size: 13px; color: var(--text-secondary); font-style: italic; line-height: 1.6;
+    background: rgba(0,0,0,.02); border-radius: 0 6px 6px 0;
+  }
+  .brain-divider { height: 1px; background: var(--border); margin: 4px 0 24px; }
+
+  /* ─── Chat Bar (right panel footer) ─── */
+  .chat-bar { /* now rendered inside .rp-ft, no fixed positioning needed */ }
+  .chat-input-wrap {
+    background: #f9fafb;
+    border-radius: 31px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    display: flex; align-items: center;
+    padding: 4px;
+    gap: 0;
+  }
+  .chat-input-inner {
+    flex: 1; background: white; border-radius: 27px;
+    display: flex; align-items: center; padding: 8px 14px; gap: 8px;
+  }
+  .chat-prefix {
+    font-size: 13px; font-weight: 400; color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .chat-divider {
+    width: 1px; height: 15px; background: var(--border); flex-shrink: 0;
+  }
+  .chat-input {
+    flex: 1; border: none; outline: none; background: none;
+    font-size: 13px; color: var(--text-default);
+    font-family: inherit;
+  }
+  .chat-input::placeholder { color: var(--text-tertiary); }
+  .chat-send-btn {
+    width: 34px; height: 34px; border-radius: 17px;
+    background: #dbdbdb; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background .15s, transform .1s;
+  }
+  .chat-send-btn:hover { background: var(--accent); }
+  .chat-send-btn:active { transform: scale(.93); }
+  .chat-send-btn svg { color: #fff; }
+
+  /* ─── Floating Side Buttons ─── */
+  .side-actions {
+    position: absolute;
+    right: 16px;
+    bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 200;
+  }
+  .side-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .15s, transform .1s;
+  }
+  .side-btn:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .side-btn.cs { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+  .side-btn.mk { background: #fdf4ff; color: #9333ea; border: 1px solid #e9d5ff; }
+
+  /* ─── Task Detail Drawer ─── */
+  /* ─── Modal (replaces drawer) ─── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,.18);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    width: 480px; max-height: 80vh;
+    background: #f9f9f6;
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.15), 0 4px 16px rgba(0,0,0,.08);
+    display: flex; flex-direction: column;
+    animation: modalIn .18s ease;
+    overflow: hidden;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(.96) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-hd {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e8e8e3;
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .modal-title {
+    font-size: 16px; font-weight: 700; color: #1a1a1a; letter-spacing: -.01em;
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .modal-count { font-size: 13px; font-weight: 400; color: #b0b0a8; }
+  .modal-close {
+    width: 24px; height: 24px;
+    border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #b0b0a8; border-radius: 6px;
+    transition: color .12s, background .12s;
+  }
+  .modal-close:hover { color: #555; background: rgba(0,0,0,.05); }
+  .modal-body { flex: 1; overflow-y: auto; }
+
+  /* task rows inside modal */
+  .mt-item {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e8e8e3;
+    cursor: default;
+  }
+  .mt-item:last-child { border-bottom: none; }
+  .mt-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .mt-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    background: #ccc; margin-top: 1px;
+  }
+  .mt-dot.doing { background: #131825; }
+  .mt-title {
+    flex: 1; font-size: 15px; font-weight: 700; color: #1a1a1a; line-height: 1.3;
+  }
+  .mt-status {
+    font-size: 13px; font-weight: 400; color: #b0b0a8; white-space: nowrap;
+  }
+  .mt-status.doing { color: #555; }
+  .mt-run-btn {
+    width: 20px; height: 20px; border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #b0b0a8; border-radius: 50%; flex-shrink: 0;
+    transition: color .12s, background .12s;
+  }
+  .mt-run-btn:hover { color: #555; background: rgba(0,0,0,.06); }
+  .mt-chat-btn {
+    width: 20px; height: 20px; border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #c8c8c0; border-radius: 50%; flex-shrink: 0;
+    transition: color .12s, background .12s;
+  }
+  .mt-chat-btn:hover { color: #555; background: rgba(0,0,0,.06); }
+  .mt-meta {
+    font-size: 12px; color: #b0b0a8; margin-top: 4px; padding-left: 19px;
+  }
+
+  /* ─── Escalated item — flat minimal ─── */
+  .mt-escalate-section { border-bottom: 1px solid #e8e8e3; }
+  .mt-escalate-item {
+    padding: 16px 24px 14px;
+    cursor: default;
+  }
+  .mt-escalate-item + .mt-escalate-item { border-top: 1px solid #eeecea; }
+
+  /* Collapsible header */
+  .mt-esc-hd {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; padding: 2px 0 8px; user-select: none;
+  }
+  .mt-esc-hd:hover .mt-esc-title { color: #333; }
+  .mt-esc-hd-left { flex: 1; min-width: 0; }
+  .mt-esc-title {
+    font-size: 14px; font-weight: 700; color: #1a1a1a; line-height: 1.4;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .mt-esc-type-icon { font-size: 14px; flex-shrink: 0; }
+  .mt-esc-hd-source {
+    font-size: 12px; color: #aaa; margin-top: 3px;
+    display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  }
+  .mt-esc-hd-chev {
+    font-size: 12px; color: #ccc; flex-shrink: 0;
+    transition: transform .18s; margin-left: 4px;
+  }
+  .mt-esc-hd-chev.open { transform: rotate(180deg); }
+
+  /* Collapsible detail body */
+  .mt-esc-detail { display: none; padding-top: 6px; }
+  .mt-esc-detail.open { display: block; }
+
+  /* Source line (inside detail, kept for reference — now in hd) */
+  .mt-esc-source {
+    font-size: 12px; color: #aaa; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  }
+  .mt-esc-avatar {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #888; color: #fff; font-size: 8px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .mt-esc-source-name { color: #555; font-weight: 500; }
+
+  /* Flat section block: label + content */
+  .mt-esc-block { margin-bottom: 10px; }
+  .mt-esc-block-label {
+    font-size: 11px; font-weight: 600; color: #bbb; letter-spacing: .04em;
+    text-transform: uppercase; margin-bottom: 3px;
+  }
+  .mt-esc-block-text {
+    font-size: 13px; color: #444; line-height: 1.6;
+  }
+  .mt-esc-block-item {
+    font-size: 13px; color: #555; line-height: 1.7;
+    padding-left: 10px; position: relative;
+  }
+  .mt-esc-block-item::before {
+    content: '·'; position: absolute; left: 0; color: #bbb;
+  }
+
+  /* Section dividers in modal */
+  .mt-section-label {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 24px 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: .07em;
+    color: #b0b0a8; border-top: 1px solid #eeecea;
+  }
+  .mt-section-label:first-child { border-top: none; }
+
+  /* Memory inline list */
+  .mt-esc-mem-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+  .mt-esc-mem-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    font-size: 12px; line-height: 1.6; color: #777;
+  }
+  .mt-esc-mem-row strong { font-weight: 600; color: #444; }
+  .mt-esc-mem-tag {
+    flex-shrink: 0; font-size: 10px; color: #aaa; white-space: nowrap;
+  }
+
+  /* Brain-doc collapsible row */
+  .mt-esc-bd { margin-bottom: 14px; }
+  .mt-esc-bd-hd {
+    display: flex; align-items: baseline; gap: 6px;
+    cursor: pointer; user-select: none;
+    padding: 3px 0;
+  }
+  .mt-esc-bd-hd:hover .mt-esc-bd-title { color: #333; }
+  .mt-esc-bd-title {
+    font-size: 11px; font-weight: 600; color: #bbb;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .mt-esc-bd-ref {
+    font-size: 11px; font-weight: 600; color: #888;
+  }
+  .mt-esc-bd-preview {
+    font-size: 12px; color: #aaa; flex: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mt-esc-bd-chev {
+    font-size: 10px; color: #ccc; flex-shrink: 0; transition: transform .18s;
+  }
+  .mt-esc-bd-chev.open { transform: rotate(180deg); }
+  .mt-esc-bd-body { display: none; padding: 4px 0 0 0; }
+  .mt-esc-bd-row {
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: 2px 10px; padding: 5px 0;
+    border-bottom: 1px solid #f0efeb; font-size: 12px;
+  }
+  .mt-esc-bd-row:last-child { border-bottom: none; }
+  .mt-esc-bd-row-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .04em;
+    color: #ccc; text-transform: uppercase; padding-top: 2px;
+  }
+  .mt-esc-bd-row-val { color: #666; line-height: 1.6; }
+
+  /* ─── Action summary box (top of escalated item) ─── */
+  .mt-esc-summary {
+    display: flex; gap: 16px; align-items: stretch;
+    background: #fafaf8; border: 1px solid #eeecea; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 14px;
+  }
+  .mt-esc-summary-stat {
+    display: flex; flex-direction: column; gap: 2px; min-width: 0;
+  }
+  .mt-esc-summary-stat + .mt-esc-summary-stat {
+    padding-left: 16px; border-left: 1px solid #eeecea;
+  }
+  .mt-esc-summary-num {
+    font-size: 20px; font-weight: 700; line-height: 1.1;
+  }
+  .mt-esc-summary-num.done     { color: #2e7d32; }
+  .mt-esc-summary-num.escalated{ color: #bf6000; }
+  .mt-esc-summary-label {
+    font-size: 11px; color: #aaa; line-height: 1.4;
+  }
+  .mt-esc-summary-desc {
+    font-size: 12px; color: #888; line-height: 1.6; align-self: center; flex: 1;
+  }
+
+  /* ─── Action list (per-action level) ─── */
+  .mt-esc-action-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .mt-esc-action-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 0; font-size: 13px; color: #444; border-radius: 6px;
+    transition: background .12s;
+  }
+  .mt-esc-action-exec {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; letter-spacing: .05em;
+    padding: 2px 5px; border-radius: 4px; flex-shrink: 0;
+    transition: background .3s, color .3s;
+  }
+  .mt-esc-action-exec.ai { background: rgba(0,0,0,.07); color: rgba(0,0,0,.45); }
+  .mt-esc-action-exec.hu { background: #e8f4ff; border: 1px solid #b3d9ff; color: #1565c0; }
+  /* running/done states */
+  .mt-esc-action-item.exec-running .mt-esc-action-exec.ai { background: rgba(255,152,0,.15); color: #bf6000; }
+  .mt-esc-action-item.exec-done    .mt-esc-action-exec.ai { background: rgba(76,175,80,.12); color: #2e7d32; }
+  .mt-esc-action-item.exec-done    .mt-esc-action-exec.hu { background: rgba(76,175,80,.12); color: #2e7d32; border-color: transparent; }
+  @keyframes escActionPulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .mt-esc-action-text { flex: 1; min-width: 0; line-height: 1.5; }
+  /* status badge */
+  .mt-esc-action-status {
+    display: none; margin-left: auto; flex-shrink: 0;
+    font-size: 11px; font-weight: 500;
+    padding: 3px 10px; border-radius: 20px;
+    white-space: nowrap; background: transparent;
+  }
+  .mt-esc-action-status.doing { display: inline-flex; align-items: center; color: #3a9e3a; border: 1.5px solid #3a9e3a; }
+  .mt-esc-action-status.todo  { display: inline-flex; align-items: center; color: #aaa;    border: 1.5px solid #ccc; }
+  .mt-esc-action-status.done  { display: inline-flex; align-items: center; color: #fff; background: #3a9e3a; border: 1.5px solid #3a9e3a; }
+  /* pre-done action row — no longer used with Help model; kept as safety */
+  .mt-esc-action-item--predone .mt-esc-action-text  { color: #aaa; }
+  .mt-esc-action-item--predone .mt-esc-action-exec  { opacity: .4; }
+  .mt-esc-action-item--predone .mt-esc-action-btns  { display: none; }
+  /* skip state */
+  .mt-esc-action-skip-badge {
+    display: none; font-size: 9px; font-weight: 700; letter-spacing: .04em;
+    padding: 2px 6px; border-radius: 4px;
+    background: rgba(0,0,0,.06); color: rgba(0,0,0,.38); flex-shrink: 0;
+  }
+  .mt-esc-action-item--skip .mt-esc-action-skip-badge { display: inline-flex; }
+  .mt-esc-action-item--skip .mt-esc-action-text { color: #bbb; }
+  .mt-esc-action-item--skip .mt-esc-action-exec { opacity: .3; }
+  .mt-esc-action-item--skip .mt-esc-action-btns .mt-esc-action-exec-btn { display: none; }
+  /* per-action buttons */
+  .mt-esc-action-btns { display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: auto; }
+  .mt-esc-action-exec-btn {
+    background: #1a1a1a; color: #fff; border: none; cursor: pointer;
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 5px;
+    transition: opacity .12s; white-space: nowrap;
+  }
+  .mt-esc-action-exec-btn:hover { opacity: .8; }
+  .mt-esc-action-exec-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .mt-esc-action-skip-btn {
+    background: none; border: 1px solid transparent; cursor: pointer;
+    font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 5px;
+    color: rgba(0,0,0,.22); transition: color .12s, background .12s, border-color .12s; white-space: nowrap;
+  }
+  .mt-esc-action-skip-btn:hover { color: rgba(0,0,0,.55); background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.12); }
+  .mt-esc-action-item--skip .mt-esc-action-skip-btn { color: rgba(0,0,0,.45); background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.12); }
+
+  /* Action buttons */
+  .mt-esc-actions {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 14px; border-top: 1px solid #eeecea; margin-top: 4px;
+  }
+  .mt-esc-btn {
+    padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: background .12s, opacity .15s;
+    display: inline-flex; align-items: center; gap: 4px; border: none;
+  }
+  .mt-esc-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .mt-esc-btn.execute { background: #1a1a1a; color: #fff; }
+  .mt-esc-btn.execute:hover:not(:disabled) { background: #333; }
+  .mt-esc-btn.already-done { background: transparent; color: #888; border: 1px solid #e0ddd8; }
+  .mt-esc-btn.already-done:hover:not(:disabled) { background: #f5f5f2; }
+  .mt-esc-btn.chat { background: transparent; color: #555; border: 1px solid #e0ddd8; }
+  .mt-esc-btn.chat:hover:not(:disabled) { background: #f5f5f2; }
+  .mt-esc-done-panel {
+    display: none; flex-direction: column; gap: 8px;
+    padding: 12px 14px; background: #fafaf8; border: 1px solid #eeecea;
+    border-radius: 10px; margin-top: 4px;
+  }
+  .mt-esc-done-panel.show { display: flex; }
+  .mt-esc-done-panel-label { font-size: 12px; color: #888; }
+  .mt-esc-done-panel textarea {
+    width: 100%; box-sizing: border-box; border: 1px solid #e0ddd8;
+    border-radius: 7px; padding: 8px 10px; font-size: 13px;
+    font-family: inherit; resize: none; background: #fff; color: #1a1a1a;
+    outline: none;
+  }
+  .mt-esc-done-panel textarea:focus { border-color: #aaa; }
+  .mt-esc-done-panel-actions { display: flex; gap: 8px; }
+  .mt-esc-done-confirm {
+    padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+    background: #1a1a1a; color: #fff; border: none; cursor: pointer; font-family: inherit;
+  }
+  .mt-esc-done-confirm:hover { background: #333; }
+  .mt-esc-done-cancel {
+    padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+    background: transparent; color: #888; border: 1px solid #e0ddd8; cursor: pointer; font-family: inherit;
+  }
+  .mt-esc-done-cancel:hover { background: #f5f5f2; }
+
+  /* ─── Chat History (right panel body) ─── */
+  .chat-history { display: contents; /* unwrapped — messages go directly into .rp-body */ }
+  .chat-history-hd { display: none; /* header replaced by rp-hd */ }
+  .chat-history-body { display: contents; }
+  .chat-msg { display: flex; gap: 8px; }
+  .chat-msg.user { flex-direction: row-reverse; }
+  .chat-msg-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+  .chat-msg.user .chat-msg-avatar { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+  .chat-msg.ai .chat-msg-avatar { background: #131825; color: #fff; }
+  .chat-msg-bubble {
+    max-width: 80%; padding: 8px 12px; border-radius: 12px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .chat-msg.user .chat-msg-bubble { background: #131825; color: #fff; border-radius: 12px 2px 12px 12px; }
+  .chat-msg.ai .chat-msg-bubble { background: #f4f6fb; color: var(--text-primary); border-radius: 2px 12px 12px 12px; }
+
+  /* Draft card */
+  .draft-card {
+    margin: 4px 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .draft-card-hd {
+    padding: 10px 14px;
+    background: #f8f9fc;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .draft-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .draft-count { font-size: 11px; color: var(--text-tertiary); }
+  .draft-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .draft-group { }
+  .draft-group-title {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .draft-checkbox {
+    width: 14px; height: 14px; border-radius: 3px;
+    border: 1.5px solid var(--border); cursor: pointer;
+    accent-color: var(--accent); flex-shrink: 0;
+  }
+  .draft-subtask {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 0 4px 20px;
+    font-size: 12px; color: var(--text-secondary);
+  }
+  .draft-ft {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 8px;
+  }
+  .dispatch-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 8px; padding: 7px 16px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    transition: background .15s;
+  }
+  .dispatch-btn:hover { background: #2d3a55; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+  /* Snackbar */
+  .snackbar {
+    position: fixed; bottom: 24px; left: calc(50% - 170px); transform: translateY(12px);
+    background: #131825; color: #fff; padding: 10px 20px; border-radius: 100px;
+    font-size: 12px; font-weight: 500; opacity: 0;
+    transition: opacity .2s, transform .2s;
+    pointer-events: none; z-index: 500;
+  }
+  .snackbar.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+
+<!-- ═══ LEFT PANEL ═══ -->
+<div class="left-panel">
+
+<!-- Role Badge -->
+<div class="role-badge" onclick="showSnack('切换账号')">
+  <div class="avatar">SK</div>
+  <div class="name-row">
+    <span class="uname">金莎拉</span>
+    <span class="urole">运营总监</span>
+  </div>
+</div>
+
+<!-- Main Page -->
+<div class="page">
+
+  <!-- Todo Section -->
+  <div class="todo-section">
+    <div class="todo-header">
+      <span class="todo-label">To Do</span>
+      <span class="todo-count">(9)</span>
+    </div>
+    <div class="todo-cards">
+      <!-- Interview Card -->
+      <div class="todo-card" onclick="openDrawer('interview')">
+        <div class="todo-card-hd">
+          <div class="todo-cat"><span class="cat-dot green"></span>Interview</div>
+          <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('interview')">
+            0
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+        <div class="todo-card-title">高级客服主管 — 终面</div>
+        <div class="todo-card-meta">
+          <span>• 2h</span>
+          <span class="dot-sep">·</span>
+          <span>森健二</span>
+        </div>
+      </div>
+
+      <div class="todo-divider-v"></div>
+
+      <!-- Task Card -->
+      <div class="todo-card" id="taskTodoCard" onclick="openDrawer('task')"></div>
+
+      <div class="todo-divider-v"></div>
+
+      <!-- Escalations Card -->
+      <div class="todo-card" id="escTodoCard" onclick="openDrawer('escalation')"></div>
+    </div>
+  </div>
+
+  <!-- Main Card -->
+  <div class="main-card">
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('goal', this)">
+        Goal<span class="tab-count">11</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('dashboard', this)">
+        Dashboard<span class="tab-count">3</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('brain', this)">
+        Brain<span class="tab-count">11</span>
+      </button>
+    </div>
+
+    <!-- Goal Panel -->
+    <div class="tab-panel active goal-panel" id="tab-goal">
+
+      <!-- Goal: Game Launch Mission -->
+      <div class="goal-item">
+        <div class="goal-header-row" onclick="toggleGoal(this)">
+          <div class="goal-header-left">
+            <div class="circ-badge">
+              <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#e9ecf4" stroke-width="3"/>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#131825" stroke-width="3"
+                  stroke-dasharray="113.1" stroke-dashoffset="96.1" stroke-linecap="round"/>
+              </svg>
+              <span class="badge-num">15</span>
+            </div>
+            <div class="goal-info">
+              <div class="goal-title">游戏上线 — 完成全渠道发布</div>
+              <div class="goal-desc">Adnext / Auxin / G123 / Newsletter / PressRelease / SNS 各渠道同步上线</div>
+            </div>
+          </div>
+          <div class="goal-header-right">
+            <div class="goal-metrics">
+              <div class="metric-col"><span class="metric-num">10</span><span class="metric-label">AI</span></div>
+              <div class="metric-col"><span class="metric-num">6</span><span class="metric-label">Human</span></div>
+              <div class="metric-col"><span class="metric-num">3</span><span class="metric-label">Done</span></div>
+            </div>
+            <div class="goal-chevron"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+          </div>
+        </div>
+        <div class="subtask-tree" style="display:none">
+
+          <!-- Group 1 -->
+          <div class="task-group">
+            <div class="task-group-title">ADNext X 通知管理登记</div>
+            <div class="task-group-rows dep-chain">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">上传官方账号 Follower 数据（提供 JSON 文件）</span>
+                <div class="task-right">
+                  <span class="task-assignee">工程师</span>
+                  <span class="task-date">26/06/18</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[上传 Follower 数据…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row dep-blocked">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">在 Adnext 创建发布内容（文案 + Banner + 发送时间）<span class="task-dep"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>上传 Follower 数据</span></span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[Adnext 创建发布内容…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row dep-blocked">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">用测试账号试发 X 通知<span class="task-dep"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>创建发布内容</span></span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[试发 X 通知…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+
+              <!-- ★ Demo: Minion blocked, needs human input -->
+              <div class="task-row needs-input-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">确认通知发送目标受众分组</span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <span class="stag needs-input"
+                    data-who="运营负责人"
+                    data-what="目标受众的分组 ID 或标签列表"
+                    data-why="Minion 无法自动获取受众分组配置，需人工指定后才能继续创建通知"
+                    onclick="openReplyChat(this)"
+                    style="cursor:pointer"
+                  ><span class="needs-dot"></span>Need Input</span>
+                  <button class="task-chat-btn" onclick="openReplyChat(this)" title="回复 Minion 的问题"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+
+              <!-- ★ Demo: execution done, awaiting human verification -->
+              <div class="task-row pending-verify-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">生成 X 通知文案草稿</span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <span class="stag pending-verify"
+                    data-who="市场运营"
+                    data-what="AI 生成的 X 通知文案草稿（共 3 个版本）"
+                    data-why="文案涉及品牌语气与合规要求，需人工确认后方可发布"
+                  >Review</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[X 通知文案…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 2 -->
+          <div class="task-group">
+            <div class="task-group-title">Auxin IM 通知预约</div>
+            <div class="task-group-rows dep-chain">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">自动生成 Auxin IM 通知内容（文案 + Banner）</span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[Auxin IM 内容…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row dep-blocked">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">为各 IM 渠道自动创建 Campaign<span class="task-dep"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>生成 IM 通知内容</span></span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[Auxin IM Campaign…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 3 -->
+          <div class="task-group">
+            <div class="task-group-title">Auxin 弹窗广告预约</div>
+            <div class="task-group-rows dep-chain">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">提供 Spine Banner 素材链接</span>
+                <div class="task-right">
+                  <span class="task-assignee">运营</span>
+                  <span class="task-date">26/06/18</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[Spine Banner 链接…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row dep-blocked">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">自动生成 Auxin 弹窗内容（Spine Banner）<span class="task-dep"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>提供素材链接</span></span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[Auxin 弹窗内容…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row dep-blocked">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">自动创建 Auxin 弹窗 Campaign<span class="task-dep"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>生成弹窗内容</span></span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[Auxin 弹窗 Campaign…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 4 -->
+          <div class="task-group">
+            <div class="task-group-title">G123 游戏列表登记</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell done-title">在 G123 游戏一览中登记新游戏</span>
+                <div class="task-right">
+                  <span class="task-assignee">Admin Agent</span>
+                  <span class="task-date">26/06/14</span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[G123 游戏登记…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 5 -->
+          <div class="task-group">
+            <div class="task-group-title">G123 游戏公开管理更新</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">更新 G123 游戏公开管理配置</span>
+                <div class="task-right">
+                  <span class="task-assignee">Admin Agent</span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[G123 公开管理…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 6 -->
+          <div class="task-group">
+            <div class="task-group-title">Sendgrid 用户邮件列表同步（通知工程师）</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell done-title">通知工程师更新 Sendgrid 用户邮件地址列表</span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date">26/06/14</span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[Sendgrid 邮件列表…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 7 -->
+          <div class="task-group">
+            <div class="task-group-title">Sendgrid 用户路由配置</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">更新 Sendgrid 用户路由规则</span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[Sendgrid 路由…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 8 -->
+          <div class="task-group">
+            <div class="task-group-title">Sendgrid 邮件草稿准备与 Sender 更新</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">自动生成邮件内容并注册草稿（Sendgrid API）</span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[Sendgrid 邮件草稿…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 9 -->
+          <div class="task-group">
+            <div class="task-group-title">新闻稿预约</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">完成新闻稿预约</span>
+                <div class="task-right">
+                  <span class="task-assignee">PR 负责人</span>
+                  <span class="task-date">26/06/17</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[新闻稿预约…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 10 -->
+          <div class="task-group">
+            <div class="task-group-title">新闻稿预约 · 媒体登记 · 邮件配信</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">完成媒体登记并发送邮件配信</span>
+                <div class="task-right">
+                  <span class="task-assignee">PR 负责人</span>
+                  <span class="task-date">26/06/18</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[媒体登记配信…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 11 -->
+          <div class="task-group">
+            <div class="task-group-title">X 官号 Follower 数据获取 · 工程师同步</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell done-title">创建工单请工程师同步 X Follower 数据（供 Adnext 使用）</span>
+                <div class="task-right">
+                  <span class="task-assignee">Minion</span>
+                  <span class="task-date">26/06/14</span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[X Follower 工单…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 12 -->
+          <div class="task-group">
+            <div class="task-group-title">YouTube 频道视频发布（10:00 JST）</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">创建A票准备并上传 YouTube 频道视频（10:00 JST 发布）</span>
+                <div class="task-right">
+                  <span class="task-assignee">视频负责人</span>
+                  <span class="task-date">26/06/18</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[YouTube 视频上传…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Goal 1 -->
+      <div class="goal-item">
+        <div class="goal-header-row" onclick="toggleGoal(this)">
+          <div class="goal-header-left">
+            <div class="circ-badge">
+              <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#e9ecf4" stroke-width="3"/>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#131825" stroke-width="3"
+                  stroke-dasharray="113.1" stroke-dashoffset="28.3" stroke-linecap="round"/>
+              </svg>
+              <span class="badge-num">72</span>
+            </div>
+            <div class="goal-info">
+              <div class="goal-title">维持客服质量评分 ≥ 92%</div>
+              <div class="goal-desc">AI 处理常规咨询，人类专注复杂案例和质量保障</div>
+            </div>
+          </div>
+          <div class="goal-header-right">
+            <div class="goal-metrics">
+              <div class="metric-col"><span class="metric-num">11</span><span class="metric-label">AI</span></div>
+              <div class="metric-col"><span class="metric-num">9</span><span class="metric-label">Human</span></div>
+              <div class="metric-col"><span class="metric-num">8</span><span class="metric-label">Done</span></div>
+            </div>
+            <div class="goal-chevron"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+          </div>
+        </div>
+        <div class="subtask-tree" style="display:none">
+          <div class="task-group">
+            <div class="task-group-title">自动回复用户咨询</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell done-title">分诊转交工单队列</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[分诊转交…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">处理 VIP 和复杂案例</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[处理 VIP…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">验证 AI 建议的解决方案</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[验证 AI…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">评估并标注 AI 回复</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">评估并标注 AI 回复</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[评估并标…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">更新 V3.2 产品 QA</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">更新 v3.2 产品 FAQ</span>
+                <div class="task-right">
+                  <span class="task-assignee">王丽莎</span>
+                  <span class="task-date">26/03/19</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[更新 v3.…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">生成月度意图偏差报告</span>
+                <div class="task-right">
+                  <span class="task-assignee"></span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[生成月度…] ')" title="引用到 Chat"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal 2 -->
+      <div class="goal-item">
+        <div class="goal-header-row" onclick="toggleGoal(this)">
+          <div class="goal-header-left">
+            <div class="circ-badge">
+              <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#e9ecf4" stroke-width="3"/>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#131825" stroke-width="3"
+                  stroke-dasharray="113.1" stroke-dashoffset="51.5" stroke-linecap="round"/>
+              </svg>
+              <span class="badge-num">48</span>
+            </div>
+            <div class="goal-info">
+              <div class="goal-title">将 PWA 安装率提升至 35%</div>
+              <div class="goal-desc">设计安装引导入口与文案，结合数据监控持续迭代转化漏斗</div>
+            </div>
+          </div>
+          <div class="goal-header-right">
+            <div class="goal-metrics">
+              <div class="metric-col"><span class="metric-num">9</span><span class="metric-label">AI</span></div>
+              <div class="metric-col"><span class="metric-num">7</span><span class="metric-label">Human</span></div>
+              <div class="metric-col"><span class="metric-num">5</span><span class="metric-label">Done</span></div>
+            </div>
+            <div class="goal-chevron"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+          </div>
+        </div>
+        <div class="subtask-tree" style="display:none">
+          <div class="task-group">
+            <div class="task-group-title">监控安装指标和异常告警</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell done-title">监控安装指标和异常告警</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date"></span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[监控安装…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">设计安装提示 UX 方案</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell done-title">设计 Chrome Android 横幅方案</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date"></span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[设计 Chr…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">设计 iOS Safari 自定义弹窗</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date">26/03/22</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[设计 iOS…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">设计场景内提示位置置位</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date">26/03/22</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[设计场景…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">撰写安装利益文案并本地化</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">撰写安装利益文案并本地化</span>
+                <div class="task-right">
+                  <span class="task-assignee">王晓芳</span>
+                  <span class="task-date">26/03/23</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[撰写安装…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">生成多语言版本文案初稿</span>
+                <div class="task-right">
+                  <span class="task-assignee"></span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[生成多语…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal 3 -->
+      <div class="goal-item">
+        <div class="goal-header-row" onclick="toggleGoal(this)">
+          <div class="goal-header-left">
+            <div class="circ-badge">
+              <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#e9ecf4" stroke-width="3"/>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#131825" stroke-width="3"
+                  stroke-dasharray="113.1" stroke-dashoffset="64.3" stroke-linecap="round"/>
+              </svg>
+              <span class="badge-num">48</span>
+            </div>
+            <div class="goal-info">
+              <div class="goal-title">Q2 CS AI 训练员团队扩容至 8 人</div>
+              <div class="goal-desc">招募并完成 3 名新 AI 训练员的入职培训，建立标准化评估机制</div>
+            </div>
+          </div>
+          <div class="goal-header-right">
+            <div class="goal-metrics">
+              <div class="metric-col"><span class="metric-num">11</span><span class="metric-label">AI</span></div>
+              <div class="metric-col"><span class="metric-num">9</span><span class="metric-label">Human</span></div>
+              <div class="metric-col"><span class="metric-num">8</span><span class="metric-label">Done</span></div>
+            </div>
+            <div class="goal-chevron"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+          </div>
+        </div>
+        <div class="subtask-tree" style="display:none">
+          <div class="task-group">
+            <div class="task-group-title">候选人筛选与面试</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell done-title">发布 AI 训练员 JD 至各渠道</span>
+                <div class="task-right">
+                  <span class="task-assignee">森健二</span>
+                  <span class="task-date"></span>
+                  <span class="stag done">Done</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[发布 AI…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">完成高级客服主管终面</span>
+                <div class="task-right">
+                  <span class="task-assignee">金莎拉</span>
+                  <span class="task-date">26/05/19</span>
+                  <span class="stag doing">Doing</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[完成高级…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task-group">
+            <div class="task-group-title">入职培训体系搭建</div>
+            <div class="task-group-rows">
+              <div class="task-row">
+                <span class="exec-icon ai">AI</span>
+                <span class="task-title-cell">生成 AI 训练员培训大纲初稿</span>
+                <div class="task-right">
+                  <span class="task-assignee"></span>
+                  <span class="task-date"></span>
+                  <button class="run-btn" onclick="runAiTask(this)">▷ Run</button>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[生成培训…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+              <div class="task-row">
+                <span class="exec-icon hi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></span>
+                <span class="task-title-cell">设计新人评估测试题库</span>
+                <div class="task-right">
+                  <span class="task-assignee">森健二</span>
+                  <span class="task-date">26/05/30</span>
+                  <span class="stag todo">To do</span>
+                  <button class="task-chat-btn" onclick="injectChatRef('@[设计评估…] ')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Padding for chat bar -->
+      <div style="height: 80px;"></div>
+    </div>
+
+    <!-- Dashboard Panel -->
+    <div class="tab-panel" id="tab-dashboard">
+      <div class="dash-list">
+        <div class="dash-row" onclick="showSnack('跳转 Creative Dashboard')">
+          <span class="dash-row-name">Creative</span>
+          <span class="dash-row-action">Open <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+        </div>
+        <div class="dash-row" onclick="showSnack('跳转 Banner Dashboard')">
+          <span class="dash-row-name">Banner</span>
+          <span class="dash-row-action">Open <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+        </div>
+        <div class="dash-row" onclick="showSnack('跳转 CS Dashboard')">
+          <span class="dash-row-name">CS</span>
+          <span class="dash-row-action">Open <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+        </div>
+      </div>
+      <div style="height: 80px;"></div>
+    </div>
+
+    <!-- Brain Panel -->
+    <div class="tab-panel" id="tab-brain">
+      <div class="brain-list">
+
+        <div class="brain-item" onclick="openBrainDetail(0)">
+          <div class="brain-item-left">
+            <div class="brain-item-title">AI客服质量决策模型</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">叶</div>
+                  <span class="brain-chip-name">叶亚</span>
+                  <span class="brain-chip-role">CTO</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#f472b6,#db2777)">黑</div>
+                  <span class="brain-chip-name">黑春文</span>
+                  <span class="brain-chip-role">RE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('AI客服质量决策模型')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>15</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="openBrainDetail(1)">
+          <div class="brain-item-left">
+            <div class="brain-item-title">PAP 数据检索与字段解析规则</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#60a5fa,#2563eb)">李</div>
+                  <span class="brain-chip-name">李淳磊</span>
+                  <span class="brain-chip-role">DlOPS</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#34d399,#059669)">卢</div>
+                  <span class="brain-chip-name">卢劲源</span>
+                  <span class="brain-chip-role">FIN</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">叶</div>
+                  <span class="brain-chip-name">叶亚</span>
+                  <span class="brain-chip-role">CTO</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('PAP 数据检索与字段解析规则')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>12</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="openBrainDetail(2)">
+          <div class="brain-item-left">
+            <div class="brain-item-title">AI 附件预览与下载权限规则</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#fb923c,#ea580c)">顾</div>
+                  <span class="brain-chip-name">顾春文</span>
+                  <span class="brain-chip-role"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('AI 附件预览与下载权限规则')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>10</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="openBrainDetail(3)">
+          <div class="brain-item-left">
+            <div class="brain-item-title">线上事故应急响应与玩家安抚规则</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#e879f9,#a21caf)">李</div>
+                  <span class="brain-chip-name">李怡菲</span>
+                  <span class="brain-chip-role"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('线上事故应急响应与玩家安抚规则')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>10</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="openBrainDetail(4)">
+          <div class="brain-item-left">
+            <div class="brain-item-title">运营公告与代金券分发操作规范</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#e879f9,#a21caf)">李</div>
+                  <span class="brain-chip-name">李怡菲</span>
+                  <span class="brain-chip-role"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('运营公告与代金券分发操作规范')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>10</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="openBrainDetail(5)">
+          <div class="brain-item-left">
+            <div class="brain-item-title">CS 服务质量决策模型</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#fbbf24,#d97706)">金</div>
+                  <span class="brain-chip-name">金莎拉</span>
+                  <span class="brain-chip-role">CS</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#94a3b8,#475569)">佐</div>
+                  <span class="brain-chip-name">佐佐木</span>
+                  <span class="brain-chip-role">OPS</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('CS 服务质量决策模型')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>8</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="brain-item" onclick="openBrainDetail(6)">
+          <div class="brain-item-left">
+            <div class="brain-item-title">数据驱动决策框架</div>
+            <div class="brain-from-row">
+              <span class="brain-from-label">FROM</span>
+              <div class="brain-chips">
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#fbbf24,#d97706)">金</div>
+                  <span class="brain-chip-name">金莎拉</span>
+                  <span class="brain-chip-role">CS</span>
+                </div>
+                <div class="brain-chip">
+                  <div class="brain-chip-avatar" style="background:linear-gradient(135deg,#60a5fa,#2563eb)">王</div>
+                  <span class="brain-chip-name">王晓芳</span>
+                  <span class="brain-chip-role">MKT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="brain-mention-btn" onclick="event.stopPropagation();mentionBrainDoc('数据驱动决策框架')" title="引用到 Chat">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>7</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+      </div>
+      <div style="height: 80px;"></div>
+    </div>
+
+  <!-- Brain Detail Page (dynamic) -->
+  <div class="brain-detail" id="brainDetail">
+    <div class="brain-detail-topbar">
+      <button class="brain-back-btn" onclick="closeBrainDetail()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        BACK TO BRAIN
+      </button>
+      <span class="brain-detail-ver" id="brainDetailVer"></span>
+    </div>
+    <div class="brain-detail-body" id="brainDetailBody"></div>
+  </div>
+
+  </div><!-- /main-card -->
+</div><!-- /page -->
+
+</div><!-- /left-panel -->
+
+<!-- ═══ RIGHT PANEL ═══ -->
+<div class="right-panel">
+
+  <!-- Header -->
+  <div class="rp-hd">
+    <span class="rp-title">XiaoBao</span>
+    <button class="rp-edit-btn" title="清空对话" onclick="clearChat()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 3 L13 11"/>
+        <path d="M13 11 Q8 9 4 13 Q2 16 3 20 Q4 22 8 22 Q12 22 14 19 Q16 15 13 11 Z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Chat body -->
+  <div class="rp-body" id="rpBody">
+    <!-- Empty state — hidden once there are messages -->
+    <div class="rp-empty" id="rpEmpty">
+      <div class="rp-empty-icon">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      </div>
+      <div class="rp-empty-text">Ask the manager assistant anything.</div>
+    </div>
+    <!-- Messages injected here by JS -->
+    <div class="chat-history" id="chatHistory">
+      <div class="chat-history-hd"></div>
+      <div class="chat-history-body" id="chatHistoryBody"></div>
+    </div>
+  </div>
+
+  <!-- Chat input -->
+  <div class="rp-ft">
+    <div class="chat-input-wrap">
+      <div class="chat-input-inner">
+        <span class="chat-prefix">Ask</span>
+        <div class="chat-divider"></div>
+        <input type="text" class="chat-input" id="chatInput"
+          placeholder="Ask manager assistant"
+          onkeydown="handleChatKey(event)">
+      </div>
+      <button class="chat-send-btn" onclick="sendChat()">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div><!-- /right-panel -->
+
+</div><!-- /app-layout -->
+
+
+<!-- Task Drawer -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal" onclick="event.stopPropagation()">
+    <div class="modal-hd">
+      <span class="modal-title" id="modalTitle">
+        Task <span class="modal-count" id="modalCount"></span>
+      </span>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Snackbar -->
+<div class="snackbar" id="snackbar"></div>
+
+<script>
+// ── Task Todo Card ──
+function renderTaskTodoCard() {
+  const card = document.getElementById('taskTodoCard');
+  if (!card) return;
+  const total = taskData.length;
+  const first = taskData[0];
+  card.innerHTML = `
+    <div class="todo-card-hd">
+      <div class="todo-cat">
+        <span class="cat-dot orange"></span>Task
+      </div>
+      <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('task')">
+        ${total}
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+    <div class="todo-card-title">${first ? first.title : ''}</div>
+    <div class="todo-card-meta">${first ? first.meta : ''}</div>
+  `;
+}
+
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+// ── Goal expand/collapse (subtask tree) ──
+function toggleGoal(headerRow) {
+  const item = headerRow.closest('.goal-item');
+  const tree = item.querySelector('.subtask-tree');
+  if (!tree) return;
+  const isOpen = tree.style.display !== 'none';
+  tree.style.display = isOpen ? 'none' : 'block';
+  item.classList.toggle('expanded', !isOpen);
+}
+
+// ── AI Task Run ──
+/* ── Rich tooltip for Needs Input / Needs Review badges ── */
+(function() {
+  const tip = document.createElement('div');
+  tip.className = 'tip-box';
+  tip.id = 'badgeTip';
+  document.body.appendChild(tip);
+
+  let hideTimer;
+
+  function showTip(el) {
+    clearTimeout(hideTimer);
+    const who  = el.dataset.who  || '';
+    const what = el.dataset.what || '';
+    const why  = el.dataset.why  || '';
+    tip.innerHTML = [
+      who  ? `<div class="tip-row"><div class="tip-label">需要谁处理</div><div class="tip-val">${who}</div></div>` : '',
+      what ? `<div class="tip-row"><div class="tip-label">需要提供</div><div class="tip-val">${what}</div></div>` : '',
+    ].join('');
+    const r = el.getBoundingClientRect();
+    tip.style.left = r.left + 'px';
+    tip.style.top  = (r.bottom + 6) + 'px';
+    // keep within viewport
+    requestAnimationFrame(() => {
+      const tw = tip.offsetWidth;
+      if (r.left + tw > window.innerWidth - 8) {
+        tip.style.left = (window.innerWidth - tw - 8) + 'px';
+      }
+    });
+    tip.classList.add('visible');
+  }
+
+  function hideTip() {
+    hideTimer = setTimeout(() => tip.classList.remove('visible'), 80);
+  }
+
+  document.addEventListener('mouseover', e => {
+    const badge = e.target.closest('.stag.needs-input, .stag.pending-verify');
+    if (badge && (badge.dataset.who || badge.dataset.what || badge.dataset.why)) {
+      showTip(badge);
+    }
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest('.stag.needs-input, .stag.pending-verify')) hideTip();
+  });
+})();
+
+function runAiTask(btn) {
+  const row = btn.closest('.task-row');
+  const taskTitle = row.querySelector('.task-title-cell').textContent.trim();
+  const taskRight = row.querySelector('.task-right');
+  btn.disabled = true;
+  btn.textContent = '⟳ Running...';
+  btn.style.opacity = '.5';
+  setTimeout(() => {
+    btn.remove();
+    const reviewTag = document.createElement('span');
+    reviewTag.className = 'stag review';
+    reviewTag.style.cursor = 'pointer';
+    reviewTag.textContent = 'Review';
+    reviewTag.title = '点击查看 AI 执行结果';
+    reviewTag.onclick = (e) => { e.stopPropagation(); openReviewModal(taskTitle, reviewTag, row, taskRight); };
+    taskRight.insertBefore(reviewTag, taskRight.querySelector('.task-chat-btn'));
+    showSnack('AI 已完成，请 Review 结果');
+  }, 2000);
+}
+
+/* ── Reply task: open chat with Minion's question pre-loaded ── */
+function openReplyChat(btn) {
+  const row = btn.closest('.task-row');
+
+  // Clear chat and show Minion's question
+  clearChat();
+
+  // Minion's blocking question
+  setTimeout(() => {
+    appendChatMsg('ai',
+      `<b>Minion</b> 在执行「确认通知发送目标受众分组」时需要补充以下信息，请提供后我将继续执行：<br><br>` +
+      `<b>需要确认的受众分组</b><br>` +
+      `请从以下字段中选择或填写：<br>` +
+      `・分组类型：<code>all_followers</code> / <code>segment_id</code> / <code>tag_list</code><br>` +
+      `・若选择 segment_id，请提供具体 ID（如 <code>seg_jp_lvl2</code>）<br>` +
+      `・若选择 tag_list，请列出标签（如 <code>active_30d, jp_user</code>）`
+    );
+
+    // Pre-fill input with template
+    const input = document.getElementById('chatInput');
+    input.value = '分组类型: segment_id，ID: ';
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+
+    // Override sendChat for this one reply to handle task state change
+    window._pendingReplyRow = row;
+  }, 200);
+}
+
+/* Patch sendChat to detect reply and update task badge */
+document.addEventListener('DOMContentLoaded', () => {
+  const _origSendChat = sendChat;
+  window.sendChat = function() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+
+    if (window._pendingReplyRow && text) {
+      const row = window._pendingReplyRow;
+      window._pendingReplyRow = null;
+      input.value = '';
+      appendChatMsg('user', text);
+      setTimeout(() => {
+        appendChatMsg('ai',
+          `收到。受众分组已确认为 <code>${text}</code>。<br>Minion 将继续执行「在 Adnext 创建发布内容」，执行完成后会通知你。`
+        );
+        const badge = row.querySelector('.stag.needs-input');
+        if (badge) { badge.className = 'stag doing'; badge.innerHTML = 'Doing'; }
+        row.classList.remove('needs-input-row');
+      }, 900);
+      return;
+    }
+    _origSendChat();
+  };
+});
+
+/* Verification: pass or fail */
+function verifyTask(btn, action) {
+  const row = btn.closest('.task-row');
+  const taskRight = row.querySelector('.task-right');
+  const verifyActions = row.querySelector('.verify-actions');
+  const stagEl = row.querySelector('.stag.pending-verify');
+  if (action === 'pass') {
+    stagEl.className = 'stag done'; stagEl.textContent = 'Done';
+    verifyActions.remove();
+    row.classList.remove('pending-verify-row');
+    showSnack('验收通过，任务已完成');
+  } else {
+    stagEl.className = 'stag'; stagEl.style.cssText = 'background:#fff5f5;border:1px solid #fecaca;color:#dc2626;width:auto;padding:0 8px;';
+    stagEl.textContent = '已驳回';
+    verifyActions.remove();
+    const rerunBtn = document.createElement('button');
+    rerunBtn.className = 'run-btn'; rerunBtn.textContent = '▷ 重新执行';
+    rerunBtn.onclick = function() { runAiTask(rerunBtn); row.classList.remove('pending-verify-row'); };
+    taskRight.insertBefore(rerunBtn, taskRight.querySelector('.task-chat-btn'));
+    showSnack('已驳回，Minion 将重新执行');
+  }
+}
+
+function openReviewModal(taskTitle, reviewTag, row, taskRight) {
+  const overlay = document.getElementById('modalOverlay');
+  const titleEl = document.getElementById('modalTitle');
+  const countEl = document.getElementById('modalCount');
+  const body = document.getElementById('modalBody');
+
+  titleEl.childNodes[0].textContent = 'Review  ';
+  countEl.textContent = '';
+  body.innerHTML = `
+    <div class="mt-item" style="cursor:default">
+      <div style="font-size:13px;color:#b0b0a8;margin-bottom:10px;font-weight:500;letter-spacing:.02em">AI 执行结果</div>
+      <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:8px">${taskTitle}</div>
+      <div style="font-size:13px;color:#555;line-height:1.7;background:#f3f3f0;border-radius:8px;padding:12px 14px;margin-bottom:16px">
+        AI 已按照策略完成本次任务，处理了 12 条客服工单，平均响应时间从 4.2 分钟降至 1.8 分钟。<br>
+        质量检测通过率 97.3%，无人工干预记录。
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="rejectReview('${taskTitle}')"
+          style="padding:8px 18px;border-radius:8px;border:1px solid #e8e8e3;background:#fff;font-size:13px;font-weight:600;color:#888;cursor:pointer;font-family:inherit">
+          拒绝
+        </button>
+        <button onclick="acceptReview()"
+          style="padding:8px 18px;border-radius:8px;border:none;background:#1a1a1a;font-size:13px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit">
+          ✓ Accept
+        </button>
+      </div>
+    </div>
+  `;
+
+  // store refs for accept/reject
+  overlay._reviewRef = { reviewTag, row, taskRight };
+  overlay.classList.add('open');
+}
+
+function acceptReview() {
+  const overlay = document.getElementById('modalOverlay');
+  const { reviewTag, row, taskRight } = overlay._reviewRef || {};
+  if (reviewTag) {
+    reviewTag.remove();
+    row.querySelector('.task-title-cell').classList.add('done-title');
+    const doneTag = document.createElement('span');
+    doneTag.className = 'stag done';
+    doneTag.textContent = 'Done';
+    taskRight.insertBefore(doneTag, taskRight.querySelector('.task-chat-btn'));
+  }
+  closeModal();
+  showSnack('任务已标记完成');
+}
+
+function rejectReview(title) {
+  const overlay = document.getElementById('modalOverlay');
+  const { reviewTag } = overlay._reviewRef || {};
+  if (reviewTag) reviewTag.remove();
+  closeModal();
+  showSnack(`已退回：${title}`);
+}
+
+// ── Drawer ──
+const interviewData = [
+  { title: '高级客服主管 — 终面', meta: '森健二 · 今天 16:00', desc: '候选人具备 5 年客服管理经验，熟悉 AI 辅助客服工具，待最终确认。', status: 'doing' }
+];
+const escalateData = [
+  {
+    id: 'esc0',
+    typeIcon: '🎮',
+    title: 'CP「逃离校园」紧急道具补偿',
+    escalatorInitial: '卢',
+    escalatorName: '卢劲源',
+    escalatorRole: 'CS',
+    escalatorColor: 'linear-gradient(135deg,#a78bfa,#6c5ce7)',
+    time: '11:28',
+    escalateReason: '超出当前 brain-doc 覆盖范围',
+    note: '70 张合成卡数量超过我的授权额度（> 50 张），需要 manager 批准。',
+    cpItems: [
+      '「校园合成」Lv.7 / Lv.11 成就 bug，153 名玩家待补 70 张「合成卡」',
+      '活动今日 23:59 结束',
+    ],
+    actions: [
+      { type: 'ai', text: '批准 CS 工具向 153 名玩家批量发放 70 张「合成卡」', status: 'pending' },
+      { type: 'hu', text: '同步技术组排查成就触发逻辑（需技术组负责人确认）',   status: 'pending' },
+      { type: 'ai', text: '官方渠道发布补偿公告，附预计修复时间',               status: 'pending' },
+    ],
+    memory: [
+      { date: '5/12', text: '同 CP 类似成就 bug（×2 人报告）', tag: 'memory · DingTalk' },
+      { date: '4/28', text: 'CS 处理过同游戏成就补偿', tag: 'memory · CS-Agent' },
+    ],
+    braindoc: {
+      ref: 'CS-PB-014',
+      preview: 'CP 反映游戏内成就或道具类 bug，影响活动正常进程，需在活动截止前完成批量补偿时',
+      rows: [
+        { label: 'When to apply', val: 'CP 反映游戏内成就或道具类 bug，影响活动正常进程，需在活动截止前完成批量补偿时' },
+        { label: 'Scope', val: 'CS 运营类问题；批量用户道具补偿；成就修复补发；受影响人数 ≥ 10' },
+        { label: 'KPI', val: '补偿完成率 ≥ 95% · 响应时效 ≤ 2h · 用户满意度 ≥ 4.2 / 5' },
+        { label: 'Actions', val: 'CS 工具批量发放道具，优先级 P0；同步技术组排查根本原因；官方渠道发布补偿公告，附预计修复时间' },
+      ],
+    },
+    ref: 'CP 逃离校园…',
+  }
+];
+const taskData = [
+  { title: 'Q2 客服 AI 上线评审', meta: 'DDL · 2026-05-08', status: 'doing', ref: 'Q2 客服 AI 上…' },
+  { title: '客服团队 Q2 OKR 草拟', meta: 'DDL · 2026-03-21', status: 'doing', ref: '客服团队 Q2 OKR…' },
+  { title: 'Q2 客服 AI 上线评审', meta: 'DDL · 2026-03-20', status: 'todo', ref: 'Q2 客服 AI…' },
+  { title: 'PWA 安装活动复盘', meta: 'DDL · 2026-03-21', status: 'todo', ref: 'PWA 安装活动…' },
+  { title: '运营月报 — 2026 / 03', meta: 'DDL · 2026-03-23', status: 'todo', ref: '运营月报…' },
+  { title: '本地化供应商续约对齐', meta: 'DDL · 2026-03-24', status: 'todo', ref: '本地化供应商…' },
+  { title: '客服知识库季度审计', meta: 'DDL · 2026-03-26', status: 'todo', ref: '客服知识库…' },
+];
+
+function openDrawer(type) {
+  const overlay = document.getElementById('modalOverlay');
+  const titleEl = document.getElementById('modalTitle');
+  const countEl = document.getElementById('modalCount');
+  const body = document.getElementById('modalBody');
+  overlay.classList.add('open');
+
+  if (type === 'interview') {
+    titleEl.childNodes[0].textContent = 'Interview  ';
+    countEl.textContent = interviewData.length;
+    body.innerHTML = interviewData.map(d => `
+      <div class="mt-item">
+        <div class="mt-row">
+          <span class="mt-dot doing"></span>
+          <span class="mt-title">${d.title}</span>
+          <span class="mt-status doing">doing</span>
+          <button class="mt-chat-btn" onclick="injectChatRef('@[${d.title}] ')">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </button>
+        </div>
+        <div class="mt-meta">${d.meta}</div>
+      </div>
+    `).join('');
+  } else {
+    const total = taskData.length;
+    titleEl.childNodes[0].textContent = 'Task  ';
+    countEl.textContent = total;
+
+    const normalLabel = `
+      <div class="mt-section-label" style="border-top:none">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="#b0b0a8"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+        NORMAL · ${taskData.length}
+      </div>
+    `;
+
+    const tasksHTML = normalLabel + taskData.map((d) => {
+      const isDoing = d.status === 'doing';
+      return `
+        <div class="mt-item">
+          <div class="mt-row">
+            <span class="mt-dot ${isDoing ? 'doing' : ''}"></span>
+            <span class="mt-title">${d.title}</span>
+            <span class="mt-status ${isDoing ? 'doing' : ''}">${isDoing ? 'doing' : 'todo'}</span>
+            ${!isDoing ? `<button class="mt-run-btn" title="开始执行" onclick="event.stopPropagation();showSnack('开始执行: ${d.title}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+            </button>` : ''}
+            <button class="mt-chat-btn" onclick="injectChatRef('@[${d.ref}] ')">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </button>
+          </div>
+          <div class="mt-meta">${d.meta}</div>
+        </div>
+      `;
+    }).join('');
+
+    body.innerHTML = tasksHTML;
+  }
+
+  if (type === 'escalation') {
+    titleEl.childNodes[0].textContent = 'Escalations  ';
+    countEl.textContent = escalateData.length;
+    body.innerHTML = buildEscalateHTML();
+  }
+}
+
+// ── AI Task Tab ──
+function buildEscalateHTML() {
+  if (!escalateData.length) {
+    return '<div style="padding:32px 16px;text-align:center;color:#b7b7b7;font-size:13px">暂无上报事项</div>';
+  }
+  return `
+    <div class="mt-escalate-section">
+      ${escalateData.map((d, i) => `
+        <div class="mt-escalate-item" id="mtEsc${i}">
+          <div class="mt-esc-hd" onclick="toggleEscDetail(this)">
+            <div class="mt-esc-hd-left">
+              <div class="mt-esc-title">${d.title}</div>
+              <div class="brain-from-row" style="margin-top:4px">
+                <span class="brain-from-label">FROM</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="brain-chip-avatar" style="background:${d.escalatorColor}">${d.escalatorInitial}</div>
+                  <div>
+                    <div style="font-size:13px;font-weight:500;color:var(--text-default);line-height:1.4">${d.escalatorName}</div>
+                    <div style="font-size:10px;color:var(--text-tertiary);letter-spacing:.04em">${d.escalatorRole || ''}</div>
+                  </div>
+                </div>
+                <span style="margin-left:auto;font-size:11px;color:var(--text-tertiary)">${d.time}</span>
+              </div>
+            </div>
+            <span class="mt-esc-hd-chev open">▾</span>
+          </div>
+
+          <div class="mt-esc-detail open" id="mtEscDetail${i}">
+            <div class="mt-esc-summary">
+              <div class="mt-esc-summary-stat">
+                <span class="mt-esc-summary-num escalated">${d.actions.length}</span>
+                <span class="mt-esc-summary-label">条 Action</span>
+              </div>
+              <span class="mt-esc-summary-desc">员工通过 Help 上报了整个任务，Agent 已规划 ${d.actions.length} 条 Action，Approve 后全部执行。</span>
+            </div>
+
+            <div class="mt-esc-block">
+              <div class="mt-esc-block-label">CP 诉求</div>
+              ${d.cpItems.map(item => `<div class="mt-esc-block-item">${item}</div>`).join('')}
+            </div>
+
+            <div class="mt-esc-block">
+              <div class="mt-esc-block-label">Agent 建议 Actions</div>
+              <ul class="mt-esc-action-list">
+                ${d.actions.map((a, j) => `
+                  <li class="mt-esc-action-item" id="mtEscActionItem${i}_${j}">
+                    <span class="mt-esc-action-exec ${a.type}">${a.type.toUpperCase()}</span>
+                    <span class="mt-esc-action-text">${a.text}</span>
+                    <span class="mt-esc-action-status" id="mtEscActionStatus${i}_${j}"></span>
+                  </li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="mt-esc-block">
+              <div class="mt-esc-block-label">Related Memory</div>
+              <ul class="mt-esc-mem-list">
+                ${d.memory.map(m => `
+                  <li class="mt-esc-mem-row">
+                    <span><strong>${m.date}</strong> ${m.text}</span>
+                    <span class="mt-esc-mem-tag">${m.tag}</span>
+                  </li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="mt-esc-bd">
+              <div class="mt-esc-bd-hd" onclick="toggleEscBrainDoc(this)">
+                <span class="mt-esc-bd-title">Brain-doc</span>
+                <span class="mt-esc-bd-ref">${d.braindoc.ref}</span>
+                <span class="mt-esc-bd-preview">${d.braindoc.preview}</span>
+                <span class="mt-esc-bd-chev">▾</span>
+              </div>
+              <div class="mt-esc-bd-body">
+                ${d.braindoc.rows.map(r => `
+                  <div class="mt-esc-bd-row">
+                    <span class="mt-esc-bd-row-label">${r.label}</span>
+                    <span class="mt-esc-bd-row-val">${r.val}</span>
+                  </div>`).join('')}
+              </div>
+            </div>
+
+            <div class="mt-esc-actions" id="mtEscActionBar${i}">
+              <button class="mt-esc-btn execute" onclick="approveEscTask(${i})">Approve</button>
+              <button class="mt-esc-btn chat" onclick="adjustEscTask(${i}, '${d.ref}')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Adjust</button>
+            </div>
+          </div><!-- /mt-esc-detail -->
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderEscalationCard() {
+  const card = document.getElementById('escTodoCard');
+  if (!card) return;
+  const total = escalateData.length;
+  const first = escalateData[0];
+  if (total === 0) {
+    card.innerHTML = `
+      <div class="todo-card-hd">
+        <div class="todo-cat"><span class="cat-dot" style="background:#e0e0e0"></span>Escalations</div>
+        <div class="todo-card-count">0</div>
+      </div>
+      <div class="todo-card-title" style="color:var(--text-disabled)">暂无上报事项</div>
+      <div class="todo-card-meta"></div>
+    `;
+  } else {
+    card.innerHTML = `
+      <div class="todo-card-hd">
+        <div class="todo-cat"><span class="cat-dot" style="background:#fa8c16;border-color:#ffd591"></span>Escalations</div>
+        <div class="todo-card-count" onclick="event.stopPropagation();openDrawer('escalation')">
+          ${total}
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+      <div class="todo-card-title">${first.title}</div>
+      <div class="todo-card-meta">来自 ${first.escalatorName} · ${first.time}</div>
+    `;
+  }
+}
+
+function toggleEscDetail(hdEl) {
+  const item   = hdEl.closest('.mt-escalate-item');
+  const detail = item.querySelector('.mt-esc-detail');
+  const chev   = hdEl.querySelector('.mt-esc-hd-chev');
+  const isOpen = detail.classList.toggle('open');
+  chev.classList.toggle('open', isOpen);
+}
+
+function toggleEscBrainDoc(hdEl) {
+  const parent = hdEl.closest('.mt-esc-bd');
+  const body = parent.querySelector('.mt-esc-bd-body');
+  const preview = parent.querySelector('.mt-esc-bd-preview');
+  const chev = hdEl.querySelector('.mt-esc-bd-chev');
+  const isOpen = body.style.display === 'block';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (preview) preview.style.display = isOpen ? 'block' : 'none';
+  chev.classList.toggle('open', !isOpen);
+}
+
+function _dismissEscItem(idx) {
+  const el = document.getElementById('mtEsc' + idx);
+  if (el) {
+    el.style.transition = 'opacity .2s, max-height .3s, padding .3s';
+    el.style.overflow = 'hidden';
+    el.style.maxHeight = el.offsetHeight + 'px';
+    requestAnimationFrame(() => {
+      el.style.opacity = '0';
+      setTimeout(() => { el.style.maxHeight = '0'; el.style.padding = '0'; }, 50);
+      setTimeout(() => { el.remove(); escalateData.splice(idx, 1);
+        const countEl = document.getElementById('modalCount');
+        if (countEl) countEl.textContent = escalateData.length;
+        renderEscalationCard();
+      }, 320);
+    });
+  }
+}
+
+// ── AI Task: Approve / Adjust ──
+function approveEscTask(idx) {
+  // Hide Approve + Adjust buttons
+  const bar = document.getElementById(`mtEscActionBar${idx}`);
+  if (bar) bar.style.display = 'none';
+
+  // Set per-action status tags
+  const d = escalateData[idx];
+  if (d) {
+    d.actions.forEach((a, j) => {
+      const st = document.getElementById(`mtEscActionStatus${idx}_${j}`);
+      if (!st) return;
+      // action index 2 (官方渠道发布补偿公告) is already done
+      if (j === 2)         { st.className = 'mt-esc-action-status done';  st.textContent = 'Done'; }
+      else if (a.type === 'ai') { st.className = 'mt-esc-action-status doing'; st.textContent = 'Doing'; }
+      else                 { st.className = 'mt-esc-action-status todo';  st.textContent = 'To do'; }
+    });
+  }
+}
+
+function adjustEscTask(idx, ref) {
+  startEscChatMock(`@[${ref}] 请调整 Action 方案：`);
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+// legacy alias
+function closeDrawer(e) { closeModal(e); }
+
+function openCandidatePage() {
+  showSnack('跳转候选人页（模拟）');
+}
+
+// Esc to close modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+});
+
+// ── Chat ──
+const chatMessages = [];
+let chatContext = null; // tracks multi-turn mock state
+
+function toggleChatHistory() { /* no-op: chat panel is always visible */ }
+
+function clearChat() {
+  chatMessages.length = 0;
+  chatContext = null;
+  const body = document.getElementById('chatHistoryBody');
+  if (body) body.innerHTML = '';
+  document.getElementById('rpEmpty').style.display = '';
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+function injectChatRef(ref, autoFocus = true) {
+  const input = document.getElementById('chatInput');
+  input.value += ref;
+  closeModal();
+  if (autoFocus) {
+    setTimeout(() => {
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }, 150);
+  }
+}
+
+function mentionBrainDoc(docName) {
+  injectChatRef(`@[${docName}] `);
+  showSnack(`已引用 @[${docName}]`);
+}
+
+// Auto-type text into chat input character by character, then send
+function _typeAndSend(text, onAiDone) {
+  const input = document.getElementById('chatInput');
+  input.value = '';
+  input.disabled = true;
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < text.length) {
+      input.value += text[i++];
+    } else {
+      clearInterval(interval);
+      setTimeout(() => {
+        input.disabled = false;
+        // Trigger send manually (bypass normal sendChat flow to keep context)
+        sendChat();
+        // Wait for AI response to appear before proceeding
+        const aiDelay = text.length > 30 ? 1200 : 900;
+        setTimeout(() => { if (onAiDone) onAiDone(); }, aiDelay + 600);
+      }, 500);
+    }
+  }, 18);
+}
+
+// Full mock conversation for "Chat to Adjust" on escalated task
+function startEscChatMock(ref) {
+  closeModal();
+
+  const steps = [
+    ref + '修改第一个action，直接批量发放140张合成卡',
+  ];
+
+  let idx = 0;
+  function runNext() {
+    if (idx >= steps.length) return;
+    _typeAndSend(steps[idx++], () => setTimeout(runNext, 800));
+  }
+  setTimeout(runNext, 500);
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  // Add user message
+  appendChatMsg('user', text);
+
+  // Simulate AI response
+  const delay = text.length > 30 ? 1200 : 900;
+  setTimeout(() => {
+    const lower = text;
+    let reply = '';
+
+    // ── Multi-turn mock: CP逃离校园 修改 action ──────────────────────────────
+    if ((lower.includes('修改') || lower.includes('修改action')) && lower.includes('140')) {
+      chatContext = 'cp_action_updated';
+      reply = `好的，action 已更新。更新后：<br><br>
+        <div style="background:#f5f5f2;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#555">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#aaa;margin-bottom:6px">ACTION 已更新</div>
+          <div style="display:flex;align-items:flex-start;gap:6px;">
+            <span style="display:inline-flex;align-items:center;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.07);color:rgba(0,0,0,.45);flex-shrink:0;margin-top:2px">AI</span>
+            <span>批准 CS 工具向 153 名玩家批量发放 140 张「合成卡」</span>
+          </div>
+        </div>`;
+
+    } else if (lower.trim() === '执行' && chatContext === 'cp_action_updated') {
+      chatContext = 'cp_executed';
+      reply = `执行成功。<br><br>
+        <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#389e0d">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#52c41a;margin-bottom:4px">✓ 执行完成</div>
+          已向 153 名玩家批量发放 140 张「合成卡」。
+        </div>`;
+
+    } else if ((lower.includes('更新策略') || lower.includes('下次') || lower.includes('不需要再升级')) && lower.includes('200')) {
+      chatContext = null;
+      reply = `好的，Brain-doc（CS-PB-014）已更新。<br><br>
+        <div style="background:#f5f5f2;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#555">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#aaa;margin-bottom:6px">BRAIN-DOC 已更新 · CS-PB-014</div>
+          <div><span style="color:#aaa;font-size:10px">新增规则</span><br>影响范围大且补偿金额 &lt; 200 元的经济补偿任务，执行层直接有权发放补偿礼包，无需上级审批。</div>
+        </div>`;
+
+    // ── Existing rules ────────────────────────────────────────────────────────
+    } else if ((lower.includes('优先处理') || lower.includes('不需要') || lower.includes('直接有权') || lower.includes('无需审批')) &&
+        (lower.includes('补偿') || lower.includes('礼包'))) {
+      reply = `好的，已更新到对应 Brain-doc。<br><br>
+        <div style="background:#f5f5f2;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#555">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#aaa;margin-bottom:6px">BRAIN-DOC 已更新 · CS-PB-014</div>
+          <div><span style="color:#aaa;font-size:10px">新增规则</span><br>影响范围 ≥ 10 人且补偿金额 &lt; 200 元的经济补偿任务，执行层直接有权发放补偿礼包，无需上级审批。</div>
+        </div>`;
+    } else if (lower.includes('目标') || lower.includes('goal') || lower.includes('提升') || lower.includes('达成')) {
+      reply = '好的，让我先确认几点：<br>1. 目标基线是多少？（当前数值）<br>2. 期望在什么时间窗口内完成？<br>3. 是否已有主要执行路径或切入点？';
+    } else if (lower.includes('brain') || lower.includes('文档') || lower.includes('模型')) {
+      reply = '我来帮你管理 Brain 决策文档。你是想新建文档、修改适用条件，还是删除某个文档？';
+    } else if (lower.includes('任务') || lower.includes('task') || lower.includes('改')) {
+      reply = '好的，请告诉我要修改哪个任务——负责人、DDL，还是要转交人工？我会帮你确认是否存在 DDL 冲突。';
+    } else {
+      reply = '已收到。根据当前目标和团队状态，我建议优先推进客服 AI 准确率提升模块。需要我生成任务草案吗？';
+    }
+
+    appendChatMsg('ai', reply);
+
+    // Scroll to bottom
+    const body = document.getElementById('chatHistoryBody');
+    body.scrollTop = body.scrollHeight;
+  }, delay);
+}
+
+function appendChatMsg(role, text) {
+  const body = document.getElementById('chatHistoryBody');
+  // Hide empty state on first message
+  const empty = document.getElementById('rpEmpty');
+  if (empty) empty.style.display = 'none';
+  const el = document.createElement('div');
+  el.className = `chat-msg ${role}`;
+  const initial = role === 'user' ? 'SK' : 'D';
+  el.innerHTML = `
+    <div class="chat-msg-avatar">${initial}</div>
+    <div class="chat-msg-bubble">${text}</div>
+  `;
+  body.appendChild(el);
+  // Scroll the right panel body
+  const rpBody = document.getElementById('rpBody');
+  if (rpBody) rpBody.scrollTop = rpBody.scrollHeight;
+}
+
+// ── Snackbar ──
+let snackTimer;
+const BRAIN_DOCS = [
+  {
+    title: 'AI 客服质量决策模型',
+    ver: 'V3.1 · 更新于 2026-04-22',
+    whenToApply: '当需要评估 AI 客服回复质量、设计质检规则或制定 CSAT 评分标准时启用。目标：建立 AI 回复准确率与满意度的量化基线，界定哪些场景允许 AI 独立答复，哪些需要转人工复核。不适用于：纯人工质检流程设计、人员排班优化。',
+    from: [
+      { initials: '叶', name: '叶亚', role: 'CTO', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+      { initials: '黑', name: '黑春文', role: 'RE', bg: 'linear-gradient(135deg,#f472b6,#db2777)' },
+      { initials: 'SK', name: 'Sarah Kim', role: 'CS TEAM LEAD', bg: 'linear-gradient(135deg,#34d399,#059669)' },
+    ],
+    priorities: [
+      'Q2 AI 独立解决率目标：≥ 75%，低于 70% 触发人工审查',
+      '质检抽样比例从 5% 提升至 12%，重点覆盖退款与投诉类工单',
+      '所有新增质检规则上线前须通过 500 条历史工单回测',
+    ],
+    guide: 'CTO 要求所有质检模型必须可解释——每条质检结论须附带置信分及触发规则 ID；反感黑盒评分体系。\n\n团队在质检规则迭代上倾向小步快跑，每两周一次规则评审，不等季度 OKR 周期。',
+    quote: '「质量是速度的前提，不是速度的对立面。」',
+    redLines: [
+      '禁止用 AI 质检结论直接触发客服绩效扣分，须人工确认',
+      '涉及法务风险的工单（实名 / 退款纠纷）不纳入 AI 质检范围',
+      '质检模型版本更新须保留 30 天回滚窗口',
+    ],
+    cases: [
+      'Q1 质检模型上线：回测准确率 91.3%，首周漏判率 2.1%，两周后修复',
+      '23 年大促期间 AI 质检误判率飙升，临时降低置信阈值至 0.85 兜底',
+      'JP 用户投诉集中爆发：质检规则未覆盖日语语境，紧急添加语言分流',
+    ],
+  },
+  {
+    title: 'PAP 数据检索与字段解析规则',
+    ver: 'V2.0 · 更新于 2026-04-10',
+    whenToApply: '当 Agent 需要从 PAP 系统检索用户行为数据、工单字段或运营指标时启用。目标：统一字段命名规范、定义检索优先级、明确哪些字段可直接用于决策，哪些需要二次清洗。不适用于：财务报表数据、HR 系统字段。',
+    from: [
+      { initials: '李', name: '李淳磊', role: 'DLOPS', bg: 'linear-gradient(135deg,#60a5fa,#2563eb)' },
+      { initials: '卢', name: '卢劲源', role: 'FIN', bg: 'linear-gradient(135deg,#34d399,#059669)' },
+      { initials: '叶', name: '叶亚', role: 'CTO', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+    ],
+    priorities: [
+      '字段版本对齐：PAP v2.3 与 DW v1.9 存在 14 个字段命名冲突，Q2 须全部修复',
+      'user_id 与 player_id 在跨系统检索中不可互换，必须显式映射',
+      '检索结果缓存 TTL 统一调整为 5 分钟，热点数据降至 1 分钟',
+    ],
+    guide: 'DataOps 负责人要求所有检索规则变更须在 Confluence 留存变更记录；不允许 Agent 直接修改字段映射表，必须走 PR 审批。\n\n当检索结果置信度 < 0.8 时，Agent 必须在回复中显示数据来源和采样时间。',
+    quote: '「数据是决策的地基，地基不稳，楼建得再高也会倒。」',
+    redLines: [
+      '禁止直接检索包含身份证号 / 银行卡号的原始字段',
+      '跨租户数据检索须经数据安全组审批，不得绕过权限层',
+      '实时检索接口 QPS 上限 200，超限须走离线批量通道',
+    ],
+    cases: [
+      '25 年初数据迁移：字段命名混乱导致 Agent 误判用户等级，影响 3,200 条工单',
+      '大促期间检索超时：将热点字段预加载进 Redis，响应时间从 800ms 降至 120ms',
+      'PAP 字段审计：发现 23 个废弃字段仍被 Agent 引用，清理后准确率提升 4%',
+    ],
+  },
+  {
+    title: 'AI 附件预览与下载权限规则',
+    ver: 'V1.5 · 更新于 2026-03-28',
+    whenToApply: '当工单处理涉及用户上传附件（图片 / 视频 / 文档）的预览或下载时启用。目标：定义不同角色对附件的访问权限层级，防止敏感内容泄露，同时保证客服处理效率。不适用于：内部报告附件、系统日志文件。',
+    from: [
+      { initials: '顾', name: '顾春文', role: 'SEC', bg: 'linear-gradient(135deg,#fb923c,#ea580c)' },
+      { initials: '叶', name: '叶亚', role: 'CTO', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+    ],
+    priorities: [
+      '图片预览需在 2 秒内完成加载，超时降级为缩略图',
+      'VIP 用户附件须单独存储于加密桶，访问日志保留 90 天',
+      '当附件触发内容安全扫描时，自动暂停预览并通知安全组',
+    ],
+    guide: '安全负责人要求所有附件访问须记录操作日志，禁止静默访问；客服侧只允许预览，不允许下载原始文件，仅管理员可申请下载。\n\n权限变更遵循「最小权限原则」，新角色默认无附件访问权，须显式授权。',
+    quote: '「权限不是障碍，是保护。」',
+    redLines: [
+      '禁止 AI 自动解析用户上传的可执行文件（.exe / .apk / .sh）',
+      '包含人脸或证件的图片不允许 AI 直接读取内容，须人工审核',
+      '附件存储超过 180 天自动归档，归档后不可被 Agent 直接检索',
+    ],
+    cases: [
+      '23 年安全事件：某 CS 角色误获下载权限，批量导出 1,200 份用户截图，事后权限全面收紧',
+      '大促高峰：预览服务并发超限，临时扩容 CDN 节点，P99 延迟从 4s 降至 800ms',
+      '内容安全误判：正常游戏截图被标记为违规，调整模型阈值后误判率降至 0.3%',
+    ],
+  },
+  {
+    title: '线上事故应急响应与玩家安抚规则',
+    ver: 'V3.0 · 更新于 2026-04-15',
+    whenToApply: '当游戏服务出现 P0 / P1 级故障（服务中断、数据异常、大规模玩家投诉）时启用。目标：定义响应时效 SLA、安抚话术标准、补偿决策权限，以及 Agent 在事故期间的自动化处理边界。不适用于：日常 Bug 反馈、单用户投诉处理。',
+    from: [
+      { initials: '李', name: '李怡菲', role: 'CS MGR', bg: 'linear-gradient(135deg,#e879f9,#a21caf)' },
+      { initials: 'LX', name: '刘睿', role: 'COO', bg: 'linear-gradient(135deg,#60a5fa,#2563eb)' },
+      { initials: '叶', name: '叶亚', role: 'CTO', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+    ],
+    priorities: [
+      'P0 事故：15 分钟内发出首条玩家公告，1 小时内给出补偿方案',
+      'P1 事故：CS 可在 50 元补偿额度内自主决策，超额需 manager 审批',
+      '安抚话术库 Q2 须覆盖「服务器维护 / 道具丢失 / 活动延期」三类场景',
+    ],
+    guide: 'COO 要求事故期间 Agent 只做信息收集和公告推送，不允许自动发放补偿；所有补偿决策须由有权限的人工确认，避免超发引发连锁投诉。\n\n事故结束后 24 小时内须提交复盘报告，根因分析纳入 Brain-doc 更新流程。',
+    quote: '「事故时玩家最需要的是被听见，其次才是被补偿。」',
+    redLines: [
+      'P0 事故期间禁止 AI 自动关闭工单，所有工单须人工处置',
+      '禁止在事故公告中承诺具体修复时间，除非技术组已确认',
+      '单次事故补偿总额超过 10 万元须 CEO 审批',
+    ],
+    cases: [
+      '26 年初服务器宕机 3 小时：Agent 自动推送安抚公告，人工处理率降低 40%',
+      '道具丢失事件：补偿额度临时上调至 200 元，事后发现 30% 用户补偿超量',
+      'JP 大区延迟风暴：跨时区响应延误 45 分钟，事后建立 JP 专属值班机制',
+    ],
+  },
+  {
+    title: '运营公告与代金券分发操作规范',
+    ver: 'V2.2 · 更新于 2026-04-08',
+    whenToApply: '当需要发布游戏内公告、向特定用户群分发代金券或道具补偿时启用。目标：规范公告审批流程、代金券分发权限层级、防止超发与误发，并确保 Agent 在执行分发操作前经过人工确认节点。不适用于：营销活动策划阶段、A/B 测试设计。',
+    from: [
+      { initials: '李', name: '李怡菲', role: 'CS MGR', bg: 'linear-gradient(135deg,#e879f9,#a21caf)' },
+      { initials: 'SK', name: '金莎拉', role: '运营总监', bg: 'linear-gradient(135deg,#fbbf24,#d97706)' },
+    ],
+    priorities: [
+      '代金券面额 ≥ 30 元须运营总监审批，≥ 100 元须 COO 审批',
+      '公告发布须提前 30 分钟通知 CS 团队，避免工单量突增无人响应',
+      'Agent 分发操作完成后须在 5 分钟内回传分发结果至运营后台',
+    ],
+    guide: '运营总监要求所有批量分发操作必须有明确的受众圈定条件，禁止「全服广播」式分发；每次分发前须预估影响人数，超过 5,000 人须额外确认。\n\n公告文案须经过法务审核模板库比对，不符合模板的内容不允许直接发布。',
+    quote: '「每一张代金券背后都是一次信任，不能随便给，也不能不给。」',
+    redLines: [
+      '禁止 Agent 在未经人工确认的情况下自动触发分发操作',
+      '同一用户 24 小时内不可重复收到同类型补偿',
+      '代金券有效期设置须与活动周期匹配，禁止发放无期限代金券',
+    ],
+    cases: [
+      '25 年活动误发：条件配置错误导致 12,000 名非目标用户收到代金券，事后全量追回引发投诉',
+      '节日公告超时：CS 未提前收到通知，工单量在公告后 10 分钟内翻倍',
+      '道具补偿测试：小范围 500 人测试后再全量发放，成功避免一次潜在超发事故',
+    ],
+  },
+  {
+    title: '客服质量与转人工决策模型',
+    ver: 'V2.4 · 更新于 2026-04-19',
+    whenToApply: '当目标场景为「客服 AI 工单 / 转人工 / CSAT / 客服质量监控 / 客服流量峰值 / 客服效应或至量」时启用。你的目标：判断自动回复率基线、设计转人工触发条件、为客服 SLA / 一次解决率设定目标。不适用于：偶尔咨询高档话术、人力扩容流程。',
+    from: [
+      { initials: 'SS', name: '依优木', role: 'CEO', bg: 'linear-gradient(135deg,#94a3b8,#475569)' },
+      { initials: 'LX', name: '刘睿', role: 'COO', bg: 'linear-gradient(135deg,#60a5fa,#2563eb)' },
+      { initials: 'SK', name: '金莎拉', role: '运营总监', bg: 'linear-gradient(135deg,#fbbf24,#d97706)' },
+      { initials: 'SK', name: 'Sarah Kim', role: 'CS TEAM LEAD', bg: 'linear-gradient(135deg,#34d399,#059669)' },
+      { initials: 'PS', name: 'Priya Singh', role: 'QUALITY REVIEWER', bg: 'linear-gradient(135deg,#f472b6,#db2777)' },
+    ],
+    priorities: [
+      'CSAT 与百剩时长是 Q2 维二被允许「授权升级」的指标',
+      'AI 自动解决率每提升 1pp，要求转人工准确率不得下降 0.3pp 以上',
+      '所有上线必须给出 P0 / P1 两级降级预案，否则一票否决',
+    ],
+    guide: 'CEO 偏好「先 80% 上线，再 20% 迭代」，反感为完美等待；\n\n在转人工策略上倾向授权——从队主管可在偏差 ±0.05 范围内自调，无需走审批。',
+    quote: '「客服永远是品牌门面，可以慢慢应答，不可以说不回复。」',
+    redLines: [
+      '禁止用 AI 直接处理涉及实名 / 退款 / 法律敏感的工单',
+      '不允许把 CSAT 兑换成短期成本节省',
+      'VIP 玩家工单必须 5 分钟内有人工介入',
+    ],
+    cases: [
+      'Q1 客服评审：三条管辖矢度 → 决定完全量 1 条 × 观察 7 天再放量',
+      '23 年 12 月退款风波：把 AI 转人工阈值临时调到 0.7 兜底',
+      'JP 客季活动：临时关闭 AI 自动结案、全量人工直核',
+    ],
+  },
+  {
+    title: '数据驱动决策框架',
+    ver: 'V1.8 · 更新于 2026-04-05',
+    whenToApply: '当需要为运营决策、产品迭代或 Agent 策略调整提供数据依据时启用。目标：定义哪些指标是核心决策指标，如何设置观察窗口，什么情况下数据结论可以直接推动执行，什么情况下需要人工判断介入。不适用于：财务预算决策、人员评级。',
+    from: [
+      { initials: '金', name: '金莎拉', role: 'CS MGR', bg: 'linear-gradient(135deg,#fbbf24,#d97706)' },
+      { initials: '王', name: '王晓芳', role: 'MKT', bg: 'linear-gradient(135deg,#60a5fa,#2563eb)' },
+      { initials: 'LX', name: '刘睿', role: 'COO', bg: 'linear-gradient(135deg,#60a5fa,#3b82f6)' },
+    ],
+    priorities: [
+      '核心决策指标每周更新一次，Agent 须使用最新版本指标基线',
+      'A/B 测试结论须达到 95% 置信度才可推动全量上线',
+      '指标异常波动（±15%）须在 2 小时内触发自动告警并通知决策者',
+    ],
+    guide: 'COO 要求所有数据驱动决策必须附带「如果数据错了，后果是什么」的风险评估；不允许仅凭单一指标做全量决策，至少需要两个互相印证的指标。\n\n数据结论的有效期为 7 天，超期须重新验证，不允许引用过期数据支撑当前决策。',
+    quote: '「数据告诉你发生了什么，但你自己要想明白为什么。」',
+    redLines: [
+      '禁止用采样率 < 5% 的数据结论推动全量策略变更',
+      '不允许在数据回溯期 < 2 周的情况下定义「趋势」',
+      '所有指标定义变更须同步更新数据字典，不得口头约定',
+    ],
+    cases: [
+      '25 年 Q3 策略误判：仅看 DAU 忽略留存率，全量上线后次周留存下降 8%',
+      '活动效果评估：引入对照组后发现自然增长占比 60%，避免过度归因活动',
+      'Agent 策略 A/B：观察期延长至 3 周后结论反转，避免一次错误全量上线',
+    ],
+  },
+];
+
+function _renderBrainDetail(doc) {
+  const editIcon = `<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+  const chipsHtml = doc.from.map(p => `
+    <div class="brain-detail-chip">
+      <div class="brain-detail-chip-avatar" style="background:${p.bg}">${p.initials}</div>
+      <span class="brain-detail-chip-name">${p.name}</span>
+      <span class="brain-detail-chip-role">${p.role}</span>
+    </div>`).join('');
+  const bulletsHtml = (items) => items.map(i => `<li>${i}</li>`).join('');
+  const guideParas = doc.guide.split('\n\n').map(p => `<p class="brain-section-text" style="margin-top:8px">${p}</p>`).join('');
+  return `
+    <div class="brain-detail-title-row">
+      <span class="brain-detail-title">${doc.title}</span>
+      <button class="brain-edit-btn" title="编辑" onclick="showSnack('编辑 Brain-doc')">${editIcon}</button>
+    </div>
+    <div class="brain-section">
+      <div class="brain-section-label">WHEN TO APPLY</div>
+      <p class="brain-section-text">${doc.whenToApply}</p>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">FROM</div>
+      <div class="brain-detail-chips">${chipsHtml}</div>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">近期优先级</div>
+      <ul class="brain-bullets">${bulletsHtml(doc.priorities)}</ul>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">决策向导</div>
+      ${guideParas}
+      <div class="brain-quote">${doc.quote}</div>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">红线与禁区</div>
+      <ul class="brain-bullets">${bulletsHtml(doc.redLines)}</ul>
+    </div>
+    <div class="brain-divider"></div>
+    <div class="brain-section">
+      <div class="brain-section-label">往往案例</div>
+      <ul class="brain-bullets">${bulletsHtml(doc.cases)}</ul>
+    </div>`;
+}
+
+function openBrainDetail(idx) {
+  const doc = BRAIN_DOCS[idx];
+  if (!doc) return;
+  document.getElementById('brainDetailVer').textContent = doc.ver;
+  document.getElementById('brainDetailBody').innerHTML = _renderBrainDetail(doc);
+  const panel = document.getElementById('brainDetail');
+  panel.classList.add('open');
+  panel.scrollTop = 0;
+}
+function closeBrainDetail() {
+  document.getElementById('brainDetail').classList.remove('open');
+}
+
+function showSnack(msg) {
+  const s = document.getElementById('snackbar');
+  s.textContent = msg;
+  s.classList.add('show');
+  clearTimeout(snackTimer);
+  snackTimer = setTimeout(() => s.classList.remove('show'), 2200);
+}
+
+// ── Init ──
+renderTaskTodoCard();
+renderEscalationCard();
+</script>
+</body>
+</html>

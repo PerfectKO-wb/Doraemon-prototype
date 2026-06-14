@@ -60,41 +60,72 @@
         .app { display: flex; width: 100%; height: 100vh; }
 
         /* ============ Doraemon Sidebar ============ */
+        /* ===== Narrow icon sidebar ===== */
         .sidebar {
-            width: 200px;
-            flex-shrink: 0;
-            display: flex; flex-direction: column;
+            width: 56px; flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center;
             height: 100vh;
             background: var(--bg-container);
             border-right: 1px solid var(--border-divider);
         }
-        .sidebar-top {
-            height: 56px;
-            padding: 0 12px 0 16px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .logo { display: flex; align-items: center; gap: 8px; }
-        .logo-mark {
-            width: 22px; height: 22px; border-radius: 50%;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        .sb-logo {
+            width: 34px; height: 34px; margin: 12px 0 4px;
+            border-radius: 10px;
+            background: linear-gradient(135deg,#0ea5e9,#0284c7);
             display: grid; place-items: center; color: #fff;
+            flex-shrink: 0; cursor: pointer;
         }
-        .logo-mark svg { width: 13px; height: 13px; }
-        .logo-text { font-family: 'Urbanist', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.3px; }
-        .sidebar-collapse {
-            width: 28px; height: 28px; border: none; background: none;
-            border-radius: 6px; cursor: pointer;
+        .sb-logo svg { width: 20px; height: 20px; }
+        .sb-actions {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 2px; padding: 4px 0 6px;
+        }
+        .sb-icon {
+            width: 36px; height: 36px; border: none; background: none;
+            border-radius: 8px; cursor: pointer;
             display: grid; place-items: center;
-            color: var(--text-secondary);
+            color: var(--text-secondary); flex-shrink: 0;
         }
-        .sidebar-collapse:hover { background: var(--bg-hover); }
-
-        .sidebar-scroll {
+        .sb-icon:hover { background: var(--bg-hover); }
+        .sb-icon svg { width: 17px; height: 17px; }
+        .sb-sep {
+            width: 24px; height: 1px; background: var(--border-divider);
+            flex-shrink: 0; margin: 2px 0 4px;
+        }
+        .sb-agents {
             flex: 1; overflow-y: auto;
-            padding: 4px 8px 16px;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 5px; padding: 4px 0;
         }
-        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: #e2e2df; border-radius: 2px; }
+        .sb-agents::-webkit-scrollbar { display: none; }
+        .sb-agent {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: none; cursor: pointer;
+            display: grid; place-items: center;
+            color: #fff; font-size: 11px; font-weight: 700; font-family: inherit;
+            flex-shrink: 0; position: relative;
+            transition: transform .12s, box-shadow .12s;
+        }
+        .sb-agent:hover { transform: scale(1.08); }
+        .sb-agent.active { box-shadow: 0 0 0 2px var(--bg-container), 0 0 0 3.5px #10b981; }
+        .sb-dot {
+            position: absolute; top: 1px; right: 1px;
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #22c55e; border: 1.5px solid var(--bg-container);
+            pointer-events: none;
+        }
+        .sb-bottom {
+            border-top: 1px solid var(--border-divider);
+            padding: 10px 0; width: 100%;
+            display: flex; justify-content: center; flex-shrink: 0;
+        }
+        .sb-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: grid; place-items: center;
+            color: #fff; font-size: 12px; font-weight: 600;
+            cursor: pointer; overflow: hidden;
+            background: linear-gradient(135deg,#7c3aed,#5b21b6);
+        }
 
         .nav-item {
             display: flex; align-items: center; gap: 10px;
@@ -125,37 +156,6 @@
         .nav-section .section-actions button:hover { background: var(--bg-hover); color: var(--text-secondary); }
         .nav-section .section-actions svg { width: 13px; height: 13px; }
 
-        .agent-dot {
-            width: 18px; height: 18px; border-radius: 50%;
-            display: grid; place-items: center;
-            color: #fff; font-size: 10px; font-weight: 700;
-            flex-shrink: 0;
-        }
-        .agent-dot.tech { background: #1c64f2; }
-        .agent-dot.f { background: var(--teal-grad); }
-
-        .sidebar-bottom {
-            border-top: 1px solid var(--border-divider);
-            padding: 12px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .user-avatar {
-            width: 28px; height: 28px; border-radius: 14px;
-            background: linear-gradient(135deg, #7c3aed, #5b21b6);
-            display: grid; place-items: center;
-            color: #fff; font-size: 11px; font-weight: 600;
-            flex-shrink: 0;
-        }
-        .user-info { flex: 1; min-width: 0; }
-        .user-name { font-size: 13px; font-weight: 500; line-height: 16px; }
-        .user-role { font-size: 11px; color: var(--text-secondary); line-height: 14px; }
-        .user-more {
-            width: 28px; height: 28px; border: none; background: none;
-            border-radius: 6px; cursor: pointer;
-            display: grid; place-items: center;
-            color: var(--text-secondary);
-        }
-        .user-more:hover { background: var(--bg-hover); }
 
         /* ============ Middle list panel ============ */
         .list-panel {
@@ -370,11 +370,13 @@
         }
 
         .main-toolbar {
-            padding: 14px 24px;
+            padding: 0 24px;
+            height: 48px;
             display: flex; align-items: center;
             gap: 8px;
             flex-shrink: 0;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            border-bottom: 1px solid var(--border-divider);
         }
         .date-select {
             position: relative;
@@ -391,24 +393,42 @@
         .date-select .cal-icon { width: 14px; height: 14px; color: var(--text-secondary); }
         .date-select:hover { border-color: var(--border-strong); }
 
-        .state-filter {
-            height: 32px;
-            min-width: 96px;
-            max-width: 160px;
-            padding: 0 8px;
-            border: 1px solid var(--border-default);
-            border-radius: 8px;
-            background: var(--bg-container);
-            font: inherit;
-            font-size: 12px;
-            color: var(--text-default);
-            cursor: pointer;
-            outline: none;
+        .state-filter { display: none; } /* replaced by state tabs */
+
+        /* Status filter tabs */
+        .status-tabs {
+            display: flex; align-items: center; gap: 0;
         }
-        .state-filter:hover { border-color: var(--border-strong); }
-        .state-filter:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(28, 100, 242, 0.12);
+        .status-tab {
+            padding: 0 14px;
+            height: 36px;
+            font-size: 13px; font-weight: 500;
+            color: var(--text-secondary);
+            border: none; background: none;
+            cursor: pointer;
+            position: relative;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .status-tab:hover { color: var(--text-default); }
+        .status-tab.active {
+            color: var(--text-default); font-weight: 600;
+        }
+        .status-tab.active::after {
+            content: '';
+            position: absolute; bottom: 0; left: 10px; right: 10px;
+            height: 2px; background: var(--button-default); border-radius: 1px;
+        }
+        .status-tab .tab-ct {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 18px; height: 16px; padding: 0 5px;
+            border-radius: 8px;
+            background: var(--bg-active);
+            font-size: 10px; font-weight: 600; color: var(--text-secondary);
+            margin-left: 5px;
+        }
+        .status-tab.active .tab-ct {
+            background: var(--button-default); color: #fff;
         }
         .visually-hidden {
             position: absolute;
@@ -466,7 +486,16 @@
             vertical-align: middle;
         }
         .inv-table .col-type { width: 80px; }
-        .inv-table .col-kind { width: 60px; }
+        .inv-table .col-kind { width: 72px; }
+        .kind-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            height: 20px; padding: 0 8px;
+            border-radius: 4px;
+            border: 1px solid #bfdbfe;
+            background: #eff6ff;
+            font-size: 11px; font-weight: 500; color: #1d4ed8;
+            white-space: nowrap;
+        }
         .doc-kind-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
         .region-badge {
             display: inline-flex; align-items: center; gap: 4px;
@@ -1160,24 +1189,6 @@
         }
         .form-row.payload-row .form-label { margin-bottom: 0; }
 
-        /* Fee Recognition info box */
-        .recog-info-box {
-            margin: 0 0 8px 0;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            line-height: 1.6;
-        }
-        .recog-info-box.recog-immediate {
-            background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;
-        }
-        .recog-info-box.recog-amortize {
-            background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af;
-        }
-        .recog-info-box.recog-by-line {
-            background: #fefce8; border: 1px solid #fde68a; color: #92400e;
-        }
-        .recog-info-box strong { font-weight: 600; }
         /* Required highlight on service period rows */
         .sp-required { }
         .sp-required .form-label { }
@@ -1350,77 +1361,34 @@
 <div class="app">
     <!-- ========== Doraemon Sidebar ========== -->
     <aside class="sidebar">
-        <div class="sidebar-top">
-            <div class="logo">
-                <div class="logo-mark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <div class="sb-logo" title="Doraemon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
-                <span class="logo-text">Doraemon</span>
-        </div>
-            <button class="sidebar-collapse" title="Collapse">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
-            </button>
-        </div>
-
-        <div class="sidebar-scroll">
-            <div class="nav-item">
+        <div class="sb-actions">
+            <button class="sb-icon" title="New Chat">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <span>New Chat</span>
-            </div>
-            <div class="nav-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                <span>Work Space</span>
-            </div>
-
-            <div class="nav-section"><span>Expert agent</span></div>
-            <div class="nav-item"><span class="agent-dot tech">T</span><span>Tech</span></div>
-            <div class="nav-item"><span class="agent-dot tech">T</span><span>Tech</span></div>
-            <div class="nav-item active"><span class="agent-dot f">F</span><span>F Expert</span></div>
-
-            <div class="nav-section">
-                <span>AI U</span>
-                <div class="section-actions">
-                    <button title="New"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-                    <button title="More"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
-                </div>
-                    </div>
-            <div class="nav-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <span>AI Research</span>
-                    </div>
-            <div class="nav-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
-                <span>Product Launch</span>
-                    </div>
-
-            <div class="nav-section"><span>Today</span></div>
-            <div class="nav-item"><span style="color:var(--text-secondary);font-size:13px;">Tech</span>
-                <button class="icon-btn" style="width:20px;height:20px;margin-left:auto;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></svg></button>
-                </div>
-            <div class="nav-item"><span style="color:var(--text-secondary);font-size:13px;">Tech</span>
-                <svg style="margin-left:auto;width:12px;height:12px;color:var(--text-disabled);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div class="nav-item"><span style="color:var(--text-secondary);font-size:13px;">Tech</span>
-                <span class="dot" style="background:var(--primary);"></span>
-                <button class="icon-btn" style="width:20px;height:20px;margin-left:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></svg></button>
-            </div>
-
-            <div class="nav-section"><span>Today</span></div>
-            <div class="nav-item">
-                <span style="color:var(--text-secondary);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Marketing Campaign Id…</span>
-                <button class="icon-btn" style="width:20px;height:20px;margin-left:auto;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/><circle cx="5" cy="12" r="1.3"/></svg></button>
-            </div>
-        </div>
-
-        <div class="sidebar-bottom">
-            <div class="user-avatar">DC</div>
-            <div class="user-info">
-                <div class="user-name">David chen</div>
-                <div class="user-role">Data Analyst</div>
-            </div>
-            <button class="user-more" title="Menu">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
             </button>
+            <button class="sb-icon" title="Workspace">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </button>
+        </div>
+        <div class="sb-sep"></div>
+        <div class="sb-agents">
+            <button class="sb-agent" style="background:#ef4444" title="Alarm Agent">A<span class="sb-dot"></span></button>
+            <button class="sb-agent" style="background:#1e3a5f" title="D Expert">D</button>
+            <button class="sb-agent active" style="background:linear-gradient(135deg,#10b981,#059669)" title="F Expert">F</button>
+            <button class="sb-agent" style="background:#f43f5e" title="HR Agent"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></button>
+            <button class="sb-agent" style="background:#f97316" title="X Agent">X</button>
+            <button class="sb-agent" style="background:#ec4899" title="P Agent"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="7" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="5" cy="17" r="2"/><circle cx="19" cy="17" r="2"/></svg></button>
+            <button class="sb-agent" style="background:#2563eb" title="Tech Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
+            <button class="sb-agent" style="background:#4d7c0f" title="Ops Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+            <button class="sb-agent" style="background:#0d9488" title="CS Agent">CS</button>
+            <button class="sb-agent" style="background:#16a34a" title="Partner Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+            <button class="sb-agent" style="background:#ea580c" title="Analytics Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+            <button class="sb-agent" style="background:#7c3aed" title="Voice Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+        </div>
+        <div class="sb-bottom">
+            <div class="sb-avatar" title="David Chen">DC</div>
         </div>
     </aside>
 
@@ -1434,15 +1402,15 @@
                         F Expert
                         <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             </div>
-                    <div class="avatar-stack">
+            <div class="avatar-stack">
                         <div class="avatar-chip" style="background:#1C64F2;">i</div>
                         <div class="avatar-chip" style="background:#F59E0B;">A</div>
                         <div class="avatar-chip" style="background:#8B5CF6;">S</div>
                         <div class="avatar-chip" style="background:#EC4899;">D</div>
                         <div class="avatar-chip" style="background:#10B981;">L</div>
                         <div class="avatar-more">+99</div>
-        </div>
-                </div>
+            </div>
+            </div>
                 <div class="expert-actions">
                     <button class="icon-btn" title="Tasks">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
@@ -1459,7 +1427,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <input type="text" placeholder="search">
                         </div>
-                    </div>
+        </div>
 
         <div class="list-count"><strong>103</strong> total</div>
 
@@ -1468,7 +1436,7 @@
         <div class="list-empty">
             <div class="empty-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    </div>
+        </div>
             <div class="empty-text">No consultations found</div>
         </div>
     </section>
@@ -1483,9 +1451,18 @@
                     <span class="bell-badge">23</span>
                 </button>
             </div>
-                    </div>
+        </div>
 
-        <div class="main-toolbar">
+        <div class="main-toolbar" style="justify-content:space-between;">
+            <!-- Status filter tabs -->
+            <div class="status-tabs" id="statusTabs">
+                <button class="status-tab active" data-state="all">All <span class="tab-ct" id="ct-all">0</span></button>
+                <button class="status-tab" data-state="pending">Pending <span class="tab-ct" id="ct-pending">0</span></button>
+                <button class="status-tab" data-state="approved">Approved <span class="tab-ct" id="ct-approved">0</span></button>
+                <button class="status-tab" data-state="denied">Denied <span class="tab-ct" id="ct-denied">0</span></button>
+            </div>
+
+            <!-- Date picker (right) -->
             <div class="date-select" id="dateSelect" aria-haspopup="dialog">
                 <span class="ph" id="dateLabel">April 2026</span>
                 <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -1499,27 +1476,29 @@
                         <div class="year-nav-btns">
                             <button id="nextYear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>
                             <button id="nextDecade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></button>
-                            </div>
                         </div>
-                    <div class="month-grid" id="monthGrid"></div>
                     </div>
-                        </div>
+                    <div class="month-grid" id="monthGrid"></div>
+                </div>
+            </div>
+
+            <!-- hidden legacy select (kept for JS compat) -->
             <label class="visually-hidden" for="stateFilter">State</label>
-            <select id="stateFilter" class="state-filter" aria-label="Filter by state" title="Filter list by status">
+            <select id="stateFilter" class="state-filter" aria-label="Filter by state" style="display:none;">
                 <option value="all" selected>State</option>
                 <option value="pending">Pending</option>
-                <option value="checked">Checked</option>
+                <option value="approved">Approved</option>
                 <option value="denied">Denied</option>
-                <option value="parsing">Parsing</option>
             </select>
             <label class="visually-hidden" for="docTypeFilter">Document type</label>
-                    </div>
+        </div>
 
         <div class="table-wrap">
             <table class="inv-table">
                 <thead>
                     <tr>
                         <th class="col-type">Type</th>
+                        <th class="col-kind">Kind</th>
                         <th id="titleColHead">Title</th>
                         <th class="col-state">State</th>
                         <th class="col-time">Upload time</th>
@@ -1540,7 +1519,7 @@
         <div class="detail-top">
             <button class="detail-back" id="detailBack" title="Back">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+                </button>
             <span class="detail-filename" id="detailName">202604091330-jmd.pdf</span>
             <div class="detail-zoom">
                 <button id="zoomOut" title="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
@@ -1554,20 +1533,20 @@
                     原型备注
                 </button>
             </div>
-                    </div>
+            </div>
 
         <div class="detail-body">
             <div class="detail-left">
                 <div class="invoice-paper" id="invoicePaper" style="padding:0;overflow:hidden;">
                     <!-- Preview loaded dynamically via renderInvoicePreview() -->
-                </div>
+                        </div>
                 <div class="voucher-paper" id="voucherPaper" style="display:none;">
                     <div class="preview-placeholder" id="voucherPreviewPlaceholder">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
                         <span>No preview</span>
                     </div>
-            </div>
-        </div>
+                        </div>
+                    </div>
 
             <div class="detail-right">
                 <div class="summary-scroll">
@@ -1620,7 +1599,7 @@
                         <div class="form-row" data-region="all">
                             <div class="form-label">Invoice No. :</div>
                             <div class="form-control"><input id="ivInvoiceNumber" placeholder="e.g. INV-2026-0001"></div>
-                        </div>
+                    </div>
 
                         <!-- ── Amount ── -->
                         <div class="form-section-label">Amount</div>
@@ -1638,7 +1617,7 @@
                         <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Total Amount :</div>
                             <div class="form-control"><input id="ivAmount" type="text" placeholder="0.00"></div>
-                        </div>
+                            </div>
                         <div class="form-row" data-region="all">
                             <div class="form-label">Excl. Tax Amount :</div>
                             <div class="form-control"><input id="ivAmountExcludingTax" type="text" placeholder="0.00"></div>
@@ -1647,13 +1626,28 @@
                             <div class="form-label">Tax Amount :</div>
                             <div class="form-control"><input id="ivTaxAmount" type="text" placeholder="0.00"></div>
                         </div>
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" style="display:none;">
                             <div class="form-label">Tax Rate :</div>
                             <div class="form-control" style="display:flex;align-items:center;gap:6px;">
                                 <input id="ivTaxRate" type="number" min="0" max="100" step="0.1" placeholder="e.g. 10" style="width:80px;">
                                 <span style="font-size:13px;color:var(--text-secondary);">%</span>
                             </div>
                         </div>
+                        <div class="form-row" data-region="all">
+                            <div class="form-label">Amount Paid :</div>
+                            <div class="form-control"><input id="ivAmountPaid" type="text" placeholder="0.00"></div>
+                        </div>
+                        <div class="form-row" data-region="all">
+                            <div class="form-label">Amount Due :</div>
+                            <div class="form-control"><input id="ivAmountDue" type="text" placeholder="0.00"></div>
+                        </div>
+                        <div class="form-row" data-region="all">
+                            <div class="form-label">Accrual Tax Rate :</div>
+                            <div class="form-control" style="display:flex;align-items:center;gap:6px;">
+                                <input id="ivAccrualTaxRate" type="number" min="0" max="100" step="0.01" placeholder="e.g. 10" style="width:80px;">
+                                <span style="font-size:13px;color:var(--text-secondary);">%</span>
+                        </div>
+                    </div>
 
                         <!-- Tax registration number (all regions, optional) -->
                         <div class="form-row" data-region="all">
@@ -1684,7 +1678,7 @@
                                 <option value="ADMINISTRATIVE">ADMINISTRATIVE</option>
                                 <option value="NON_ADMINISTRATIVE">NON_ADMINISTRATIVE</option>
                             </select>
-                        </div>
+                    </div>
 
                         <!-- ── Line Items ── -->
                         <div class="form-row payload-row" data-region="all">
@@ -1696,7 +1690,7 @@
                         <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Purpose :</div>
                             <div class="form-control"><input id="ivPurpose"></div>
-                        </div>
+                    </div>
 
                         <!-- ── Dates ── -->
                         <div class="form-section-label">Dates</div>
@@ -1726,10 +1720,18 @@
                             <div class="form-control">
                                 <input type="date" id="ivAccountingDate" style="font:inherit;font-size:13px;border:1px solid var(--border-default);border-radius:6px;padding:6px 10px;background:#fff;color:var(--text-default);outline:none;width:100%;">
                             </div>
-                        </div>
+                    </div>
 
                         <!-- ── Payee Bank Info ── -->
                         <div class="form-section-label">Payee Bank Info</div>
+
+                        <div class="form-row" data-region="all" data-req>
+                            <div class="form-label req-label">Requires Finance Payout :</div>
+                            <select class="form-control" id="ivRequiresFinancePayout">
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                            </select>
+                    </div>
 
                         <!-- Common -->
                         <div class="form-row req-bank" data-region="all" data-req>
@@ -1763,11 +1765,11 @@
                         <div class="form-row" data-region="jp sg tw">
                             <div class="form-label">Bank Code :</div>
                             <div class="form-control"><input id="ivBankCode" placeholder="e.g. 0009 (JP) / 7214 (SG) / 822 (TW)"></div>
-                        </div>
+                </div>
                         <div class="form-row" data-region="jp sg tw">
                             <div class="form-label">Branch Code :</div>
                             <div class="form-control"><input id="ivBranchCode" placeholder="e.g. 210 (JP) / 001 (SG)"></div>
-                        </div>
+            </div>
 
                         <!-- JP only: Kana fields -->
                         <div class="form-row" data-region="jp" data-req>
@@ -1777,7 +1779,7 @@
                         <div class="form-row" data-region="jp">
                             <div class="form-label">Bank Name (Kana) :</div>
                             <div class="form-control"><input id="ivBankNameKana" placeholder="半角カタカナ（銀行名）"></div>
-                        </div>
+        </div>
 
                         <!-- All regions: SWIFT (optional) -->
                         <div class="form-row" data-region="all">
@@ -1853,9 +1855,6 @@
                                 <option value="MILESTONE_BASED">MILESTONE_BASED</option>
                             </select>
                         </div>
-
-                        <!-- Info panel: changes with recognition policy -->
-                        <div id="ivRecognitionInfo" class="recog-info-box" style="display:none;"></div>
 
                         <!-- ── Submitter ── -->
                         <div class="form-section-label">Submitter</div>
@@ -1993,7 +1992,24 @@
             desc: 'Upload reimbursement vouchers',
             meta: 'Parsing · 4 vouchers',
             icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>',
-            href: 'F-PAP-VOUCHER-COLLECTION.html'
+            href: 'F-PAP-VOUCHER-COLLECTION.html',
+            hidden: true
+        },
+        {
+            key: 'expense-report',
+            title: 'Expense Report',
+            desc: 'Submit monthly expense reports',
+            meta: 'Draft · 2 reports',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+            href: 'F-PAP-EXPENSE-REPORT.html'
+        },
+        {
+            key: 'expense-review',
+            title: 'Expense Review',
+            desc: 'Finance review of expense reports',
+            meta: 'Pending · 2 reports',
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>',
+            href: 'F-PAP-EXPENSE-REVIEW.html'
         }
     ];
 
@@ -2028,6 +2044,7 @@
             servicePeriodStart: '2026-03-18',
             servicePeriodEnd: '2026-03-19',
             accountingDate: '',
+            requiresFinancePayout: 'YES',
             bankName: '三菱UFJ銀行',
             branchName: 'きよなみ支店',
             accountType: '普通預金',
@@ -2076,6 +2093,7 @@
             servicePeriodStart: '2026-02-01',
             servicePeriodEnd: '2026-02-28',
             accountingDate: '',
+            requiresFinancePayout: 'YES',
             bankName: '',
             branchName: '',
             accountType: 'CHECKING',
@@ -2124,6 +2142,7 @@
             servicePeriodStart: '2026-03-01',
             servicePeriodEnd: '2026-03-31',
             accountingDate: '',
+            requiresFinancePayout: 'YES',
             bankName: 'CITIBANK N.A. SINGAPORE',
             branchName: '',
             accountType: 'CHECKING',
@@ -2172,6 +2191,7 @@
             servicePeriodStart: '2026-02-01',
             servicePeriodEnd: '2026-02-28',
             accountingDate: '',
+            requiresFinancePayout: 'YES',
             bankName: 'CHINA MERCHANTS BANK H.O. SHENZHEN',
             branchName: 'H.O. SHENZHEN',
             accountNo: '121983402732002',
@@ -2219,6 +2239,7 @@
             servicePeriodStart: '2026-01-01',
             servicePeriodEnd: '2026-03-31',
             accountingDate: '',
+            requiresFinancePayout: 'YES',
             bankName: 'CTBC BANK CO.,LTD. JHONGHE BRANCH',
             branchName: 'JHONGHE BRANCH',
             accountType: 'CHECKING',
@@ -2248,7 +2269,7 @@
     // Vouchers hidden for now (not relevant to current demo scope)
     let vouchers = [];
 
-    const STATE_LABELS = { pending: 'Pending', denied: 'Denied', checked: 'Checked', parsing: 'Parsing' };
+    const STATE_LABELS = { pending: 'Pending', denied: 'Denied', approved: 'Approved', checked: 'Approved', parsing: 'Parsing' };
 
     /** 'all' or a key of STATE_LABELS */
     let stateFilter = 'all';
@@ -2276,7 +2297,7 @@
 
     function renderList() {
         const body = document.getElementById('listBody');
-        const navHtml = listItems.map(it => `
+        const navHtml = listItems.filter(it => !it.hidden).map(it => `
             <div class="list-card ${it.active ? 'active' : ''}" data-key="${it.key}">
                 <div class="list-card-icon">${it.icon}</div>
                 <div class="list-card-content">
@@ -2311,6 +2332,7 @@
 
     function applyStateFilterTo(list) {
         if (!stateFilter || stateFilter === 'all') return list;
+        if (stateFilter === 'approved') return list.filter(f => f.state === 'approved' || f.state === 'checked');
         return list.filter(f => f.state === stateFilter);
     }
     function filteredInvoices() {
@@ -2345,6 +2367,7 @@
             return `
             <tr data-id="${f.id}" data-doc-type="${f.docType}">
                 <td class="col-type">${fileIcon(f.type)}</td>
+                <td class="col-kind"><span class="kind-badge">${f.docType === 'voucher' ? 'Voucher' : 'Invoice'}</span></td>
                 <td><span class="file-cell"><span class="fname">${f.name}</span></span></td>
                 <td class="col-state"><span class="tag ${f.state}">${STATE_LABELS[f.state] || f.state}</span></td>
                 <td class="col-time">${f.time}</td>
@@ -2356,6 +2379,7 @@
                 openDetail(Number(tr.dataset.id), tr.dataset.docType);
             });
         });
+        renderTabCounts();
     }
 
     // ========== Month picker ==========
@@ -2467,6 +2491,12 @@
         return `<span class="li-cell" contenteditable="${ce}" spellcheck="false">${text ?? ''}</span>`;
     }
 
+    function liSelect(field, value, options, editable = true) {
+        const disabled = editable ? '' : 'disabled';
+        const opts = options.map(o => `<option value="${o}"${value === o ? ' selected' : ''}>${o}</option>`).join('');
+        return `<select class="li-select li-cell" data-field="${field}" ${disabled} style="font-size:11.5px;padding:2px 4px;border:none;background:transparent;width:100%;min-width:80px;">${opts}</select>`;
+    }
+
     function renderLineItems(lineItems, editable = true) {
         currentLineItems = lineItems ? lineItems.map(it => Object.assign({}, it)) : [];
         const wrap = document.getElementById('ivPayloadWrap');
@@ -2479,6 +2509,10 @@
                 <td class="li-num">${liCell(item.amount_excluding_tax, editable)}</td>
                 <td class="li-num">${liCell(item.tax_rate, editable)}</td>
                 <td class="li-num">${liCell(item.tax_inclusive_amount, editable)}</td>
+                <td>${liSelect('allocation_required', item.allocation_required || '', ['', 'Yes', 'No'], editable)}</td>
+                <td>${liSelect('allocation_method', item.allocation_method || '', ['', 'MONTHLY_EQUAL', 'MONTHLY_BY_LINE_ITEM', 'BY_LINE_ITEM_PERIOD', 'BY_EXPLICIT_SCHEDULE', 'USAGE_BASED', 'MANUAL'], editable)}</td>
+                <td>${liSelect('recognition_policy', item.recognition_policy || '', ['', 'IMMEDIATE', 'PREPAID_MONTHLY', 'ACCRUAL_BY_SERVICE_PERIOD', 'MONTHLY_BY_LINE_ITEM', 'SCHEDULED_BY_DOCUMENT', 'USAGE_BASED', 'MILESTONE_BASED'], editable)}</td>
+                <td class="li-num">${liCell(item.amortization_period_count ?? '', editable)}</td>
                 <td class="li-del"><button class="li-del-btn" title="Delete row" onclick="deleteLineItem(${i})">×</button></td>
             </tr>`).join('');
         wrap.innerHTML = `
@@ -2487,6 +2521,7 @@
                     <th style="width:28px">#</th>
                     <th>Item</th><th>Description</th><th>Service Period</th>
                     <th>Excl. Tax</th><th>Tax Rate</th><th style="text-align:right">Incl. Tax</th>
+                    <th>Alloc. Req.</th><th>Alloc. Method</th><th>Recognition</th><th>Periods</th>
                     <th style="width:32px"></th>
                 </tr></thead>
                 <tbody>${rows}</tbody>
@@ -2499,7 +2534,8 @@
 
     function setLineItemsEditable(editable) {
         document.querySelectorAll('#ivPayloadWrap .li-cell').forEach(el => {
-            el.contentEditable = editable ? 'true' : 'false';
+            if (el.tagName === 'SELECT') el.disabled = !editable;
+            else el.contentEditable = editable ? 'true' : 'false';
         });
     }
 
@@ -2507,21 +2543,27 @@
         const rows = document.querySelectorAll('#ivPayloadWrap tbody tr[data-li]');
         return Array.from(rows).map(tr => {
             const cells = tr.querySelectorAll('.li-cell');
+            const selects = {};
+            tr.querySelectorAll('.li-select').forEach(s => { selects[s.dataset.field] = s.value; });
             return {
-                item_name: cells[0]?.textContent.trim() || '',
-                description: cells[1]?.textContent.trim() || '',
-                service_period_start: cells[2]?.textContent.trim() || '',
-                service_period_end: cells[3]?.textContent.trim() || '',
-                amount_excluding_tax: cells[4]?.textContent.trim() || '',
-                tax_rate: cells[5]?.textContent.trim() || '',
-                tax_inclusive_amount: cells[6]?.textContent.trim() || '',
+                item_name:               cells[0]?.textContent.trim() || '',
+                description:             cells[1]?.textContent.trim() || '',
+                service_period_start:    cells[2]?.textContent.trim() || '',
+                service_period_end:      cells[3]?.textContent.trim() || '',
+                amount_excluding_tax:    cells[4]?.textContent.trim() || '',
+                tax_rate:                cells[5]?.textContent.trim() || '',
+                tax_inclusive_amount:    cells[6]?.textContent.trim() || '',
+                allocation_required:     selects['allocation_required'] || '',
+                allocation_method:       selects['allocation_method'] || '',
+                recognition_policy:      selects['recognition_policy'] || '',
+                amortization_period_count: cells[7]?.textContent.trim() || '',
             };
         });
     }
 
     function addLineItem() {
         currentLineItems = collectLineItems();
-        currentLineItems.push({ item_name: '', description: '', service_period_start: '', service_period_end: '', amount_excluding_tax: '', tax_rate: '', tax_inclusive_amount: '' });
+        currentLineItems.push({ item_name: '', description: '', service_period_start: '', service_period_end: '', amount_excluding_tax: '', tax_rate: '', tax_inclusive_amount: '', allocation_required: '', allocation_method: '', recognition_policy: '', amortization_period_count: '' });
         renderLineItems(currentLineItems);
         // Focus first cell of the new row
         const rows = document.querySelectorAll('#ivPayloadWrap tbody tr[data-li]');
@@ -2553,12 +2595,16 @@
         setVal('ivAmount', f.totalAmount);
         setVal('ivAmountExcludingTax', f.amountExcludingTax);
         setVal('ivTaxAmount', f.taxAmount);
+        setVal('ivAmountPaid', f.amountPaid || '');
+        setVal('ivAmountDue', f.amountDue || '');
+        setVal('ivAccrualTaxRate', f.accrualTaxRate || '');
         setVal('ivTaxRate', f.taxRate);
         setVal('ivTaxRegistrationNo', f.taxRegistrationNo);
         setVal('ivBusinessCategory', f.businessCategory);
         setVal('ivPaymentType', f.paymentType);
         renderLineItems(f.lineItems);
         setVal('ivPurpose', f.purpose);
+        setVal('ivRequiresFinancePayout', f.requiresFinancePayout || 'YES');
         setVal('ivBankName', f.bankName);
         setVal('ivBranchName', f.branchName);
         setVal('ivAccountType', f.accountType || '');
@@ -2620,49 +2666,12 @@
     }
 
     function onRecognitionChange(policy) {
-        const infoBox = document.getElementById('ivRecognitionInfo');
-        const spRows  = document.querySelectorAll('[data-sp-row]');
-
-        // Reset highlights
+        const spRows = document.querySelectorAll('[data-sp-row]');
         spRows.forEach(r => r.classList.remove('sp-required'));
 
-        if (policy === 'IMMEDIATE') {
-            infoBox.className = 'recog-info-box recog-immediate';
-            infoBox.style.display = '';
-            infoBox.innerHTML = '<strong>IMMEDIATE</strong> — Expense recognised in full on the accounting date. No amortization required.';
-        } else if (policy === 'PREPAID_MONTHLY') {
+        const needsSP = ['PREPAID_MONTHLY','PREPAID_DAILY','ACCRUAL_BY_SERVICE_PERIOD'];
+        if (needsSP.includes(policy)) {
             spRows.forEach(r => r.classList.add('sp-required'));
-            infoBox.className = 'recog-info-box recog-amortize';
-            infoBox.style.display = '';
-            infoBox.innerHTML = '<strong>PREPAID_MONTHLY</strong> — Prepaid fee amortised equally across whole months. Fill in Service Period below.';
-        } else if (policy === 'PREPAID_DAILY') {
-            spRows.forEach(r => r.classList.add('sp-required'));
-            infoBox.className = 'recog-info-box recog-amortize';
-            infoBox.style.display = '';
-            infoBox.innerHTML = '<strong>PREPAID_DAILY</strong> — Prepaid fee amortised on a pro-rata daily basis. Fill in Service Period below.';
-        } else if (policy === 'ACCRUAL_BY_SERVICE_PERIOD') {
-            spRows.forEach(r => r.classList.add('sp-required'));
-            infoBox.className = 'recog-info-box recog-amortize';
-            infoBox.style.display = '';
-            infoBox.innerHTML = '<strong>ACCRUAL_BY_SERVICE_PERIOD</strong> — Accrued over the visible service period. Fill in Service Period and select an Allocation method.';
-        } else if (policy === 'MONTHLY_BY_LINE_ITEM') {
-            infoBox.className = 'recog-info-box recog-by-line';
-            infoBox.style.display = '';
-            infoBox.innerHTML = '<strong>MONTHLY_BY_LINE_ITEM</strong> — Each line item represents one monthly period. Fill in Service Period per row in Line Items below.';
-        } else if (policy === 'SCHEDULED_BY_DOCUMENT') {
-            infoBox.className = 'recog-info-box recog-amortize';
-            infoBox.style.display = '';
-            infoBox.innerHTML = '<strong>SCHEDULED_BY_DOCUMENT</strong> — Recognition follows an explicit schedule, ratio, or amortisation table provided in the document.';
-        } else if (policy === 'USAGE_BASED') {
-            infoBox.className = 'recog-info-box recog-amortize';
-            infoBox.style.display = '';
-            infoBox.innerHTML = '<strong>USAGE_BASED</strong> — Recognised based on actual consumption or usage volume over time.';
-        } else if (policy === 'MILESTONE_BASED') {
-            infoBox.className = 'recog-info-box recog-amortize';
-            infoBox.style.display = '';
-            infoBox.innerHTML = '<strong>MILESTONE_BASED</strong> — Recognised upon delivery of goods or completion of a milestone / acceptance checkpoint.';
-        } else {
-            infoBox.style.display = 'none';
         }
     }
 
@@ -2888,11 +2897,15 @@
             totalAmount: v('ivAmount'),
             amountExcludingTax: v('ivAmountExcludingTax'),
             taxAmount: v('ivTaxAmount'),
+            amountPaid: v('ivAmountPaid'),
+            amountDue: v('ivAmountDue'),
+            accrualTaxRate: v('ivAccrualTaxRate'),
             taxRate: v('ivTaxRate'),
             taxRegistrationNo: v('ivTaxRegistrationNo'),
             businessCategory: v('ivBusinessCategory'),
             paymentType: sel('ivPaymentType'),
             purpose: v('ivPurpose'),
+            requiresFinancePayout: v('ivRequiresFinancePayout'),
             bankName: v('ivBankName'),
             branchName: v('ivBranchName'),
             accountType: v('ivAccountType'),
@@ -3053,6 +3066,40 @@
         }
     });
 
+    // Status filter tabs
+    function renderTabCounts() {
+        const baseList = (() => {
+            const inv = (selectedMonth == null
+                ? invoices.slice()
+                : invoices.filter(f => f.month === (selectedMonth + 1) && f.year === selectedYear))
+                .map(f => ({ ...f, docType: 'invoice' }));
+            const vou = (selectedMonth == null
+                ? vouchers.slice()
+                : vouchers.filter(f => f.month === (selectedMonth + 1) && f.year === selectedYear))
+                .map(f => ({ ...f, docType: 'voucher' }));
+            return inv.concat(vou);
+        })();
+        const counts = {
+            all: baseList.length,
+            pending: baseList.filter(f => f.state === 'pending').length,
+            approved: baseList.filter(f => f.state === 'approved' || f.state === 'checked').length,
+            denied: baseList.filter(f => f.state === 'denied').length,
+        };
+        Object.entries(counts).forEach(([k, v]) => {
+            const el = document.getElementById('ct-' + k);
+            if (el) el.textContent = v;
+        });
+    }
+
+    document.getElementById('statusTabs').addEventListener('click', (e) => {
+        const btn = e.target.closest('.status-tab');
+        if (!btn) return;
+        document.querySelectorAll('.status-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        stateFilter = btn.dataset.state;
+        renderTable();
+    });
+
     document.getElementById('stateFilter').addEventListener('change', (e) => {
         stateFilter = e.target.value;
         renderTable();
@@ -3133,6 +3180,7 @@
                 label: '三井住友銀行 — CTW INC',
                 sub: '口座番号 1234567 / 渋谷支店',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: '三井住友銀行', bankNameKana: 'スミトモミツイギンコウ',
                     bankCode: '0009', branchName: '渋谷支店', branchCode: '219',
                     accountType: '普通預金', accountNo: '1234567',
@@ -3144,6 +3192,7 @@
                 label: 'みずほ銀行 — CTW INC',
                 sub: '口座番号 7654321 / 新宿支店',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: 'みずほ銀行', bankNameKana: 'ミズホギンコウ',
                     bankCode: '0001', branchName: '新宿支店', branchCode: '051',
                     accountType: '普通預金', accountNo: '7654321',
@@ -3157,6 +3206,7 @@
                 label: 'Citibank NA — CTW US INC',
                 sub: 'Acct 9876543210 / SWIFT: CITIUS33',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: 'Citibank NA', swiftCode: 'CITIUS33',
                     achRouting: '021000089', wireRouting: '021000089',
                     accountNo: '9876543210', accountName: 'CTW US INC'
@@ -3167,6 +3217,7 @@
                 label: 'East West Bank — CTW US INC',
                 sub: 'Acct 1122334455 / ACH: 322070381',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: 'East West Bank', swiftCode: 'EWBKUS66',
                     achRouting: '322070381', wireRouting: '322070381',
                     accountNo: '1122334455', accountName: 'CTW US INC'
@@ -3179,6 +3230,7 @@
                 label: 'Citibank Singapore — CTW G123',
                 sub: 'Acct 0123456012 / SWIFT: CITISGSG',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: 'Citibank Singapore', swiftCode: 'CITISGSG',
                     bankCode: '7214', branchCode: '001', branchName: 'Robinson Road',
                     accountNo: '0123456012', accountName: 'CTW G123 SINGAPORE PTE LTD'
@@ -3189,6 +3241,7 @@
                 label: 'DBS Bank — CTW G123',
                 sub: 'Acct 0039876543 / SWIFT: DBSSSGSG',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: 'DBS Bank Ltd', swiftCode: 'DBSSSGSG',
                     bankCode: '7171', branchCode: '003', branchName: 'Shenton Way',
                     accountNo: '0039876543', accountName: 'CTW G123 SINGAPORE PTE LTD'
@@ -3201,6 +3254,7 @@
                 label: '工商银行 — 上海维优艺初心科技',
                 sub: '账号 1001234567890123456 / SWIFT: ICBKCNBJSHH',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: '中国工商银行上海分行', swiftCode: 'ICBKCNBJSHH',
                     branchName: '上海自贸区支行',
                     accountNo: '1001234567890123456', accountName: '上海维优艺初心科技有限公司'
@@ -3211,6 +3265,7 @@
                 label: '招商银行 — 上海维优艺初心科技',
                 sub: '账号 6214850000123456 / SWIFT: CMBCCNBS',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: '招商银行上海分行', swiftCode: 'CMBCCNBS',
                     branchName: '上海陆家嘴支行',
                     accountNo: '6214850000123456', accountName: '上海维优艺初心科技有限公司'
@@ -3223,6 +3278,7 @@
                 label: '台新銀行 — AINEKOX CO LTD',
                 sub: '帳號 9876543210 / SWIFT: TAISTWTP',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: '台新銀行', bankCode: '812', swiftCode: 'TAISTWTP',
                     branchName: '信義分行', branchCode: '0001',
                     accountNo: '9876543210', accountName: 'AINEKOX CO LTD'
@@ -3233,6 +3289,7 @@
                 label: '國泰世華 — AINEKOX CO LTD',
                 sub: '帳號 1234567890 / SWIFT: CTCBTWTP',
                 payee: {
+                    requiresFinancePayout: 'YES',
                     bankName: '國泰世華商業銀行', bankCode: '013', swiftCode: 'CTCBTWTP',
                     branchName: '台北分行', branchCode: '0002',
                     accountNo: '1234567890', accountName: 'AINEKOX CO LTD'

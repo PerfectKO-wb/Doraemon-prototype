@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --text-default: #131825;
+      --text-secondary: #73726e;
+      --text-disabled: #ababa9;
+      --bg-base: #f5f7f9;
+      --bg-container: #ffffff;
+      --bg-tab-inactive: #ececec;
+      --bg-table-header: #f0f1f3;
+      --bg-input: #f5f5f5;
+      --border-divider: #e5e7eb;
+      --border-default: #d9d9d9;
+      --error: #f5222d;
+      --sidebar-width: 56px;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-pill: 20px;
+      --shadow-tab: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --transition: 0.15s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg-base);
+      color: var(--text-default);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 22px;
+      letter-spacing: 0;
+    }
+
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      background: var(--bg-container);
+      border-right: 1px solid var(--border-divider);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 200;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .sidebar-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .sidebar-icon:hover {
+      background: #efefef;
+    }
+
+    .sidebar-icon.active {
+      background: #efefef;
+    }
+
+    .sidebar-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #722ed1, #1677ff);
+      margin-top: auto;
+      flex-shrink: 0;
+    }
+
+    /* Main */
+    .main-wrap {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      min-width: 0;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px 0;
+    }
+
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-default);
+      line-height: 26px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .notification-btn {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-default);
+      border-radius: var(--radius-sm);
+    }
+
+    .notification-btn:hover {
+      background: #efefef;
+    }
+
+    .notification-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      background: var(--text-default);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      padding: 12px 24px 0;
+    }
+
+    .tab-item {
+      padding: 6px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-pill);
+      background: var(--bg-tab-inactive);
+      transition: all var(--transition);
+      border: 1px solid transparent;
+    }
+
+    .tab-item:hover {
+      color: var(--text-default);
+    }
+
+    .tab-item.active {
+      background: var(--bg-container);
+      color: var(--text-default);
+      border-color: var(--border-divider);
+      box-shadow: var(--shadow-tab);
+    }
+
+    /* Content */
+    .main {
+      padding: 16px 24px 32px;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    .filter-input,
+    .filter-select {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 14px;
+      border: 1px solid var(--border-divider);
+      border-radius: var(--radius-sm);
+      background: var(--bg-container);
+      color: var(--text-default);
+      font-family: inherit;
+      transition: border-color var(--transition);
+    }
+
+    .filter-select {
+      padding-right: 28px;
+      appearance: none;
+      cursor: pointer;
+      min-width: 110px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2373726e' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+
+    .filter-input:hover,
+    .filter-select:hover {
+      border-color: var(--border-default);
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+      outline: none;
+      border-color: #131825;
+    }
+
+    .date-input {
+      width: 140px;
+    }
+
+    .search-input-wrap {
+      position: relative;
+    }
+
+    .search-input-wrap svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      color: var(--text-disabled);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 160px;
+      padding-left: 32px;
+    }
+
+    .filter-separator {
+      color: var(--text-disabled);
+      font-size: 14px;
+    }
+
+    /* Table */
+    .table-container {
+      background: var(--bg-container);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-divider);
+      overflow: hidden;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-default);
+      background: var(--bg-table-header);
+      border-bottom: 1px solid var(--border-divider);
+      white-space: nowrap;
+    }
+
+    .table th.col-status,
+    .table th.col-detail {
+      text-align: center;
+      width: 72px;
+    }
+
+    .table td {
+      padding: 12px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border-divider);
+      vertical-align: top;
+      color: var(--text-default);
+    }
+
+    .table tbody tr:nth-child(even) td {
+      background: #fafafa;
+    }
+
+    .table tbody tr:hover td {
+      background: #f5f5f5;
+    }
+
+    .table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table td.col-status,
+    .table td.col-detail {
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    /* Name Cell */
+    .name-cell {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .employee-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+      background: #e8e8e8;
+    }
+
+    .name-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .employee-name {
+      font-weight: 600;
+      color: var(--text-default);
+      font-size: 14px;
+      line-height: 22px;
+    }
+
+    .employee-tag {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 18px;
+    }
+
+    /* Work Output */
+    .work-output {
+      max-width: 480px;
+      line-height: 22px;
+      font-size: 14px;
+      color: var(--text-default);
+    }
+
+    .work-output-item {
+      padding: 2px 0;
+    }
+
+    .work-output-item + .work-output-item {
+      margin-top: 4px;
+    }
+
+    .work-output-item.work-output-warning,
+    .work-output-item.work-output-warning strong {
+      color: var(--error);
+    }
+
+    .work-output-item.work-output-warning strong {
+      font-weight: 600;
+    }
+
+    .work-output-item.work-output-warning .work-output-date {
+      color: var(--error);
+      opacity: 0.85;
+    }
+
+    .work-output-item.work-output-ticket strong,
+    .work-output-item.work-output-ticket-idle strong {
+      color: var(--text-default);
+      font-weight: 600;
+    }
+
+    .work-output-item.work-output-ticket-idle {
+      color: var(--text-secondary);
+    }
+
+    .work-output-date {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Status */
+    .status-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-icon.warning svg {
+      width: 18px;
+      height: 18px;
+      color: var(--error);
+    }
+
+    .status-icon.success svg {
+      width: 18px;
+      height: 18px;
+      color: #52c41a;
+    }
+
+    /* Detail */
+    .detail-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all var(--transition);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+    }
+
+    .detail-btn:hover {
+      background: #efefef;
+      color: var(--text-default);
+    }
+
+    .detail-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Cell text */
+    .cell-muted {
+      color: var(--text-default);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="sidebar-icon" title="Home">🏠</div>
+        <div class="sidebar-icon" title="Chat">💬</div>
+        <div class="sidebar-icon active" title="Dashboard">📊</div>
+        <div class="sidebar-icon" title="Settings">⚙️</div>
+      </nav>
+      <div class="sidebar-avatar" title="User"></div>
+    </aside>
+
+    <div class="main-wrap">
+      <header class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <div class="header-actions">
+          <button class="notification-btn" type="button" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
+            </svg>
+            <span class="notification-badge">667</span>
+          </button>
+        </div>
+      </header>
+
+      <nav class="tab-bar">
+        <a href="#" class="tab-item">Creative</a>
+        <a href="#" class="tab-item">A/B Test</a>
+        <a href="#" class="tab-item active">Report</a>
+      </nav>
+
+      <main class="main">
+        <div class="filter-bar">
+          <div class="filter-group">
+            <span class="filter-label">Date</span>
+            <input type="date" class="filter-input date-input" id="dateInput">
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">Joined from</span>
+            <input type="date" class="filter-input date-input" id="joinedFromInput">
+            <span class="filter-separator">to</span>
+            <input type="date" class="filter-input date-input" id="joinedToInput">
+          </div>
+
+          <div class="filter-group search-input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
+            </svg>
+            <input type="text" class="filter-input search-input" id="nameSearch" placeholder="name">
+          </div>
+
+          <div class="filter-group">
+            <select class="filter-select" id="departmentFilter">
+              <option value="all">Department</option>
+              <option value="tech">tech</option>
+              <option value="creative">creative</option>
+              <option value="marketing">marketing</option>
+              <option value="operation">operation</option>
+              <option value="management">management</option>
+              <option value="cp">cp</option>
+              <option value="executive">executive</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <select class="filter-select" id="positionFilter">
+              <option value="all">Position</option>
+              <option value="fin">fin</option>
+              <option value="hr">hr</option>
+              <option value="illust">illust</option>
+              <option value="nlp">nlp</option>
+              <option value="qa">qa</option>
+              <option value="cs">cs</option>
+              <option value="sre">sre</option>
+              <option value="video">video</option>
+              <option value="fe">fe</option>
+              <option value="be">be</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <select class="filter-select" id="locationFilter">
+              <option value="all">SHA</option>
+              <option value="SH">上海</option>
+              <option value="TW">台北</option>
+              <option value="NYC">纽约</option>
+              <option value="TYO">东京</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Joined Date</th>
+                <th>Location</th>
+                <th>Work Output</th>
+                <th class="col-status">Status</th>
+                <th class="col-detail">Detail</th>
+              </tr>
+            </thead>
+            <tbody id="employeeTableBody">
+              <!-- Filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const AVATAR_COLORS = ['#1677ff', '#722ed1', '#13c2c2', '#52c41a', '#fa8c16', '#eb2f96'];
+
+    function getAvatarUrl(name, id) {
+      const idx = (id || name).split('').reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_COLORS.length;
+      const color = AVATAR_COLORS[idx].replace('#', '');
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${color}&color=fff&size=64&bold=true`;
+    }
+
+    const WORK_OUTPUT = {
+      abnormalDev: '结论：异常。常规任务"【IPKT】评论模块页面改造"和"[ETask] CT050-SR001_IP_TEST, 1 Elements"应有产出说明',
+      abnormalFe: '结论：异常。常规任务"数据推荐/排行榜排序调整"和"[FE] Manager看板筛选项 v2"应有产出说明',
+      abnormalBe: '结论：异常。常规任务"支付回调重试方案"和"[API] order-service 接口联调"应有产出说明',
+      normalDev: '结论：正常。完成代码评审与单元测试各1项，合并 PR #1284、#1287。',
+      ticketIdle: '今日完成：今天没有完成的工单，当前任务：没有当前待处理/进行中的工单',
+      ticketActive: '今日完成：完成工单3项（升级故障×1、配置咨询×2），当前任务：待处理工单2项（P2 活动配置、P3 数据核对）',
+      ticketSre: '今日完成：完成巡检报告与告警规则优化各1项，当前任务：待处理 P1 故障工单 1 项（支付回调超时）',
+      normalCs: '结论：正常。完成其他任务2项：2026-05-17的CS日报。当天未记录客服工单、知识库维护或服务评估处理。',
+      normalFinance: '结论：正常。完成财务月报复核与供应商付款审批各1项。当天未记录异常账务调整。',
+      normalIr: '结论：正常。完成 Q2 IR 报告初稿及投资者沟通纪要。当天未记录披露事项变更。',
+    };
+
+    function getRecentDates(endDateStr, count = 5) {
+      const dates = [];
+      const end = new Date(endDateStr + 'T12:00:00');
+      for (let i = 0; i < count; i++) {
+        const d = new Date(end);
+        d.setDate(d.getDate() - i);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dates.push(`${y}-${m}-${day}`);
+      }
+      return dates;
+    }
+
+    function formatWorkOutput(text, dateStr) {
+      if (!text) return '';
+      const isWarning = /结论[：:]异常/.test(text);
+      const warningClass = isWarning ? ' work-output-warning' : '';
+      const dateLabel = dateStr
+        ? `<span class="work-output-date">${dateStr}</span> `
+        : '';
+
+      const conclusionMatch = text.match(/^(结论[：:][^。]+。)(.*)$/s);
+      if (conclusionMatch) {
+        return `<div class="work-output-item${warningClass}">${dateLabel}<strong>${conclusionMatch[1]}</strong>${conclusionMatch[2]}</div>`;
+      }
+
+      const ticketMatch = text.match(/^(今日完成：)(.*?)(，当前任务：)(.*)$/s);
+      if (ticketMatch) {
+        const isIdle = !isWarning && (text.includes('没有完成') || text.includes('没有当前'));
+        const ticketClass = isWarning ? warningClass : (isIdle ? ' work-output-ticket-idle' : ' work-output-ticket');
+        return `<div class="work-output-item${ticketClass}">${dateLabel}<strong>${ticketMatch[1]}</strong>${ticketMatch[2]}<strong>${ticketMatch[3]}</strong>${ticketMatch[4]}</div>`;
+      }
+
+      return `<div class="work-output-item${warningClass}">${dateLabel}${text}</div>`;
+    }
+
+    function renderWorkOutputHistory(history, selectedDateStr) {
+      const dates = getRecentDates(selectedDateStr);
+      const items = history || [];
+      const len = Math.min(dates.length, items.length);
+
+      return dates.slice(0, len).map((date, i) => {
+        const text = items[items.length - 1 - i];
+        if (!text || text.includes('休息日')) return '';
+        return formatWorkOutput(text, date);
+      }).filter(Boolean).join('');
+    }
+
+    const employeesMay17 = [
+      {
+        id: "e1",
+        name: "邓叶",
+        tag: "finance",
+        department: "management",
+        position: "finance",
+        joinedDate: "2024/12/30",
+        location: "SH",
+        locationLabel: "上海",
+        workOutput: "结论：休息日。",
+        status: "需关注",
+        statusHistory: ["正常", "正常", "正常", "正常", "需关注"],
+        workOutputHistory: [
+          "结论：正常。完成预算调整方案与部门会议纪要。当天未记录异常账务调整。",
+          "结论：审核供应商合同及付款审批各1项。",
+          WORK_OUTPUT.normalFinance,
+          "结论：异常。月度结账相关任务应有产出说明但未填写。",
+          "结论：休息日。",
+        ],
+      },
+      {
+        id: "e2",
+        name: "邬卓洋",
+        tag: "video",
+        department: "tech",
+        position: "video",
+        joinedDate: "2025-10-27",
+        location: "SH",
+        locationLabel: "上海",
+        workOutput: WORK_OUTPUT.abnormalDev,
+        status: "需关注",
+        statusHistory: ["需关注", "需关注", "需关注", "需关注", "需关注"],
+        workOutputHistory: [
+          WORK_OUTPUT.abnormalDev,
+          WORK_OUTPUT.abnormalDev,
+          '结论：正常。完成视频素材剪辑与字幕校对，交付评论模块 demo 初版。',
+          WORK_OUTPUT.abnormalDev,
+          WORK_OUTPUT.abnormalDev,
+        ],
+      },
+      {
+        id: "e3",
+        name: "贺严娇",
+        tag: "fe",
+        department: "tech",
+        position: "fe",
+        joinedDate: "2025/08/08",
+        location: "SH",
+        locationLabel: "上海",
+        workOutput: WORK_OUTPUT.abnormalFe,
+        status: "需关注",
+        statusHistory: ["正常", "正常", "需关注", "正常", "需关注"],
+        workOutputHistory: [
+          WORK_OUTPUT.normalDev,
+          '结论：正常。修复排行榜排序 BUG，完成组件封装。',
+          WORK_OUTPUT.abnormalFe,
+          '结论：正常。优化列表渲染性能，合并 PR #1260。',
+          WORK_OUTPUT.abnormalFe,
+        ],
+      },
+      {
+        id: "e4",
+        name: "王盼",
+        tag: "be",
+        department: "tech",
+        position: "be",
+        joinedDate: "2026-04-23",
+        location: "SH",
+        locationLabel: "上海",
+        workOutput: WORK_OUTPUT.abnormalBe,
+        status: "需关注",
+        statusHistory: ["正常", "正常", "正常", "正常", "需关注"],
+        workOutputHistory: [
+          '结论：正常。完成 API 文档与数据库索引优化。',
+          '结论：正常。参与代码评审与接口联调。',
+          WORK_OUTPUT.normalDev,
+          '结论：正常。完成 order-service 接口联调。',
+          WORK_OUTPUT.abnormalBe,
+        ],
+      },
+      {
+        id: "e5",
+        name: "张及琛",
+        tag: "be",
+        department: "tech",
+        position: "be",
+        joinedDate: "2024/09/02",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: WORK_OUTPUT.ticketSre,
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          WORK_OUTPUT.ticketActive,
+          WORK_OUTPUT.ticketSre,
+          '结论：正常。完成需求评审与接口开发。',
+          WORK_OUTPUT.ticketIdle,
+          WORK_OUTPUT.ticketSre,
+        ],
+      },
+      {
+        id: "e6",
+        name: "杨智尧",
+        tag: "IR",
+        department: "management",
+        position: "IR",
+        joinedDate: "2024/01/12",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: WORK_OUTPUT.normalIr,
+        status: "正常",
+        statusHistory: ["正常", "需关注", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。完成投资者沟通与路演材料更新。',
+          '结论：异常。请假日无产出说明。',
+          '结论：正常。撰写 Q2 IR 报告章节草稿。',
+          WORK_OUTPUT.normalIr,
+          WORK_OUTPUT.normalIr,
+        ],
+      },
+      {
+        id: "e7",
+        name: "陈炜",
+        tag: "mlops",
+        department: "tech",
+        position: "mlops",
+        joinedDate: "2024/09/23",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: '结论：正常。完成模型部署脚本优化与监控配置更新。',
+        status: "正常",
+        statusHistory: ["需关注", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：异常。请假日无产出说明。',
+          '结论：正常。完成部署脚本优化。',
+          '结论：正常。更新 Grafana 监控面板与告警阈值。',
+          WORK_OUTPUT.normalDev,
+          '结论：正常。完成模型部署脚本优化与监控配置更新。',
+        ],
+      },
+      {
+        id: "e8",
+        name: "郭晓芳",
+        tag: "cs",
+        department: "operation",
+        position: "cs",
+        joinedDate: "2024/09/24",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: WORK_OUTPUT.normalCs,
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。处理客服工单5项（咨询×3、投诉×2），完成知识库条目更新2条。',
+          '结论：正常。完成服务评估回访3通，更新 FAQ 文档1篇。',
+          WORK_OUTPUT.normalCs.replace('2026-05-17', '2026-05-15'),
+          '结论：正常。完成当日 CS 日报，记录工单处理与服务评估各1项。',
+          WORK_OUTPUT.normalCs,
+        ],
+      },
+      {
+        id: "e9",
+        name: "赵子琪",
+        tag: "qa",
+        department: "tech",
+        position: "qa",
+        joinedDate: "2024/10/28",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: WORK_OUTPUT.ticketIdle,
+        status: "需关注",
+        statusHistory: ["正常", "需关注", "需关注", "正常", "需关注"],
+        workOutputHistory: [
+          WORK_OUTPUT.ticketActive,
+          WORK_OUTPUT.ticketIdle,
+          WORK_OUTPUT.ticketIdle,
+          '今日完成：完成用例评审与回归测试各1项，当前任务：待处理测试工单 1 项（支付模块）',
+          WORK_OUTPUT.ticketIdle,
+        ],
+      },
+      {
+        id: "e10",
+        name: "庞文飞",
+        tag: "sre",
+        department: "tech",
+        position: "sre",
+        joinedDate: "2024/12/03",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: WORK_OUTPUT.ticketSre,
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '今日完成：完成日常巡检与容量评估，当前任务：无待处理工单',
+          WORK_OUTPUT.ticketSre,
+          WORK_OUTPUT.ticketActive,
+          '今日完成：完成故障响应与告警规则优化，当前任务：待处理 P2 容量评估 1 项',
+          WORK_OUTPUT.ticketSre,
+        ],
+      },
+      {
+        id: "e11",
+        name: "王凯旋",
+        tag: "be",
+        department: "tech",
+        position: "be",
+        joinedDate: "2025-11-03",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: '结论：正常。完成支付回调重试方案设计与实现。',
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。完成方案设计与技术评审。',
+          '结论：正常。完成代码实现与单元测试。',
+          WORK_OUTPUT.normalDev,
+          '结论：正常。完成测试验证与文档撰写。',
+          '结论：正常。完成支付回调重试方案设计与实现。',
+        ],
+      },
+      {
+        id: "e12",
+        name: "郑为鹏",
+        tag: "",
+        department: "tech",
+        position: "",
+        joinedDate: "",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: '结论：异常。常规任务"通用日报"和"[SRE] 系统维护巡检"应有产出说明',
+        status: "需关注",
+        statusHistory: ["需关注", "需关注", "正常", "正常", "需关注"],
+        workOutputHistory: [
+          '结论：异常。请假日无产出说明。',
+          WORK_OUTPUT.abnormalDev.replace('【IPKT】评论模块页面改造', '通用日报').replace('[ETask] CT050-SR001_IP_TEST, 1 Elements', '[SRE] 系统维护巡检'),
+          '结论：正常。完成巡检报告与系统维护。',
+          WORK_OUTPUT.ticketSre,
+          '结论：异常。常规任务"通用日报"和"[SRE] 系统维护巡检"应有产出说明',
+        ],
+      },
+    ];
+
+    const employeesMay18 = [
+      {
+        id: "e1",
+        name: "Grace Lee",
+        tag: "pdm",
+        department: "management",
+        position: "fin",
+        joinedDate: "2018-03-10",
+        location: "SH",
+        locationLabel: "上海",
+        workOutput: '结论：正常。完成里程碑风险复盘及项目进度跟踪。当天未记录阻塞项升级。',
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。完成周会汇报与需求评审。',
+          '结论：正常。完成方案设计与进度跟踪。',
+          '结论：正常。完成里程碑复盘及风险清单更新。',
+          WORK_OUTPUT.normalFinance,
+          '结论：正常。完成里程碑风险复盘及项目进度跟踪。当天未记录阻塞项升级。',
+        ],
+      },
+      {
+        id: "e2",
+        name: "Alex Chen",
+        tag: "ceo",
+        department: "executive",
+        position: "hr",
+        joinedDate: "2017-01-01",
+        location: "SH",
+        locationLabel: "上海",
+        workOutput: WORK_OUTPUT.normalIr,
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。参与战略会议与预算审批。',
+          '结论：正常。完成高管面谈与产品组合评审。',
+          WORK_OUTPUT.normalIr,
+          '结论：正常。确认产品组合优先级与资源分配。',
+          WORK_OUTPUT.normalIr,
+        ],
+      },
+      {
+        id: "e3",
+        name: "Anna Garcia",
+        tag: "psm",
+        department: "operation",
+        position: "qa",
+        joinedDate: "2025-12-12",
+        location: "NYC",
+        locationLabel: "纽约",
+        workOutput: WORK_OUTPUT.ticketActive,
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          WORK_OUTPUT.ticketActive,
+          '今日完成：完成客户沟通与问题排查各2项，当前任务：待处理升级工单 1 项',
+          WORK_OUTPUT.ticketSre,
+          WORK_OUTPUT.ticketIdle,
+          WORK_OUTPUT.ticketActive,
+        ],
+      },
+      {
+        id: "e4",
+        name: "David Zhou",
+        tag: "be",
+        department: "tech",
+        position: "nlp",
+        joinedDate: "2022-04-18",
+        location: "SH",
+        locationLabel: "上海",
+        workOutput: WORK_OUTPUT.abnormalBe,
+        status: "需关注",
+        statusHistory: ["正常", "正常", "正常", "正常", "需关注"],
+        workOutputHistory: [
+          WORK_OUTPUT.normalDev,
+          '结论：正常。完成 NLP 模型微调与接口开发。',
+          WORK_OUTPUT.abnormalBe.replace('支付回调重试方案', '意图识别模块 v3').replace('order-service 接口联调', 'NLP pipeline 部署'),
+          '结论：正常。完成测试验证与文档撰写。',
+          WORK_OUTPUT.abnormalBe.replace('支付回调重试方案', '意图识别模块 v3').replace('order-service 接口联调', 'NLP pipeline 部署'),
+        ],
+      },
+      {
+        id: "e5",
+        name: "Diana Kim",
+        tag: "pm",
+        department: "cp",
+        position: "hr",
+        joinedDate: "2026-02-20",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: '结论：正常。更新合作伙伴发布清单并完成法务对接。',
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。完成合同审核与会议安排。',
+          WORK_OUTPUT.normalFinance,
+          '结论：正常。更新合作伙伴发布清单。',
+          '结论：正常。完成法务对接与发布清单确认。',
+          '结论：正常。更新合作伙伴发布清单并完成法务对接。',
+        ],
+      },
+      {
+        id: "e6",
+        name: "Hannah Qin",
+        tag: "fe",
+        department: "tech",
+        position: "nlp",
+        joinedDate: "2026-05-07",
+        location: "SH",
+        locationLabel: "上海",
+        workOutput: WORK_OUTPUT.abnormalFe,
+        status: "需关注",
+        statusHistory: ["正常", "正常", "正常", "正常", "需关注"],
+        workOutputHistory: [
+          '结论：正常。完成组件开发与需求确认。',
+          '结论：正常。完成 UI 评审与交互优化。',
+          WORK_OUTPUT.abnormalFe,
+          '结论：正常。交付 Manager 看板筛选项初版。',
+          WORK_OUTPUT.abnormalFe,
+        ],
+      },
+      {
+        id: "e7",
+        name: "Iris Chen",
+        tag: "md",
+        department: "creative",
+        position: "illust",
+        joinedDate: "2026-05-05",
+        location: "TW",
+        locationLabel: "台北",
+        workOutput: '结论：正常。交付商店预览动画初稿并完成内部评审。',
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。完成动画设计与素材整理。',
+          '结论：正常。完成初稿制作。',
+          '结论：正常。完成内部评审与反馈修改。',
+          WORK_OUTPUT.abnormalDev.replace('【IPKT】评论模块页面改造', '商店预览动画终稿').replace('[ETask] CT050-SR001_IP_TEST, 1 Elements', '[Design] 主视觉延展稿'),
+          '结论：正常。交付商店预览动画初稿并完成内部评审。',
+        ],
+      },
+      {
+        id: "e8",
+        name: "Kevin Lee",
+        tag: "liveops",
+        department: "operation",
+        position: "qa",
+        joinedDate: "2019-06-24",
+        location: "TW",
+        locationLabel: "台北",
+        workOutput: WORK_OUTPUT.ticketActive,
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          WORK_OUTPUT.ticketIdle,
+          '今日完成：完成活动策划与数据核对，当前任务：待处理活动配置工单 1 项',
+          WORK_OUTPUT.ticketActive,
+          '今日完成：完成报告撰写与奖励稽核，当前任务：无待处理工单',
+          WORK_OUTPUT.ticketActive,
+        ],
+      },
+      {
+        id: "e9",
+        name: "Mika Sato",
+        tag: "art",
+        department: "creative",
+        position: "illust",
+        joinedDate: "2021-11-03",
+        location: "TYO",
+        locationLabel: "东京",
+        workOutput: '结论：正常。完成发布用主视觉评审及本地化调整。',
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。完成设计评审与反馈收集。',
+          '结论：正常。完成修改确认。',
+          WORK_OUTPUT.normalDev.replace('代码评审与单元测试', '主视觉方案定稿').replace('PR #1284、#1287', '本地化素材包'),
+          '结论：正常。完成本地化调整。',
+          '结论：正常。完成发布用主视觉评审及本地化调整。',
+        ],
+      },
+      {
+        id: "e10",
+        name: "Sarah Brown",
+        tag: "cs",
+        department: "operation",
+        position: "cs",
+        joinedDate: "2026-04-16",
+        location: "NYC",
+        locationLabel: "纽约",
+        workOutput: WORK_OUTPUT.normalCs.replace('2026-05-17', '2026-05-18'),
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。处理客服工单3项，完成知识库维护1条。',
+          WORK_OUTPUT.normalCs.replace('2026-05-17', '2026-05-16'),
+          WORK_OUTPUT.normalCs.replace('2026-05-17', '2026-05-18'),
+          '结论：正常。完成服务评估回访2通。',
+          WORK_OUTPUT.normalCs.replace('2026-05-17', '2026-05-18'),
+        ],
+      },
+      {
+        id: "e11",
+        name: "Tom Wilson",
+        tag: "growth",
+        department: "marketing",
+        position: "fin",
+        joinedDate: "2020-07-15",
+        location: "NYC",
+        locationLabel: "纽约",
+        workOutput: '结论：正常。完成渠道 ROAS 分析与预算评估报告。',
+        status: "正常",
+        statusHistory: ["正常", "正常", "正常", "正常", "正常"],
+        workOutputHistory: [
+          '结论：正常。完成数据收集与效果分析。',
+          WORK_OUTPUT.normalFinance.replace('财务月报', '投放数据').replace('供应商付款审批', '渠道效果评估'),
+          '结论：正常。完成预算评估与方案讨论。',
+          WORK_OUTPUT.ticketIdle,
+          '结论：正常。完成渠道 ROAS 分析与预算评估报告。',
+        ],
+      },
+    ];
+
+    const defaultDate = '2026-05-17';
+    document.getElementById('dateInput').value = defaultDate;
+
+    let filters = {
+      department: 'all',
+      position: 'all',
+      location: 'all',
+      nameSearch: '',
+    };
+
+    document.getElementById('dateInput').addEventListener('change', renderTable);
+
+    document.getElementById('departmentFilter').addEventListener('change', (e) => {
+      filters.department = e.target.value;
+      renderTable();
+    });
+
+    document.getElementById('positionFilter').addEventListener('change', (e) => {
+      filters.position = e.target.value;
+      renderTable();
+    });
+
+    document.getElementById('locationFilter').addEventListener('change', (e) => {
+      filters.location = e.target.value;
+      renderTable();
+    });
+
+    document.getElementById('nameSearch').addEventListener('input', (e) => {
+      filters.nameSearch = e.target.value.trim().toLowerCase();
+      renderTable();
+    });
+
+    function getEmployeesByDate(dateStr) {
+      if (dateStr === '2026-05-17') {
+        return employeesMay17;
+      }
+      return employeesMay18;
+    }
+
+    function filterEmployees() {
+      const dateStr = document.getElementById('dateInput').value;
+      let filtered = [...getEmployeesByDate(dateStr)];
+
+      if (filters.department !== 'all') {
+        filtered = filtered.filter(e => e.department === filters.department);
+      }
+
+      if (filters.position !== 'all') {
+        filtered = filtered.filter(e => e.position === filters.position);
+      }
+
+      if (filters.location !== 'all') {
+        filtered = filtered.filter(e => e.location === filters.location);
+      }
+
+      if (filters.nameSearch) {
+        filtered = filtered.filter(e =>
+          e.name.toLowerCase().includes(filters.nameSearch) ||
+          (e.tag && e.tag.toLowerCase().includes(filters.nameSearch))
+        );
+      }
+
+      filtered.sort((a, b) => {
+        if (a.status === '需关注' && b.status !== '需关注') return -1;
+        if (a.status !== '需关注' && b.status === '需关注') return 1;
+        return 0;
+      });
+
+      return filtered;
+    }
+
+    const warningIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>`;
+    const infoIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 11v5M12 8h.01"/></svg>`;
+
+    function renderTable() {
+      const tbody = document.getElementById('employeeTableBody');
+      const filtered = filterEmployees();
+
+      const selectedDate = document.getElementById('dateInput').value;
+
+      tbody.innerHTML = filtered.map(emp => {
+        const isWarning = emp.status === '需关注';
+        const workItems = renderWorkOutputHistory(emp.workOutputHistory, selectedDate);
+
+        return `
+        <tr>
+          <td>
+            <div class="name-cell">
+              <img class="employee-avatar" src="${getAvatarUrl(emp.name, emp.id)}" alt="${emp.name}">
+              <div class="name-info">
+                <span class="employee-name">${emp.name}</span>
+                ${emp.tag ? `<span class="employee-tag">${emp.tag}</span>` : ''}
+              </div>
+            </div>
+          </td>
+          <td class="cell-muted">${emp.department}</td>
+          <td class="cell-muted">${emp.position}</td>
+          <td class="cell-muted">${emp.joinedDate}</td>
+          <td class="cell-muted">${emp.location}</td>
+          <td>
+            <div class="work-output">${workItems}</div>
+          </td>
+          <td class="col-status">
+            ${isWarning ? `<span class="status-icon warning">${warningIcon}</span>` : ''}
+          </td>
+          <td class="col-detail">
+            <button class="detail-btn" type="button" title="View detail">${infoIcon}</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>

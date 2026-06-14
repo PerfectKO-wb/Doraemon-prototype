@@ -1,0 +1,4174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAP — 消息系统 (Dev)</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── DS3 DESIGN TOKENS (from source) ── */
+:root{
+  --ds3-bg:#f0f4f8;
+  --ds3-text-primary:#000000d9;
+  --ds3-text-secondary:#0000008c;
+  --ds3-text-tertiary:#00000059;
+  --ds3-accent-blue:#007aff;
+  --ds3-accent-purple:#af52de;
+  --ds3-glass-bg:#ffffff73;
+  --ds3-glass-card:#ffffff59;
+  --ds3-glass-border:#ffffffb3;
+  --ds3-glass-border-hover:#ffffffe6;
+  --ds3-glass-panel:#fff9;
+  --ds3-success:#34c759;
+  --ds3-warning:#ff9f0a;
+  --ds3-error:#ff3b30;
+  --ds3-glass-shadow:0 8px 32px #1f26871f;
+  --ds3-glass-inset:inset 0 1px 0 #fff9;
+}
+
+html,body{width:100%;height:100%;overflow:hidden;}
+
+/* ── ROOT ── */
+.ds3-root{
+  width:100vw;height:100vh;
+  color:var(--ds3-text-primary);
+  background:linear-gradient(160deg,#f0f4f8 0%,#e8edf5 50%,#f5f0fa 100%);
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;
+  position:relative;overflow:hidden;
+}
+
+/* ── NEBULA CANVAS ── */
+.ds3-nebula-canvas{
+  z-index:0;pointer-events:none;
+  width:100%;height:100%;
+  position:fixed;top:0;left:0;
+}
+
+/* ── UI LAYER ── */
+.ds3-ui-layer{
+  z-index:1;width:100%;height:100%;
+  display:flex;flex-direction:column;position:relative;
+}
+
+/* ── SCROLLABLE CONTENT ── */
+.ds3-scrollbar{
+  width:100%;height:100%;overflow-y:auto;
+  padding:40px 40px 100px;
+}
+.ds3-scrollbar::-webkit-scrollbar{width:4px;height:4px;}
+.ds3-scrollbar::-webkit-scrollbar-track{background:transparent;}
+.ds3-scrollbar::-webkit-scrollbar-thumb{background:#0000001a;border-radius:2px;}
+.ds3-scrollbar::-webkit-scrollbar-thumb:hover{background:#0003;}
+.ds3-content{max-width:560px;margin:0 auto;}
+
+/* ── LIQUID GLASS (base class) ── */
+.lg{
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  isolation:isolate;
+  background:#ffffff40;
+  border:1px solid #ffffff80;
+  border-radius:20px;
+  position:relative;
+  box-shadow:0 8px 32px #1f26871a, inset 0 1px #ffffff80;
+}
+.lg::before{
+  content:"";z-index:0;border-radius:inherit;pointer-events:none;
+  background:#ffffff0d;position:absolute;inset:0;
+  box-shadow:inset 0 0 20px -5px #fff6;
+}
+.lg-hover:hover{
+  background:#ffffff59;border-color:#ffffffa6;
+  box-shadow:0 12px 40px #1f268726, inset 0 1px #fff9;
+}
+.lg-active{
+  border-color:#007aff40;
+  box-shadow:0 12px 48px #007aff1f, 0 8px 32px #1f26871a, inset 0 1px #fff9;
+}
+
+/* ── ROLE BADGE (user switcher) ── */
+.ds3-role-badge{
+  position:absolute;top:16px;left:16px;z-index:100;
+}
+.ds3-role-badge summary{
+  list-style:none;display:flex;align-items:center;gap:8px;
+  padding:6px 14px 6px 6px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.5);
+  background:rgba(255,255,255,.3);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:0 4px 16px rgba(31,38,135,.06), inset 0 1px 0 rgba(255,255,255,.5);
+  color:rgba(0,0,0,.8);cursor:pointer;
+  font-size:13px;font-weight:500;
+  touch-action:manipulation;
+  transition:all .2s;
+}
+.ds3-role-badge summary::-webkit-details-marker{display:none;}
+.ds3-role-badge summary:hover{
+  background:rgba(255,255,255,.45);
+  border-color:rgba(255,255,255,.7);
+}
+.ds3-role-badge[open] summary{
+  background:rgba(255,255,255,.5);
+}
+.badge-avatar{
+  width:28px;height:28px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+}
+.badge-info{display:flex;flex-direction:column;line-height:1.3;}
+.badge-name{font-size:13px;font-weight:500;}
+.badge-role{font-size:10px;opacity:.45;font-weight:400;}
+.badge-arrow{font-size:10px;opacity:.4;}
+
+/* Dropdown */
+.ds3-role-dropdown{
+  position:absolute;top:44px;left:0;
+  padding:4px;border-radius:16px;
+  background:rgba(255,255,255,.65);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:0 8px 32px rgba(31,38,135,.1), inset 0 1px 0 rgba(255,255,255,.5);
+  min-width:220px;z-index:1;
+}
+.drop-link{
+  display:flex;align-items:center;gap:8px;width:100%;
+  padding:8px 12px;border:none;border-radius:10px;
+  background:transparent;color:rgba(0,0,0,.7);
+  cursor:pointer;font-size:13px;text-align:left;font-weight:500;
+  text-decoration:none;box-sizing:border-box;
+  transition:background .12s;
+}
+.drop-link:hover{background:rgba(0,0,0,.05);}
+.drop-link.active{background:#ff2d5512;color:#ff2d55;}
+.drop-av{
+  width:24px;height:24px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;flex-shrink:0;
+}
+.drop-meta{flex:1;}
+.drop-meta-name{font-weight:600;font-size:13px;}
+.drop-meta-role{font-size:11px;opacity:.45;}
+.drop-uid{font-size:10px;color:rgba(0,0,0,.25);font-weight:500;}
+
+/* ── DATE HERO ── */
+.date-block{margin-bottom:22px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;}
+.date-main{font-size:32px;font-weight:800;color:rgba(0,0,0,.85);line-height:1.2;}
+.date-day{font-size:14px;font-weight:500;color:rgba(0,0,0,.35);margin-top:4px;}
+
+/* ── SECTION LABEL ── */
+.sec-label{
+  font-size:11px;font-weight:700;
+  color:rgba(0,0,0,.35);
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:10px;padding-left:2px;
+}
+
+/* ── ALERTS SECTION ── */
+.alerts-sec-label{
+  display:flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:700;
+  color:#c0392b;
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:10px;padding-left:2px;
+}
+.alerts-pulse-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#ff3b30;flex-shrink:0;
+  box-shadow:0 0 0 0 rgba(255,59,48,.5);
+  animation:alertDotPulse 1.8s ease-in-out infinite;
+}
+@keyframes alertDotPulse{
+  0%{box-shadow:0 0 0 0 rgba(255,59,48,.5);}
+  60%{box-shadow:0 0 0 6px rgba(255,59,48,0);}
+  100%{box-shadow:0 0 0 0 rgba(255,59,48,0);}
+}
+
+/* ── QUICK PICK COLLAPSED CARD ── */
+.qp-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:18px;
+  padding:14px 18px;
+  cursor:pointer;
+  transition:all .2s ease;
+  box-shadow:0 8px 32px rgba(31,38,135,.08), inset 0 1px 0 rgba(255,255,255,.5);
+  margin-bottom:8px;
+}
+.qp-card:hover{
+  background:rgba(255,255,255,.7);
+  box-shadow:0 12px 40px rgba(31,38,135,.12), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.qp-row{display:flex;align-items:center;gap:10px;}
+.qp-left{flex:1;min-width:0;}
+.qp-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:700;color:rgba(0,0,0,.85);line-height:1.4;
+}
+.qp-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:20px;padding:0 7px;
+  border-radius:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;
+  background:rgba(0,122,255,.14);color:#005ec4;border:1px solid rgba(0,122,255,.25);
+}
+.qp-sub{margin-top:4px;font-size:11.5px;color:rgba(0,0,0,.5);line-height:1.5;}
+.qp-chevron{
+  width:26px;height:26px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(0,0,0,.45);transition:transform .22s ease;flex-shrink:0;
+}
+.qp-chevron.open{transform:rotate(180deg);}
+
+/* Expanded Quick Pick — all pairs shown at once */
+.qp-expanded{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:18px;
+  padding:16px 16px 20px;
+  box-shadow:0 8px 32px rgba(31,38,135,.08), inset 0 1px 0 rgba(255,255,255,.5);
+  margin-bottom:8px;display:none;
+}
+.qp-expanded.show{display:block;}
+
+.qp-pairs-list{display:flex;flex-direction:column;gap:20px;}
+
+/* Per-pair block */
+.qp-pair{}
+.qp-pair-q{
+  font-size:13px;font-weight:500;color:rgba(0,0,0,.65);
+  margin-bottom:10px;padding-left:2px;
+}
+
+/* Image option row */
+.qp-img-opts{display:flex;gap:10px;}
+.qp-img-card{
+  flex:1;cursor:pointer;
+  border-radius:12px;overflow:hidden;
+  border:2px solid transparent;
+  transition:border-color .18s, transform .15s, box-shadow .18s;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.qp-img-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,0,0,.14);
+}
+.qp-img-card.selected{
+  border-color:#007aff;
+  box-shadow:0 4px 16px rgba(0,122,255,.25);
+}
+.qp-img-card.dimmed{opacity:.45;}
+
+/* Thumbnail */
+.qp-img-thumb{
+  width:100%;aspect-ratio:3/2;
+  border-radius:10px 10px 0 0;
+  overflow:hidden;position:relative;
+}
+.qp-img-thumb img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  border-radius:10px 10px 0 0;
+}
+/* Fallback gradient (CSS only) */
+.qp-img-thumb.g1a{background:linear-gradient(135deg,#ff6b9d 0%,#c94b4b 40%,#4b1248 100%);}
+.qp-img-thumb.g1b{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);}
+.qp-img-thumb.g2a{background:linear-gradient(135deg,#1c0a00 0%,#3d1a00 40%,#c68642 100%);}
+.qp-img-thumb.g2b{background:linear-gradient(135deg,#0a0a2e 0%,#1a1a6e 40%,#00d4ff 100%);}
+.qp-img-thumb.g3a{background:linear-gradient(135deg,#1a0030 0%,#3d0060 50%,#6b00a8 100%);}
+.qp-img-thumb.g3b{background:linear-gradient(135deg,#1a3d1a 0%,#2d6b2d 50%,#4caf50 100%);}
+.qp-img-thumb.g4a{background:linear-gradient(135deg,#05001a 0%,#0a0535 40%,#1a0a5e 100%);}
+.qp-img-thumb.g4b{background:linear-gradient(135deg,#ffe4f0 0%,#ffd6e7 40%,#c8f0c8 100%);}
+
+/* Thumb overlay content (simulated) */
+.qp-thumb-inner{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:10px;
+}
+.qp-thumb-title{
+  font-size:13px;font-weight:800;color:#fff;
+  text-align:center;line-height:1.3;
+  text-shadow:0 1px 4px rgba(0,0,0,.6);
+}
+.qp-thumb-title.dark{color:rgba(255,255,255,.9);}
+.qp-thumb-title.kawaii{color:#5a3a6e;font-size:12px;}
+
+/* A / B label */
+.qp-img-lbl{
+  text-align:center;padding:7px 0 8px;
+  font-size:12px;font-weight:600;color:rgba(0,0,0,.4);
+  background:#fff;
+  transition:color .15s;
+}
+.qp-img-card.selected .qp-img-lbl{color:#007aff;}
+
+/* Video card thumb */
+.qp-video-thumb{
+  width:100%;aspect-ratio:3/2;
+  border-radius:10px 10px 0 0;
+  overflow:hidden;position:relative;
+  background:#111;
+}
+.qp-video-thumb video{
+  width:100%;height:100%;object-fit:cover;display:block;
+  border-radius:10px 10px 0 0;
+  pointer-events:none;
+}
+.qp-video-overlay{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.3);
+  transition:background .2s;
+}
+.qp-img-card:hover .qp-video-overlay{background:rgba(0,0,0,.1);}
+.qp-play-icon{
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,.25);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .2s;
+}
+.qp-img-card:hover .qp-play-icon{opacity:0;}
+
+/* Carousel nav arrows */
+.qp-carousel-prev,.qp-carousel-next{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:24px;height:24px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.45);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .15s;z-index:3;
+}
+.qp-carousel-prev{left:7px;}
+.qp-carousel-next{right:7px;}
+.qp-img-card:hover .qp-carousel-prev,
+.qp-img-card:hover .qp-carousel-next{opacity:1;}
+/* hide nav when only 1 video */
+.qp-carousel-prev[hidden],.qp-carousel-next[hidden]{display:none!important;}
+
+/* Carousel dots */
+.qp-carousel-dots{
+  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  display:flex;gap:4px;z-index:3;
+}
+.qp-carousel-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:rgba(255,255,255,.45);
+  transition:background .15s, transform .15s;
+  cursor:pointer;
+}
+.qp-carousel-dot.active{background:#fff;transform:scale(1.25);}
+
+/* Play button (bottom-right) */
+.qp-play-btn{
+  position:absolute;bottom:7px;right:7px;
+  width:26px;height:26px;border-radius:8px;
+  background:rgba(0,0,0,.45);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;opacity:0;transition:opacity .15s;
+  z-index:2;
+}
+.qp-img-card:hover .qp-play-btn{opacity:1;}
+
+/* Video player modal */
+.qp-video-modal{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.82);
+  align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);
+}
+.qp-video-modal.open{display:flex;}
+.qp-vm-box{
+  position:relative;border-radius:14px;overflow:hidden;
+  max-width:560px;width:92%;
+  background:#1a1a1a;
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
+}
+.qp-vm-box video{width:100%;display:block;max-height:55vh;background:#000;}
+.qp-vm-close{
+  position:absolute;top:10px;right:10px;
+  width:30px;height:30px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.55);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;z-index:2;
+}
+/* Video list (no thumbnails) */
+.qp-vm-list{
+  padding:10px 14px 14px;
+  display:flex;flex-direction:column;gap:4px;
+  max-height:180px;overflow-y:auto;
+}
+.qp-vm-list-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;
+  transition:background .15s;
+  color:rgba(255,255,255,.65);font-size:13px;
+}
+.qp-vm-list-item:hover{background:rgba(255,255,255,.08);}
+.qp-vm-list-item.active{
+  background:rgba(255,255,255,.12);
+  color:#fff;font-weight:600;
+}
+.qp-vm-list-num{
+  flex-shrink:0;width:18px;height:18px;border-radius:50%;
+  background:rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:rgba(255,255,255,.5);
+}
+.qp-vm-list-item.active .qp-vm-list-num{
+  background:#007aff;color:#fff;
+}
+.qp-vm-now-playing{
+  display:flex;align-items:center;gap:5px;
+  padding:0 14px 8px;font-size:11px;color:rgba(255,255,255,.4);
+}
+.qp-vm-now-playing-dot{
+  width:6px;height:6px;border-radius:50%;background:#007aff;
+  animation:nmPulse 1.2s ease-in-out infinite;
+}
+@keyframes nmPulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* Zoom button on image thumb */
+.qp-zoom-btn{
+  position:absolute;bottom:7px;right:7px;
+  width:26px;height:26px;border-radius:8px;
+  background:rgba(0,0,0,.45);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;line-height:1;
+  opacity:0;transition:opacity .15s;
+  z-index:2;
+}
+.qp-img-card:hover .qp-zoom-btn{opacity:1;}
+
+/* Lightbox */
+.qp-lightbox{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.75);
+  align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.qp-lightbox.open{display:flex;}
+.qp-lb-box{
+  position:relative;border-radius:16px;overflow:hidden;
+  max-width:480px;width:90%;
+  box-shadow:0 24px 80px rgba(0,0,0,.5);
+}
+.qp-lb-thumb{
+  width:100%;aspect-ratio:3/2;
+}
+.qp-lb-caption{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:12px 16px;
+  background:linear-gradient(transparent,rgba(0,0,0,.65));
+  color:#fff;font-size:14px;font-weight:700;text-align:center;
+}
+.qp-lb-close{
+  position:absolute;top:10px;right:10px;
+  width:30px;height:30px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.5);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;line-height:1;
+}
+
+.qp-done{text-align:center;padding:20px 0 8px;}
+.qp-done-icon{font-size:32px;margin-bottom:8px;}
+.qp-done-title{font-size:16px;font-weight:700;color:rgba(0,0,0,.8);margin-bottom:4px;}
+.qp-done-sub{font-size:12px;color:rgba(0,0,0,.4);}
+
+/* ── SECTION ── */
+.section{margin-bottom:16px;}
+
+/* ── GENERIC GLASS CARD ── */
+.g-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:16px;padding:14px 16px;
+  box-shadow:0 4px 16px rgba(31,38,135,.07), inset 0 1px 0 rgba(255,255,255,.5);
+  margin-bottom:8px;
+  cursor:pointer;transition:all .18s;
+}
+.g-card:hover{
+  background:rgba(255,255,255,.7);
+  box-shadow:0 8px 28px rgba(31,38,135,.1), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.g-card.doing{
+  background:rgba(255,59,48,.06);
+  border-color:rgba(255,59,48,.2);
+  box-shadow:0 4px 16px rgba(255,59,48,.08), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.g-card.overdue{}
+.g-card.urgent-border{
+  border-left:2.5px solid rgba(255,59,48,.6);
+}
+
+/* ── TASK ELEMENTS ── */
+.card-title{font-size:14px;font-weight:600;color:rgba(0,0,0,.85);margin-bottom:6px;line-height:1.4;}
+.card-desc{font-size:12px;color:rgba(0,0,0,.5);line-height:1.5;}
+.ddl-row{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;color:#ff3b30;
+  margin-bottom:8px;
+}
+.ddl-dot{width:5px;height:5px;border-radius:50%;background:#ff3b30;flex-shrink:0;}
+
+/* ── DOING CARD (part 1: compact task card only) ── */
+.doing-card-desc{
+  font-size:13px;color:rgba(0,0,0,.55);line-height:1.6;margin-top:6px;
+}
+
+/* ── DOING BODY TEXT (part 2: plain text outside card) ── */
+.doing-body{
+  padding:14px 2px 10px;
+  font-size:14px;color:rgba(0,0,0,.75);line-height:1.75;
+}
+.doing-body p{margin-bottom:10px;}
+.doing-body p:last-child{margin-bottom:0;}
+.doing-body .doing-warn{
+  display:flex;align-items:flex-start;gap:6px;
+  color:rgba(0,0,0,.6);font-size:13.5px;
+}
+.doing-body .doing-warn-icon{flex-shrink:0;margin-top:1px;}
+.doing-body ol{
+  margin:8px 0 8px 18px;display:flex;flex-direction:column;gap:5px;
+}
+.doing-body ol li{font-size:13.5px;color:rgba(0,0,0,.7);line-height:1.65;}
+.doing-body .doing-cta{
+  font-size:13.5px;color:rgba(0,0,0,.5);margin-top:10px;
+}
+
+/* ── DOING INPUT (part 3: standalone input bar) ── */
+.doing-input{
+  background:rgba(255,255,255,.62);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:14px;padding:11px 14px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 4px 16px rgba(31,38,135,.07), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.doing-input input{
+  flex:1;border:none;outline:none;background:transparent;
+  font-size:13px;color:rgba(0,0,0,.7);font-family:inherit;
+}
+.doing-input input::placeholder{color:rgba(0,0,0,.28);}
+.doing-input-icon{color:rgba(0,0,0,.3);flex-shrink:0;display:flex;align-items:center;}
+.doing-input-clear{
+  font-size:15px;color:rgba(0,0,0,.25);flex-shrink:0;
+  cursor:pointer;transition:color .15s;line-height:1;
+  border:none;background:transparent;padding:0;font-family:inherit;
+}
+.doing-input-clear:hover{color:rgba(0,0,0,.5);}
+.doing-input-send{
+  width:28px;height:28px;border-radius:8px;border:none;
+  background:rgba(0,0,0,.08);color:rgba(0,0,0,.45);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .15s;
+}
+.doing-input-send:hover{background:rgba(0,122,255,.15);color:#007aff;}
+.doing-input-send.ready{background:#007aff;color:#fff;}
+
+/* ── TODO HEADER ── */
+.todo-hdr{
+  display:flex;align-items:center;gap:6px;
+  margin-bottom:8px;
+}
+.todo-count{font-size:11px;font-weight:700;color:rgba(0,0,0,.35);letter-spacing:.5px;}
+.todo-overdue{font-size:11px;font-weight:700;color:#ff3b30;letter-spacing:.5px;}
+
+/* ── URGENT COLLAPSE ENTRY ── */
+/* ── COLLAPSED ENTRY CARD ── */
+.urgent-entry-card{
+  background:rgba(211,47,47,.08);
+  border:1.5px solid #d32f2f;
+  border-radius:14px;
+  padding:13px 16px;
+  cursor:pointer;
+  transition:all .2s ease;
+  box-shadow:0 4px 20px rgba(211,47,47,.15);
+  margin-bottom:8px;
+  user-select:none;
+}
+.urgent-entry-card:hover{
+  background:rgba(211,47,47,.13);
+  box-shadow:0 6px 28px rgba(211,47,47,.22);
+}
+.urgent-entry-row{display:flex;align-items:center;gap:10px;}
+.urgent-entry-left{flex:1;min-width:0;}
+.urgent-entry-title{
+  display:flex;align-items:center;gap:9px;
+  font-size:13.5px;font-weight:800;color:#b71c1c;line-height:1.4;
+}
+.urgent-entry-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:20px;padding:0 7px;
+  border-radius:10px;font-size:11px;font-weight:800;
+  background:#d32f2f;color:#fff;border:none;
+  animation:badgePulse 1.6s ease-in-out infinite;
+}
+@keyframes badgePulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(211,47,47,.6);}
+  50%{box-shadow:0 0 0 5px rgba(211,47,47,0);}
+}
+.urgent-entry-icon{
+  font-size:16px;flex-shrink:0;
+  animation:iconFlash 2s ease-in-out infinite;
+}
+@keyframes iconFlash{
+  0%,100%{opacity:1;}
+  45%{opacity:1;}
+  50%{opacity:.3;}
+  55%{opacity:1;}
+}
+.urgent-entry-sub{
+  margin-top:3px;font-size:11.5px;
+  color:#c62828;font-weight:600;line-height:1.4;
+}
+.urgent-entry-chevron{
+  width:26px;height:26px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(211,47,47,.12);
+  color:#d32f2f;transition:transform .22s ease;flex-shrink:0;
+}
+.urgent-entry-chevron.open{transform:rotate(180deg);}
+
+/* ── EXPANDED HEADER BAR ── */
+.urgent-expanded-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 10px;
+  cursor:pointer;user-select:none;
+}
+.urgent-expanded-header-label{
+  display:flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:800;color:#b71c1c;letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.urgent-expanded-collapse{
+  display:flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;color:#d32f2f;
+}
+
+/* ── EXPANDED ALERT CARDS ── */
+.alert-card-view{
+  background:#fff;
+  border:1px solid rgba(211,47,47,.18);
+  border-left:5px solid #d32f2f;
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:8px;
+  cursor:pointer;
+  transition:box-shadow .18s, border-color .18s;
+  box-shadow:0 2px 8px rgba(211,47,47,.07);
+  position:relative;
+}
+.alert-card-view:hover{
+  box-shadow:0 4px 16px rgba(211,47,47,.14);
+  border-color:rgba(211,47,47,.35);
+}
+.alert-card-type-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:800;letter-spacing:.06em;
+  padding:2px 8px;border-radius:5px;
+  background:#d32f2f;color:#fff;
+  margin-bottom:7px;text-transform:uppercase;
+}
+.alert-card-title{
+  font-size:13px;font-weight:700;color:rgba(0,0,0,.85);
+  line-height:1.4;margin-bottom:6px;
+}
+.alert-card-title em{
+  font-style:normal;font-weight:800;color:rgba(0,0,0,.9);
+}
+.alert-card-error-type{
+  font-family:'SF Mono','Fira Code',monospace;
+  font-size:11.5px;font-weight:700;
+  color:#c62828;
+  background:rgba(211,47,47,.08);
+  padding:0 5px;border-radius:4px;
+}
+.alert-card-ddl{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;color:#b71c1c;margin-bottom:6px;
+}
+.alert-card-desc{
+  font-size:12px;color:rgba(0,0,0,.55);line-height:1.5;
+}
+.alert-card-action{
+  position:absolute;top:50%;right:14px;transform:translateY(-50%);
+  font-size:11px;font-weight:700;
+  padding:5px 11px;border-radius:8px;
+  background:rgba(211,47,47,.1);color:#c62828;
+  border:1px solid rgba(211,47,47,.22);cursor:pointer;
+  transition:background .15s;white-space:nowrap;
+}
+.alert-card-action:hover{background:rgba(211,47,47,.2);}
+
+/* ── TODO CARD HOVER BUTTON ── */
+.g-card.todo-card{position:relative;}
+.todo-start-btn{
+  position:absolute;top:12px;right:12px;
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(0,0,0,.07);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:scale(.85);
+  transition:opacity .15s, transform .15s, background .15s;
+  color:rgba(0,0,0,.55);flex-shrink:0;
+}
+.g-card.todo-card:hover .todo-start-btn{
+  opacity:1;transform:scale(1);
+}
+.todo-start-btn:hover{
+  background:rgba(0,122,255,.15) !important;
+  color:#007aff !important;
+}
+.g-card.todo-card.just-added{
+  animation:todoAdded .35s ease both;
+}
+@keyframes todoAdded{
+  from{opacity:0;transform:translateY(-8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.g-card.doing-card-anim{
+  animation:doingSwap .3s ease both;
+}
+@keyframes doingSwap{
+  from{opacity:0;transform:scale(.97);}
+  to{opacity:1;transform:scale(1);}
+}
+
+/* ── TASK ROW (ai-trainer) ── */
+.task-row{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:14px;padding:12px 16px;
+  margin-bottom:8px;text-decoration:none;color:inherit;
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 3px 12px rgba(31,38,135,.06), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.task-row:hover{
+  background:rgba(255,255,255,.72);
+  box-shadow:0 6px 20px rgba(31,38,135,.1), inset 0 1px 0 rgba(255,255,255,.6);
+  transform:translateY(-1px);
+}
+.task-icon{font-size:20px;flex-shrink:0;}
+.task-body{flex:1;min-width:0;}
+.task-title{font-size:14px;font-weight:600;color:rgba(0,0,0,.85);margin-bottom:2px;}
+.task-desc{font-size:12px;color:rgba(0,0,0,.45);line-height:1.4;}
+.task-badge{
+  font-size:11px;font-weight:700;
+  padding:3px 10px;border-radius:20px;flex-shrink:0;
+}
+.badge-red   {background:rgba(255,59,48,.12);color:#ff3b30;border:1px solid rgba(255,59,48,.2);}
+.badge-orange{background:rgba(255,159,10,.12);color:#c47f00;border:1px solid rgba(255,159,10,.2);}
+.badge-blue  {background:rgba(0,122,255,.12);color:#005ec4;border:1px solid rgba(0,122,255,.2);}
+
+/* ── MANAGER ── */
+.mgr-block{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:14px;padding:12px 16px;margin-bottom:4px;
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 3px 12px rgba(31,38,135,.06), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.mgr-block:hover{background:rgba(255,255,255,.72);box-shadow:0 6px 20px rgba(31,38,135,.1), inset 0 1px 0 rgba(255,255,255,.6);}
+.mgr-type{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  padding:2px 7px;border-radius:5px;flex-shrink:0;
+}
+.type-interview{background:rgba(0,122,255,.1);color:#007aff;}
+.type-task{background:rgba(52,199,89,.1);color:#1a9e3f;}
+.mgr-title{flex:1;font-size:14px;font-weight:600;color:rgba(0,0,0,.8);}
+.mgr-right{font-size:13px;color:rgba(0,0,0,.35);}
+.mgr-sub{font-size:11px;color:rgba(0,0,0,.3);padding:2px 16px 8px;}
+
+.stat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.stat-chip{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.6);border-radius:10px;
+  padding:7px 14px;font-size:12px;color:rgba(0,0,0,.5);
+  cursor:pointer;transition:all .15s;
+  box-shadow:0 2px 8px rgba(31,38,135,.05);
+}
+.stat-chip:hover{background:rgba(255,255,255,.75);border-color:rgba(0,122,255,.3);}
+.stat-num{font-size:15px;font-weight:700;color:rgba(0,0,0,.8);}
+
+.goal-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:16px;padding:14px 16px;margin-bottom:8px;
+  box-shadow:0 4px 16px rgba(31,38,135,.07), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.goal-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
+.goal-title{font-size:14px;font-weight:600;color:rgba(0,0,0,.85);flex:1;line-height:1.45;}
+.goal-pts{font-size:13px;font-weight:700;color:#34c759;flex-shrink:0;margin-left:10px;}
+.goal-sub{font-size:12px;color:rgba(0,0,0,.45);margin-bottom:10px;line-height:1.4;}
+.ds3-progress-bar{background:#0000000f;border-radius:2px;height:4px;overflow:hidden;margin-bottom:10px;}
+.ds3-progress-fill{border-radius:2px;height:100%;transition:width .6s cubic-bezier(.4,0,.2,1);background:rgba(0,0,0,.7);}
+.goal-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.goal-chip{
+  font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px;
+  display:flex;align-items:center;gap:3px;
+}
+.chip-ai   {background:rgba(0,122,255,.1);color:#007aff;}
+.chip-human{background:rgba(255,159,10,.1);color:#c47f00;}
+.chip-done {background:rgba(52,199,89,.1);color:#1a9e3f;}
+
+/* ── ARTIST ── */
+.test-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:16px;padding:14px 16px;margin-bottom:8px;
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 4px 16px rgba(31,38,135,.07), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.test-card:hover{background:rgba(255,255,255,.72);box-shadow:0 8px 28px rgba(31,38,135,.1);}
+.test-type{
+  display:inline-block;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:5px;margin-bottom:8px;
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.type-ab   {background:rgba(175,82,222,.1);color:#af52de;}
+.type-rate {background:rgba(50,173,230,.1);color:#0096b8;}
+.test-title{font-size:14px;font-weight:600;color:rgba(0,0,0,.85);margin-bottom:4px;}
+.test-desc{font-size:12px;color:rgba(0,0,0,.45);line-height:1.4;margin-bottom:10px;}
+.test-footer{display:flex;align-items:center;justify-content:space-between;}
+.test-count{font-size:11px;color:rgba(0,0,0,.3);}
+.test-btn{
+  font-size:12px;font-weight:600;
+  padding:5px 14px;border-radius:20px;
+  border:1px solid rgba(0,0,0,.12);
+  background:rgba(255,255,255,.7);
+  color:rgba(0,0,0,.65);
+  cursor:pointer;transition:all .15s;
+}
+.test-btn:hover{border-color:rgba(0,122,255,.4);color:#007aff;background:rgba(0,122,255,.06);}
+
+/* ── CASE LIST ── */
+.case-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:8px;
+  cursor:pointer;transition:background .12s;
+}
+.case-row:hover{background:rgba(0,0,0,.04);}
+.case-id{font-size:10px;font-weight:700;color:#007aff;min-width:80px;flex-shrink:0;}
+.case-text{flex:1;font-size:12px;color:rgba(0,0,0,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.case-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.cs-done   {background:rgba(52,199,89,.12);color:#1a9e3f;}
+.cs-pending{background:rgba(255,159,10,.12);color:#c47f00;}
+.cs-review {background:rgba(0,122,255,.12);color:#007aff;}
+
+/* ── CASES DOCK ── */
+.ds3-case-dock{
+  z-index:40;pointer-events:auto;
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  position:fixed;bottom:20px;right:20px;
+}
+.ds3-case-trigger{
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:rgba(0,0,0,.55);letter-spacing:.2px;cursor:pointer;
+  background:#ffffffb3;border:1px solid rgba(0,0,0,.1);
+  border-radius:999px;align-items:center;gap:8px;
+  min-height:30px;padding:0 12px 0 10px;
+  font-size:11px;font-weight:700;line-height:16px;
+  transition:color .15s,border-color .15s,background .15s,box-shadow .15s;
+  display:inline-flex;box-shadow:0 1px 2px rgba(0,0,0,.06);
+  font-family:inherit;
+}
+.ds3-case-trigger:hover{
+  color:rgba(0,0,0,.82);background:#fffffff2;
+  border-color:rgba(0,0,0,.25);box-shadow:0 2px 6px rgba(0,0,0,.09);
+}
+.ds3-case-trigger.is-open{color:rgba(0,0,0,.9);background:#fffffffa;border-color:rgba(0,0,0,.55);}
+.ds3-case-trigger-dot{background:rgba(0,0,0,.28);border-radius:999px;width:6px;height:6px;transition:background .15s;}
+.ds3-case-chevron{opacity:.6;font-size:10px;line-height:1;transition:transform .18s,opacity .15s;transform:rotate(180deg);}
+.ds3-case-chevron.is-open{opacity:.9;transform:rotate(0);}
+.ds3-case-menu{
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  transform-origin:100% 100%;
+  background:#fffffff5;border:1px solid rgba(0,0,0,.08);
+  border-radius:14px;flex-direction:column;gap:2px;
+  min-width:260px;padding:6px;
+  animation:.16s ease-out both ds3-case-menu-in;
+  display:flex;box-shadow:0 8px 24px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.06);
+}
+.ds3-case-option{
+  text-align:left;cursor:pointer;background:transparent;
+  border:none;border-radius:10px;flex-direction:column;
+  align-items:flex-start;gap:2px;padding:8px 12px;
+  transition:background .12s;display:flex;width:100%;font-family:inherit;
+}
+.ds3-case-option:hover{background:rgba(0,0,0,.06);}
+.ds3-case-option.is-active{background:rgba(0,0,0,.08);}
+.ds3-case-option-label{color:rgba(0,0,0,.85);letter-spacing:.2px;font-size:12px;font-weight:700;}
+.ds3-case-option.is-active .ds3-case-option-label::before{content:"• ";color:rgba(0,0,0,.85);}
+.ds3-case-option-title{color:rgba(0,0,0,.5);font-size:11px;line-height:1.4;}
+
+/* ── GREETING ── */
+.greeting{font-size:17px;font-weight:700;color:rgba(0,0,0,.85);margin-bottom:4px;}
+.greeting-sub{font-size:13px;color:rgba(0,0,0,.45);margin-bottom:20px;}
+
+/* PDM brief */
+.pdm-brief{
+  font-size:14px;line-height:1.75;color:rgba(0,0,0,.5);
+  margin:-8px 0 22px;padding-left:2px;
+}
+.pdm-brief strong{font-weight:600;color:rgba(0,0,0,.78);}
+
+/* ── Agent task card (Case 2) ── */
+.pdm-agent-card{
+  background:#fff5f5;
+  border:1px solid #ffcdd2;
+  border-radius:16px;
+  padding:16px 16px 14px;
+  margin-bottom:8px;
+}
+.pdm-ac-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.pdm-ac-title-row{display:flex;align-items:flex-start;gap:6px;flex:1;min-width:0;}
+.pdm-ac-emoji{font-size:15px;line-height:1.45;flex-shrink:0;}
+.pdm-ac-title{font-size:15px;font-weight:700;line-height:1.45;color:rgba(0,0,0,.88);}
+.pdm-ac-chev{flex-shrink:0;color:rgba(0,0,0,.3);font-size:18px;line-height:1;margin-top:1px;}
+.pdm-ac-ddl{font-size:12px;font-weight:600;color:#e53935;margin-bottom:14px;display:flex;align-items:center;gap:4px;}
+.pdm-ac-sep{border:none;border-top:1px solid rgba(255,205,210,.7);margin:0 0 14px;}
+.pdm-ac-block{margin-bottom:14px;}
+.pdm-ac-block-hd{font-size:12px;font-weight:600;color:rgba(0,0,0,.65);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.pdm-tri-list{list-style:none;display:flex;flex-direction:column;gap:6px;padding-left:2px;}
+.pdm-tri-list li{font-size:13px;line-height:1.65;color:rgba(0,0,0,.55);padding-left:14px;position:relative;}
+.pdm-tri-list li::before{content:"";position:absolute;left:0;top:8px;border:4px solid transparent;border-left:5px solid #bdbdbd;}
+.pdm-mem-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.pdm-mem-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;font-size:13px;line-height:1.6;color:rgba(0,0,0,.55);}
+.pdm-mem-row strong{font-weight:600;color:rgba(0,0,0,.75);}
+.pdm-mem-tag{flex-shrink:0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:#e8f4fd;color:#1565c0;white-space:nowrap;margin-top:2px;}
+.pdm-rec-box{background:#fff8f0;border:1px solid rgba(255,152,0,.22);border-left:3px solid #ff9800;border-radius:8px;padding:10px 12px;}
+.pdm-rec-hd{font-size:11px;font-weight:600;color:#bf6000;margin-bottom:8px;letter-spacing:.01em;}
+.pdm-rec-list{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.pdm-rec-item{font-size:13px;line-height:1.55;color:rgba(0,0,0,.82);display:flex;align-items:flex-start;gap:6px;border-radius:6px;padding:4px 5px;transition:background .12s;}
+/* Executor badges */
+.pdm-rec-exec{display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 5px;border-radius:4px;flex-shrink:0;margin-top:2px;transition:background .3s,color .3s;}
+.pdm-rec-exec.ai{background:rgba(0,0,0,.07);color:rgba(0,0,0,.45);}
+.pdm-rec-exec.hu{background:#e8f4ff;border:1px solid #b3d9ff;color:#1565c0;}
+/* Execution state transitions */
+.pdm-rec-list li.exec-running .pdm-rec-exec.ai{background:rgba(255,152,0,.15);color:#bf6000;}
+.pdm-rec-list li.exec-done .pdm-rec-exec.ai{background:rgba(76,175,80,.12);color:#2e7d32;}
+.pdm-rec-list li.exec-assigned .pdm-rec-exec.hu{background:rgba(21,101,192,.12);color:#1565c0;}
+.pdm-rec-list li.exec-todo .pdm-rec-exec.hu{background:rgba(0,0,0,.04);color:#888;border:1px solid rgba(0,0,0,.1);}
+.pdm-rec-list li.exec-todo .pdm-rec-item-text{color:#aaa;}
+.pdm-rec-status{display:none;margin-left:auto;flex-shrink:0;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap;background:transparent;}
+.pdm-rec-status.doing{display:inline-flex;align-items:center;color:#3a9e3a;border:1.5px solid #3a9e3a;}
+.pdm-rec-status.todo{display:inline-flex;align-items:center;color:#aaa;border:1.5px solid #ccc;}
+.pdm-rec-status.done{display:inline-flex;align-items:center;color:#fff;background:#3a9e3a;border:1.5px solid #3a9e3a;}
+@keyframes aCardSlideIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+.a-card-new{animation:aCardSlideIn .35s ease-out;border-left:2px solid #1565c0 !important;}
+@keyframes execPulse{0%,100%{opacity:1}50%{opacity:.45}}
+/* Done feedback panel */
+.pdm-done-panel{display:none;flex-direction:column;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,.1);}
+.pdm-done-panel.show{display:flex;}
+.pdm-done-panel-label{font-size:11px;color:rgba(0,0,0,.45);letter-spacing:.01em;}
+.pdm-done-panel textarea{width:100%;box-sizing:border-box;border:1px solid rgba(0,0,0,.14);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;color:rgba(0,0,0,.8);background:rgba(255,255,255,.7);resize:none;outline:none;line-height:1.6;}
+.pdm-done-panel textarea:focus{border-color:rgba(0,0,0,.3);background:#fff;}
+.pdm-done-panel-actions{display:flex;gap:8px;align-items:center;}
+.pdm-btn-done-confirm{background:rgba(0,0,0,.88);color:#fff;padding:0 14px;border:none;}
+.pdm-btn-done-confirm:hover{opacity:.85;}
+.pdm-btn-done-cancel{background:transparent;border:1px solid rgba(0,0,0,.15);color:rgba(0,0,0,.6);padding:0 12px;}
+.pdm-btn-done-cancel:hover{background:rgba(0,0,0,.04);}
+/* Action row + buttons */
+.pdm-action-row{display:flex;align-items:center;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(229,57,53,.12);}
+.pdm-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:36px;padding:0 16px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid transparent;transition:opacity .15s;}
+.pdm-btn:disabled{opacity:.4;cursor:not-allowed;}
+.pdm-btn-execute{background:rgba(0,0,0,.88);color:#fff;}
+.pdm-btn-execute:hover:not(:disabled){opacity:.85;}
+.pdm-btn-done-inline{background:transparent;border:1px solid rgba(0,0,0,.14);color:rgba(0,0,0,.55);}
+.pdm-btn-done-inline:hover:not(:disabled){background:rgba(76,175,80,.06);border-color:rgba(76,175,80,.35);color:#2e7d32;}
+.pdm-btn-help{background:transparent;border:1px solid rgba(255,152,0,.4);color:#bf6000;}
+.pdm-btn-help:hover:not(:disabled){background:rgba(255,152,0,.08);border-color:rgba(255,152,0,.6);}
+/* Help feedback panel */
+.pdm-help-panel{display:none;flex-direction:column;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,.1);}
+.pdm-help-panel.show{display:flex;}
+.pdm-help-panel-label{font-size:11px;color:rgba(0,0,0,.45);letter-spacing:.01em;}
+.pdm-help-panel textarea{width:100%;box-sizing:border-box;border:1px solid rgba(0,0,0,.14);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;color:rgba(0,0,0,.8);background:rgba(255,255,255,.7);resize:none;outline:none;line-height:1.6;}
+.pdm-help-panel textarea:focus{border-color:rgba(0,0,0,.3);background:#fff;}
+.pdm-help-panel-actions{display:flex;gap:8px;align-items:center;}
+.pdm-agent-status{display:none;font-size:13px;line-height:1.55;padding:10px 12px;border-radius:10px;margin-bottom:10px;}
+.pdm-agent-status.show{display:block;}
+.pdm-agent-status.ok{background:#f6ffed;border:1px solid #b7eb8f;color:#389e0d;}
+.pdm-agent-status.warn{background:#fff5f5;border:1px solid #ffcdd2;color:#c62828;}
+.pdm-agent-status.info{background:#f0f7ff;border:1px solid #90caf9;color:#1565c0;}
+/* Agent section badge & animation */
+.pdm-agent-badge{
+  display:inline-flex;align-items:center;
+  font-size:10px;font-weight:700;letter-spacing:.02em;
+  padding:2px 8px;border-radius:20px;
+  background:rgba(229,57,53,.1);color:#c62828;
+  border:1px solid rgba(229,57,53,.18);
+}
+.pdm-agent-card{transition:opacity .35s ease, transform .35s ease;}
+.pdm-agent-card.resolving{opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;}
+.pdm-agent-card.resolved-msg{
+  background:rgba(240,255,244,.9);
+  border-color:#b7eb8f;
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;font-size:13px;color:#389e0d;font-weight:500;
+}
+/* section label row */
+.sec-label-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+/* Request source tag */
+.pdm-src-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:600;letter-spacing:.02em;
+  padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;
+}
+.pdm-src-dingtalk{background:#e6f0ff;color:#1254a0;border:1px solid rgba(18,84,160,.15);}
+.pdm-src-alert{background:#fff3e0;color:#bf5800;border:1px solid rgba(191,88,0,.18);}
+/* Brain-doc block */
+.pdm-braindoc-hd{cursor:pointer;user-select:none;justify-content:space-between !important;}
+.pdm-braindoc-hd:hover{opacity:.8;}
+.pdm-braindoc-ref{
+  font-size:10px;font-weight:700;letter-spacing:.04em;
+  padding:2px 7px;border-radius:8px;margin-left:4px;
+  background:rgba(99,102,241,.1);color:#4338ca;border:1px solid rgba(99,102,241,.18);
+  flex-shrink:0;
+}
+.pdm-braindoc-chev{font-size:12px;color:rgba(0,0,0,.35);transition:transform .2s;flex-shrink:0;}
+.pdm-braindoc-chev.open{transform:rotate(180deg);}
+.pdm-braindoc-preview{
+  display:flex;flex-direction:column;gap:3px;
+  margin-top:6px;padding:7px 10px;
+  background:rgba(99,102,241,.04);
+  border:1px solid rgba(99,102,241,.12);
+  border-radius:7px;
+}
+.pdm-braindoc-preview-text{font-size:12px;line-height:1.6;color:rgba(0,0,0,.55);}
+.pdm-braindoc-preview.hidden{display:none;}
+.pdm-braindoc-body{
+  margin-top:10px;
+  border:1px solid rgba(99,102,241,.15);
+  border-radius:10px;
+  overflow:hidden;
+}
+.pdm-bd-row{
+  padding:9px 12px;
+  border-bottom:1px solid rgba(99,102,241,.1);
+  display:grid;grid-template-columns:82px 1fr;gap:8px;
+  align-items:baseline;
+}
+.pdm-bd-row:last-child{border-bottom:none;}
+.pdm-bd-label{
+  font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:rgba(67,56,202,.7);
+}
+.pdm-bd-val{font-size:12px;line-height:1.65;color:rgba(0,0,0,.65);}
+.pdm-bd-val ul{list-style:none;display:flex;flex-direction:column;gap:4px;padding:0;}
+.pdm-bd-val ul li{padding-left:12px;position:relative;}
+.pdm-bd-val ul li::before{content:"→";position:absolute;left:0;color:rgba(99,102,241,.6);font-size:11px;}
+
+
+/* ── VIEWS ── */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ── ANIMATIONS ── */
+@keyframes ds3-case-menu-in{
+  0%{opacity:0;transform:translateY(4px) scale(.98);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+@keyframes ds3-card-appear{
+  0%{opacity:0;transform:translateY(8px) scale(.98);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.ds3-card-appear{opacity:0;animation:.32s cubic-bezier(.22,1,.36,1) forwards ds3-card-appear;}
+@keyframes ds3-task-appear{
+  0%{opacity:0;transform:translateY(12px) scale(.97);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.ds3-task-appear{opacity:0;animation:.5s cubic-bezier(.34,1.56,.64,1) forwards ds3-task-appear;}
+
+/* ════════════════════════════════════════════
+   AGENT BRIEF CARD
+════════════════════════════════════════════ */
+.agent-brief-card{
+  margin-bottom:20px;
+}
+.abc-row{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+.abc-avatar-col{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  flex-shrink:0;
+  padding-top:2px;
+}
+.abc-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(145deg,#6366f1 0%,#8b5cf6 100%);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 2px 8px rgba(99,102,241,.3);
+}
+.abc-connector{
+  width:1.5px;flex:1;min-height:12px;
+  background:linear-gradient(to bottom, rgba(99,102,241,.25), transparent);
+  margin-top:6px;
+}
+.abc-content-col{
+  flex:1;min-width:0;
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:4px 16px 16px 16px;
+  padding:12px 14px 12px;
+  box-shadow:0 2px 12px rgba(31,38,135,.06), inset 0 1px rgba(255,255,255,.55);
+}
+.abc-header-row{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:7px;
+}
+.abc-name{
+  font-size:12px;font-weight:700;
+  color:rgba(99,102,241,.85);letter-spacing:.01em;
+}
+.abc-time{
+  font-size:11px;color:rgba(0,0,0,.3);
+  margin-left:auto;
+}
+.abc-body{
+  font-size:13.5px;line-height:1.65;
+  color:rgba(0,0,0,.65);
+}
+.abc-body strong{font-weight:700;color:rgba(0,0,0,.82);}
+.abc-chips{
+  display:flex;gap:6px;flex-wrap:wrap;
+  margin-top:10px;
+}
+.abc-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:6px;
+  font-size:11.5px;font-weight:600;
+  transition:opacity .15s;
+}
+.abc-chip-pending{
+  background:rgba(245,158,11,.1);
+  color:rgba(180,108,0,.9);
+  border:1px solid rgba(245,158,11,.2);
+}
+.abc-chip-urgent{
+  background:rgba(239,68,68,.08);
+  color:rgba(185,28,28,.9);
+  border:1px solid rgba(239,68,68,.18);
+}
+.abc-chip-done{
+  background:rgba(34,197,94,.09);
+  color:rgba(21,128,61,.85);
+  border:1px solid rgba(34,197,94,.2);
+}
+
+/* ════════════════════════════════════════════
+   INLINE MESSAGE CARDS
+   Rules: no side stripes, no gradient text,
+   no glass-as-decoration. Tinted surfaces
+   carry meaning; consistent button vocabulary.
+════════════════════════════════════════════ */
+.imc-section{
+  margin-bottom:20px;
+}
+.imc-list{
+  display:flex;flex-direction:column;gap:10px;
+}
+
+/* Base card */
+/* Base card — unified surface */
+.imc-card{
+  border-radius:14px;
+  padding:14px 14px 12px;
+  border:1px solid rgba(0,0,0,.08);
+  background:rgba(255,255,255,.72);
+  box-shadow:0 1px 4px rgba(0,0,0,.04), inset 0 1px rgba(255,255,255,.7);
+  transition:box-shadow .18s, border-color .18s, background .18s;
+  position:relative;overflow:hidden;
+}
+.imc-card:hover{
+  background:rgba(255,255,255,.88);
+  border-color:rgba(0,0,0,.12);
+  box-shadow:0 4px 14px rgba(0,0,0,.08);
+}
+.imc-card:focus-within{
+  outline:2px solid rgba(0,0,0,.18);
+  outline-offset:2px;
+}
+.imc-card.imc-done{
+  opacity:.48;
+  pointer-events:none;
+  background:rgba(255,255,255,.45) !important;
+  border-color:rgba(0,0,0,.07) !important;
+  box-shadow:none !important;
+  transition:opacity .22s;
+}
+/* Exit animation: shrinks height then fades out */
+@keyframes imcExit{
+  0%  { opacity:.48; transform:scale(1);   max-height:300px; margin-bottom:8px; }
+  40% { opacity:.15; transform:scale(.97); max-height:300px; margin-bottom:8px; }
+  100%{ opacity:0;   transform:scale(.97); max-height:0;     margin-bottom:0;   padding-top:0; padding-bottom:0; }
+}
+.imc-card.imc-exiting{
+  animation:imcExit .45s cubic-bezier(.4,0,1,1) forwards;
+  pointer-events:none;
+  overflow:hidden;
+}
+/* A-status dismiss button */
+.imc-dismiss-btn{
+  margin-top:10px;
+  display:flex;justify-content:flex-end;
+}
+.imc-dismiss-btn button{
+  border:none;background:none;cursor:pointer;
+  font-size:12px;color:rgba(0,0,0,.32);
+  padding:3px 0;
+  transition:color .15s;
+}
+.imc-dismiss-btn button:hover{ color:rgba(0,0,0,.6); }
+
+/* Card header row */
+.imc-header{
+  display:flex;align-items:center;gap:7px;
+  margin-bottom:9px;
+}
+.imc-type-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--imc-dot-color, rgba(0,0,0,.25));
+  flex-shrink:0;
+}
+.imc-type-label{
+  font-size:11px;font-weight:700;letter-spacing:.04em;
+  color:var(--imc-label-color, rgba(0,0,0,.4));
+  text-transform:uppercase;
+}
+/* Colors per type */
+/* B-type (quick & chat) dot/label color */
+.imc-card[data-type="b-quick"]  .imc-type-dot{ background:#8b5cf6; }
+.imc-card[data-type="b-quick"]  .imc-type-label{ color:rgba(109,40,217,.8); }
+.imc-card[data-type="b-chat"]   .imc-type-dot{ background:#8b5cf6; }
+.imc-card[data-type="b-chat"]   .imc-type-label{ color:rgba(109,40,217,.8); }
+.imc-card[data-type="c"]        .imc-type-dot{ background:#3b82f6; }
+.imc-card[data-type="c"]        .imc-type-label{ color:rgba(29,78,216,.8); }
+
+/* Need Input — orange */
+.imc-card[data-type="d-input"]  .imc-type-dot { background:#f97316; }
+.imc-card[data-type="d-input"]  .imc-type-label{ color:rgba(194,65,12,.85); }
+.imc-card[data-type="d-input"]  { border-left:3px solid rgba(249,115,22,.35); }
+
+/* Review — purple (distinct from b-quick) */
+.imc-card[data-type="e-review"] .imc-type-dot { background:#a855f7; }
+.imc-card[data-type="e-review"] .imc-type-label{ color:rgba(126,34,206,.85); }
+.imc-card[data-type="e-review"] { border-left:3px solid rgba(168,85,247,.35); }
+
+/* Pulsing dot for Need Input */
+.imc-card[data-type="d-input"] .imc-type-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%     { opacity:.4; transform:scale(.7); }
+}
+
+.imc-header-spacer{flex:1;}
+.imc-urgency-badge{
+  font-size:10px;font-weight:700;letter-spacing:.03em;
+  padding:2px 8px;border-radius:5px;
+  background:rgba(239,68,68,.1);
+  color:rgba(185,28,28,.9);
+  border:1px solid rgba(239,68,68,.18);
+}
+.imc-source{
+  font-size:11px;color:rgba(0,0,0,.38);
+  display:flex;align-items:center;gap:4px;
+}
+.imc-time{
+  font-size:11px;color:rgba(0,0,0,.28);
+  margin-left:6px;
+}
+
+/* Card title + body */
+.imc-title{
+  font-size:14.5px;font-weight:700;
+  color:rgba(0,0,0,.85);line-height:1.35;
+  margin-bottom:5px;
+}
+.imc-summary{
+  font-size:12.5px;line-height:1.6;
+  color:rgba(0,0,0,.5);
+}
+.imc-tags{
+  display:flex;flex-wrap:wrap;gap:5px;
+  margin-top:8px;
+}
+.imc-tag{
+  font-size:11px;font-weight:500;
+  padding:2px 8px;border-radius:5px;
+  background:rgba(0,0,0,.05);
+  color:rgba(0,0,0,.48);
+}
+.imc-tag-warn{ background:rgba(245,158,11,.1); color:rgba(161,97,0,.85); }
+.imc-tag-ok  { background:rgba(34,197,94,.1);  color:rgba(21,128,61,.85); }
+.imc-tag-blue{ background:rgba(59,130,246,.1); color:rgba(29,78,216,.85); }
+.imc-tag-purple{ background:rgba(139,92,246,.1); color:rgba(109,40,217,.85); }
+
+/* Jump destination row (Type C) */
+.imc-jump-dest{
+  display:flex;align-items:center;gap:8px;
+  margin-top:10px;padding:8px 10px;border-radius:9px;
+  background:rgba(59,130,246,.07);
+  font-size:12px;font-weight:500;
+  color:rgba(29,78,216,.8);
+  transition:background .15s;cursor:pointer;
+}
+.imc-jump-dest:hover{ background:rgba(59,130,246,.12); }
+.imc-jump-dest svg{ flex-shrink:0; }
+
+/* Action row */
+.imc-actions{
+  display:flex;gap:8px;margin-top:12px;
+  align-items:center;flex-wrap:wrap;
+}
+/* All imc buttons share the same foundation */
+.imc-btn{
+  padding:7px 15px;border-radius:9px;
+  border:none;font-size:13px;font-weight:600;
+  cursor:pointer;transition:background .15s, transform .1s, box-shadow .15s;
+  font-family:inherit;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.imc-btn:active{ transform:scale(.97); }
+.imc-btn:focus-visible{
+  outline:2px solid rgba(0,0,0,.25);
+  outline-offset:2px;
+}
+/* Primary variants */
+.imc-btn-amber{
+  background:#f59e0b;color:#fff;
+  box-shadow:0 1px 4px rgba(245,158,11,.3);
+}
+.imc-btn-amber:hover{ background:#d97706; }
+.imc-btn-purple{
+  background:#8b5cf6;color:#fff;
+  box-shadow:0 1px 4px rgba(139,92,246,.3);
+}
+.imc-btn-orange{
+  background:#f97316;color:#fff;
+  box-shadow:0 1px 4px rgba(249,115,22,.3);
+}
+.imc-btn-orange:hover{ background:#ea6c0a; }
+.imc-btn-purple:hover{ background:#7c3aed; }
+.imc-btn-blue{
+  background:#3b82f6;color:#fff;
+  box-shadow:0 1px 4px rgba(59,130,246,.3);
+}
+.imc-btn-blue:hover{ background:#2563eb; }
+/* Secondary (neutral) */
+.imc-btn-ghost{
+  background:rgba(0,0,0,.06);color:rgba(0,0,0,.6);
+  box-shadow:none;
+}
+.imc-btn-ghost:hover{ background:rgba(0,0,0,.1); }
+
+/* Done chip */
+.imc-done-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:600;
+  color:rgba(21,128,61,.85);
+  padding:5px 10px;border-radius:7px;
+  background:rgba(34,197,94,.09);
+  border:1px solid rgba(34,197,94,.2);
+}
+
+/* a-status: slightly muted to signal read-only */
+.imc-card[data-type="a-status"]{
+  background:rgba(250,251,252,.72);
+}
+.imc-card[data-type="a-status"]:hover{
+  background:rgba(255,255,255,.85);
+  box-shadow:0 3px 10px rgba(0,0,0,.06);
+}
+.imc-card[data-type="a-status"] .imc-type-dot { background:#22c55e; }
+.imc-card[data-type="a-status"] .imc-type-label{ color:rgba(21,128,61,.8); }
+
+/* Status pill (Type A) */
+.imc-status-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:9px;padding:5px 11px;border-radius:8px;
+  font-size:12.5px;font-weight:600;
+  background:var(--pill-bg, rgba(34,197,94,.08));
+  color:var(--pill-color, rgba(21,128,61,.9));
+  border:1px solid var(--pill-border, rgba(34,197,94,.2));
+}
+@keyframes imcSlideIn{
+  0%{opacity:0;transform:translateY(10px);}
+  100%{opacity:1;transform:translateY(0);}
+}
+.imc-card{
+  animation:imcSlideIn .32s cubic-bezier(.22,1,.36,1) both;
+}
+.imc-card:nth-child(2){ animation-delay:.06s; }
+.imc-card:nth-child(3){ animation-delay:.12s; }
+.imc-card:nth-child(4){ animation-delay:.18s; }
+
+@media(prefers-reduced-motion:reduce){
+  .imc-card{ animation:none; }
+}
+
+/* ── Bell/Panel CSS (kept but unused) ── */
+
+/* ════════════════════════════════════════════
+   HISTORY PANEL  —  compact consumed messages
+════════════════════════════════════════════ */
+.imc-history-toggle{
+  display:flex;align-items:center;gap:6px;
+  width:100%;padding:8px 2px;margin-top:4px;
+  background:none;border:none;cursor:pointer;
+  font-size:12px;font-weight:600;
+  color:rgba(0,0,0,.32);transition:color .15s;
+  font-family:inherit;
+}
+.imc-history-toggle:hover{ color:rgba(0,0,0,.55); }
+.imc-history-toggle svg{ transition:transform .2s; }
+.imc-history-toggle.open svg{ transform:rotate(180deg); }
+.imc-history-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:16px;height:16px;padding:0 4px;
+  border-radius:8px;font-size:10px;font-weight:700;
+  background:rgba(0,0,0,.07);color:rgba(0,0,0,.4);
+}
+
+.imc-history-list{
+  display:none;flex-direction:column;gap:1px;
+  margin-top:2px;
+  border-radius:10px;overflow:hidden;
+  border:1px solid rgba(0,0,0,.07);
+}
+.imc-history-list.open{ display:flex; }
+
+.imc-history-row{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;
+  background:rgba(255,255,255,.55);
+  transition:background .12s;
+}
+.imc-history-row:hover{ background:rgba(255,255,255,.75); }
+.imc-history-row + .imc-history-row{
+  border-top:1px solid rgba(0,0,0,.05);
+}
+.imc-hr-dot{
+  width:6px;height:6px;border-radius:50%;
+  flex-shrink:0;background:rgba(0,0,0,.18);
+}
+.imc-hr-title{
+  flex:1;font-size:12.5px;color:rgba(0,0,0,.55);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.imc-hr-source{
+  font-size:11px;color:rgba(0,0,0,.28);flex-shrink:0;
+}
+.imc-hr-action{
+  font-size:11px;color:rgba(0,0,0,.28);font-style:italic;
+}
+.imc-hr-done{
+  font-size:10.5px;font-weight:600;
+  padding:2px 7px;border-radius:5px;
+  background:rgba(34,197,94,.09);
+  color:rgba(21,128,61,.75);
+  flex-shrink:0;
+}
+.imc-history-more{
+  cursor:pointer;
+  background:rgba(248,249,250,.8);
+}
+.imc-history-more:hover{
+  background:rgba(240,242,245,.95);
+}
+
+/* Spinner for loading state on Approve */
+@keyframes imcSpin{ to{transform:rotate(360deg);} }
+.imc-spinner{
+  display:inline-block;
+  width:12px;height:12px;border-radius:50%;
+  border:2px solid rgba(0,0,0,.12);
+  border-top-color:rgba(0,0,0,.45);
+  animation:imcSpin .7s linear infinite;
+  flex-shrink:0;
+}
+  position:absolute;top:16px;right:16px;z-index:100;
+  width:38px;height:38px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.55);
+  background:rgba(255,255,255,.32);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:0 4px 16px rgba(31,38,135,.07), inset 0 1px rgba(255,255,255,.5);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;flex-shrink:0;
+}
+.msg-bell-btn:hover{
+  background:rgba(255,255,255,.5);
+  box-shadow:0 6px 20px rgba(31,38,135,.12), inset 0 1px rgba(255,255,255,.6);
+}
+.msg-bell-icon{color:rgba(0,0,0,.6);transition:color .2s;}
+.msg-bell-btn:hover .msg-bell-icon{color:rgba(0,0,0,.85);}
+.msg-bell-badge{
+  position:absolute;top:-3px;right:-3px;
+  min-width:16px;height:16px;padding:0 4px;
+  border-radius:8px;
+  background:#ff3b30;color:#fff;
+  font-size:10px;font-weight:700;line-height:16px;
+  text-align:center;
+  border:1.5px solid rgba(255,255,255,.9);
+  display:none;
+}
+.msg-bell-badge.visible{display:block;}
+
+/* Panel overlay backdrop */
+.msg-backdrop{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.18);
+  -webkit-backdrop-filter:blur(2px);
+  backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;
+  transition:opacity .28s ease;
+}
+.msg-backdrop.open{opacity:1;pointer-events:auto;}
+
+/* Notification panel */
+.msg-panel{
+  position:fixed;top:0;right:0;bottom:0;z-index:201;
+  width:min(420px, 100vw);
+  background:rgba(248,250,254,.92);
+  -webkit-backdrop-filter:blur(40px) saturate(200%);
+  backdrop-filter:blur(40px) saturate(200%);
+  border-left:1px solid rgba(255,255,255,.6);
+  box-shadow:-12px 0 48px rgba(31,38,135,.14);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
+}
+.msg-panel.open{transform:translateX(0);}
+
+/* Panel header */
+.msg-panel-hd{
+  padding:20px 20px 0;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.msg-panel-title{font-size:20px;font-weight:800;color:rgba(0,0,0,.85);}
+.msg-panel-close{
+  width:32px;height:32px;border-radius:16px;
+  border:none;background:rgba(0,0,0,.06);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .15s;
+  color:rgba(0,0,0,.5);font-size:17px;line-height:1;
+}
+.msg-panel-close:hover{background:rgba(0,0,0,.1);}
+
+/* Tab bar */
+.msg-tabs{
+  display:flex;gap:4px;
+  padding:14px 20px 0;
+  flex-shrink:0;border-bottom:1px solid rgba(0,0,0,.07);
+  padding-bottom:0;
+}
+.msg-tab{
+  padding:8px 16px;border-radius:10px 10px 0 0;
+  border:none;background:transparent;
+  font-size:13px;font-weight:600;color:rgba(0,0,0,.45);
+  cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;gap:6px;
+  position:relative;bottom:-1px;
+  border:1px solid transparent;border-bottom:none;
+}
+.msg-tab.active{
+  background:rgba(248,250,254,.98);
+  color:rgba(0,0,0,.85);
+  border-color:rgba(0,0,0,.07);
+  border-bottom-color:rgba(248,250,254,.98);
+}
+.msg-tab:hover:not(.active){color:rgba(0,0,0,.65);}
+.msg-tab-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:18px;height:18px;padding:0 5px;
+  border-radius:9px;font-size:10px;font-weight:700;
+  background:rgba(255,59,48,.12);color:#ff3b30;
+}
+.msg-tab.active .msg-tab-count{background:rgba(255,59,48,.15);}
+.msg-tab-count.zero{background:rgba(0,0,0,.08);color:rgba(0,0,0,.35);}
+
+/* Message list */
+.msg-list{
+  flex:1;overflow-y:auto;padding:16px 16px 80px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.msg-list::-webkit-scrollbar{width:3px;}
+.msg-list::-webkit-scrollbar-track{background:transparent;}
+.msg-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:2px;}
+
+/* Empty state */
+.msg-empty{
+  text-align:center;padding:48px 24px;
+  color:rgba(0,0,0,.3);font-size:14px;
+}
+.msg-empty-icon{font-size:36px;margin-bottom:10px;}
+
+/* Message card */
+.msg-card{
+  border-radius:16px;
+  background:rgba(255,255,255,.75);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 2px 12px rgba(31,38,135,.07), inset 0 1px rgba(255,255,255,.6);
+  overflow:hidden;
+  transition:all .2s;
+}
+.msg-card:hover{
+  background:rgba(255,255,255,.9);
+  box-shadow:0 4px 18px rgba(31,38,135,.1);
+}
+.msg-card.msg-done{
+  opacity:.55;
+  background:rgba(255,255,255,.45);
+  box-shadow:none;
+}
+.msg-card.msg-done:hover{opacity:.7;}
+
+/* Card type stripe */
+.msg-card-stripe{
+  height:3px;width:100%;
+  background:var(--stripe-color, rgba(0,0,0,.1));
+}
+
+/* Card header */
+.msg-card-hd{
+  padding:12px 14px 8px;
+  display:flex;align-items:center;gap:8px;
+}
+.msg-type-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--type-color, rgba(0,0,0,.2));
+  flex-shrink:0;
+}
+.msg-type-label{
+  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--type-color, rgba(0,0,0,.4));
+  flex-shrink:0;
+}
+.msg-card-hd-mid{flex:1;min-width:0;}
+.msg-source-row{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;color:rgba(0,0,0,.4);
+}
+.msg-source-avatar{
+  width:14px;height:14px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:700;flex-shrink:0;
+}
+.msg-time{font-size:11px;color:rgba(0,0,0,.3);flex-shrink:0;margin-left:auto;}
+
+/* Card body */
+.msg-card-body{padding:0 14px 12px;}
+.msg-card-title{
+  font-size:14px;font-weight:700;color:rgba(0,0,0,.85);
+  line-height:1.4;margin-bottom:4px;
+}
+.msg-card-summary{
+  font-size:12.5px;color:rgba(0,0,0,.5);
+  line-height:1.55;
+}
+.msg-card-meta{
+  margin-top:8px;
+  display:flex;flex-wrap:wrap;gap:5px;
+}
+.msg-meta-tag{
+  font-size:11px;padding:2px 8px;border-radius:6px;
+  background:rgba(0,0,0,.06);color:rgba(0,0,0,.5);font-weight:500;
+}
+.msg-meta-tag.tag-ok{background:rgba(52,199,89,.12);color:#1a7d33;}
+.msg-meta-tag.tag-warn{background:rgba(255,159,10,.12);color:#a06200;}
+.msg-meta-tag.tag-info{background:rgba(0,122,255,.1);color:#0057b8;}
+.msg-meta-tag.tag-purple{background:rgba(175,82,222,.1);color:#7b2fbe;}
+
+/* Card actions */
+.msg-card-actions{
+  padding:0 14px 14px;
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+.msg-btn{
+  padding:7px 14px;border-radius:10px;
+  border:none;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;gap:5px;
+}
+.msg-btn-primary{
+  background:var(--btn-color, #007aff);color:#fff;
+}
+.msg-btn-primary:hover{filter:brightness(1.08);}
+.msg-btn-secondary{
+  background:rgba(0,0,0,.06);color:rgba(0,0,0,.65);
+}
+.msg-btn-secondary:hover{background:rgba(0,0,0,.1);}
+.msg-btn-ghost{
+  background:transparent;color:rgba(0,0,0,.4);
+  font-size:12px;padding:6px 8px;
+}
+.msg-btn-ghost:hover{color:rgba(0,0,0,.7);}
+.msg-done-chip{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:600;color:var(--ds3-success);
+  padding:6px 10px;border-radius:8px;
+  background:rgba(52,199,89,.1);
+}
+
+/* Type A: Info/Status pills */
+.msg-status-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:10px;
+  background:var(--pill-bg, rgba(0,122,255,.08));
+  color:var(--pill-color, #007aff);
+  font-size:12.5px;font-weight:600;
+  margin-top:8px;
+}
+
+/* Type C: jump row */
+.msg-jump-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;border-radius:10px;
+  background:rgba(0,0,0,.04);margin-top:8px;
+  font-size:12.5px;color:rgba(0,0,0,.55);
+  cursor:pointer;transition:background .15s;
+}
+.msg-jump-row:hover{background:rgba(0,0,0,.07);}
+.msg-jump-icon{font-size:14px;}
+.msg-jump-label{flex:1;font-weight:500;}
+.msg-jump-arrow{color:rgba(0,0,0,.25);font-size:12px;}
+
+/* Section divider in "全部" tab */
+.msg-section-label{
+  font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:rgba(0,0,0,.3);padding:4px 2px 2px;
+}
+
+/* ════════════════════════════════════════════
+   MINION CHAT OVERLAY
+════════════════════════════════════════════ */
+.chat-overlay{
+  position:fixed;inset:0;z-index:300;
+  display:flex;flex-direction:column;
+  background:rgba(248,250,254,.96);
+  -webkit-backdrop-filter:blur(40px) saturate(200%);
+  backdrop-filter:blur(40px) saturate(200%);
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
+}
+.chat-overlay.open{transform:translateY(0);}
+
+.chat-ov-hd{
+  padding:16px 20px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid rgba(0,0,0,.07);
+  flex-shrink:0;background:rgba(255,255,255,.6);
+}
+.chat-ov-back{
+  width:34px;height:34px;border-radius:17px;
+  border:none;background:rgba(0,0,0,.06);
+  cursor:pointer;font-size:16px;color:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;flex-shrink:0;
+}
+.chat-ov-back:hover{background:rgba(0,0,0,.1);}
+.chat-ov-agent{
+  width:34px;height:34px;border-radius:17px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+  background:linear-gradient(135deg, #af52de 0%, #007aff 100%);
+}
+.chat-ov-info{flex:1;min-width:0;}
+.chat-ov-agent-name{font-size:14px;font-weight:700;color:rgba(0,0,0,.85);}
+.chat-ov-task-name{font-size:12px;color:rgba(0,0,0,.4);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chat-ov-status{
+  font-size:11px;font-weight:600;padding:3px 10px;border-radius:8px;
+  background:rgba(0,122,255,.1);color:#007aff;
+  flex-shrink:0;
+}
+.chat-ov-status.done{background:rgba(52,199,89,.12);color:#1a7d33;}
+
+/* Chat messages area */
+.chat-messages{
+  flex:1;overflow-y:auto;
+  padding:16px 16px 8px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.chat-messages::-webkit-scrollbar{width:3px;}
+.chat-messages::-webkit-scrollbar-track{background:transparent;}
+.chat-messages::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:2px;}
+
+.chat-bubble-wrap{display:flex;gap:10px;align-items:flex-end;}
+.chat-bubble-wrap.user{flex-direction:row-reverse;}
+
+.chat-av{
+  width:28px;height:28px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;flex-shrink:0;align-self:flex-start;
+}
+.chat-av.agent{background:linear-gradient(135deg,#af52de,#007aff);color:#fff;font-size:14px;}
+.chat-av.user{background:rgba(255,45,85,.12);color:#ff2d55;font-size:11px;font-weight:700;}
+
+.chat-bubble{
+  max-width:78%;padding:10px 14px;border-radius:16px;
+  font-size:13.5px;line-height:1.55;color:rgba(0,0,0,.8);
+}
+.chat-bubble.agent{
+  background:rgba(255,255,255,.85);
+  border:1px solid rgba(0,0,0,.07);
+  border-radius:4px 16px 16px 16px;
+  box-shadow:0 2px 8px rgba(31,38,135,.06);
+}
+.chat-bubble.user{
+  background:linear-gradient(135deg,#007aff,#0057b8);
+  color:#fff;
+  border-radius:16px 16px 4px 16px;
+}
+.chat-bubble-time{
+  font-size:10px;color:rgba(0,0,0,.28);
+  margin-top:4px;
+  padding:0 2px;
+}
+.chat-bubble-wrap.user .chat-bubble-time{text-align:right;}
+
+/* Confirmation summary card in chat */
+.chat-confirm-card{
+  margin:4px 0;
+  background:rgba(0,122,255,.05);
+  border:1px solid rgba(0,122,255,.15);
+  border-radius:14px;
+  padding:14px;
+}
+.chat-confirm-title{
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:rgba(0,122,255,.7);margin-bottom:10px;
+}
+.chat-confirm-row{
+  display:grid;grid-template-columns:90px 1fr;gap:4px 8px;
+  font-size:12.5px;line-height:1.5;
+}
+.chat-confirm-label{color:rgba(0,0,0,.4);font-weight:600;}
+.chat-confirm-val{color:rgba(0,0,0,.75);}
+
+/* Typing indicator */
+.chat-typing{
+  display:flex;align-items:center;gap:4px;padding:12px 14px;
+  background:rgba(255,255,255,.8);border:1px solid rgba(0,0,0,.07);
+  border-radius:4px 16px 16px 16px;width:fit-content;
+  box-shadow:0 2px 8px rgba(31,38,135,.06);
+}
+.chat-typing span{
+  width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.3);
+  animation:typingBounce 1.2s ease-in-out infinite;
+}
+.chat-typing span:nth-child(2){animation-delay:.2s;}
+.chat-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes typingBounce{
+  0%,60%,100%{transform:translateY(0);}
+  30%{transform:translateY(-5px);}
+}
+
+/* Quick replies */
+.chat-quick-replies{
+  padding:8px 16px 12px;
+  display:flex;gap:8px;flex-wrap:wrap;
+  flex-shrink:0;
+}
+.chat-qr{
+  padding:7px 14px;border-radius:20px;
+  border:1px solid rgba(0,122,255,.35);
+  background:rgba(0,122,255,.06);
+  color:#007aff;font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .15s;
+}
+.chat-qr:hover{background:rgba(0,122,255,.12);border-color:rgba(0,122,255,.5);}
+.chat-qr:disabled{opacity:.4;cursor:not-allowed;}
+
+/* Chat input row */
+.chat-input-row{
+  padding:12px 16px 20px;
+  display:flex;gap:8px;align-items:flex-end;
+  flex-shrink:0;border-top:1px solid rgba(0,0,0,.07);
+  background:rgba(255,255,255,.6);
+}
+.chat-input{
+  flex:1;min-height:38px;max-height:100px;
+  padding:9px 14px;border-radius:20px;
+  border:1px solid rgba(0,0,0,.12);
+  background:rgba(255,255,255,.8);
+  font-size:13.5px;color:rgba(0,0,0,.8);
+  resize:none;outline:none;line-height:1.45;font-family:inherit;
+  transition:border-color .15s;
+}
+.chat-input:focus{border-color:rgba(0,122,255,.5);}
+.chat-send-btn{
+  width:38px;height:38px;border-radius:19px;
+  border:none;background:#007aff;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .18s;
+}
+.chat-send-btn:hover{background:#005ec4;transform:scale(1.05);}
+.chat-send-btn:disabled{background:rgba(0,0,0,.15);cursor:not-allowed;transform:none;}
+
+/* Confirm / Complete buttons in chat */
+.chat-action-row{
+  padding:0 16px 16px;flex-shrink:0;
+  display:flex;gap:8px;
+}
+.chat-confirm-btn{
+  flex:1;padding:12px;border-radius:14px;
+  border:none;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .2s;
+  background:linear-gradient(135deg,#34c759,#1a9e40);
+  color:#fff;
+  box-shadow:0 4px 14px rgba(52,199,89,.3);
+}
+.chat-confirm-btn:hover{filter:brightness(1.06);transform:translateY(-1px);}
+.chat-confirm-btn:disabled{filter:none;transform:none;opacity:.5;cursor:not-allowed;}
+
+/* Blockquote in chat bubbles */
+.chat-blockquote{
+  margin:5px 0;padding:6px 10px;
+  border-radius:6px;
+  background:rgba(99,102,241,.08);
+  border-left:3px solid rgba(99,102,241,.3);
+  font-size:12.5px;color:rgba(0,0,0,.65);
+  line-height:1.55;display:block;
+}
+.chat-list-item{
+  padding:2px 0;
+  font-size:13px;line-height:1.6;display:block;
+}
+
+/* Animate in chat bubbles */
+  0%{opacity:0;transform:translateY(8px) scale(.95);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.bubble-anim{animation:.28s cubic-bezier(.22,1,.36,1) forwards bubbleIn;}
+
+/* Done overlay on chat */
+.chat-done-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(248,250,254,.95);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  gap:12px;text-align:center;padding:32px;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+}
+.chat-done-overlay.show{opacity:1;pointer-events:auto;}
+.chat-done-icon{font-size:48px;}
+.chat-done-title{font-size:20px;font-weight:800;color:rgba(0,0,0,.85);}
+.chat-done-sub{font-size:14px;color:rgba(0,0,0,.45);line-height:1.5;}
+.chat-done-close{
+  margin-top:8px;padding:11px 28px;border-radius:14px;
+  border:none;background:#007aff;color:#fff;
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:all .2s;
+}
+.chat-done-close:hover{background:#005ec4;}
+/* ── History Drawer ── */
+.hdw-backdrop{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.28);
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+  z-index:900;
+  opacity:0;
+  transition:opacity .25s;
+}
+.hdw-backdrop.open{ display:block; opacity:1; }
+.hdw-drawer{
+  position:fixed;
+  top:0;left:0;bottom:0;
+  width:340px;
+  max-width:92vw;
+  background:rgba(252,252,253,.97);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-right:1px solid rgba(0,0,0,.08);
+  box-shadow:8px 0 32px rgba(0,0,0,.12);
+  z-index:901;
+  display:flex;flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.hdw-drawer.open{ transform:translateX(0); }
+.hdw-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 18px 14px;
+  border-bottom:1px solid rgba(0,0,0,.07);
+  flex-shrink:0;
+}
+.hdw-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:15px;font-weight:700;color:rgba(0,0,0,.85);letter-spacing:.1px;
+}
+.hdw-title-icon{ font-size:17px; }
+.hdw-total{
+  font-size:11px;font-weight:700;
+  background:rgba(0,0,0,.07);
+  color:rgba(0,0,0,.5);
+  border-radius:20px;padding:1px 8px;
+}
+.hdw-close{
+  width:30px;height:30px;border-radius:8px;
+  border:none;background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(0,0,0,.35);
+  transition:background .15s,color .15s;
+}
+.hdw-close:hover{ background:rgba(0,0,0,.07);color:rgba(0,0,0,.7); }
+.hdw-body{
+  flex:1;overflow-y:auto;
+  padding:12px 0 24px;
+}
+.hdw-body::-webkit-scrollbar{ width:4px; }
+.hdw-body::-webkit-scrollbar-thumb{ background:rgba(0,0,0,.12);border-radius:4px; }
+/* Date group header */
+.hdw-date-group{
+  padding:10px 18px 4px;
+  font-size:11px;font-weight:700;
+  color:rgba(0,0,0,.3);
+  letter-spacing:.5px;text-transform:uppercase;
+}
+/* Row */
+.hdw-row{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 18px;
+  transition:background .14s;
+}
+.hdw-row:hover{ background:rgba(0,0,0,.03); }
+.hdw-row-dot{
+  width:7px;height:7px;border-radius:50%;
+  flex-shrink:0;margin-top:5px;
+}
+.hdw-row-body{ flex:1;min-width:0; }
+.hdw-row-title{
+  font-size:13px;font-weight:500;color:rgba(0,0,0,.8);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.4;
+}
+.hdw-row-meta{
+  display:flex;align-items:center;gap:6px;margin-top:2px;
+}
+.hdw-row-source{ font-size:11px;color:rgba(0,0,0,.35); }
+.hdw-row-time{   font-size:11px;color:rgba(0,0,0,.25); }
+.hdw-row-tag{
+  font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;
+  background:rgba(0,0,0,.06);color:rgba(0,0,0,.4);
+}
+.hdw-row-tag.done-read{   background:rgba(34,197,94,.1); color:rgba(21,128,61,.75);  }
+.hdw-row-tag.done-finish{ background:rgba(139,92,246,.1);color:rgba(109,40,217,.75); }
+.hdw-row-action{
+  font-size:11px;color:rgba(0,0,0,.35);font-style:italic;
+}
+
+</style>
+</head>
+<body>
+<div class="ds3-root">
+  <!-- NEBULA CANVAS -->
+  <canvas class="ds3-nebula-canvas" id="nebulaCanvas"></canvas>
+
+  <div class="ds3-ui-layer">
+
+    <!-- ROLE BADGE -->
+    <details class="ds3-role-badge" id="roleBadge">
+      <summary>
+        <span class="badge-avatar" id="badgeAvatar" style="background:rgba(255,45,85,.12);color:#ff2d55;">CX</span>
+        <div class="badge-info">
+          <span class="badge-name" id="badgeName">林晨曦</span>
+          <span class="badge-role" id="badgeRole">产品经理</span>
+        </div>
+        <span class="badge-arrow">▾</span>
+      </summary>
+      <div class="ds3-role-dropdown">
+        <a class="drop-link" href="?role=ai-trainer&user=u1">
+          <span class="drop-av" style="background:rgba(0,122,255,.12);color:#007aff;">LW</span>
+          <div class="drop-meta"><div class="drop-meta-name">王丽莎</div><div class="drop-meta-role">AI 训练师</div></div>
+          <span class="drop-uid">u1</span>
+        </a>
+        <a class="drop-link" href="?role=manager&user=u2">
+          <span class="drop-av" style="background:rgba(175,82,222,.12);color:#af52de;">SK</span>
+          <div class="drop-meta"><div class="drop-meta-name">金莎拉</div><div class="drop-meta-role">运营总监</div></div>
+          <span class="drop-uid">u2</span>
+        </a>
+        <a class="drop-link" href="?role=artist&user=u3">
+          <span class="drop-av" style="background:rgba(255,159,10,.12);color:#ff9f0a;">SY</span>
+          <div class="drop-meta"><div class="drop-meta-name">陈思远</div><div class="drop-meta-role">高级游戏美术师</div></div>
+          <span class="drop-uid">u3</span>
+        </a>
+        <a class="drop-link" href="D-PAP-WORKER.html?user=u4">
+          <span class="drop-av" style="background:rgba(28,100,242,.12);color:#1C64F2;">ZY</span>
+          <div class="drop-meta"><div class="drop-meta-name">张悦</div><div class="drop-meta-role">运营专员 · 普通员工</div></div>
+          <span class="drop-uid">u4</span>
+        </a>
+        <a class="drop-link" href="?role=pdm&user=u5">
+          <span class="drop-av" style="background:rgba(255,45,85,.12);color:#ff2d55;">CX</span>
+          <div class="drop-meta"><div class="drop-meta-name">林晨曦</div><div class="drop-meta-role">产品经理</div></div>
+          <span class="drop-uid">u5</span>
+        </a>
+      </div>
+    </details>
+
+    <!-- SCROLLABLE MAIN -->
+    <div class="ds3-scrollbar">
+
+
+      <div class="ds3-content">
+
+        <!-- DATE -->
+        <div class="date-block">
+          <div>
+            <div class="date-main" id="heroDate">2026-04-28</div>
+            <div class="date-day" id="heroDay">Tue</div>
+          </div>
+        </div>
+
+        <!-- ══ PDM ══ -->
+        <div class="view" id="view-pdm">
+
+          <!-- NORMAL BRIEF (Case 1 + Case 2) -->
+          <p class="pdm-brief" id="pdmBrief"></p>
+
+
+          <!-- INLINE MESSAGES: shown in Case 2 -->
+          <div id="pdmAgentSection" class="imc-section" style="display:none;">
+            <div class="sec-label">Dispatch Center</div>
+            <div id="inlineMsgList"></div>
+            <!-- HISTORY TOGGLE -->
+            <button class="imc-history-toggle" id="historyToggle" onclick="toggleHistory()" style="display:none;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              <span id="historyToggleLabel">History</span>
+              <span class="imc-history-count" id="historyCount">0</span>
+            </button>
+            <div class="imc-history-list" id="historyList"></div>
+          </div>
+
+          <!-- DOING（A票执行层，始终存在） -->
+          <div class="section">
+            <div class="sec-label">Doing</div>
+
+            <!-- Part 1: Task card (JS-rendered) -->
+            <div id="pdmDoingCard"></div>
+
+            <!-- Part 2: AI coach (JS-rendered) -->
+            <div class="doing-body" id="pdmDoingBody"></div>
+
+            <!-- Part 3: Input box -->
+            <div class="doing-input" id="pdmDoingInput">
+              <div class="doing-input-icon">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M14 10v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2M8 2v8M5 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <input type="text" id="doingInput" placeholder="描述这次交付的产出物，可附图片/视频…（⌘+Enter 发送）" oninput="onDoingInput(this)"/>
+              <button class="doing-input-clear" id="doingClear" onclick="clearDoingInput()" style="display:none;">×</button>
+              <button class="doing-input-send" id="doingSend">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4M11 1v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- TO DO (JS-rendered) -->
+          <div class="section" id="pdmTodoSection">
+            <div class="todo-hdr">
+              <span class="sec-label" style="margin:0;">To Do</span>
+              <span class="todo-count" id="pdmTodoCount">4 ·</span>
+              <span class="todo-overdue" id="pdmTodoOverdue">4 OVERDUE</span>
+            </div>
+            <div id="pdmTodoList"></div>
+          </div>
+        </div><!-- /pdm -->
+
+        <!-- ══ AI TRAINER ══ -->
+        <div class="view" id="view-ai-trainer">
+          <div class="greeting" id="trainerGreeting">夜深了，还在工作呢 🌙</div>
+          <div class="greeting-sub">这是你今天的任务，共 3 项。</div>
+          <a class="task-row ds3-task-appear" href="#" style="animation-delay:.05s;">
+            <span class="task-icon">🎫</span>
+            <div class="task-body"><div class="task-title">客服工单处理</div><div class="task-desc">处理用户转交的工单，解答疑问并跟进直至关闭。</div></div>
+            <span class="task-badge badge-red">12 待处理</span>
+          </a>
+          <a class="task-row ds3-task-appear" href="#" style="animation-delay:.12s;">
+            <span class="task-icon">📚</span>
+            <div class="task-body"><div class="task-title">知识库维护</div><div class="task-desc">审核和更新知识库条目，确保回答准确性和时效性。</div></div>
+            <span class="task-badge badge-orange">5 待处理</span>
+          </a>
+          <a class="task-row ds3-task-appear" href="#" style="animation-delay:.19s;">
+            <span class="task-icon">✅</span>
+            <div class="task-body"><div class="task-title">服务评估</div><div class="task-desc">评估客服对话质量，标注改进点并提交评分报告。</div></div>
+            <span class="task-badge badge-blue">8 待处理</span>
+          </a>
+          <div class="sec-label" style="margin-top:20px;">🧪 Case List</div>
+          <div class="case-row"><span class="case-id">EC-2023-009</span><span class="case-text">用户投诉游戏内购退款流程繁琐</span><span class="case-status cs-pending">待处理</span></div>
+          <div class="case-row"><span class="case-id">EC-2023-007</span><span class="case-text">账号异常封禁申诉</span><span class="case-status cs-review">处理中</span></div>
+          <div class="case-row"><span class="case-id">EC-2023-005</span><span class="case-text">VIP 会员权益未到账</span><span class="case-status cs-done">已完成</span></div>
+        </div>
+
+        <!-- ══ MANAGER ══ -->
+        <div class="view" id="view-manager">
+          <div class="sec-label">Todo <span style="font-size:13px;font-weight:700;color:rgba(0,0,0,.7);letter-spacing:0;text-transform:none;">9</span></div>
+          <div class="mgr-block ds3-task-appear" style="animation-delay:.05s;">
+            <span class="mgr-type type-interview">Interview</span>
+            <span class="mgr-title">高级客服主管 — 终面</span>
+            <span class="mgr-right">3 →</span>
+          </div>
+          <div class="mgr-sub">2h · 森健二</div>
+          <div class="mgr-block ds3-task-appear" style="animation-delay:.1s;">
+            <span class="mgr-type type-task">Task</span>
+            <span class="mgr-title">Q2 客服 AI 上线评审</span>
+            <span class="mgr-right">6 →</span>
+          </div>
+          <div class="mgr-sub">DDL · 2026-03-19</div>
+          <div class="stat-row" style="margin-top:16px;">
+            <div class="stat-chip">Goal <span class="stat-num">2</span></div>
+            <div class="stat-chip">Dashboard <span class="stat-num">3</span></div>
+            <div class="stat-chip">Brain <span class="stat-num">0</span></div>
+          </div>
+          <div class="goal-card ds3-card-appear">
+            <div class="goal-top"><div class="goal-title">维持客服质量评分 ≥ 92%</div><div class="goal-pts">+72</div></div>
+            <div class="goal-sub">AI 处理常规咨询，人类专注复杂案例和质量保障</div>
+            <div class="ds3-progress-bar"><div class="ds3-progress-fill" style="width:74%;"></div></div>
+            <div class="goal-chips">
+              <span class="goal-chip chip-ai">🤖 11 AI</span>
+              <span class="goal-chip chip-human">👤 9 Human</span>
+              <span class="goal-chip chip-done">✓ 8 Done</span>
+            </div>
+          </div>
+          <div class="goal-card ds3-card-appear" style="animation-delay:.1s;">
+            <div class="goal-top"><div class="goal-title">将 PWA 安装率提升至 35%</div><div class="goal-pts">+48</div></div>
+            <div class="goal-sub">通过智能提示、优化安装流程和基于互动的触发机制，推动移动端用户安装 PWA</div>
+            <div class="ds3-progress-bar"><div class="ds3-progress-fill" style="width:55%;"></div></div>
+            <div class="goal-chips">
+              <span class="goal-chip chip-ai">🤖 9 AI</span>
+              <span class="goal-chip chip-human">👤 7 Human</span>
+              <span class="goal-chip chip-done">✓ 5 Done</span>
+            </div>
+          </div>
+          <div class="mgr-block" style="justify-content:space-between;">
+            <span style="font-size:14px;font-weight:600;">Msg</span>
+            <span style="font-size:13px;color:rgba(0,0,0,.35);">Send →</span>
+          </div>
+        </div>
+
+        <!-- ══ ARTIST ══ -->
+        <div class="view" id="view-artist">
+          <div class="sec-label">🧪 Test List</div>
+          <div class="test-card ds3-task-appear" style="animation-delay:.05s;"><span class="test-type type-ab">A/B 对比</span><div class="test-title">角色立绘风格偏好测试</div><div class="test-desc">比较写实风与卡通风两组角色立绘，收集用户审美偏好数据。</div><div class="test-footer"><span class="test-count">12 条待评分</span><button class="test-btn">开始评分</button></div></div>
+          <div class="test-card ds3-task-appear" style="animation-delay:.1s;"><span class="test-type type-rate">评分</span><div class="test-title">UI 配色方案满意度评估</div><div class="test-desc">对 3 套游戏主界面配色方案进行 1-5 分评分。</div><div class="test-footer"><span class="test-count">6 条待评分</span><button class="test-btn">开始评分</button></div></div>
+          <div class="test-card ds3-task-appear" style="animation-delay:.15s;"><span class="test-type type-ab">A/B 对比</span><div class="test-title">场景背景图光影处理对比</div><div class="test-desc">AI 生成的两版场景背景，评估光影效果自然度。</div><div class="test-footer"><span class="test-count">8 条待评分</span><button class="test-btn">开始评分</button></div></div>
+          <div class="test-card ds3-task-appear" style="animation-delay:.2s;"><span class="test-type type-rate">评分</span><div class="test-title">动态特效流畅度体验测试</div><div class="test-desc">评估技能释放特效在不同设备上的视觉体验。</div><div class="test-footer"><span class="test-count">4 条待评分</span><button class="test-btn">开始评分</button></div></div>
+        </div>
+
+      </div><!-- /ds3-content -->
+    </div><!-- /ds3-scrollbar -->
+
+    <!-- CASES DOCK -->
+    <div class="ds3-case-dock">
+      <div id="casesMenu" class="ds3-case-menu" style="display:none;">
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(1)">
+          <span class="ds3-case-option-label">Case 1</span>
+          <span class="ds3-case-option-title">日常任务（无消息）</span>
+        </button>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(2)">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
+            A1 <span style="font-size:9px;padding:1px 6px;background:rgba(34,197,94,.1);color:rgba(21,128,61,.85);border-radius:4px;font-weight:700;">状态通知</span>
+          </span>
+          <span class="ds3-case-option-title">OA 审批完成通知</span>
+        </button>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(3)" style="display:none;">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
+            B1 <span style="font-size:9px;padding:1px 6px;background:rgba(139,92,246,.12);color:rgba(109,40,217,.85);border-radius:4px;font-weight:700;">快捷任务</span>
+          </span>
+          <span class="ds3-case-option-title">小秘 · CP 道具补偿</span>
+        </button>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(4)" style="display:none;">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
+            B2 <span style="font-size:9px;padding:1px 6px;background:rgba(139,92,246,.12);color:rgba(109,40,217,.85);border-radius:4px;font-weight:700;">会话任务</span>
+          </span>
+          <span class="ds3-case-option-title">Minion · X 官号发布任务</span>
+        </button>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(5)" style="display:none;">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
+            C1 <span style="font-size:9px;padding:1px 6px;background:rgba(59,130,246,.1);color:rgba(29,78,216,.85);border-radius:4px;font-weight:700;">跳转任务</span>
+          </span>
+          <span class="ds3-case-option-title">i18n · 翻译监修</span>
+        </button>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(6)">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
+            D1 <span style="font-size:9px;padding:1px 6px;background:rgba(249,115,22,.1);color:rgba(194,65,12,.85);border-radius:4px;font-weight:700;">Need Input</span>
+          </span>
+          <span class="ds3-case-option-title">Minion · 受众分组确认</span>
+        </button>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(7)">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
+            E1 <span style="font-size:9px;padding:1px 6px;background:rgba(168,85,247,.1);color:rgba(126,34,206,.85);border-radius:4px;font-weight:700;">Review</span>
+          </span>
+          <span class="ds3-case-option-title">Minion · X 文案审阅</span>
+        </button>
+      </div>
+      <button class="ds3-case-trigger" type="button" id="casesTrigger" onclick="toggleCases()">
+        <span class="ds3-case-trigger-dot"></span>
+        <span>Cases</span>
+        <span class="ds3-case-chevron" id="casesChev">⌃</span>
+      </button>
+    </div>
+
+  </div><!-- /ds3-ui-layer -->
+
+  <!-- MINION CHAT OVERLAY -->
+  <div class="chat-overlay" id="chatOverlay">
+    <div class="chat-ov-hd">
+      <button class="chat-ov-back" onclick="closeChatOverlay()">‹</button>
+      <div class="chat-ov-agent">🤖</div>
+      <div class="chat-ov-info">
+        <div class="chat-ov-agent-name" id="chatAgentName">Minion Agent</div>
+        <div class="chat-ov-task-name" id="chatTaskName">任务标题</div>
+      </div>
+      <div class="chat-ov-status" id="chatStatus">进行中</div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-quick-replies" id="chatQuickReplies"></div>
+    <div class="chat-input-row" id="chatInputRow">
+      <textarea class="chat-input" id="chatInput" rows="1" placeholder="输入回复…" oninput="autoGrowInput(this)"></textarea>
+      <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+    <div class="chat-action-row" id="chatActionRow" style="display:none;">
+      <button class="chat-confirm-btn" id="chatConfirmBtn" onclick="confirmChatTask()">✓ 确认执行，任务完成</button>
+    </div>
+    <!-- Done overlay -->
+    <div class="chat-done-overlay" id="chatDoneOverlay">
+      <div class="chat-done-icon">✅</div>
+      <div class="chat-done-title">任务已完成</div>
+      <div class="chat-done-sub" id="chatDoneSub">Minion Agent 将开始执行，执行结果将以消息通知你。</div>
+      <button class="chat-done-close" onclick="closeChatDone()">返回消息</button>
+    </div>
+  </div>
+
+</div><!-- /ds3-root -->
+
+<script>
+/* ── NEBULA CANVAS ── */
+(function(){
+  const canvas = document.getElementById('nebulaCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, orbs = [];
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function makeOrb(){
+    const hues = [210, 260, 190, 230, 280];
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 120 + Math.random() * 200,
+      hue: hues[Math.floor(Math.random() * hues.length)],
+      a: 0.03 + Math.random() * 0.05,
+      vx: (Math.random() - .5) * .18,
+      vy: (Math.random() - .5) * .18,
+    };
+  }
+
+  function init(){
+    resize();
+    orbs = Array.from({length:7}, makeOrb);
+  }
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+    for(const o of orbs){
+      const grad = ctx.createRadialGradient(o.x,o.y,0, o.x,o.y,o.r);
+      grad.addColorStop(0,  `hsla(${o.hue},70%,72%,${o.a})`);
+      grad.addColorStop(.5, `hsla(${o.hue},60%,78%,${o.a*.4})`);
+      grad.addColorStop(1,  `hsla(${o.hue},50%,85%,0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(o.x, o.y, o.r, 0, Math.PI*2);
+      ctx.fill();
+      o.x += o.vx; o.y += o.vy;
+      if(o.x < -o.r || o.x > W+o.r) o.vx *= -1;
+      if(o.y < -o.r || o.y > H+o.r) o.vy *= -1;
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  init(); draw();
+})();
+
+/* ── USERS ── */
+const USERS={
+  u1:{initials:'LW',name:'王丽莎', role:'AI 训练师',   avBg:'rgba(0,122,255,.12)',avColor:'#007aff', view:'ai-trainer'},
+  u2:{initials:'SK',name:'金莎拉', role:'运营总监',     avBg:'rgba(175,82,222,.12)',avColor:'#af52de',view:'manager'},
+  u3:{initials:'SY',name:'陈思远', role:'高级游戏美术师',avBg:'rgba(255,159,10,.12)',avColor:'#ff9f0a',view:'artist'},
+  u5:{initials:'CX',name:'林晨曦', role:'产品经理',     avBg:'rgba(255,45,85,.12)', avColor:'#ff2d55',view:'pdm'},
+};
+
+const params = new URLSearchParams(location.search);
+const userId = params.get('user')||'u5';
+const user   = USERS[userId]||USERS.u5;
+
+/* Date */
+const now  = new Date();
+const daysEn = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const daysZh = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+const isPdmView = (USERS[userId]||USERS.u5).view === 'pdm';
+document.getElementById('heroDate').textContent = isPdmView
+  ? `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日`
+  : now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+document.getElementById('heroDay').textContent = isPdmView ? daysZh[now.getDay()] : daysEn[now.getDay()];
+
+/* Badge */
+const av = document.getElementById('badgeAvatar');
+av.textContent           = user.initials;
+av.style.background      = user.avBg;
+av.style.color           = user.avColor;
+document.getElementById('badgeName').textContent = user.name;
+document.getElementById('badgeRole').textContent = user.role;
+
+/* Active drop link */
+document.querySelectorAll('.drop-link').forEach(el=>{
+  if((el.getAttribute('href')||'').includes('user='+userId)) el.classList.add('active');
+});
+
+/* Show view */
+document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+const vEl = document.getElementById('view-'+user.view);
+if(vEl) vEl.classList.add('active');
+
+/* Greeting */
+const grEl = document.getElementById('trainerGreeting');
+if(grEl){
+  const h = now.getHours();
+  grEl.textContent = h<6 ? '夜深了，还在工作呢 🌙'
+                   : h<12? '早上好，新的一天开始了 ☀️'
+                   : h<18? '下午好，保持专注 💪'
+                   :       '晚上好，辛苦了 🌙';
+}
+
+/* Close badge when clicking outside */
+document.addEventListener('click', e=>{
+  const bd = document.getElementById('roleBadge');
+  if(!bd.contains(e.target)) bd.removeAttribute('open');
+});
+
+/* ── CASES ── */
+let casesOpen = false;
+function toggleCases(){
+  casesOpen = !casesOpen;
+  const menu = document.getElementById('casesMenu');
+  const btn  = document.getElementById('casesTrigger');
+  const chev = document.getElementById('casesChev');
+  menu.style.display = casesOpen ? 'flex' : 'none';
+  btn.classList.toggle('is-open', casesOpen);
+  chev.classList.toggle('is-open', casesOpen);
+}
+
+/* ── QUICK PICK ── */
+const PAIRS=[
+  {
+    q:'Which video do you prefer?',
+    type:'video',
+    a:{
+      videos:[
+        {src:'https://www.w3schools.com/html/mov_bbb.mp4', label:'Big Buck Bunny — Trailer'},
+        {src:'https://www.w3schools.com/html/movie.mp4',   label:'Big Buck Bunny — Clip 2'},
+      ]
+    },
+    b:{
+      videos:[
+        {src:'https://www.w3schools.com/html/movie.mp4',   label:'Sample Reel A'},
+        {src:'https://www.w3schools.com/html/mov_bbb.mp4', label:'Sample Reel B'},
+        {src:'https://www.w3schools.com/html/movie.mp4',   label:'Sample Reel C'},
+      ]
+    }
+  },
+  {
+    q:'Vibes-only — which one?',
+    a:{g:'g1a', title:'情だはなる'},
+    b:{g:'g1b', title:'贝世物じゃねと\n英勇者の戦いは', dark:true}
+  },
+  {
+    q:'Which one would you ship?',
+    a:{g:'g2a', title:'トーナメントを制せよ 頂点を摑め！'},
+    b:{g:'g2b', title:'傾付は、また佳らない！\nレベルアップ'}
+  },
+  {
+    q:'Which thumbnail would you tap first?',
+    a:{g:'g3a', title:'⚜ QB', large:true},
+    b:{g:'g3b', title:'SEIREI\nSPIRIT', dark:true}
+  },
+  {
+    q:'Pick the more clickable one.',
+    a:{g:'g4a', title:'記号\n陳家名章 城曲指揮'},
+    b:{g:'g4b', title:'弾łく\n挑よう\nTUTORIAL 🎀', kawaii:true}
+  },
+];
+
+let qpOpen=false;
+const qpPicks={};     // {pairIdx: 'A'|'B'}
+const qpVidIdx={};    // {'0A': currentVideoIndex, ...}
+
+function makeVideoCard(p, i, slot){
+  const opt = p[slot === 'A' ? 'a' : 'b'];
+  const videos = opt.videos;
+  const picked = qpPicks[i];
+  const cls = picked === slot ? ' selected' : picked && picked !== slot ? ' dimmed' : '';
+  const cardKey = `${i}${slot}`;
+  const curIdx = qpVidIdx[cardKey] || 0;
+  const vid_id = `qpVid${cardKey}`;
+  const multi = videos.length > 1;
+
+  const dots = multi ? `<div class="qp-carousel-dots">${
+    videos.map((_,di)=>`<div class="qp-carousel-dot${di===curIdx?' active':''}"
+      onclick="event.stopPropagation();qpVidNav('${cardKey}',${di})"></div>`).join('')
+  }</div>` : '';
+
+  const arrows = multi ? `
+    <button class="qp-carousel-prev" onclick="event.stopPropagation();qpVidNav('${cardKey}',${(curIdx-1+videos.length)%videos.length})"${curIdx===0?' style="opacity:.3"':''}>
+      <svg width="8" height="12" viewBox="0 0 8 12" fill="white"><path d="M7 1L1 6l6 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    </button>
+    <button class="qp-carousel-next" onclick="event.stopPropagation();qpVidNav('${cardKey}',${(curIdx+1)%videos.length})"${curIdx===videos.length-1?' style="opacity:.3"':''}>
+      <svg width="8" height="12" viewBox="0 0 8 12" fill="white"><path d="M1 1l6 5-6 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    </button>` : '';
+
+  const videosJson = JSON.stringify(videos).replace(/"/g,'&quot;');
+
+  return `
+    <div class="qp-img-card${cls}" id="qpP${cardKey}" onclick="pickImg(${i},'${slot}')"
+         onmouseenter="qpVideoPlay('${vid_id}')" onmouseleave="qpVideoStop('${vid_id}')">
+      <div class="qp-video-thumb">
+        <video id="${vid_id}" src="${videos[curIdx].src}" muted playsinline loop preload="metadata"></video>
+        <div class="qp-video-overlay">
+          <div class="qp-play-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="white"><path d="M4 2.5l9 5.5-9 5.5V2.5z"/></svg>
+          </div>
+        </div>
+        ${arrows}
+        ${dots}
+        <button class="qp-play-btn" onclick="event.stopPropagation();openQpVideoModal(${i},'${slot}')">
+          <svg width="11" height="13" viewBox="0 0 11 13" fill="white"><path d="M1 1l9 5.5L1 12V1z"/></svg>
+        </button>
+      </div>
+      <div class="qp-img-lbl">${slot}${multi ? ` <span style="font-size:10px;opacity:.5;">(${curIdx+1}/${videos.length})</span>` : ''}</div>
+    </div>`;
+}
+
+function qpVidNav(cardKey, newIdx){
+  qpVidIdx[cardKey] = newIdx;
+  renderAllPairs();
+  // re-attach hover state if was playing
+}
+
+function makeImageCard(p, i, slot){
+  const opt = slot === 'A' ? p.a : p.b;
+  const picked = qpPicks[i];
+  const cls = picked === slot ? ' selected' : picked && picked !== slot ? ' dimmed' : '';
+  return `
+    <div class="qp-img-card${cls}" id="qpP${i}${slot}" onclick="pickImg(${i},'${slot}')">
+      <div class="qp-img-thumb ${opt.g}">
+        <div class="qp-thumb-inner">
+          <div class="qp-thumb-title${opt.kawaii?' kawaii':''}">${opt.title.replace(/\n/g,'<br>')}</div>
+        </div>
+        <button class="qp-zoom-btn" onclick="event.stopPropagation();openQpLightbox('${opt.g}','${opt.title.replace(/\n/g,' ')}')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="white" stroke-width="1.6"/><path d="M10 10l3.5 3.5" stroke="white" stroke-width="1.6" stroke-linecap="round"/><path d="M5 6.5h3M6.5 5v3" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="qp-img-lbl">${slot}</div>
+    </div>`;
+}
+
+function renderAllPairs(){
+  const list = document.getElementById('qpPairsList');
+  list.innerHTML = PAIRS.map((p,i)=>{
+    const cardA = p.type==='video' ? makeVideoCard(p,i,'A') : makeImageCard(p,i,'A');
+    const cardB = p.type==='video' ? makeVideoCard(p,i,'B') : makeImageCard(p,i,'B');
+    return `
+    <div class="qp-pair">
+      <div class="qp-pair-q">${p.q}</div>
+      <div class="qp-img-opts">${cardA}${cardB}</div>
+    </div>`;
+  }).join('');
+}
+
+function qpVideoPlay(id){
+  const v = document.getElementById(id);
+  if(v) v.play();
+}
+function qpVideoStop(id){
+  const v = document.getElementById(id);
+  if(v){ v.pause(); v.currentTime=0; }
+}
+
+// Quick Pick video modal
+let _qpVmVideos = [];
+let _qpVmCurIdx = 0;
+
+function openQpVideoModal(pairIdx, slot){
+  const p = PAIRS[pairIdx];
+  const opt = p[slot === 'A' ? 'a' : 'b'];
+  _qpVmVideos = opt.videos;
+  // start from current carousel position
+  _qpVmCurIdx = qpVidIdx[`${pairIdx}${slot}`] || 0;
+  _renderQpVmModal();
+  document.getElementById('qpVideoModal').classList.add('open');
+}
+
+function _renderQpVmModal(){
+  const player = document.getElementById('qpVmPlayer');
+  const label  = document.getElementById('qpVmNowLabel');
+  const list   = document.getElementById('qpVmList');
+
+  const cur = _qpVmVideos[_qpVmCurIdx];
+  player.src = cur.src;
+  player.play();
+  label.textContent = cur.label;
+
+  list.innerHTML = _qpVmVideos.map((v, i) => `
+    <div class="qp-vm-list-item${i===_qpVmCurIdx?' active':''}" onclick="qpVmPlayIdx(${i})">
+      <div class="qp-vm-list-num">${i+1}</div>
+      <span>${v.label}</span>
+    </div>`).join('');
+}
+
+function qpVmPlayIdx(idx){
+  _qpVmCurIdx = idx;
+  _renderQpVmModal();
+}
+
+function closeQpVideoModal(){
+  const player = document.getElementById('qpVmPlayer');
+  player.pause();
+  player.src = '';
+  document.getElementById('qpVideoModal').classList.remove('open');
+}
+
+// Quick Pick lightbox
+function openQpLightbox(gradientClass, caption){
+  const lb = document.getElementById('qpLightbox');
+  const thumb = document.getElementById('qpLbThumb');
+  const cap = document.getElementById('qpLbCaption');
+  thumb.className = 'qp-lb-thumb ' + gradientClass;
+  cap.textContent = caption;
+  lb.classList.add('open');
+}
+function closeQpLightbox(){
+  document.getElementById('qpLightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeQpLightbox(); closeQpVideoModal(); } });
+
+function pickImg(pairIdx, choice){
+  if(qpPicks[pairIdx]) return;
+  qpPicks[pairIdx] = choice;
+  renderAllPairs();
+  const remaining = PAIRS.length - Object.keys(qpPicks).length;
+  document.getElementById('qpBadge').textContent = remaining;
+  document.getElementById('qpLeftText').textContent = remaining;
+  if(remaining === 0){
+    setTimeout(()=>{
+      document.getElementById('qpPairsList').style.display='none';
+      document.getElementById('qpDone').style.display='block';
+      document.getElementById('qpBadge').textContent='0';
+    }, 500);
+  }
+}
+
+function toggleQP(){
+  qpOpen=!qpOpen;
+  document.getElementById('qpExpanded').classList.toggle('show',qpOpen);
+  document.getElementById('qpChevron').classList.toggle('open',qpOpen);
+  if(qpOpen) renderAllPairs();
+}
+
+if(user.view==='pdm'){/* no-op: pairs render on expand */}
+
+/* ── PDM MOCK (林晨曦) ── */
+const PDM_CASES = [
+  { id:'AB-2026-041', title:'首页推荐文案 A/B 测试 — 游戏活动版' },
+  { id:'AB-2026-038', title:'Push 通知点击率优化实验' },
+  { id:'AB-2026-035', title:'新用户引导页文案对比' },
+  { id:'AB-2026-032', title:'商城促销 Banner 点击偏好' },
+  { id:'AB-2026-029', title:'客服快捷回复语气测试' },
+  { id:'AB-2026-026', title:'赛季 Pass 主视觉偏好测试' },
+  { id:'AB-2026-023', title:'Loading 页文案长度对比' },
+  { id:'AB-2026-020', title:'成就弹窗 CTA 按钮文案' },
+];
+
+const pdmTasks = [
+  {
+    title:'智能客服周会纪要 + Action 同步',
+    ddlLabel:'DDL 2026-05-12 · 已逾期 6 day', overdue:true, overdueDays:6,
+    desc:'会后 2 小时内同步纪要到 Notion，并把 Action 项录入 Linear；@ 相关人确认 owner。',
+    coach:{ case:'overdue', overdueDays:6, suggestions:[
+      'Action 项格式统一为「[owner] @[ddl] — 具体动作」，便于自动跟进',
+      '只摘录决策与 Action，会上讨论过程不展开，控制阅读时长 ≤ 3 分钟',
+      '纪要发出后在周会群置顶链接并 @ 所有 Action owner',
+    ]},
+  },
+  {
+    title:'Q2 客服 AI 上线评审 deck',
+    ddlLabel:'DDL 2026-05-12 · 已逾期 6 day', overdue:true, overdueDays:6,
+    desc:'汇总三条管线灰度数据 + 各业务线 checklist + P0/P1 降级预案，准备运营 VP 评审 deck（≤ 8 页）。',
+    coach:{ case:'overdue', overdueDays:6, suggestions:[
+      '砍掉 roadmap 附录，只保留里程碑与风险矩阵',
+      '用上周灰度结论直接出一版决策摘要，附 1 页数据截图',
+      '今晚 20:00 前发评审群预热并锁定会议时段',
+    ]},
+  },
+  {
+    title:'Q2 留存项目 PRD v0.3',
+    ddlLabel:'DDL 2026-05-14 · 已逾期 4 day', overdue:true, overdueDays:4,
+    desc:'补充召回推送频控、跨语言文案降级、与游戏内活动冲突避让逻辑。',
+    coach:{ case:'overdue', overdueDays:4, suggestions:[
+      '频控规则先写默认值表，边界 case 标 TBD 不阻塞评审',
+      '活动冲突章节引用运营日历截图即可',
+      'v0.3 只改第 3、5 章，其余章节标注「无变更」',
+    ]},
+  },
+  {
+    title:'日本市场用户访谈纪要',
+    ddlLabel:'DDL 2026-05-15 · 已逾期 3 day', overdue:true, overdueDays:3,
+    desc:'整理 6 位日本玩家访谈录音，输出 ≤ 8 条主题洞察清单。',
+    coach:{ case:'overdue', overdueDays:3, suggestions:[
+      '按「付费动机 / 社交 / 挫败点」三桶归类即可',
+      '每条洞察附 1 句原话引用，不展开全文转录',
+      '洞察清单发出后同步给日区运营负责人',
+    ]},
+  },
+  {
+    title:'PWA 安装率数据复盘',
+    ddlLabel:'DDL 2026-05-16 · 已逾期 2 day', overdue:true, overdueDays:2,
+    desc:'安装率 28%→32%，7 日留存 -2pp；需拆分原因并给出下阶段实验方案。',
+    coach:{ case:'overdue', overdueDays:2, suggestions:[
+      '先画漏斗：曝光 → 点击安装 → 完成安装 → D7 留存',
+      '按渠道 / 机型拆一层，定位掉点环节',
+      '实验方案只列 2 个可本周启动的项',
+    ]},
+  },
+  {
+    title:'Creator Console 需求澄清文档',
+    ddlLabel:'DDL 2026-05-17 · 已逾期 1 day', overdue:true, overdueDays:1,
+    desc:'对齐研发与运营对 Console 权限模型、审计日志、灰度开关的共识。',
+    coach:{ case:'overdue', overdueDays:1, suggestions:[
+      '先把已定稿的 3 个模块发出，剩余标 TBD',
+      '拉 15 分钟 sync 逐条关掉 open question',
+      '今晚同步到 Jira，避免下游再等',
+    ]},
+  },
+  {
+    title:'Payment SDK 对接反馈汇总',
+    ddlLabel:'DDL 2026-05-15 · 已逾期 3 day', overdue:true, overdueDays:3,
+    desc:'汇总各游戏线 SDK 对接阻塞项，输出优先级与责任人矩阵。',
+    coach:{ case:'overdue', overdueDays:3, suggestions:[
+      '阻塞项按 P0/P1 分两表，P0 必须今日有 owner',
+      '已关闭项移到附录，正文只保留未决',
+      '矩阵发出后钉钉群 @ 各线技术负责人',
+    ]},
+  },
+  {
+    title:'Season Pass 文档 · 合规审阅版',
+    ddlLabel:'DDL 2026-05-20 · 剩余 2 day', overdue:false,
+    desc:'输出目录 + 核心章节骨架，关键截图今日内敲定，预留半天给 legal review。',
+    coach:{ case:'burndown', elapsedPct:82, daysLeft:2, suggestions:[
+      '先出目录 + 核心章节骨架',
+      '关键截图今天内敲定',
+      '预留半天给 legal review',
+    ]},
+  },
+  {
+    title:'跨端账号体系 PRD · 评审预读包',
+    ddlLabel:'DDL 2026-05-22 · 剩余 4 day', overdue:false,
+    desc:'整理背景、方案对比、迁移风险与灰度计划，供架构评审预读。',
+    coach:{ case:'normal', daysLeft:4, suggestions:[
+      '背景 1 页、方案对比 1 页、风险与灰度各半页',
+      '预读包周五 18:00 前发出即可，不必等全文档定稿',
+      'open question 单独列表，会上只讨论未决项',
+    ]},
+  },
+];
+
+let pdmDoingIdx = -1;
+
+function getDoingTitle(){
+  if(pdmDoingIdx >= 0) return pdmTasks[pdmDoingIdx].title;
+  if(aTicketDoingIdx >= 0 && aTickets[aTicketDoingIdx]) return aTickets[aTicketDoingIdx].title;
+  return '';
+}
+function getDoingCoach(){
+  if(pdmDoingIdx >= 0) return pdmTasks[pdmDoingIdx].coach;
+  if(aTicketDoingIdx >= 0 && aTickets[aTicketDoingIdx]) return aTickets[aTicketDoingIdx].coach;
+  return null;
+}
+function getTodoOverduePdm(){
+  const list = [];
+  pdmTasks.forEach((t,i) => { if(t.overdue && i !== pdmDoingIdx) list.push(t); });
+  aTickets.forEach((t,i) => {
+    if(i !== aTicketDoingIdx) list.push({ title:t.title, overdueDays: i < 3 ? 3 - i : 1 });
+  });
+  return list.sort((a,b) => (b.overdueDays||0) - (a.overdueDays||0));
+}
+function renderPdmBrief(){
+  const el = document.getElementById('pdmBrief');
+  if(!el) return;
+  const h = now.getHours();
+  const greet = h < 12 ? '上午好' : h < 18 ? '下午好' : '晚上好';
+  const todoN = pdmTasks.filter((_,i) => i !== pdmDoingIdx).length + aTickets.filter((_,i) => i !== aTicketDoingIdx).length;
+  const overdueN = pdmTasks.filter((t,i) => t.overdue && i !== pdmDoingIdx).length + aTickets.filter((_,i) => i !== aTicketDoingIdx).length;
+  el.innerHTML = `${greet}，<strong>林晨曦</strong>。今日共 <strong>${1 + todoN}</strong> 项任务在跟进，To do 中 <strong>${overdueN}</strong> 项已逾期；请优先完成当前 Doing 的 output。`;
+}
+function renderPdmCoach(){
+  const body = document.getElementById('pdmDoingBody');
+  if(!body) return;
+  const title = getDoingTitle();
+  const coach = getDoingCoach();
+  if(!coach || !title){ body.innerHTML = ''; return; }
+  const overdueTodos = getTodoOverduePdm();
+  let html = '';
+  if(overdueTodos.length > 0 && coach.case !== 'overdue'){
+    const top = overdueTodos[0];
+    const topTitle = (top.title || '').length > 28 ? top.title.slice(0,28) + '…' : top.title;
+    html += `<p>⚠ To do 里已有 ${overdueTodos.length} 项逾期（最紧：「${topTitle}」逾期 ${top.overdueDays || 3} day）。腾出手就先清这批。</p>`;
+  }
+  if(coach.case === 'overdue'){
+    html += `<div class="doing-warn"><span class="doing-warn-icon">❗</span><span>「${title}」已逾期 ${coach.overdueDays} day —— 立刻把当前 output 先交出来止血，哪怕 80% 版本也先给我：</span></div>`;
+  } else if(coach.case === 'burndown'){
+    html += `<p>「${title}」已消耗 ${coach.elapsedPct}% 的计划时间，只剩 ${coach.daysLeft} day。按下面顺序收口：</p>`;
+  } else {
+    html += `<p>离 DDL 还有 ${coach.daysLeft} day，节奏稳。建议按下面顺序推进：</p>`;
+  }
+  if(coach.suggestions?.length) html += '<ol>' + coach.suggestions.map(s => `<li>${s}</li>`).join('') + '</ol>';
+  html += '<p class="doing-cta">做完后点右边的 ➤ 把 output 抓紧交我，自动接下一个任务。</p>';
+  body.innerHTML = html;
+}
+function renderPdmCasesDock(){
+  if(user.view !== 'pdm') return;
+  const menu = document.getElementById('casesMenu');
+  if(!menu) return;
+  menu.innerHTML = PDM_CASES.map((c,i) => `
+    <button class="ds3-case-option${i===0?' is-active':''}" type="button">
+      <span class="ds3-case-option-label">${c.id}</span>
+      <span class="ds3-case-option-title">${c.title}</span>
+    </button>`).join('');
+}
+
+function renderPdmDoing(){
+  if(pdmDoingIdx < 0) return; // A-ticket doing is handled separately
+  const t = pdmTasks[pdmDoingIdx];
+  document.getElementById('pdmDoingCard').innerHTML = `
+    <div class="g-card doing ds3-card-appear doing-card-anim">
+      <div class="card-title">${t.title}</div>
+      <div class="ddl-row"><span class="ddl-dot"></span>${t.ddlLabel}</div>
+      <div class="doing-card-desc">${t.desc}</div>
+    </div>`;
+  renderPdmCoach();
+  renderPdmBrief();
+}
+
+function makeUrgentCards(tickets){
+  const urgentTag = `<span style="flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:2px 7px;border-radius:6px;
+    background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">⚠ Urgent</span>`;
+
+  return tickets.map((at) => {
+    const realIdx = aTickets.indexOf(at);
+    const desc = at.label.replace(/^\[WARNING\]\s+\S+\s+—\s+/, '');
+    const btn = `
+      <button class="todo-start-btn" onclick="event.stopPropagation();window.switchToDoing(-1,${realIdx})" title="切换为 Doing">
+        <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6-10 6V0z"/></svg>
+      </button>`;
+    return `
+    <div class="g-card todo-card" style="background:rgba(255,255,255,.5);">
+      <div class="card-title" style="padding-right:36px;display:flex;align-items:center;gap:6px;">${urgentTag}<span>${at.title}</span></div>
+      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${at.ddl}</div>
+      <div class="card-desc"><div style="color:rgba(0,0,0,.6);font-size:12px;line-height:1.5;">${desc}</div></div>
+      ${btn}
+    </div>`;
+  }).join('');
+}
+
+function renderPdmTodo(){
+  const todos = pdmTasks.filter((_,i)=> pdmDoingIdx < 0 || i !== pdmDoingIdx);
+  const todoATickets = (typeof aTickets === 'undefined')
+    ? []
+    : aTickets.filter((_,i) => i !== aTicketDoingIdx);
+  const totalCount = todos.length + todoATickets.length;
+  const overdueCount = todos.filter(t=>t.overdue).length + todoATickets.length;
+  document.getElementById('pdmTodoCount').textContent = totalCount + ' ·';
+  document.getElementById('pdmTodoOverdue').textContent = overdueCount + ' OVERDUE';
+
+  // urgent A-tickets: flat display, no collapse
+  const urgentHtml = makeUrgentCards(todoATickets);
+
+  document.getElementById('pdmTodoList').innerHTML = urgentHtml + todos.map((t, listIdx)=>{
+    const realIdx = pdmTasks.indexOf(t);
+    return `
+      <div class="g-card todo-card ${t.overdue?'overdue':''} ds3-task-appear" style="animation-delay:${(listIdx+todoATickets.length)*0.07}s;">
+        <div class="card-title">${t.title}</div>
+        <div class="ddl-row"><span class="ddl-dot"></span>${t.ddlLabel}</div>
+        <div class="card-desc">${t.desc}</div>
+        <button class="todo-start-btn" onclick="switchToDoing(${realIdx})" title="切换为 Doing">
+          <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6-10 6V0z"/></svg>
+        </button>
+      </div>`;
+  }).join('');
+}
+
+function switchToDoing(newDoingIdx){
+  pdmDoingIdx = newDoingIdx;
+  renderPdmDoing();
+  renderPdmTodo();
+  renderPdmBrief();
+  // Scroll doing card into view smoothly
+  const card = document.getElementById('pdmDoingCard');
+  if(card) card.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* ── ALERT A-TICKETS ── */
+const aTickets = [
+  {
+    id: 'A-001',
+    title: '[publisher] vividarmy-game-server — deploy_failed',
+    severity: 'Urgent',
+    owner: '王彬-Wang Bin',
+    ddl: '2026-05-18 · 今日 18:00',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] publisher — npm install timeout 导致部署失败，TW 区发布阻断',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'overdue', overdueDays:1, suggestions:[
+      '在 Publisher 控制台确认失败阶段与 commit hash，截图附 A 票 Output',
+      '钉钉 @ 王彬 同步 npm registry 超时日志，请求 30min 内给 ETA',
+      '若 18:00 前无法恢复，执行回滚预案并在 CP 群公告',
+    ]},
+  },
+  {
+    id: 'A-002',
+    title: '[publisher] vividarmy-game-server — service_down',
+    severity: 'Urgent',
+    owner: '王彬-Wang Bin',
+    ddl: '2026-05-18 · 已逾期',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] publisher — vividarmy-game-server 内存超限 OOM 重启',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'overdue', overdueDays:2, suggestions:[
+      '拉取近 1h 内存曲线与 GC 日志，确认是否新版本引入',
+      '临时扩容实例并观察 15min，稳定后回复 CP',
+      '创建 follow-up A 票跟踪根因修复',
+    ]},
+  },
+  {
+    id: 'A-003',
+    title: '[publisher] production — rollback_timeout',
+    severity: 'Urgent',
+    owner: '王彬-Wang Bin',
+    ddl: '2026-05-17 · 已逾期',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] publisher — production 回滚验证超时，灰度未收敛',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'overdue', overdueDays:3, suggestions:[
+      '列出回滚检查项完成度，未完成项标红并指派 owner',
+      '与 QA 开 10min 对齐，确认可强制关闭灰度的条件',
+      '今日内输出一页回滚结论给运营 VP',
+    ]},
+  },
+  {
+    id: 'A-004',
+    title: '[gateway] api-core — error_rate_spike',
+    severity: 'Urgent',
+    owner: '李航-Li Hang',
+    ddl: '2026-05-18 · 今日 20:00',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] gateway — 502 错误率 12% 持续 8min，影响登录接口',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'overdue', overdueDays:0, suggestions:[
+      '确认是否单 AZ 故障，必要时切换流量',
+      '同步客服准备标准话术',
+    ]},
+  },
+  {
+    id: 'A-005',
+    title: '[data] player-db — connection_pool_exhausted',
+    severity: 'Urgent',
+    owner: '赵敏-Zhao Min',
+    ddl: '2026-05-19 · 明日 10:00',
+    type: 'bug',
+    dept: 'Tech',
+    label: '[WARNING] data — 连接池打满，部分查询排队 > 3s',
+    url: 'chat_urgent_warning.html?scene=publisher-alert',
+    coach: { case:'normal', daysLeft:1, suggestions:[
+      '收集慢查询 TOP5 与对应业务方',
+      '评估临时升配 vs 限流方案',
+    ]},
+  },
+];
+let aTicketDoingIdx = 0;
+
+function renderATicketDoing() {
+  const at = aTickets[aTicketDoingIdx];
+  // strip "[WARNING] system — " prefix from label for cleaner display
+  const desc = at.label.replace(/^\[WARNING\]\s+\S+\s+—\s+/, '');
+  document.getElementById('pdmDoingCard').innerHTML = `
+    <div class="g-card doing ds3-card-appear doing-card-anim">
+      <div class="card-title" style="display:flex;align-items:center;gap:6px;">
+        <span style="flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+          padding:2px 7px;border-radius:6px;
+          background:rgba(255,59,48,.1);color:#c0392b;border:1px solid rgba(255,59,48,.2);">⚠ Urgent</span>
+        <span>${at.title}</span>
+      </div>
+      <div class="ddl-row"><span class="ddl-dot"></span>DDL ${at.ddl}</div>
+      <div class="doing-card-desc">${desc}</div>
+    </div>`;
+  renderPdmCoach();
+  renderPdmBrief();
+}
+
+/* Override switchToDoing to handle A-tickets (idx = -1, aIdx = which aTicket) */
+const _origSwitchToDoing = switchToDoing;
+window.switchToDoing = function(newDoingIdx, aIdx){
+  if(newDoingIdx === -1){
+    if(aIdx !== undefined) aTicketDoingIdx = aIdx;
+    pdmDoingIdx = -1;
+    renderATicketDoing();
+    renderPdmTodo();
+    renderPdmBrief();
+    document.getElementById('pdmDoingCard').scrollIntoView({behavior:'smooth', block:'nearest'});
+  } else {
+    aTicketDoingIdx = -1; // no A-ticket in Doing when a regular task takes over
+    if(pdmDoingIdx === -1) pdmDoingIdx = 0;
+    _origSwitchToDoing(newDoingIdx);
+  }
+};
+
+/* ── PDM CASE SWITCHING ── */
+let pdmCase = 1;
+let pdmAgentPending = 1; // count of pending agent tasks
+
+function _dismissAgentCard(msgText, msgClass, afterMs){
+  // Animate card out
+  const card = document.getElementById('pdmAgentCard');
+  card.classList.add('resolving');
+  setTimeout(() => {
+    card.style.display = 'none';
+    // Update badge → 0
+    pdmAgentPending = 0;
+    const badge = document.getElementById('pdmAgentBadge');
+    if(badge){ badge.textContent = '0 Pending'; badge.style.background = 'rgba(0,0,0,.05)'; badge.style.color = 'rgba(0,0,0,.35)'; badge.style.borderColor = 'rgba(0,0,0,.08)'; }
+    const caseBadge = document.getElementById('pdmCaseBadge');
+    if(caseBadge){ caseBadge.style.display = 'none'; }
+    // Show result status
+    const st = document.getElementById('pdmAgentStatus');
+    st.className = 'pdm-agent-status ' + msgClass + ' show';
+    st.textContent = msgText;
+    // After 2s auto-collapse section and show normal brief
+    setTimeout(() => {
+      document.getElementById('pdmAgentSection').style.display = 'none';
+      // Restore brief to normal
+      renderPdmBrief();
+    }, afterMs);
+  }, 350);
+}
+
+function switchPdmCase(n){
+  pdmCase = n;
+  document.querySelectorAll('#casesMenu .ds3-case-option').forEach((el, i) => {
+    el.classList.toggle('is-active', i === n - 1);
+  });
+  // Close menu
+  casesOpen = false;
+  document.getElementById('casesMenu').style.display = 'none';
+  document.getElementById('casesTrigger').classList.remove('is-open');
+  document.getElementById('casesChev').classList.remove('is-open');
+
+  const agentSec = document.getElementById('pdmAgentSection');
+  const brief    = document.getElementById('pdmBrief');
+
+  if(n === 1){
+    // 日常任务：无消息
+    if(agentSec) agentSec.style.display = 'none';
+    if(brief)    brief.style.display    = '';
+    renderPdmBrief();
+  } else {
+    // Cases 2-6: 显示消息区
+    if(agentSec) agentSec.style.display = '';
+    if(brief)    brief.style.display    = '';
+    typeBrief('下午好，<b>林晨曦</b>。Agent 刚在运营群中拆解完今日可执行任务，结合 memory + brain-doc 交叉比对后识别出 <b>2 项任务</b>，其中 <b>1 项</b>需你在今日优先确认。');
+    // Determine which message IDs to show for this case
+    const caseMap = { 2:['A1','A2'], 3:['B1'], 4:['B2'], 5:['C1'], 6:['D1'], 7:['E1'] };
+    activeCaseIds = caseMap[n] || null;
+    historyOpen = true;
+    renderInlineMsgs(activeCaseIds);
+    renderHistory(activeCaseIds);
+    /* Sync toggle button state */
+    const ht = document.getElementById('historyToggle');
+    const hl = document.getElementById('historyList');
+    if(ht) ht.classList.add('open');
+    if(hl) hl.classList.add('open');
+  }
+}
+
+/* ── Typewriter brief (HTML-aware) ── */
+let _typeTimer = null;
+function typeBrief(html){
+  const el = document.getElementById('pdmBrief');
+  if(!el) return;
+  clearTimeout(_typeTimer);
+  el.innerHTML = '';
+
+  /* Split html into tokens: tag vs text */
+  const tokens = [];
+  const re = /(<[^>]+>)|([^<]+)/g;
+  let m;
+  while((m = re.exec(html)) !== null){
+    if(m[1]) tokens.push({ tag: m[1] });
+    else     tokens.push({ text: m[2] });
+  }
+
+  let tIdx = 0, cIdx = 0;
+  const DELAY = 22; // ms per character
+
+  function tick(){
+    if(tIdx >= tokens.length){ return; }
+    const token = tokens[tIdx];
+    if(token.tag){
+      // Insert tag instantly, move to next token
+      el.innerHTML += token.tag;
+      tIdx++; cIdx = 0;
+      _typeTimer = setTimeout(tick, 0);
+    } else {
+      if(cIdx < token.text.length){
+        el.innerHTML += token.text[cIdx];
+        cIdx++;
+        _typeTimer = setTimeout(tick, DELAY);
+      } else {
+        tIdx++; cIdx = 0;
+        _typeTimer = setTimeout(tick, 0);
+      }
+    }
+  }
+  tick();
+}
+
+function togglePdmBrainDoc(){
+  const body    = document.getElementById('pdmBrainDocBody');
+  const chev    = document.getElementById('pdmBrainDocChev');
+  const preview = document.getElementById('pdmBrainDocPreview');
+  const open    = body.style.display === 'none';
+  body.style.display    = open ? 'block' : 'none';
+  preview.classList.toggle('hidden', open);
+  chev.classList.toggle('open', open);
+}
+
+
+function openPdmHelpPanel(){
+  _dismissAgentCard('已提交 Help 请求，决策者将介入处理。', 'info', 3500);
+}
+
+
+
+if(user.view==='pdm'){
+  aTicketDoingIdx = 0;
+  pdmDoingIdx = -1;
+  renderATicketDoing();
+  renderPdmTodo();
+  renderPdmBrief();
+
+  // ── Agent card action helpers ──────────────────────────────────────────────
+
+  // Action-level items config: { idx, type: 'ai'|'hu' }
+  const REC_ITEMS = [
+    { idx: 0, type: 'ai' },
+    { idx: 1, type: 'hu' },
+    { idx: 2, type: 'ai' },
+  ];
+
+  function _getCheckedItems(){
+    // items that are neither skipped nor escalated
+    return REC_ITEMS.filter(it => {
+      const row = document.getElementById('pdmRecItem' + it.idx);
+      return row && !row.classList.contains('pdm-rec-item--skip') && !row.classList.contains('pdm-rec-item--esc');
+    });
+  }
+
+  function _getEscalatedItems(){
+    return REC_ITEMS.filter(it => {
+      const row = document.getElementById('pdmRecItem' + it.idx);
+      return row && row.classList.contains('pdm-rec-item--esc');
+    });
+  }
+
+  function _setAllAgentBtns(disabled){
+    ['pdmAgentYes'].forEach(id=>{
+      const el = document.getElementById(id); if(el) el.disabled = disabled;
+    });
+    // lock per-action buttons while executing
+    REC_ITEMS.forEach(it => {
+      const escBtn  = document.getElementById('pdmRecEscBtn'  + it.idx);
+      const skipBtn = document.getElementById('pdmRecSkipBtn' + it.idx);
+      if(escBtn)  escBtn.disabled  = disabled;
+      if(skipBtn) skipBtn.disabled = disabled;
+    });
+  }
+
+  // Approve: AI actions → doing, HU action → todo, create A card
+  document.getElementById('pdmAgentYes').addEventListener('click', function(){
+    if(this.disabled) return;
+    _setAllAgentBtns(true);
+
+    // Hide buttons
+    document.getElementById('pdmActionRow').style.display = 'none';
+
+    // Step 1: mark states + show right-side status tags
+    [0, 2].forEach(i => {
+      document.getElementById('pdmRecItem' + i).classList.add('exec-running');
+      const st = document.getElementById('pdmRecStatus' + i);
+      if (st) { st.className = 'pdm-rec-status doing'; st.textContent = 'Doing'; }
+    });
+    // index 2 (官方渠道发布补偿公告) is already done
+    const st2 = document.getElementById('pdmRecStatus2');
+    if (st2) { st2.className = 'pdm-rec-status done'; st2.textContent = 'Done'; }
+    const st1 = document.getElementById('pdmRecStatus1');
+    if (st1) { st1.className = 'pdm-rec-status todo'; st1.textContent = 'To do'; }
+
+    // Step 2: create A card after 0.8s
+    setTimeout(() => {
+      const todoList = document.getElementById('pdmTodoList');
+      if (todoList) {
+        const card = document.createElement('div');
+        card.className = 'g-card todo-card a-card-new';
+        card.innerHTML = `
+          <div class="card-title" style="display:flex;align-items:center;gap:6px;">
+            <span style="flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:6px;background:rgba(21,101,192,.08);color:#1565c0;border:1px solid rgba(21,101,192,.2);">HU Task</span>
+            <span>同步技术组排查成就触发逻辑</span>
+          </div>
+          <div class="ddl-row"><span class="ddl-dot"></span>需技术组负责人确认 · Agent 推送</div>
+          <div class="card-desc" style="font-size:12px;color:rgba(0,0,0,.5);margin-top:4px;">来自「CP 逃离校园」紧急道具补偿任务</div>
+        `;
+        todoList.prepend(card);
+      }
+    }, 800);
+  });
+
+}
+
+/* ── DOING INPUT ── */
+function onDoingInput(el){
+  const hasVal = el.value.length > 0;
+  document.getElementById('doingClear').style.display = hasVal ? 'block' : 'none';
+  document.getElementById('doingSend').classList.toggle('ready', hasVal);
+}
+function clearDoingInput(){
+  const el = document.getElementById('doingInput');
+  el.value = ''; el.focus(); onDoingInput(el);
+}
+</script>
+<!-- Quick Pick Video Modal -->
+<div class="qp-video-modal" id="qpVideoModal" onclick="closeQpVideoModal()">
+  <div class="qp-vm-box" onclick="event.stopPropagation()">
+    <button class="qp-vm-close" onclick="closeQpVideoModal()">✕</button>
+    <video id="qpVmPlayer" controls autoplay style="width:100%;display:block;max-height:55vh;background:#000;"></video>
+    <div class="qp-vm-now-playing">
+      <div class="qp-vm-now-playing-dot"></div>
+      <span id="qpVmNowLabel">Playing</span>
+    </div>
+    <div class="qp-vm-list" id="qpVmList"></div>
+  </div>
+</div>
+
+<!-- Quick Pick Lightbox -->
+<div class="qp-lightbox" id="qpLightbox" onclick="closeQpLightbox()">
+  <div class="qp-lb-box" onclick="event.stopPropagation()">
+    <div class="qp-lb-thumb" id="qpLbThumb"></div>
+    <div class="qp-lb-caption" id="qpLbCaption"></div>
+    <button class="qp-lb-close" onclick="closeQpLightbox()">✕</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   MESSAGE SYSTEM  —  INLINE
+════════════════════════════════════════════ */
+
+/* ── Message data ── */
+const INLINE_MSGS = [
+  /* B-1: Quick action task */
+  {
+    id: 'B1',
+    type: 'b-quick',
+    typeLabel: 'Quick Action',
+    urgency: null,
+    source: '小秘 Agent',
+    time: '10:23',
+    title: 'CP「逃离校园」道具补偿',
+    summary: '「校园合成」Lv.7 / Lv.11 成就 bug 影响约 153 名玩家，待补 70 张合成卡。活动今日 23:59 截止，需先补偿再排查。',
+    tags: [],
+    actions: [
+      { label: 'Approve', cls: 'imc-btn-purple', action: 'approve' },
+      { label: 'Help', cls: 'imc-btn-ghost', action: 'help' },
+    ],
+  },
+  /* B-3: Minion · X Official Account Release */
+  {
+    id: 'B2',
+    type: 'b-chat',
+    typeLabel: 'Chat Task',
+    source: 'Minion Agent',
+    time: '14:37',
+    title: 'X 官号上线发布任务 · 需要你的输入',
+    summary: '「逃离校园」上线前发布流程已就绪，Minion 需要你提供发布文案和发送时间，其余步骤将自动执行。',
+    tags: [],
+    actions: [
+      { label: '💬 Start Chat', cls: 'imc-btn-purple', action: 'navigateToChat' },
+    ],
+    chat: {
+      agentName: 'Minion Agent',
+      taskName: 'X 官号上线发布任务',
+      doneSub: 'Minion Agent 将按确认的参数开始执行发布流程，完成后会发送状态通知给你。',
+      steps: [
+        {
+          type: 'agent', time: '14:37',
+          content: '你好 👋 我是 Minion Agent，负责「逃离校园」X 官号上线发布流程。\n\n本次任务共 3 个阶段：\n① Upload follower of the official account\n② Create Release Content on Adnext（文案 / Banner / 发送时间）\n③ Test with own X account\n\n其中 **② 文案** 和 **② 发送时间** 需要你提供，其余步骤我来执行。可以开始吗？',
+          quickReplies: ['可以，开始吧'],
+        },
+        {
+          type: 'agent', time: '14:38',
+          content: '**Step 2.1 · 发布文案（Post Text）**\n\n请提供用于 X 官号发布的正文文案。\n\n建议包含：游戏名称、上线时间、核心卖点、下载链接或 CTA。字数建议 ≤ 280 字符（英文）。\n\n你可以直接粘贴文案，或使用下方示例：',
+          quickReplies: ['使用示例文案', '我来输入文案'],
+        },
+        {
+          type: 'agent', time: '14:39',
+          content: '✅ 已记录文案：\n\n> 🎮 Escape Campus is LIVE! Build your ultimate campus, challenge rivals, and claim your throne. Download now and grab your launch rewards — limited time only! #EscapeCampus #GameLaunch\n\n**Step 2.3 · 发送时间（Sending Time）**\n\n请设置 X 帖子的计划发布时间（JST）：',
+          quickReplies: ['09:00 JST', '12:00 JST', '21:00 JST', '自定义'],
+        },
+        {
+          type: 'agent', time: '14:40',
+          content: '✅ 已记录发送时间：**21:00 JST，上线当日**\n\n接下来我将自动执行：\n· ① Upload follower list → official account\n· ② Setup Banner on Adnext（使用标准模板）\n· ③ Test post via internal X test account\n\n以下是完整执行摘要，请确认后我立即开始：',
+          quickReplies: [],
+        },
+        {
+          type: 'confirm', time: '14:40',
+          content: '执行摘要确认：',
+          confirmData: [
+            { label: '① Follower Upload', val: '自动执行 · 官号 follower 列表' },
+            { label: '② Post Text',       val: '🎮 Escape Campus is LIVE! Build your ultimate campus… #EscapeCampus #GameLaunch' },
+            { label: '② SNS Banner',      val: '自动执行 · 使用标准上线模板' },
+            { label: '② Sending Time',    val: '21:00 JST，上线当日' },
+            { label: '③ Test Account',    val: '自动执行 · 内部测试账号验证' },
+          ],
+        },
+      ],
+    },
+  },
+  /* D-1: Minion · Need Input from regular employee */
+  {
+    id: 'D1',
+    type: 'd-input',
+    typeLabel: 'Need Input',
+    urgency: null,
+    source: 'Minion Agent',
+    time: '14:41',
+    title: '确认 X 通知受众分组',
+    summary: '「逃离校园」上线发布流程执行中，Minion 无法自动获取受众分组配置，需你提供分组类型及对应 ID 后方可继续。',
+    tags: [],
+    actions: [],
+    chatScene: 'need-input',
+  },
+  /* E-1: Minion · Result needs human review */
+  {
+    id: 'E1',
+    type: 'e-review',
+    typeLabel: 'Review',
+    urgency: null,
+    source: 'Minion Agent',
+    time: '15:02',
+    title: 'X 通知文案草稿 · 待确认',
+    summary: 'Minion 已生成 3 版 X 通知文案，请审阅后选择或调整，确认后将自动进入发布流程。',
+    tags: [],
+    actions: [],
+    chatScene: 'review-draft',
+  },
+  /* C-1: Translation review jump */
+  {
+    id: 'C1',
+    type: 'c',
+    typeLabel: 'Jump Task',
+    source: 'i18n 系统',
+    time: '09:45',
+    title: '翻译监修 · JA→EN（逃离校园）',
+    summary: '日语专家已 Deploy JA 词条，共 287 条，需在 i18n 咨询会话中完成 EN 监修并点击 Mark as Reviewed。',
+    tags: [],
+    jumpDest: { icon: '', label: '' },
+    actions: [],
+  },
+  /* A-1: 财务请款 OA 已完成 */
+  {
+    id: 'A1',
+    type: 'a-status',
+    typeLabel: 'Status',
+    source: 'OA System',
+    time: '今天 14:52',
+    title: '财务请款 OA 已完成',
+    summary: '你提交的请款申请（申请号 OA-2026-05-1183，金额 ¥ 32,000）已完成全部审批流程，款项将于 3 个工作日内到账。',
+    tags: [],
+    statusPill: null,
+  },
+  /* A-2: 出差申请 OA 已审批 */
+  {
+    id: 'A2',
+    type: 'a-status',
+    typeLabel: 'Status',
+    source: 'OA System',
+    time: '今天 11:08',
+    title: '出差申请 OA 已审批通过',
+    summary: '你的出差申请（东京 · 6/10–6/13，预算 ¥ 18,600）已由直属上级批准，行程预订可按计划推进。',
+    tags: [],
+    statusPill: null,
+  },
+];
+
+/* Consumed set */
+const consumedIds = new Set();
+/* Track current case IDs */
+let activeCaseIds = null;
+
+/* ── Render inline messages ── */
+function renderInlineMsgs(ids){
+  const list = document.getElementById('inlineMsgList');
+  if(!list) return;
+  list.innerHTML = '';
+  list.className = 'imc-list';
+
+  const msgs = (ids ? INLINE_MSGS.filter(m => ids.includes(m.id)) : INLINE_MSGS)
+    .filter(m => !consumedIds.has(m.id)); // only show active (unconsumed) messages
+
+  msgs.forEach((msg, i) => {
+    const card = buildImcCard(msg, false, i);
+    list.appendChild(card);
+  });
+}
+
+function buildImcCard(msg, done, idx){
+  const card = document.createElement('div');
+  card.className = 'imc-card' + (done ? ' imc-done' : '');
+  card.dataset.type = msg.type;
+  card.id = 'imc-' + msg.id;
+  card.style.animationDelay = (idx * 0.07) + 's';
+
+  /* Whole-card click navigation for d-input and e-review */
+  if ((msg.type === 'd-input' || msg.type === 'e-review') && msg.chatScene) {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => {
+      consumedActions[msg.id] = 'Chat opened';
+      dismissCard(msg.id, 'Chat opened');
+      setTimeout(() => {
+        window.location.href = 'chat.html?scene=' + msg.chatScene;
+      }, 400);
+    });
+  }
+
+  /* Header */
+  const urgencyHtml = msg.urgency
+    ? `<span class="imc-urgency-badge">${msg.urgency}</span>` : '';
+  const header = `
+    <div class="imc-header">
+      <div class="imc-type-dot"></div>
+      <span class="imc-type-label">${msg.typeLabel}</span>
+      <span class="imc-header-spacer"></span>
+      ${urgencyHtml}
+      <span class="imc-source">${msg.source}</span>
+      <span class="imc-time">${msg.time}</span>
+    </div>`;
+
+  /* Tags */
+  const tagsHtml = (msg.tags||[]).length
+    ? `<div class="imc-tags">${(msg.tags).map(t=>`<span class="imc-tag ${t.cls}">${t.text}</span>`).join('')}</div>` : '';
+
+  /* Jump destination — clickable row triggers the jump action directly */
+  const jumpHtml = msg.jumpDest
+    ? `<div class="imc-jump-dest" onclick="handleImcAction('${msg.id}','jump')" style="cursor:pointer;" role="button" tabindex="0">
+        ${msg.jumpDest.icon ? `<span>${msg.jumpDest.icon}</span>` : ''}
+        ${msg.jumpDest.label ? `<span>${msg.jumpDest.label}</span>` : ''}
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>` : '';
+
+  /* Status pill (Type A) */
+  const pillHtml = msg.statusPill
+    ? `<div class="imc-status-pill" style="--pill-bg:${msg.statusPill.bg};--pill-color:${msg.statusPill.color};--pill-border:${msg.statusPill.bg.replace('.1)','.25)')}">
+        ${msg.statusPill.text}
+      </div>` : '';
+
+  /* Actions: driven by type and done state */
+  let actionsHtml = '';
+  if(msg.type === 'a-status'){
+    actionsHtml = `<div class="imc-dismiss-btn"><button onclick="dismissCard('${msg.id}','Read')">Mark as read</button></div>`;
+  } else if(msg.type === 'd-input' || msg.type === 'e-review'){
+    if(!done){
+      const arrowColor = msg.type === 'd-input' ? 'rgba(194,65,12,.5)' : 'rgba(126,34,206,.5)';
+      actionsHtml = `<div class="imc-actions" style="justify-content:flex-end;padding-top:4px;">
+        <span style="font-size:12px;color:${arrowColor};display:flex;align-items:center;gap:4px;">
+          点击卡片前往对话
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </div>`;
+    } else {
+      actionsHtml = `<div class="imc-actions"><div class="imc-done-chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Done</div></div>`;
+    }
+  } else if(done){
+    actionsHtml = `<div class="imc-actions"><div class="imc-done-chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Done</div></div>`;
+  } else if(msg.actions && msg.actions.length){
+    const btnHtml = msg.actions.map(a =>
+      `<button class="imc-btn ${a.cls}" onclick="handleImcAction('${msg.id}','${a.action}')" type="button">${a.label}</button>`
+    ).join('');
+    actionsHtml = `<div class="imc-actions">${btnHtml}</div>`;
+  }
+
+  card.innerHTML = header + `
+    <div class="imc-title" ${msg.type === 'c' ? `onclick="handleImcAction('${msg.id}','jump')" style="cursor:pointer;display:flex;align-items:center;gap:6px;"` : ''}>
+      <span style="flex:1;">${msg.title}</span>
+      ${msg.type === 'c' ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
+    </div>
+    <div class="imc-summary">${msg.summary}</div>
+    ${tagsHtml}
+    ${pillHtml}
+    ${actionsHtml}`;
+
+  return card;
+}
+
+/* ── Core consumption: animate card out → history ── */
+const consumedActions = {}; // msgId → action label taken by user
+function dismissCard(msgId, chipLabel){
+  const card = document.getElementById('imc-' + msgId);
+  if(card){
+    // Show brief done chip
+    const actEl = card.querySelector('.imc-actions, .imc-dismiss-btn');
+    if(actEl){
+      const chipIcon = chipLabel === 'Read'
+        ? '✓'
+        : `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      actEl.outerHTML = `<div class="imc-actions"><div class="imc-done-chip">${chipIcon} ${chipLabel}</div></div>`;
+    }
+    card.classList.add('imc-done');
+    // Start exit animation after brief pause
+    setTimeout(() => {
+      card.classList.add('imc-exiting');
+      setTimeout(() => {
+        consumeImcMsg(msgId);
+      }, 420);
+    }, 600);
+  } else {
+    consumeImcMsg(msgId);
+  }
+}
+
+/* ── Actions ── */
+function handleImcAction(msgId, action){
+  const msg = INLINE_MSGS.find(m => m.id === msgId);
+  if(!msg) return;
+
+  if(action === 'openInputChat'){
+    openInputChatOverlay(msg);
+    return;
+  }
+  if(action === 'openReviewChat'){
+    openReviewChatOverlay(msg);
+    return;
+  }
+
+  if(action === 'navigateToChat'){
+    showToast('正在打开 X 官号发布对话…');
+    consumedActions[msgId] = 'Chat opened';
+    dismissCard(msgId, 'Chat opened');
+    setTimeout(() => {
+      window.location.href = 'chat.html?scene=x-release';
+    }, 800);
+    return;
+  }
+  if(action === 'openChat'){
+    openChatOverlay(msg);
+    return;
+  }
+  if(action === 'jump'){
+    showToast('正在跳转至 i18n 咨询会话…');
+    const card = document.getElementById('imc-' + msgId);
+    if(card){
+      const actEl = card.querySelector('.imc-actions');
+      if(actEl) actEl.innerHTML = `<div class="imc-done-chip">↗ Jumped</div>`;
+    }
+    consumedActions[msgId] = 'Jumped';
+    setTimeout(() => dismissCard(msgId, 'Jumped'), 800);
+    return;
+  }
+  if(action === 'approve'){
+    const card = document.getElementById('imc-' + msgId);
+    if(card){
+      const actEl = card.querySelector('.imc-actions');
+      if(actEl) actEl.innerHTML = `<div style="font-size:12.5px;color:rgba(0,0,0,.4);display:flex;align-items:center;gap:6px;"><span class="imc-spinner"></span> Agent 正在执行…</div>`;
+    }
+    showToast('已批准 — Agent 正在执行操作');
+    consumedActions[msgId] = 'Approved';
+    setTimeout(() => dismissCard(msgId, 'Done'), 1600);
+    return;
+  }
+  if(action === 'help'){
+    showToast('Help 请求已发送，等待决策者介入。');
+    consumedActions[msgId] = 'Help sent';
+    setTimeout(() => dismissCard(msgId, 'Done'), 500);
+    return;
+  }
+}
+
+function consumeImcMsg(msgId){
+  consumedIds.add(msgId);
+  // Remove card from DOM if still present (shouldn't be, but safety)
+  const card = document.getElementById('imc-' + msgId);
+  if(card) card.remove();
+  renderHistory(activeCaseIds);
+}
+
+/* ── History panel ── */
+let historyOpen = false;
+
+/* Default to D1 after all variables are declared */
+switchPdmCase(6);
+const HISTORY_CAP = 5; // max rows shown inline; older → archive link
+
+/* Static mock history — simulates a full backlog across all 3 B/C/A types */
+const MOCK_HISTORY = [
+  { id:'h1',  type:'b-quick', typeLabel:'Quick Action', title:'Q2 促销活动补偿审批',          source:'小秘 Agent',   time:'昨天 17:42', done:'Done', action:'Approved' },
+  { id:'h2',  type:'a-status',typeLabel:'Status',       title:'出差申请 OA 审批通过',           source:'OA System',    time:'昨天 15:10', done:'Read', action:null },
+  { id:'h3',  type:'b-chat',  typeLabel:'Chat Task',    title:'EDM 发送时间确认 · Summer Sale', source:'Minion Agent', time:'昨天 11:28', done:'Done', action:'Chat done' },
+  { id:'h4',  type:'b-quick', typeLabel:'Quick Action', title:'新用户福利包补发审批',            source:'小秘 Agent',   time:'6月5日 16:03',done:'Done', action:'Approved' },
+  { id:'h5',  type:'a-status',typeLabel:'Status',       title:'报销请款 OA 已完成',             source:'OA System',    time:'6月5日 09:55',done:'Read', action:null },
+  { id:'h6',  type:'b-chat',  typeLabel:'Chat Task',    title:'Instagram 官号内容排期',         source:'Minion Agent', time:'6月4日 14:20',done:'Done', action:'Chat done' },
+  { id:'h7',  type:'b-quick', typeLabel:'Quick Action', title:'CP「魔法少女」周边补货审批',      source:'小秘 Agent',   time:'6月4日 10:47',done:'Done', action:'Help sent' },
+  { id:'h8',  type:'a-status',typeLabel:'Status',       title:'年假申请 OA 审批通过',           source:'OA System',    time:'6月3日 18:31',done:'Read', action:null },
+  { id:'h9',  type:'b-chat',  typeLabel:'Chat Task',    title:'X Campaign 文案与发送时间确认',   source:'Minion Agent', time:'6月3日 11:05',done:'Done', action:'Chat done' },
+  { id:'h10', type:'b-quick', typeLabel:'Quick Action', title:'付费活动道具批次补偿',            source:'小秘 Agent',   time:'6月2日 16:58',done:'Done', action:'Approved' },
+  { id:'h11', type:'a-status',typeLabel:'Status',       title:'团建费用报销 OA 完成',           source:'OA System',    time:'6月2日 09:22',done:'Read', action:null },
+  { id:'h12', type:'b-chat',  typeLabel:'Chat Task',    title:'TikTok 官号上线发布任务',        source:'Minion Agent', time:'6月1日 15:40',done:'Done', action:'Chat done' },
+];
+
+function toggleHistory(){
+  historyOpen = !historyOpen;
+  document.getElementById('historyToggle').classList.toggle('open', historyOpen);
+  document.getElementById('historyList').classList.toggle('open', historyOpen);
+}
+
+function renderHistory(ids){
+  const TYPE_COLORS = {
+    'b-quick':'#8b5cf6',
+    'b-chat':'#8b5cf6','c':'#3b82f6','a-status':'#22c55e',
+  };
+
+  /* Live consumed messages from current case */
+  const liveMsgs = (ids ? INLINE_MSGS.filter(m => ids.includes(m.id)) : INLINE_MSGS)
+    .filter(m => consumedIds.has(m.id))
+    .map(m => ({
+      id: m.id, type: m.type, typeLabel: m.typeLabel,
+      title: m.title, source: m.source, time: m.time,
+      done: m.type === 'a-status' ? 'Read' : 'Done',
+    }));
+
+  /* Merge live + mock history (live first, then mock backlog) */
+  const liveIds = new Set(liveMsgs.map(m => m.id));
+  const combined = [...liveMsgs, ...MOCK_HISTORY.filter(m => !liveIds.has(m.id))];
+
+  const toggleBtn = document.getElementById('historyToggle');
+  const countEl   = document.getElementById('historyCount');
+  const labelEl   = document.getElementById('historyToggleLabel');
+  const historyEl = document.getElementById('historyList');
+  if(!toggleBtn) return;
+
+  if(combined.length === 0){
+    toggleBtn.style.display = 'none';
+    historyEl.innerHTML = '';
+    return;
+  }
+
+  toggleBtn.style.display = 'flex';
+  countEl.textContent = combined.length;
+  labelEl.textContent = 'History';
+
+  const overflow = combined.length > HISTORY_CAP;
+  const visible  = combined.slice(0, HISTORY_CAP);
+  const hiddenN  = combined.length - visible.length;
+
+  historyEl.innerHTML = visible.map(m => {
+    const color = TYPE_COLORS[m.type] || 'rgba(0,0,0,.2)';
+    const actionTaken = consumedActions[m.id];
+    const doneLabel = actionTaken || m.done || (m.type === 'a-status' ? 'Read' : 'Done');
+    const clickAttr = m.type === 'b-chat'
+      ? `onclick="window.location.href='chat.html?scene=x-release'" style="cursor:pointer;"`
+      : m.type === 'c'
+      ? `onclick="showToast('跳转至：${(m.jumpDest||{label:'对应任务'}).label || '对应任务'}')" style="cursor:pointer;"`
+      : '';
+    const actionNote = (m.type === 'b-quick' && actionTaken)
+      ? `<span class="imc-hr-action">· ${actionTaken}</span>` : '';
+    return `<div class="imc-history-row" ${clickAttr}>
+      <div class="imc-hr-dot" style="background:${color}"></div>
+      <span class="imc-hr-title">${m.title}</span>
+      <span class="imc-hr-source">${m.source}${actionNote}</span>
+      <span class="imc-hr-done">${doneLabel}</span>
+    </div>`;
+  }).join('') + (overflow
+    ? `<div class="imc-history-row imc-history-more" onclick="openHistoryDrawer()">
+        <span style="flex:1;font-size:12px;color:rgba(0,0,0,.35);">另有 ${hiddenN} 条更早记录</span>
+        <span style="font-size:11px;color:rgba(0,0,0,.25);">全部历史 →</span>
+      </div>`
+    : '');
+
+  if(historyOpen) historyEl.classList.add('open');
+}
+
+/* ── Update brief chips after consumption ── */
+function updateAgentBriefChips(ids){
+  const msgs    = ids ? INLINE_MSGS.filter(m => ids.includes(m.id)) : INLINE_MSGS;
+  const pending = msgs.filter(m => !consumedIds.has(m.id));
+  const urgent  = pending.filter(m => m.urgency);
+  const chips   = document.getElementById('agentBriefChips');
+  if(!chips) return;
+  chips.innerHTML = '';
+  if(pending.length === 0){
+    chips.innerHTML = `<span class="abc-chip abc-chip-done">✓ 全部处理完毕</span>`;
+  } else {
+    chips.innerHTML = `
+      <span class="abc-chip abc-chip-pending">${pending.length} 条待处理</span>
+      ${urgent.length ? `<span class="abc-chip abc-chip-urgent">${urgent.length} 项今日优先</span>` : ''}`;
+  }
+}
+
+/* ── Toast ── */
+let _toastTimer;
+function showToast(text){
+  let el = document.getElementById('sysToast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'sysToast';
+    el.style.cssText = [
+      'position:fixed','bottom:72px','left:50%',
+      'transform:translateX(-50%) translateY(8px)',
+      'background:rgba(15,15,15,.82)','color:#fff',
+      'font-size:13px','font-weight:500',
+      'padding:9px 16px','border-radius:24px',
+      'z-index:9999','opacity:0',
+      'transition:opacity .22s,transform .22s',
+      'white-space:nowrap','pointer-events:none',
+      '-webkit-backdrop-filter:blur(16px)',
+      'backdrop-filter:blur(16px)',
+    ].join(';');
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>{
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(8px)';
+  }, 2400);
+}
+
+/* ════════════════════════════════════════════
+   MINION CHAT OVERLAY
+════════════════════════════════════════════ */
+let chatStepIdx = 0;
+let chatMsg     = null;
+let activeChatMsgId = null;
+
+/* ── D-input: Need Input chat overlay ── */
+function openInputChatOverlay(msg) {
+  const ctx = msg.inputContext || {};
+  const fieldsHtml = (ctx.fields || []).map(f =>
+    `<div style="margin:6px 0"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">${f.label}</div>` +
+    `<input class="chat-overlay-field" placeholder="${f.hint}" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:6px 10px;font-size:13px;color:#fff;outline:none;" /></div>`
+  ).join('');
+
+  const overlay = document.createElement('div');
+  overlay.id = 'inputChatOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `
+    <div style="background:#1c1c2e;border-radius:16px;padding:24px;width:380px;max-width:92vw;box-shadow:0 8px 40px rgba(0,0,0,.4);color:#fff;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#f97316;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">Need Input · Minion Agent</div>
+          <div style="font-size:15px;font-weight:600;">${ctx.taskName || msg.title}</div>
+        </div>
+        <button onclick="document.getElementById('inputChatOverlay').remove()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <div style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:14px;">Minion 在执行过程中需要以下信息才能继续：</div>
+      ${fieldsHtml}
+      <button onclick="submitInputChat('${msg.id}')" style="margin-top:16px;width:100%;padding:9px;background:#f97316;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">提交 · 继续执行</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+function submitInputChat(msgId) {
+  const overlay = document.getElementById('inputChatOverlay');
+  const inputs = overlay ? overlay.querySelectorAll('.chat-overlay-field') : [];
+  const allFilled = [...inputs].every(i => i.value.trim());
+  if (!allFilled) { [...inputs].forEach(i => { if (!i.value.trim()) i.style.borderColor='#f97316'; }); return; }
+  if (overlay) overlay.remove();
+  showToast('已提交，Minion 正在继续执行…');
+  consumedActions[msgId] = 'Input submitted';
+  setTimeout(() => dismissCard(msgId, 'Input submitted'), 600);
+}
+
+/* ── E-review: Review chat overlay ── */
+function openReviewChatOverlay(msg) {
+  const ctx = msg.reviewContext || {};
+  const draftsHtml = (ctx.drafts || []).map((d, i) =>
+    `<label style="display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.12);margin-bottom:8px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='rgba(168,85,247,.12)'" onmouseout="this.style.background=''" >` +
+    `<input type="radio" name="draft_${msg.id}" value="${i}" style="margin-top:3px;accent-color:#a855f7;" ${i===0?'checked':''} />` +
+    `<div><div style="font-size:10px;font-weight:700;color:#a855f7;letter-spacing:.05em;margin-bottom:3px;">${d.ver}</div>` +
+    `<div style="font-size:13px;color:rgba(255,255,255,.8);line-height:1.5;">${d.text}</div></div></label>`
+  ).join('');
+
+  const overlay = document.createElement('div');
+  overlay.id = 'reviewChatOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `
+    <div style="background:#1c1c2e;border-radius:16px;padding:24px;width:440px;max-width:92vw;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.4);color:#fff;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#a855f7;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">Review · Minion Agent</div>
+          <div style="font-size:15px;font-weight:600;">${ctx.taskName || msg.title}</div>
+        </div>
+        <button onclick="document.getElementById('reviewChatOverlay').remove()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <div style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:14px;">请选择或修改一版文案后确认，Minion 将据此继续发布流程：</div>
+      ${draftsHtml}
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button onclick="submitReviewChat('${msg.id}','approve')" style="flex:1;padding:9px;background:#a855f7;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">✓ 确认使用</button>
+        <button onclick="submitReviewChat('${msg.id}','reject')" style="flex:1;padding:9px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:14px;cursor:pointer;">✗ 重新生成</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+function submitReviewChat(msgId, action) {
+  const overlay = document.getElementById('reviewChatOverlay');
+  if (overlay) overlay.remove();
+  if (action === 'approve') {
+    showToast('已确认文案，Minion 将继续执行发布流程');
+    consumedActions[msgId] = 'Approved';
+    setTimeout(() => dismissCard(msgId, 'Approved'), 600);
+  } else {
+    showToast('已驳回，Minion 将重新生成文案…');
+    consumedActions[msgId] = 'Rejected';
+    setTimeout(() => dismissCard(msgId, 'Re-generate'), 600);
+  }
+}
+
+function openChatOverlay(msg){
+  chatMsg = msg;
+  chatStepIdx = 0;
+  activeChatMsgId = msg.id;
+  const chat = msg.chat;
+  document.getElementById('chatAgentName').textContent = chat.agentName;
+  document.getElementById('chatTaskName').textContent  = chat.taskName;
+  document.getElementById('chatStatus').textContent    = '进行中';
+  document.getElementById('chatStatus').className      = 'chat-ov-status';
+  document.getElementById('chatMessages').innerHTML    = '';
+  document.getElementById('chatQuickReplies').innerHTML= '';
+  document.getElementById('chatActionRow').style.display  = 'none';
+  document.getElementById('chatConfirmBtn').disabled   = false;
+  document.getElementById('chatDoneOverlay').classList.remove('show');
+  document.getElementById('chatDoneSub').textContent   = chat.doneSub;
+  document.getElementById('chatInput').value           = '';
+  document.getElementById('chatInputRow').style.display= 'flex';
+  document.getElementById('chatOverlay').classList.add('open');
+  setTimeout(()=> advanceChatStep(), 400);
+}
+
+function closeChatOverlay(){
+  document.getElementById('chatOverlay').classList.remove('open');
+  activeChatMsgId = null;
+}
+
+function closeChatDone(){
+  document.getElementById('chatOverlay').classList.remove('open');
+  activeChatMsgId = null;
+}
+
+function advanceChatStep(){
+  if(!chatMsg) return;
+  const steps = chatMsg.chat.steps;
+  if(chatStepIdx >= steps.length) return;
+  const step = steps[chatStepIdx];
+
+  if(step.type === 'agent'){
+    showTypingIndicator();
+    setTimeout(()=>{
+      removeTypingIndicator();
+      appendAgentBubble(step.content, step.time);
+      if(step.quickReplies) showQuickReplies(step.quickReplies);
+      scrollChatBottom();
+    }, 900 + Math.random()*350);
+  } else if(step.type === 'confirm'){
+    showTypingIndicator();
+    setTimeout(()=>{
+      removeTypingIndicator();
+      appendAgentBubble(step.content, step.time);
+      appendConfirmCard(step.confirmData);
+      document.getElementById('chatQuickReplies').innerHTML = '';
+      document.getElementById('chatActionRow').style.display = 'flex';
+      document.getElementById('chatInputRow').style.display  = 'none';
+      scrollChatBottom();
+    }, 1000);
+  }
+  chatStepIdx++;
+}
+
+function showQuickReplies(replies){
+  const qrEl = document.getElementById('chatQuickReplies');
+  qrEl.innerHTML = '';
+  replies.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'chat-qr'; btn.textContent = r;
+    btn.onclick = ()=> handleQuickReply(r, qrEl);
+    qrEl.appendChild(btn);
+  });
+}
+
+function handleQuickReply(text, qrEl){
+  qrEl.querySelectorAll('.chat-qr').forEach(b => b.disabled = true);
+  appendUserBubble(text);
+  scrollChatBottom();
+  setTimeout(()=>{ qrEl.innerHTML = ''; advanceChatStep(); }, 300);
+}
+
+function sendChatMessage(){
+  const input = document.getElementById('chatInput');
+  const text  = input.value.trim();
+  if(!text) return;
+  input.value = ''; autoGrowInput(input);
+  appendUserBubble(text);
+  document.getElementById('chatQuickReplies').innerHTML = '';
+  scrollChatBottom();
+  setTimeout(()=> advanceChatStep(), 300);
+}
+
+function appendAgentBubble(text, time){
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-bubble-wrap bubble-anim';
+  /* Render **bold**, > blockquote, · list bullets, newlines */
+  let html = text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .split('\n')
+    .map(line => {
+      if(line.startsWith('> ')) return `<div class="chat-blockquote">${line.slice(2)}</div>`;
+      if(/^[①②③·]/.test(line))  return `<div class="chat-list-item">${line}</div>`;
+      return line;
+    })
+    .join('<br>');
+  wrap.innerHTML = `
+    <div class="chat-av agent">🤖</div>
+    <div>
+      <div class="chat-bubble agent">${html}</div>
+      <div class="chat-bubble-time">${time}</div>
+    </div>`;
+  document.getElementById('chatMessages').appendChild(wrap);
+}
+
+function appendUserBubble(text){
+  const now  = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-bubble-wrap user bubble-anim';
+  wrap.innerHTML = `
+    <div class="chat-av user">我</div>
+    <div>
+      <div class="chat-bubble user">${text}</div>
+      <div class="chat-bubble-time">${time}</div>
+    </div>`;
+  document.getElementById('chatMessages').appendChild(wrap);
+}
+
+function appendConfirmCard(data){
+  const rows = data.map(r =>
+    `<div class="chat-confirm-label">${r.label}</div><div class="chat-confirm-val">${r.val}</div>`
+  ).join('');
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-bubble-wrap bubble-anim';
+  wrap.innerHTML = `
+    <div class="chat-av agent">🤖</div>
+    <div style="max-width:82%;">
+      <div class="chat-confirm-card">
+        <div class="chat-confirm-title">执行摘要 · 请确认</div>
+        <div class="chat-confirm-row">${rows}</div>
+      </div>
+      <div class="chat-bubble-time">14:40</div>
+    </div>`;
+  document.getElementById('chatMessages').appendChild(wrap);
+}
+
+function showTypingIndicator(){
+  removeTypingIndicator();
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-bubble-wrap'; wrap.id = 'chatTypingWrap';
+  wrap.innerHTML = `
+    <div class="chat-av agent">🤖</div>
+    <div class="chat-typing"><span></span><span></span><span></span></div>`;
+  document.getElementById('chatMessages').appendChild(wrap);
+  scrollChatBottom();
+}
+
+function removeTypingIndicator(){
+  const el = document.getElementById('chatTypingWrap');
+  if(el) el.remove();
+}
+
+function scrollChatBottom(){
+  const el = document.getElementById('chatMessages');
+  setTimeout(()=>{ el.scrollTop = el.scrollHeight; }, 50);
+}
+
+function confirmChatTask(){
+  document.getElementById('chatConfirmBtn').disabled = true;
+  appendUserBubble('确认执行 ✓');
+  scrollChatBottom();
+  setTimeout(()=>{
+    document.getElementById('chatStatus').textContent = '已完成';
+    document.getElementById('chatStatus').className   = 'chat-ov-status done';
+    document.getElementById('chatDoneOverlay').classList.add('show');
+    // Dismiss card after overlay shown
+    if(activeChatMsgId){
+      consumedActions[activeChatMsgId] = 'Chat done';
+      dismissCard(activeChatMsgId, 'Done');
+    }
+  }, 600);
+}
+
+function autoGrowInput(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && !e.shiftKey && document.activeElement.id === 'chatInput'){
+    e.preventDefault(); sendChatMessage();
+  }
+});
+
+/* ── History Drawer ── */
+const TYPE_COLORS_DRAWER = {
+  'b-quick':'#8b5cf6','b-chat':'#8b5cf6','c':'#3b82f6','a-status':'#22c55e',
+};
+
+function openHistoryDrawer(){
+  /* Build full list: live consumed first, then all MOCK_HISTORY */
+  const liveMsgs = INLINE_MSGS
+    .filter(m => consumedIds.has(m.id))
+    .map(m => ({
+      id:m.id, type:m.type, title:m.title, source:m.source,
+      time:'今天 ' + m.time, done: m.type==='a-status'?'Read':'Done',
+    }));
+  const liveIds = new Set(liveMsgs.map(m => m.id));
+  const all = [...liveMsgs, ...MOCK_HISTORY.filter(m => !liveIds.has(m.id))];
+
+  /* Group by time label */
+  const groups = {};
+  all.forEach(m => {
+    const g = m.time.startsWith('今天') ? '今天'
+            : m.time.startsWith('昨天') ? '昨天'
+            : m.time.replace(/\s.*/,'');
+    if(!groups[g]) groups[g] = [];
+    groups[g].push(m);
+  });
+
+  const body = document.getElementById('hdwBody');
+  body.innerHTML = Object.entries(groups).map(([date, items]) => `
+    <div class="hdw-date-group">${date}</div>
+    ${items.map(m => {
+      const color = TYPE_COLORS_DRAWER[m.type] || 'rgba(0,0,0,.2)';
+      const tagCls = m.done === 'Read' ? 'done-read' : 'done-finish';
+      // b-quick: show action taken; b-chat: link to chat; c: show toast
+      const actionTaken = consumedActions[m.id] || m.action || null;
+      const doneLabel = actionTaken || m.done;
+      const clickAttr = m.type === 'b-chat'
+        ? `onclick="window.location.href='chat.html?scene=x-release'" style="cursor:pointer;" title="查看会话"`
+        : m.type === 'c'
+        ? `onclick="showToast('跳转至对应任务（模拟）')" style="cursor:pointer;" title="跳转任务"`
+        : '';
+      const actionNote = (m.type === 'b-quick' && actionTaken)
+        ? `<span class="hdw-row-action">· ${actionTaken}</span>` : '';
+      return `<div class="hdw-row" ${clickAttr}>
+        <div class="hdw-row-dot" style="background:${color}"></div>
+        <div class="hdw-row-body">
+          <div class="hdw-row-title">${m.title}</div>
+          <div class="hdw-row-meta">
+            <span class="hdw-row-source">${m.source}</span>
+            ${actionNote}
+            <span class="hdw-row-time">${m.time}</span>
+            <span class="hdw-row-tag ${tagCls}">${doneLabel}</span>
+          </div>
+        </div>
+        ${m.type === 'b-chat' || m.type === 'c' ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
+      </div>`;
+    }).join('')}
+  `).join('');
+
+  document.getElementById('hdwTotal').textContent = all.length;
+  document.getElementById('hdwBackdrop').classList.add('open');
+  document.getElementById('hdwDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeHistoryDrawer(){
+  document.getElementById('hdwBackdrop').classList.remove('open');
+  document.getElementById('hdwDrawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+<!-- ══ HISTORY DRAWER ══ -->
+<div class="hdw-backdrop" id="hdwBackdrop" onclick="closeHistoryDrawer()"></div>
+<aside class="hdw-drawer" id="hdwDrawer" role="dialog" aria-modal="true" aria-label="历史消息">
+  <div class="hdw-header">
+    <div class="hdw-title">
+      <span class="hdw-title-icon">🗂</span>
+      <span>历史消息</span>
+      <span class="hdw-total" id="hdwTotal">0</span>
+    </div>
+    <button class="hdw-close" onclick="closeHistoryDrawer()" aria-label="关闭">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="hdw-body" id="hdwBody"></div>
+</aside>
+
+</body>
+</html>
