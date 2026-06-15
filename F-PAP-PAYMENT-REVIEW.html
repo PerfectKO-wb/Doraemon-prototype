@@ -529,6 +529,7 @@
             white-space: nowrap;
         }
         .tag.denied { color: var(--error); background: var(--error-bg); border: 1px solid var(--error-border); }
+        .tag.unconfirmed { color: #92400e; background: #fffbeb; border: 1px solid #fde68a; }
         .tag.checked { color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
         .tag.pending { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
         .tag.parsing { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
@@ -1457,6 +1458,7 @@
             <!-- Status filter tabs -->
             <div class="status-tabs" id="statusTabs">
                 <button class="status-tab active" data-state="all">All <span class="tab-ct" id="ct-all">0</span></button>
+                <button class="status-tab" data-state="unconfirmed">Unconfirmed <span class="tab-ct" id="ct-unconfirmed">0</span></button>
                 <button class="status-tab" data-state="pending">Pending <span class="tab-ct" id="ct-pending">0</span></button>
                 <button class="status-tab" data-state="approved">Approved <span class="tab-ct" id="ct-approved">0</span></button>
                 <button class="status-tab" data-state="denied">Denied <span class="tab-ct" id="ct-denied">0</span></button>
@@ -1565,27 +1567,24 @@
                             <div class="form-label">Description :</div>
                             <div class="form-control"><input id="ivDescription" placeholder="e.g. Marketing expenses · Apr"></div>
                         </div>
-                        <div class="form-row" data-region="all" data-req>
-                            <div class="form-label">Region :</div>
-                            <select class="form-control" id="ivRegion" onchange="syncIvCompanyFromRegion()">
-                                <option value="JP">Japan (JP)</option>
-                                <option value="US">United States (US)</option>
-                                <option value="SG">Singapore (SG)</option>
-                                <option value="CN">China (CN)</option>
-                                <option value="TW">Taiwan (TW)</option>
-                                <option value="KY">Cayman Islands (KY)</option>
-                            </select>
-                        </div>
+                        <select id="ivRegion" style="display:none">
+                            <option value="JP">Japan (JP)</option>
+                            <option value="US">United States (US)</option>
+                            <option value="SG">Singapore (SG)</option>
+                            <option value="CN">China (CN)</option>
+                            <option value="TW">Taiwan (TW)</option>
+                            <option value="KY">Cayman Islands (KY)</option>
+                        </select>
                         <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Company :</div>
                             <select class="form-control" id="ivCompany">
                                 <option value="">— Select —</option>
-                                <option value="AINEKOX CO LTD.">AINEKOX CO LTD.</option>
-                                <option value="SHANGHAI WEIYOUYI CHUXIN TECH CO LTD">SHANGHAI WEIYOUYI CHUXIN TECH CO LTD</option>
-                                <option value="CTW G123 SINGAPORE PTE LTD">CTW G123 SINGAPORE PTE LTD</option>
-                                <option value="CTW INC">CTW INC</option>
-                                <option value="CTW US INC">CTW US INC</option>
-                                <option value="CTW CAYMAN">CTW CAYMAN</option>
+                                <option value="JP_CTW_INC">JP_CTW_INC</option>
+                                <option value="SG_CTW_INC">SG_CTW_INC</option>
+                                <option value="US_CTW_INC">US_CTW_INC</option>
+                                <option value="KY_CTW_INC">KY_CTW_INC</option>
+                                <option value="SH_WYYCX_INC">SH_WYYCX_INC</option>
+                                <option value="HK_CTW_INC">HK_CTW_INC</option>
                             </select>
                         </div>
                         <div class="form-row" data-region="all" data-req>
@@ -1658,20 +1657,17 @@
                         <!-- ── Category ── -->
                         <div class="form-section-label">Category</div>
 
-                        <div class="form-row" data-region="all" data-req>
-                            <div class="form-label">Business Category :</div>
-                            <select class="form-control" id="ivBusinessCategory">
-                                <option value="">— Select —</option>
-                                <option value="ADVERTISING">ADVERTISING</option>
-                                <option value="ROYALTY">ROYALTY</option>
-                                <option value="OFFICE_ADMIN">OFFICE_ADMIN</option>
-                                <option value="SAAS">SAAS</option>
-                                <option value="CLOUD">CLOUD</option>
-                                <option value="PROFESSIONAL_SERVICE">PROFESSIONAL_SERVICE</option>
-                                <option value="COMMUNICATION">COMMUNICATION</option>
-                                <option value="OTHER">OTHER</option>
-                            </select>
-                        </div>
+                        <select id="ivBusinessCategory" style="display:none">
+                            <option value="">— Select —</option>
+                            <option value="ADVERTISING">ADVERTISING</option>
+                            <option value="ROYALTY">ROYALTY</option>
+                            <option value="OFFICE_ADMIN">OFFICE_ADMIN</option>
+                            <option value="SAAS">SAAS</option>
+                            <option value="CLOUD">CLOUD</option>
+                            <option value="PROFESSIONAL_SERVICE">PROFESSIONAL_SERVICE</option>
+                            <option value="COMMUNICATION">COMMUNICATION</option>
+                            <option value="OTHER">OTHER</option>
+                        </select>
                         <div class="form-row" data-region="all" data-req>
                             <div class="form-label">Payment Type :</div>
                             <select class="form-control" id="ivPaymentType">
@@ -1727,23 +1723,23 @@
 
                         <div class="form-row" data-region="all" data-req>
                             <div class="form-label req-label">Requires Finance Payout :</div>
-                            <select class="form-control" id="ivRequiresFinancePayout">
+                            <select class="form-control" id="ivRequiresFinancePayout" onchange="onPayoutChange(this.value)">
                                 <option value="YES">YES</option>
                                 <option value="NO">NO</option>
                             </select>
                     </div>
 
                         <!-- Common -->
-                        <div class="form-row req-bank" data-region="all" data-req>
+                        <div class="form-row req-bank" data-region="all" data-req data-payout-row>
                             <div class="form-label req-label">Bank Name :</div>
                             <div class="form-control"><input id="ivBankName" placeholder="Beneficiary bank name"></div>
                         </div>
-                        <div class="form-row" data-region="jp sg cn tw">
+                        <div class="form-row" data-region="jp sg cn tw" data-payout-row>
                             <div class="form-label">Branch Name :</div>
                             <div class="form-control"><input id="ivBranchName" placeholder="Branch name"></div>
                         </div>
                         <!-- Account type: JP only, enum -->
-                        <div class="form-row" data-region="jp">
+                        <div class="form-row" data-region="jp" data-payout-row>
                             <div class="form-label">Account Type :</div>
                             <select class="form-control" id="ivAccountType">
                                 <option value="">— Select —</option>
@@ -1752,53 +1748,53 @@
                                 <option value="定期預金">定期預金</option>
                             </select>
                         </div>
-                        <div class="form-row req-bank" data-region="all" data-req>
+                        <div class="form-row req-bank" data-region="all" data-req data-payout-row>
                             <div class="form-label req-label">Account No. :</div>
                             <div class="form-control"><input id="ivAccountNo" placeholder="Account number"></div>
                         </div>
-                        <div class="form-row req-bank" data-region="all" data-req>
+                        <div class="form-row req-bank" data-region="all" data-req data-payout-row>
                             <div class="form-label req-label">Account Name :</div>
                             <div class="form-control"><input id="ivAccountName" placeholder="Account holder name"></div>
                         </div>
 
                         <!-- JP + SG + TW: local bank/branch codes -->
-                        <div class="form-row" data-region="jp sg tw">
+                        <div class="form-row" data-region="jp sg tw" data-payout-row>
                             <div class="form-label">Bank Code :</div>
                             <div class="form-control"><input id="ivBankCode" placeholder="e.g. 0009 (JP) / 7214 (SG) / 822 (TW)"></div>
-                </div>
-                        <div class="form-row" data-region="jp sg tw">
+                        </div>
+                        <div class="form-row" data-region="jp sg tw" data-payout-row>
                             <div class="form-label">Branch Code :</div>
                             <div class="form-control"><input id="ivBranchCode" placeholder="e.g. 210 (JP) / 001 (SG)"></div>
-            </div>
+                        </div>
 
                         <!-- JP only: Kana fields -->
-                        <div class="form-row" data-region="jp" data-req>
+                        <div class="form-row" data-region="jp" data-req data-payout-row>
                             <div class="form-label">Account Name (Kana) :</div>
                             <div class="form-control"><input id="ivAccountHolderKana" placeholder="半角カタカナ"></div>
                         </div>
-                        <div class="form-row" data-region="jp">
+                        <div class="form-row" data-region="jp" data-payout-row>
                             <div class="form-label">Bank Name (Kana) :</div>
                             <div class="form-control"><input id="ivBankNameKana" placeholder="半角カタカナ（銀行名）"></div>
-        </div>
+                        </div>
 
                         <!-- All regions: SWIFT (optional) -->
-                        <div class="form-row" data-region="all">
+                        <div class="form-row" data-region="all" data-payout-row>
                             <div class="form-label">SWIFT Code :</div>
                             <div class="form-control"><input id="ivSwiftCode" placeholder="8 or 11 chars"></div>
                         </div>
 
                         <!-- US only: ACH / Wire -->
-                        <div class="form-row" data-region="us">
+                        <div class="form-row" data-region="us" data-payout-row>
                             <div class="form-label">ACH Routing :</div>
                             <div class="form-control"><input id="ivAchRouting" placeholder="9-digit routing number"></div>
                         </div>
-                        <div class="form-row" data-region="us">
+                        <div class="form-row" data-region="us" data-payout-row>
                             <div class="form-label">Wire Routing :</div>
                             <div class="form-control"><input id="ivWireRouting" placeholder="9-digit routing number"></div>
                         </div>
 
                         <!-- SG only: PayNow -->
-                        <div class="form-row" data-region="sg">
+                        <div class="form-row" data-region="sg" data-payout-row>
                             <div class="form-label">PayNow UEN :</div>
                             <div class="form-control"><input id="ivPayNowUen" placeholder="e.g. 201812345K"></div>
                         </div>
@@ -2017,7 +2013,7 @@
     function jpFields(overrides = {}) {
         return Object.assign({
             region: 'JP',
-            company: 'CTW INC',
+            company: 'JP_CTW_INC',
             recognitionPolicy: 'PREPAID_MONTHLY',
             allocationMethod: 'MONTHLY_EQUAL',
             documentType: 'INVOICE',
@@ -2066,7 +2062,7 @@
     function usFields(overrides = {}) {
         return Object.assign({
             region: 'US',
-            company: 'CTW US INC',
+            company: 'US_CTW_INC',
             recognitionPolicy: 'ACCRUAL_BY_SERVICE_PERIOD',
             allocationMethod: 'MONTHLY_EQUAL',
             documentType: 'INVOICE',
@@ -2114,7 +2110,7 @@
     function sgFields(overrides = {}) {
         return Object.assign({
             region: 'SG',
-            company: 'CTW G123 SINGAPORE PTE LTD',
+            company: 'SG_CTW_INC',
             recognitionPolicy: 'PREPAID_DAILY',
             allocationMethod: 'DAILY_PRORATA',
             documentType: 'INVOICE',
@@ -2163,7 +2159,7 @@
     function cnFields(overrides = {}) {
         return Object.assign({
             region: 'CN',
-            company: 'CTW G123 SINGAPORE PTE LTD',
+            company: 'SH_WYYCX_INC',
             recognitionPolicy: 'IMMEDIATE',
             allocationMethod: 'MONTHLY_EQUAL',
             documentType: 'CONTRACT',
@@ -2211,7 +2207,7 @@
     function twFields(overrides = {}) {
         return Object.assign({
             region: 'TW',
-            company: 'AINEKOX CO LTD.',
+            company: 'HK_CTW_INC',
             recognitionPolicy: 'MONTHLY_BY_LINE_ITEM',
             allocationMethod: 'MONTHLY_BY_LINE_ITEM',
             documentType: 'INVOICE',
@@ -2262,6 +2258,7 @@
         { id: 1, name: 'JP_file_8457_p_001.pdf', type: 'pdf', state: 'pending', time: '2026-04-01 10:12', month: 4, year: 2026, region: 'JP', fields: jpFields() },
         { id: 2, name: 'US_file_8222_p_001.pdf', type: 'pdf', state: 'pending', time: '2026-04-05 10:30', month: 4, year: 2026, region: 'US', fields: usFields() },
         { id: 4, name: 'SG_file_8413_p_001-004.pdf', type: 'pdf', state: 'pending', time: '2026-04-08 15:10', month: 4, year: 2026, region: 'SG', fields: sgFields() },
+        { id: 10, name: 'AWS_Invoice_2026-05_JP.pdf', type: 'pdf', state: 'unconfirmed', time: '2026-04-09 08:44', month: 4, year: 2026, region: 'JP', fields: jpFields() },
         { id: 6, name: 'CN_file_8387_p_001.png', type: 'img', state: 'pending', time: '2026-04-12 09:30', month: 4, year: 2026, region: 'CN', fields: cnFields() },
         { id: 7, name: 'TW_file_8492_p_001.pdf', type: 'pdf', state: 'pending', time: '2026-04-10 09:15', month: 4, year: 2026, region: 'TW', fields: twFields() },
     ];
@@ -2269,7 +2266,7 @@
     // Vouchers hidden for now (not relevant to current demo scope)
     let vouchers = [];
 
-    const STATE_LABELS = { pending: 'Pending', denied: 'Denied', approved: 'Approved', checked: 'Approved', parsing: 'Parsing' };
+    const STATE_LABELS = { pending: 'Pending', denied: 'Denied', approved: 'Approved', checked: 'Approved', parsing: 'Parsing', unconfirmed: 'Unconfirmed' };
 
     /** 'all' or a key of STATE_LABELS */
     let stateFilter = 'all';
@@ -2472,12 +2469,16 @@
 
         renderInvoicePreview(inv);
 
-        // Populate form with invoice data + apply region-aware visibility
-        populateInvoiceSummary(inv);
+        // Apply state (enable/disable form) BEFORE populating values,
+        // so disabled selects are re-enabled before their value is set.
+        applyStateUI(inv.state, 'invoice');
+
+        // Unconfirmed invoices have not been reviewed yet — show blank form for manual entry
+        const invForPopulate = inv.state === 'unconfirmed' ? { fields: {} } : inv;
+        populateInvoiceSummary(invForPopulate);
         applyInvoiceRegion(inv.fields?.region || inv.region || 'JP');
 
         zoom = 100; applyZoom();
-        applyStateUI(inv.state, 'invoice');
 
         document.getElementById('listView').classList.add('hidden');
         document.getElementById('detailView').classList.add('open');
@@ -2604,7 +2605,8 @@
         setVal('ivPaymentType', f.paymentType);
         renderLineItems(f.lineItems);
         setVal('ivPurpose', f.purpose);
-        setVal('ivRequiresFinancePayout', f.requiresFinancePayout || 'YES');
+        const payoutVal = f.requiresFinancePayout || 'NO';
+        setVal('ivRequiresFinancePayout', payoutVal);
         setVal('ivBankName', f.bankName);
         setVal('ivBranchName', f.branchName);
         setVal('ivAccountType', f.accountType || '');
@@ -2646,14 +2648,26 @@
 
         // Auto-fill Company from Region
         syncIvCompanyFromRegion();
+
+        // Show/hide bank fields based on Requires Finance Payout
+        onPayoutChange(payoutVal);
     }
 
-    const IV_COMPANY_BY_REGION = { JP: 'CTW INC', US: 'CTW US INC', SG: 'CTW G123 SINGAPORE PTE LTD', TW: 'AINEKOX CO LTD.', CN: 'SHANGHAI WEIYOUYI CHUXIN TECH CO LTD', KY: 'CTW CAYMAN' };
+    const IV_COMPANY_BY_REGION = { JP: 'JP_CTW_INC', US: 'US_CTW_INC', SG: 'SG_CTW_INC', TW: 'HK_CTW_INC', CN: 'SH_WYYCX_INC', KY: 'KY_CTW_INC' };
     function syncIvCompanyFromRegion() {
         const reg = document.getElementById('ivRegion').value;
         if (IV_COMPANY_BY_REGION[reg]) document.getElementById('ivCompany').value = IV_COMPANY_BY_REGION[reg];
     }
 
+
+    function onPayoutChange(val) {
+        const show = val === 'YES';
+        document.querySelectorAll('#invoiceSummary [data-payout-row]').forEach(row => {
+            row.style.display = show ? '' : 'none';
+        });
+        // Re-apply region filter so region-specific rows stay correctly hidden
+        if (show) applyInvoiceRegion(document.getElementById('ivRegion').value || 'JP');
+    }
 
     function onAllocationRequiredChange(val) {
         const allocationRow = document.getElementById('ivAllocationMethodRow');
@@ -2709,12 +2723,14 @@
         document.getElementById('invoiceSummary').style.display = 'none';
         document.getElementById('voucherSummary').style.display = '';
 
+        // Apply state (enable/disable form) BEFORE populating values
+        applyStateUI(r.state, 'voucher');
+
         // Populate preview and form
         renderVoucherPreview(r);
         populateVoucherSummary(r);
 
         zoom = 100; applyZoom();
-        applyStateUI(r.state, 'voucher');
 
         document.getElementById('listView').classList.add('hidden');
         document.getElementById('detailView').classList.add('open');
@@ -3081,6 +3097,7 @@
         })();
         const counts = {
             all: baseList.length,
+            unconfirmed: baseList.filter(f => f.state === 'unconfirmed').length,
             pending: baseList.filter(f => f.state === 'pending').length,
             approved: baseList.filter(f => f.state === 'approved' || f.state === 'checked').length,
             denied: baseList.filter(f => f.state === 'denied').length,
@@ -3946,7 +3963,7 @@ function escHtml(str) {
 }
 
 // Re-render drawer when region changes (if drawer is open)
-const _IV_COMPANY = { JP: 'CTW INC', US: 'CTW US INC', SG: 'CTW G123 SINGAPORE PTE LTD', TW: 'AINEKOX CO LTD.', CN: 'SHANGHAI WEIYOUYI CHUXIN TECH CO LTD' };
+const _IV_COMPANY = { JP: 'JP_CTW_INC', US: 'US_CTW_INC', SG: 'SG_CTW_INC', TW: 'HK_CTW_INC', CN: 'SH_WYYCX_INC', KY: 'KY_CTW_INC' };
 function syncIvCompanyFromRegion() {
     const reg = document.getElementById('ivRegion')?.value;
     if (reg && _IV_COMPANY[reg]) {
