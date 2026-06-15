@@ -865,6 +865,7 @@
         }
         .source-badge svg { width: 10px; height: 10px; }
         .tag.needs-check { color: #7c3aed; background: #f5f3ff; border: 1px solid #ddd6fe; }
+        .tag.no-need { color: #6b7280; background: #f3f4f6; border: 1px solid #d1d5db; text-decoration: line-through; opacity: .8; }
         .col-source { width: 160px; }
 
         /* Category filter */
@@ -1205,9 +1206,6 @@
 
             <div class="toolbar-right">
                 <span class="toolbar-hint" id="uploadHint">JPG / PNG / PDF</span>
-                <button class="btn-primary" id="recallBtn" style="display:none; background:#fff; color:#111; border:1.5px solid #111;">
-                    Recall
-                </button>
                 <button class="btn-primary" id="confirmMailBtn" style="display:none;">
                     Confirm
                 </button>
@@ -1484,7 +1482,7 @@
 
     const STATE_LABELS = {
         pending: 'Pending', denied: 'Denied', approved: 'Approved',
-        parsing: 'Parsing', confirmed: 'Confirmed', 'needs-check': 'Needs Check'
+        parsing: 'Parsing', confirmed: 'Confirmed', 'needs-check': 'Need Confirm'
     };
 
     // ========== Render helpers ==========
@@ -1714,15 +1712,22 @@
     function confirmMailInViewer() {
         const f = mailFiles.find(x => x.id === currentMailId);
         if (!f) return;
-        if (f.state === 'needs-check') {
+        if (f.state === 'needs-check' || f.state === 'no-need') {
             f.state = 'parsing';
             f.selected = false;
+            renderMailTable();
             showToast('Confirmed — sent to parsing');
         }
         advanceToNextMail();
     }
 
     function skipMailInViewer() {
+        const f = mailFiles.find(x => x.id === currentMailId);
+        if (f && (f.state === 'needs-check' || f.state === 'parsing')) {
+            f.state = 'no-need';
+            f.selected = false;
+            renderMailTable();
+        }
         advanceToNextMail();
     }
 
@@ -1947,10 +1952,11 @@
     ];
 
     const MAIL_STATE_LABELS = {
-        'needs-check': 'Needs Check',
+        'needs-check': 'Need Confirm',
         'parsing': 'Pending',
         'confirmed': 'Confirmed',
         'denied': 'Denied',
+        'no-need': 'No need',
     };
 
     function getMailSelected() { return mailFiles.filter(f => f.selected); }
@@ -2046,13 +2052,10 @@
         const hasPending    = selectedItems.some(f => f.state === 'parsing');
         const hasNeedsCheck = selectedItems.some(f => f.state === 'needs-check');
         const confirmBtn = document.getElementById('confirmMailBtn');
-        const recallBtn  = document.getElementById('recallBtn');
         if (selectedItems.length === 0) {
             confirmBtn.disabled = false;
-            recallBtn.disabled  = false;
         } else {
             confirmBtn.disabled = hasPending;
-            recallBtn.disabled  = hasNeedsCheck;
         }
 
         updateCatTrigger();
@@ -2079,7 +2082,6 @@
         const isUploaded = tab === 'uploaded';
         document.getElementById('uploadBtn').style.display = isUploaded ? '' : 'none';
         document.getElementById('uploadHint').style.display = isUploaded ? '' : 'none';
-        document.getElementById('recallBtn').style.display = isUploaded ? 'none' : '';
         document.getElementById('confirmMailBtn').style.display = isUploaded ? 'none' : '';
         document.getElementById('picSelect').style.display = isUploaded ? 'none' : '';
         if (tab === 'mail-inbox') renderMailTable();
@@ -2137,17 +2139,6 @@
 
     // Bulk action: confirm check
     document.getElementById('confirmMailBtn').addEventListener('click', confirmMailCheck);
-
-    document.getElementById('recallBtn').addEventListener('click', () => {
-        const ids = mailFiles.filter(f => f.selected && f.state === 'parsing').map(f => f.id);
-        if (!ids.length) { showToast('Select pending invoices to recall'); return; }
-        ids.forEach(id => {
-            const f = mailFiles.find(x => x.id === id);
-            if (f) { f.state = 'needs-check'; f.selected = false; }
-        });
-        renderMailTable();
-        showToast(`${ids.length} invoice${ids.length > 1 ? 's' : ''} recalled`);
-    });
 
 </script>
 

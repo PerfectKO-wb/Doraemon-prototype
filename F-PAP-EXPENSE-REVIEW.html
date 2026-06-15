@@ -4,36 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>F Expert · Expense Review</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Urbanist:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Urbanist:wght@700&display=swap" rel="stylesheet">
 <style>
 :root {
-    --bg-base: #f0f2f5;
+    --bg-base: #ffffff;
     --bg-container: #ffffff;
-    --bg-hover: #f5f6f8;
-    --bg-active: #eef0f3;
-    --bg-subtle: #f7f8fa;
-    --text-default: #0f172a;
-    --text-secondary: #64748b;
-    --text-disabled: #94a3b8;
-    --border-divider: #e2e8f0;
-    --border-default: #cbd5e1;
-    --border-strong: #94a3b8;
-    --button-default: #1e293b;
-    --primary: #3b82f6;
-    --primary-dark: #1d4ed8;
-    --error: #ef4444; --error-bg: #fef2f2; --error-border: #fecaca;
+    --bg-hover: #f3f5f9;
+    --bg-active: #eaecf0;
+    --bg-subtle: #f7f8fb;
+    --bg-surface: #fdfdfe;
+    --text-default: #0b1220;
+    --text-secondary: #5a6478;
+    --text-disabled: #9aa3b2;
+    --border-divider: #e3e7ee;
+    --border-default: #c8d0dc;
+    --border-strong: #8b95a8;
+    --button-default: #111827;
+    --primary: #2563eb;
+    --primary-dark: #1a4fcc;
+    --primary-bg: #eff6ff;
+    --error: #e5394b; --error-bg: #fff1f2; --error-border: #fecdd3;
     --success: #16a34a; --success-bg: #f0fdf4; --success-border: #bbf7d0;
     --warn: #d97706; --warn-bg: #fffbeb; --warn-border: #fde68a;
     --teal-grad: linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);
-    --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
-    --shadow-sm: 0 1px 3px rgba(15,23,42,.08),0 1px 2px rgba(15,23,42,.04);
-    --shadow-md: 0 4px 12px rgba(15,23,42,.1),0 2px 4px rgba(15,23,42,.06);
-    --shadow-lg: 0 16px 40px rgba(15,23,42,.14),0 4px 12px rgba(15,23,42,.08);
+    --shadow-xs: 0 1px 2px rgba(11,18,32,.04);
+    --shadow-sm: 0 1px 3px rgba(11,18,32,.08),0 1px 2px rgba(11,18,32,.04);
+    --shadow-md: 0 4px 14px rgba(11,18,32,.10),0 2px 4px rgba(11,18,32,.06);
+    --shadow-lg: 0 16px 44px rgba(11,18,32,.13),0 4px 12px rgba(11,18,32,.07);
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+}
+@keyframes pulse-dot {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.55; transform:scale(.75); }
+}
+@keyframes row-in {
+    from { opacity:0; transform:translateY(5px); }
+    to   { opacity:1; transform:translateY(0); }
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;}
 body{
-    font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;
+    font-family:'Manrope',-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;
     font-size:14px;color:var(--text-default);
     background:var(--bg-base);height:100vh;overflow:hidden;
     -webkit-font-smoothing:antialiased;
@@ -46,7 +57,8 @@ button{font-family:inherit;}
 .sidebar {
     width: 56px; flex-shrink: 0;
     display: flex; flex-direction: column; align-items: center;
-    height: 100vh; background: var(--bg-container);
+    height: 100vh;
+    background: linear-gradient(180deg, #f9fafb 0%, #f1f3f7 100%);
     border-right: 1px solid var(--border-divider);
 }
 .sb-logo {
@@ -259,21 +271,22 @@ button{font-family:inherit;}
 .lp-search input::placeholder{color:var(--text-disabled);}
 .lp-tabs{display:flex;border-bottom:1px solid var(--border-divider);}
 .lp-tab{
-    padding:0 14px;height:36px;border:none;background:none;font:inherit;
+    padding:0 16px;height:48px;border:none;background:none;font:inherit;
     font-size:13px;font-weight:500;color:var(--text-secondary);
     cursor:pointer;position:relative;transition:color .15s; white-space:nowrap;
 }
 .lp-tab:hover{color:var(--text-default);}
-.lp-tab.active{color:var(--text-default);font-weight:600;}
+.lp-tab.active{color:var(--text-default);font-weight:700;}
 .lp-tab.active::after{
-    content:'';position:absolute;bottom:0;left:10px;right:10px;
-    height:2px;background:var(--button-default);border-radius:1px;
+    content:'';position:absolute;bottom:0;left:12px;right:12px;
+    height:3px;background:linear-gradient(90deg,var(--primary),#5b52f0);
+    border-radius:2px 2px 0 0;
 }
 .lp-tab .tc{
     display:inline-flex;align-items:center;justify-content:center;
-    min-width:18px;height:16px;padding:0 5px;border-radius:8px;
-    background:var(--bg-active);font-size:10px;font-weight:600;
-    color:var(--text-secondary);margin-left:5px;
+    min-width:18px;height:16px;padding:0 5px;border-radius:20px;
+    background:var(--bg-active);font-size:10px;font-weight:700;
+    color:var(--text-secondary);margin-left:5px;font-family:var(--font-mono);
 }
 .lp-tab.active .tc{background:var(--button-default);color:#fff;}
 .lp-list{flex:1;overflow-y:auto;}
@@ -298,14 +311,20 @@ button{font-family:inherit;}
 .ri-right{text-align:right;flex-shrink:0;}
 .ri-amount{font-size:12px;font-weight:700;margin-bottom:3px;}
 .tag{
-    display:inline-flex;align-items:center;justify-content:center;
-    height:20px;padding:0 8px;border-radius:20px;
-    font-size:10px;font-weight:600;white-space:nowrap;
+    display:inline-flex;align-items:center;gap:5px;
+    height:22px;padding:0 9px 0 7px;border-radius:20px;
+    font-size:11px;font-weight:600;white-space:nowrap;
+    letter-spacing:.15px;font-family:var(--font-mono);
 }
-.tag.pending{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;}
-.tag.approved{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;}
-.tag.rejected{background:#fee2e2;color:#dc2626;border:1px solid #fecaca;}
-.tag.draft{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;}
+.tag::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.tag.pending{background:#fefce8;color:#854d0e;}
+.tag.pending::before{background:#eab308;animation:pulse-dot 2s ease-in-out infinite;}
+.tag.approved{background:#f0fdf4;color:#166534;}
+.tag.approved::before{background:#22c55e;}
+.tag.rejected{background:#fff1f2;color:#9f1239;}
+.tag.rejected::before{background:#f43f5e;}
+.tag.draft{background:#f1f4f8;color:#4a5568;}
+.tag.draft::before{background:#94a3b8;}
 
 /* ===== Detail area ===== */
 .detail-area{
@@ -342,9 +361,9 @@ button{font-family:inherit;}
     height:34px;padding:0 14px;border-radius:8px;
     border:1.5px solid var(--border-default);background:var(--bg-container);
     color:var(--text-default);font:inherit;font-size:13px;font-weight:500;cursor:pointer;
-    transition:all .15s;
+    transition:all .15s ease;
 }
-.btn-ghost:hover{background:var(--bg-hover);border-color:var(--border-strong);}
+.btn-ghost:hover{background:var(--bg-hover);border-color:var(--border-strong);box-shadow:var(--shadow-xs);}
 
 /* ===== Content split ===== */
 /* ===== 3rd-column two-state layout ===== */
@@ -382,19 +401,25 @@ button{font-family:inherit;}
 .er-table-wrap-rv { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
 .er-table-scroll-rv { flex:1; overflow-y:auto; }
 .er-table-scroll-rv::-webkit-scrollbar { width:5px; }
-.er-table-scroll-rv::-webkit-scrollbar-thumb { background:#e2e2df; border-radius:3px; }
+.er-table-scroll-rv::-webkit-scrollbar-thumb { background:#d4d8e0; border-radius:3px; }
 .er-table-rv { width:100%; border-collapse:collapse; font-size:13px; }
 .er-table-rv thead th {
-    padding:0 14px; height:36px; text-align:left;
-    font-size:11px; font-weight:700; text-transform:uppercase;
-    color:var(--text-secondary); letter-spacing:.04em;
-    background:var(--bg-subtle); white-space:nowrap;
+    padding:0 14px; height:38px; text-align:left;
+    font-size:10.5px; font-weight:700; text-transform:uppercase;
+    color:var(--text-secondary); letter-spacing:.06em;
+    background:#ffffff; white-space:nowrap;
     position:sticky; top:0; z-index:1;
     border-bottom:1px solid var(--border-divider);
 }
-.er-table-rv tbody tr { border-bottom:1px solid var(--border-divider); cursor:pointer; transition:background .12s; }
+.er-table-rv tbody tr { border-bottom:1px solid var(--border-divider); cursor:pointer; transition:background .12s; animation:row-in .2s ease-out both; }
+.er-table-rv tbody tr:nth-child(1) { animation-delay:.03s; }
+.er-table-rv tbody tr:nth-child(2) { animation-delay:.06s; }
+.er-table-rv tbody tr:nth-child(3) { animation-delay:.09s; }
+.er-table-rv tbody tr:nth-child(4) { animation-delay:.12s; }
+.er-table-rv tbody tr:nth-child(5) { animation-delay:.15s; }
 .er-table-rv tbody tr:last-child { border-bottom:none; }
 .er-table-rv tbody tr:hover td { background:var(--bg-hover); }
+.er-table-rv tbody tr:hover td:first-child { box-shadow:inset 3px 0 0 var(--primary); }
 .er-table-rv tbody tr.tr-selected td { background:#eff6ff; }
 .er-table-rv td { padding:12px 14px; vertical-align:middle; }
 .rv-col-check  { width:42px; }
@@ -402,7 +427,7 @@ button{font-family:inherit;}
 .rv-col-period { width:105px; }
 .rv-col-sub    { width:105px; color:var(--text-secondary); font-size:12px; }
 .rv-col-inv    { width:75px; text-align:center; color:var(--text-secondary); }
-.rv-col-amt    { width:130px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums; }
+.rv-col-amt    { width:130px; text-align:right; font-weight:700; font-family:var(--font-mono); }
 .rv-col-status { width:110px; }
 .rv-emp-name   { font-weight:600; color:var(--text-default); }
 .rv-emp-sub    { font-size:11px; color:var(--text-secondary); margin-top:2px; }
@@ -834,7 +859,7 @@ button{font-family:inherit;}
         <button class="sb-agent" style="background:#7c3aed" title="Voice Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
     </div>
     <div class="sb-bottom">
-        <div class="sb-avatar" title="仪 恺">仪</div>
+        <div class="sb-avatar" title="王 彬">王</div>
     </div>
 </aside>
 
@@ -874,6 +899,7 @@ button{font-family:inherit;}
             <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
             <div class="list-card-content">
                 <div class="list-card-title">Invoice Collection <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Submit payment request</div>
                 <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending · 26 invoices</div>
             </div>
             <span class="list-card-dot"></span>
@@ -882,6 +908,7 @@ button{font-family:inherit;}
             <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11.5" cy="14.5" r="2.5"/><line x1="15" y1="18" x2="13.5" y2="16.5"/></svg></div>
             <div class="list-card-content">
                 <div class="list-card-title">Invoice Review <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Review and approve invoices</div>
                 <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending · 18 invoices</div>
             </div>
             <span class="list-card-dot"></span>
@@ -890,6 +917,7 @@ button{font-family:inherit;}
             <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
             <div class="list-card-content">
                 <div class="list-card-title">Expense Report <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Submit monthly expense reports</div>
                 <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Draft · 2 reports</div>
             </div>
         </div>
@@ -897,6 +925,7 @@ button{font-family:inherit;}
             <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></div>
             <div class="list-card-content">
                 <div class="list-card-title">Expense Review <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Finance review of expense reports</div>
                 <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending · 2 reports</div>
             </div>
         </div>
@@ -922,9 +951,9 @@ button{font-family:inherit;}
         <!-- Unified toolbar: tabs left, search right -->
         <div class="rv-toolbar">
             <div class="lp-tabs" style="border:none;height:auto;flex:1;">
-                <button class="lp-tab active" onclick="switchTab(this,'pending')">Pending <span class="tc" id="tc-pending">3</span></button>
+                <button class="lp-tab active" onclick="switchTab(this,'all')">All <span class="tc" id="tc-all">7</span></button>
+                <button class="lp-tab" onclick="switchTab(this,'pending')">Pending <span class="tc" id="tc-pending">3</span></button>
                 <button class="lp-tab" onclick="switchTab(this,'approved')">Approved <span class="tc" id="tc-approved">3</span></button>
-                <button class="lp-tab" onclick="switchTab(this,'all')">All <span class="tc" id="tc-all">7</span></button>
             </div>
             <div class="rv-search">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9a9a98" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -1101,9 +1130,15 @@ button{font-family:inherit;}
 
 <script>
 // ============ Data ============
+const EMPLOYEE_EMAILS = {
+    '王 彬': 'bin.wang@ctw.inc',
+    '张磊':  'lei.zhang@ctw.inc',
+    '王芳':  'fang.wang@ctw.inc',
+    '李 响': 'xiang.li@ctw.inc',
+};
 const REPORTS = [
     {
-        id:'ER-2026-05-YK', employee:'仪 恺', dept:'Finance', period:'May 2026',
+        id:'ER-2026-05-YK', employee:'王 彬', dept:'Finance', period:'May 2026',
         amount:4965.72, submitted:'2026-06-04', status:'pending', avatarColor:'#7c3aed',
         bill:{ app:'支付宝', period:'2026年5月', totalOut:4965.72 },
         invoices:[
@@ -1133,8 +1168,8 @@ const REPORTS = [
             { date:'2026/5/12', merchant:'充电（特来电）',          cat:'车辆费',   amount:137.24, invId:'INV-003', desc:'新能源充电',        actualDesc:'充电桩充电',  remarks:'',        flag:false },
         ],
         comments:[
-            { author:'系统', time:'06/04 09:01', text:'Report submitted by 仪 恺 for May 2026. Total ¥5,094.72, 3 invoices attached.', issue:false, avatarColor:'#6b7280' },
-            { author:'仪 恺', time:'06/04 09:02', text:'备注：5月住房补贴分两次到账，合计2029元，替票1张（INV-002）。停车/洗车均为工作车辆相关费用，替票INV-001。', issue:false, avatarColor:'#7c3aed' },
+            { author:'系统', time:'06/04 09:01', text:'Report submitted by 王 彬 for May 2026. Total ¥5,094.72, 3 invoices attached.', issue:false, avatarColor:'#6b7280' },
+            { author:'王 彬', time:'06/04 09:02', text:'备注：5月住房补贴分两次到账，合计2029元，替票1张（INV-002）。停车/洗车均为工作车辆相关费用，替票INV-001。', issue:false, avatarColor:'#7c3aed' },
         ]
     },
     {
@@ -1166,8 +1201,8 @@ const REPORTS = [
         ],
         comments:[]
     },
-    { id:'ER-2026-04-YK', employee:'仪 恺', dept:'Finance', period:'Apr 2026', amount:3812.00, submitted:'2026-05-03', status:'approved', avatarColor:'#7c3aed', bill:null, invoices:[], rows:[], comments:[] },
-    { id:'ER-2026-03-YK', employee:'仪 恺', dept:'Finance', period:'Mar 2026', amount:4210.50, submitted:'2026-04-02', status:'approved', avatarColor:'#7c3aed', bill:null, invoices:[], rows:[], comments:[] },
+    { id:'ER-2026-04-YK', employee:'王 彬', dept:'Finance', period:'Apr 2026', amount:3812.00, submitted:'2026-05-03', status:'approved', avatarColor:'#7c3aed', bill:null, invoices:[], rows:[], comments:[] },
+    { id:'ER-2026-03-YK', employee:'王 彬', dept:'Finance', period:'Mar 2026', amount:4210.50, submitted:'2026-04-02', status:'approved', avatarColor:'#7c3aed', bill:null, invoices:[], rows:[], comments:[] },
     { id:'ER-2026-02-ZL', employee:'张磊',  dept:'Tech',    period:'Feb 2026', amount:1560.00, submitted:'2026-03-01', status:'approved', avatarColor:'#0e7490', bill:null, invoices:[], rows:[], comments:[] },
     // ── Multi-invoice demo: one expense item needs two invoices ──
     {
@@ -1229,7 +1264,7 @@ const BILL_ROWS = {
 };
 
 // ============ State ============
-let currentTab = 'pending';
+let currentTab = 'all';
 let activeId = null;
 let activeDocTab = 'bill';
 let activeBillImgIdx = 0;
@@ -1277,7 +1312,7 @@ function renderList() {
             ${checkCell}
             <td class="rv-col-emp">
                 <div class="rv-emp-name">${r.employee}</div>
-                <div class="rv-emp-sub">${r.dept}</div>
+                <div class="rv-emp-sub">${EMPLOYEE_EMAILS[r.employee] || r.dept}</div>
             </td>
             <td class="rv-col-period">${r.period}</td>
             <td class="rv-col-sub">${r.submitted}</td>
@@ -1688,7 +1723,7 @@ function renderReportSide(r) {
                     <th>Invoice Amount<br><span class="th-sub">发票金额</span></th>
                     <th>Actual Desc<br><span class="th-sub">实际内容支出说明</span></th>
                     <th>Remarks<br><span class="th-sub">备注</span></th>
-                    <th>Category<br><span class="th-sub">项目类型</span></th>
+                    <th>Account Name<br><span class="th-sub">科目名称</span></th>
                     <th>Invoice<br><span class="th-sub">关联发票</span></th>
                     <th>Payment Voucher<br><span class="th-sub">付款凭证</span></th>
                     <th></th>
@@ -1728,7 +1763,7 @@ function showDocModal(type, id) {
                 <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Invoice ID</span><span class="doc-modal-meta-value">${inv.id}</span></div>
                 <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Date</span><span class="doc-modal-meta-value">${inv.date}</span></div>
                 <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Amount</span><span class="doc-modal-meta-value" style="color:#0f172a;">¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</span></div>
-                <div class="doc-modal-meta-item" style="flex:1;"><span class="doc-modal-meta-label">Category</span><span class="doc-modal-meta-value">${inv.category}</span></div>
+                <div class="doc-modal-meta-item" style="flex:1;"><span class="doc-modal-meta-label">Account Name</span><span class="doc-modal-meta-value">${inv.category}</span></div>
             </div>
             <embed src="${inv.path}" type="application/pdf" width="100%" height="520px"
                 style="border-radius:10px;border:1px solid var(--border-divider);display:block;">
@@ -1747,7 +1782,7 @@ function showDocModal(type, id) {
                 <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Invoice ID</span><span class="doc-modal-meta-value">${inv.id}</span></div>
                 <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Date</span><span class="doc-modal-meta-value">${inv.date}</span></div>
                 <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Amount</span><span class="doc-modal-meta-value" style="color:#0f172a;">¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</span></div>
-                <div class="doc-modal-meta-item" style="flex:1;"><span class="doc-modal-meta-label">Category</span><span class="doc-modal-meta-value">${inv.category}</span></div>
+                <div class="doc-modal-meta-item" style="flex:1;"><span class="doc-modal-meta-label">Account Name</span><span class="doc-modal-meta-value">${inv.category}</span></div>
             </div>
             <div class="invoice-mock">
                 <div class="im-top">
@@ -1840,12 +1875,28 @@ function toggleFlag(rowIdx) {
 }
 
 // ============ Actions ============
+function advanceToNext() {
+    const filtered = currentTab === 'all' ? REPORTS : REPORTS.filter(r => r.status === currentTab);
+    const idx = filtered.findIndex(r => r.id === activeId);
+    // Try the item right after current; skip the one we just acted on (its status may have changed)
+    const next = filtered.slice(idx + 1).find(r => r.id !== activeId);
+    if (next) {
+        // Brief delay so toast is readable before the panel swaps
+        setTimeout(() => openReport(next.id), 320);
+        // Still refresh counts and list in background
+        refreshTabCounts();
+        renderList();
+    } else {
+        closeDetail();
+    }
+}
+
 function approveReport() {
     const r = REPORTS.find(x=>x.id===activeId);
     if (!r) return;
     r.status = 'approved';
     showToast('Report approved — will be submitted to OA');
-    closeDetail();
+    advanceToNext();
 }
 
 function openRejectModal() {
@@ -1869,13 +1920,13 @@ function confirmReject() {
     if (!r) return;
     r.status = 'rejected';
     r.comments.push({
-        author:'仪 恺', time:new Date().toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''),
+        author:'王 彬', time:new Date().toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''),
         text:`[Returned] ${reason}`, issue:true, avatarColor:'#7c3aed'
     });
     closeRejectModal();
     document.getElementById('rejectReason').value = '';
     showToast('Report returned to employee for revision');
-    closeDetail();
+    advanceToNext();
 }
 
 let toastTimer;
