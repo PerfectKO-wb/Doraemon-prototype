@@ -2170,6 +2170,73 @@ body {
   font-size:11px;color:rgba(0,0,0,.35);font-style:italic;
 }
 
+/* ══ DC Section Header & Queue Badge ══ */
+.dc-section-head{
+  position:relative;
+  display:flex;align-items:center;gap:7px;
+  margin-bottom:2px;
+}
+.dc-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:18px;height:18px;
+  padding:0 5px;
+  border-radius:9px;
+  background:rgba(0,0,0,.08);
+  color:rgba(0,0,0,.5);
+  font-size:11px;font-weight:700;
+  border:none;cursor:pointer;
+  transition:background .14s,color .14s;
+  line-height:1;
+}
+.dc-badge:hover{background:rgba(0,122,255,.12);color:rgba(0,100,220,.8);}
+/* Queue panel */
+.dc-queue-panel{
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;
+  min-width:260px;max-width:340px;
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(0,0,0,.09);
+  border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.1),0 2px 6px rgba(0,0,0,.06);
+  padding:6px 0;
+  z-index:200;
+  display:none;
+}
+.dc-queue-panel.open{display:block;}
+.dc-qi{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 14px;
+  cursor:pointer;
+  transition:background .12s;
+  border-radius:0;
+}
+.dc-qi:hover{background:rgba(0,0,0,.04);}
+.dc-qi.is-active{background:rgba(0,122,255,.06);}
+.dc-qi-dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+}
+.dc-qi-body{flex:1;min-width:0;}
+.dc-qi-label{
+  font-size:10px;font-weight:600;
+  color:rgba(0,0,0,.38);
+  display:block;margin-bottom:1px;
+}
+.dc-qi-title{
+  font-size:12px;font-weight:500;color:rgba(0,0,0,.78);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  display:block;
+}
+.dc-qi-time{font-size:11px;color:rgba(0,0,0,.3);flex-shrink:0;}
+.dc-qi-cur{
+  font-size:10px;font-weight:600;
+  color:rgba(0,122,255,.8);
+  background:rgba(0,122,255,.1);
+  border-radius:4px;padding:1px 5px;flex-shrink:0;
+}
+
 /* ══ History Side Tab ══ */
 .hist-side-tab {
   position: absolute;
@@ -2376,9 +2443,12 @@ body {
 
           <!-- INLINE MESSAGES: shown in Case 2 -->
           <div id="pdmAgentSection" class="imc-section" style="display:none;">
-            <div class="sec-label" id="dcSectionLabel">Dispatch Center</div>
+            <div class="dc-section-head">
+              <div class="sec-label" id="dcSectionLabel">Dispatch Center</div>
+              <button class="dc-badge" id="dcBadge" style="display:none;" onclick="toggleQueuePanel(event)">0</button>
+              <div class="dc-queue-panel" id="dcQueuePanel"></div>
+            </div>
             <div id="inlineMsgList"></div>
-            <!-- HISTORY TOGGLE -->
           </div>
 
           <!-- DOING（A票执行层，始终存在） -->
@@ -2540,6 +2610,12 @@ body {
             E1 <span style="font-size:9px;padding:1px 6px;background:rgba(168,85,247,.1);color:rgba(126,34,206,.85);border-radius:4px;font-weight:700;">Review</span>
           </span>
           <span class="ds3-case-option-title">Minion · X 文案审阅</span>
+        </button>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(8)">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
+            Multi <span style="font-size:9px;padding:1px 6px;background:rgba(239,68,68,.1);color:rgba(185,28,28,.85);border-radius:4px;font-weight:700;">4 未读</span>
+          </span>
+          <span class="ds3-case-option-title">多消息堆积</span>
         </button>
       </div>
       <button class="ds3-case-trigger" type="button" id="casesTrigger" onclick="toggleCases()">
@@ -3338,8 +3414,9 @@ function switchPdmCase(n){
     // Reset consumed state for fresh case preview
     consumedIds.clear();
     Object.keys(consumedActions).forEach(k => delete consumedActions[k]);
+    activeMsgId = null;
     // Determine which message IDs to show for this case
-    const caseMap = { 2:['A1','A2'], 3:['B1'], 4:['B2'], 5:['C1'], 6:['D1'], 7:['E1'] };
+    const caseMap = { 2:['A1','A2'], 3:['B1'], 4:['B2'], 5:['C1'], 6:['D1'], 7:['E1'], 8:['M1','M2','M3','M4'] };
     activeCaseIds = caseMap[n] || null;
     historyOpen = true;
     renderInlineMsgs(activeCaseIds);
@@ -3668,12 +3745,129 @@ const INLINE_MSGS = [
     tags: [],
     statusPill: null,
   },
+  /* ── Case 8: 多消息堆积 ── */
+  {
+    id: 'M1',
+    type: 'b-quick',
+    typeLabel: 'Quick Action',
+    urgency: null,
+    source: 'Release Agent',
+    time: '10:23',
+    title: '「逃离校园」v1.2.4 热修包待发布',
+    summary: '自动化测试全部通过（100%）。修复内容：成就 Lv.7 / Lv.11 解锁 bug、iOS 低内存崩溃。回滚方案已就绪，发布窗口今日 22:00 前。',
+    tags: [],
+    actions: [
+      { label: '🚀 Publish Now', cls: 'imc-btn-purple', action: 'publish' },
+      { label: 'Schedule',       cls: 'imc-btn-ghost',  action: 'schedule' },
+    ],
+    statusPill: null,
+  },
+  {
+    id: 'M2',
+    type: 'a-status',
+    typeLabel: 'Status',
+    urgency: null,
+    source: 'OA System',
+    time: '09:15',
+    title: '出行申请 OA 审批通过',
+    summary: '你提交的出差申请（上海 · 6月18–20日）已完成审批，差旅报销可在出行结束后 5 个工作日内提交。',
+    tags: [],
+    actions: [],
+    statusPill: null,
+  },
+  {
+    id: 'M3',
+    type: 'c-chat',
+    typeLabel: 'Chat Task',
+    urgency: null,
+    source: 'Minion Agent',
+    time: '08:50',
+    title: 'TikTok 官号上线发布任务 · 需要你的输入',
+    summary: '「逃离校园」TikTok 发布流程就绪，Minion 需要你提供发布文案与投放时间段，其余步骤自动执行。',
+    tags: [],
+    actions: [{ label: '💬 Start Chat', cls: 'imc-btn-ghost', action: 'openChatTab' }],
+    chatScene: 'x-release',
+    statusPill: null,
+  },
+  {
+    id: 'M4',
+    type: 'd',
+    typeLabel: 'Jump Task',
+    urgency: null,
+    source: 'i18n 系统',
+    time: '昨天 17:30',
+    title: 'TikTok 脚本翻译监修待处理',
+    summary: '「逃离校园」TikTok 宣传脚本机器翻译已完成（JP / KO / TW），等待监修确认，截止本周五。',
+    tags: [],
+    actions: [],
+    jump: 'i18n-expert.html',
+    statusPill: null,
+  },
 ];
 
 /* Consumed set */
 const consumedIds = new Set();
 /* Track current case IDs */
 let activeCaseIds = null;
+/* Active message in queue (null = show first pending) */
+let activeMsgId = null;
+let queuePanelOpen = false;
+
+/* ── Queue panel helpers ── */
+const DC_TYPE_COLORS = {
+  'b-quick':'#8b5cf6','c-chat':'#8b5cf6','d':'#3b82f6',
+  'a-status':'#22c55e','d-input':'#f59e0b','e-review':'#f59e0b',
+};
+
+function renderQueuePanel(allPending){
+  const panel = document.getElementById('dcQueuePanel');
+  const badge = document.getElementById('dcBadge');
+  if(!panel || !badge) return;
+  if(allPending.length <= 1){
+    badge.style.display = 'none';
+    panel.classList.remove('open');
+    return;
+  }
+  badge.style.display = 'inline-flex';
+  badge.textContent = allPending.length;
+  panel.innerHTML = allPending.map(m => {
+    const isActive = m.id === activeMsgId;
+    const color = DC_TYPE_COLORS[m.type] || 'rgba(0,0,0,.2)';
+    return `<div class="dc-qi${isActive?' is-active':''}" onclick="activateQueueMsg('${m.id}')">
+      <span class="dc-qi-dot" style="background:${color}"></span>
+      <div class="dc-qi-body">
+        <span class="dc-qi-label">${m.typeLabel}</span>
+        <span class="dc-qi-title">${m.title}</span>
+      </div>
+      <span class="dc-qi-time">${m.time}</span>
+      ${isActive ? '<span class="dc-qi-cur">当前</span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function toggleQueuePanel(e){
+  if(e) e.stopPropagation();
+  queuePanelOpen = !queuePanelOpen;
+  const panel = document.getElementById('dcQueuePanel');
+  if(panel) panel.classList.toggle('open', queuePanelOpen);
+}
+
+function activateQueueMsg(id){
+  activeMsgId = id;
+  queuePanelOpen = false;
+  const panel = document.getElementById('dcQueuePanel');
+  if(panel) panel.classList.remove('open');
+  renderInlineMsgs(activeCaseIds);
+}
+
+/* Close queue panel when clicking outside */
+document.addEventListener('click', function(e){
+  if(!e.target.closest('#dcQueuePanel') && !e.target.closest('#dcBadge')){
+    queuePanelOpen = false;
+    const panel = document.getElementById('dcQueuePanel');
+    if(panel) panel.classList.remove('open');
+  }
+});
 
 /* ── Render inline messages ── */
 function renderInlineMsgs(ids){
@@ -3682,17 +3876,29 @@ function renderInlineMsgs(ids){
   list.innerHTML = '';
   list.className = 'imc-list';
 
-  const msgs = (ids ? INLINE_MSGS.filter(m => ids.includes(m.id)) : INLINE_MSGS)
-    .filter(m => !consumedIds.has(m.id)); // only show active (unconsumed) messages
+  const allPending = (ids ? INLINE_MSGS.filter(m => ids.includes(m.id)) : INLINE_MSGS)
+    .filter(m => !consumedIds.has(m.id));
 
-  msgs.forEach((msg, i) => {
-    const card = buildImcCard(msg, false, i);
+  /* Show only the active message (or first if none selected) */
+  let toShow = null;
+  if(activeMsgId && allPending.find(m => m.id === activeMsgId)){
+    toShow = allPending.find(m => m.id === activeMsgId);
+  } else if(allPending.length > 0){
+    toShow = allPending[0];
+    activeMsgId = toShow.id;
+  }
+
+  if(toShow){
+    const card = buildImcCard(toShow, false, 0);
     list.appendChild(card);
-  });
+  }
+
+  /* Update queue badge & panel */
+  renderQueuePanel(allPending);
 
   /* Show/hide "Dispatch Center" section label */
   const dcLabel = document.getElementById('dcSectionLabel');
-  if(dcLabel) dcLabel.style.display = msgs.length > 0 ? '' : 'none';
+  if(dcLabel) dcLabel.style.display = allPending.length > 0 ? '' : 'none';
 }
 
 function buildImcCard(msg, done, idx){
@@ -3882,13 +4088,15 @@ function handleImcAction(msgId, action){
 
 function consumeImcMsg(msgId){
   consumedIds.add(msgId);
-  // Remove card from DOM if still present (shouldn't be, but safety)
   const card = document.getElementById('imc-' + msgId);
   if(card) card.remove();
-  renderHistory(activeCaseIds);
-  /* Hide section label if no messages remain */
+  /* Auto-advance: pick next pending */
   const remaining = (activeCaseIds ? INLINE_MSGS.filter(m => activeCaseIds.includes(m.id)) : INLINE_MSGS)
     .filter(m => !consumedIds.has(m.id));
+  activeMsgId = remaining.length > 0 ? remaining[0].id : null;
+  renderHistory(activeCaseIds);
+  renderQueuePanel(remaining);
+  /* Hide section label if nothing left */
   const dcLabel = document.getElementById('dcSectionLabel');
   if(dcLabel) dcLabel.style.display = remaining.length > 0 ? '' : 'none';
 }
