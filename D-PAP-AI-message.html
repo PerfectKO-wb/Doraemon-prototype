@@ -3930,6 +3930,7 @@ function renderInlineMsgs(ids){
   if(toShow){
     const card = buildImcCard(toShow, false, 0);
     list.appendChild(card);
+    checkImcExpand(card);
   }
 
   /* Update queue badge & panel */
@@ -4039,6 +4040,18 @@ function toggleImcExpand(e, cardId){
   const expanded = card.classList.toggle('imc-expanded');
   const label = card.querySelector('.imc-expand-label');
   if(label) label.textContent = expanded ? '收起' : '展开';
+}
+
+/* Hide expand toggle if summary doesn't actually overflow */
+function checkImcExpand(card){
+  const summary = card.querySelector('.imc-summary');
+  const toggle  = card.querySelector('.imc-expand-toggle');
+  if(!summary || !toggle) return;
+  /* Force a reflow tick so clamp is applied before measuring */
+  requestAnimationFrame(() => {
+    const overflows = summary.scrollHeight > summary.clientHeight + 2;
+    toggle.style.display = overflows ? '' : 'none';
+  });
 }
 
 /* ── Core consumption: animate card out → history ── */
