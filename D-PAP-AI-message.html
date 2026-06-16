@@ -1259,6 +1259,73 @@ body {
 .imc-list{
   display:flex;flex-direction:column;gap:10px;
 }
+.dc-section-head.is-muted{
+  display:none;
+}
+.imc-group{
+  display:flex;flex-direction:column;gap:6px;
+}
+.imc-group + .imc-group{
+  margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,.06);
+}
+.imc-status-list{
+  display:flex;flex-direction:column;gap:2px;
+  border-radius:10px;background:rgba(255,255,255,.34);
+  border:1px solid rgba(255,255,255,.52);
+  padding:4px;
+  position:relative;
+}
+.imc-status-list.has-pager{
+  padding-bottom:28px;
+}
+.imc-pager{
+  display:flex;align-items:center;gap:5px;
+  color:rgba(0,0,0,.34);
+  font-size:11px;font-weight:700;
+}
+.imc-pager-btn{
+  width:18px;height:18px;border-radius:9px;
+  border:none;background:transparent;
+  color:rgba(0,0,0,.34);
+  cursor:pointer;font-size:14px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .14s,color .14s;
+}
+.imc-pager-btn:hover{
+  background:rgba(0,0,0,.05);color:rgba(0,0,0,.62);
+}
+.imc-pager-count{
+  min-width:28px;text-align:center;
+}
+.imc-card.has-pager .imc-pager{
+  position:absolute;right:8px;bottom:8px;
+}
+.imc-card.has-pager .imc-actions{
+  padding-right:78px;
+}
+.imc-card.has-pager.imc-pager-only{
+  padding-bottom:34px;
+}
+.imc-status-list.has-pager .imc-pager{
+  position:absolute;right:6px;bottom:5px;
+}
+.imc-status-row{
+  display:grid;grid-template-columns:1fr;gap:4px;
+  padding:7px 8px;border-radius:7px;
+  cursor:pointer;transition:background .14s;
+}
+.imc-status-row:hover{background:rgba(0,0,0,.035);}
+.imc-status-title{
+  font-size:12.5px;font-weight:600;color:rgba(0,0,0,.58);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.imc-status-summary{
+  font-size:11.5px;line-height:1.45;color:rgba(0,0,0,.36);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.imc-status-time{
+  font-size:10.5px;color:rgba(0,0,0,.28);white-space:nowrap;
+}
 
 /* Base card */
 /* Base card — unified surface */
@@ -1274,6 +1341,14 @@ body {
 }
 .imc-card:hover{
   background:rgba(0,0,0,.035);
+}
+.imc-group.action .imc-card{
+  background:rgba(255,255,255,.34);
+  border:1px solid rgba(255,255,255,.48);
+  padding:10px 12px;
+}
+.imc-group.action .imc-card:hover{
+  background:rgba(255,255,255,.5);
 }
 .imc-card:focus-within{
   outline:2px solid rgba(0,0,0,.12);
@@ -1309,6 +1384,9 @@ body {
   display:flex;align-items:center;gap:5px;
   margin-bottom:4px;
 }
+.imc-header-action{
+  margin-bottom:6px;
+}
 .imc-type-dot{
   width:6px;height:6px;border-radius:50%;
   background:rgba(0,0,0,.2);flex-shrink:0;
@@ -1321,12 +1399,12 @@ body {
   font-size:10px;color:rgba(0,0,0,.18);
 }
 /* Colors per type */
-.imc-card[data-type="b-quick"]  .imc-type-dot{ background:#8b5cf6; }
-.imc-card[data-type="b-quick"]  .imc-type-label{ color:rgba(109,40,217,.65); }
-.imc-card[data-type="c-chat"]   .imc-type-dot{ background:#8b5cf6; }
-.imc-card[data-type="c-chat"]   .imc-type-label{ color:rgba(109,40,217,.65); }
-.imc-card[data-type="d"]        .imc-type-dot{ background:#3b82f6; }
-.imc-card[data-type="d"]        .imc-type-label{ color:rgba(29,78,216,.65); }
+.imc-card[data-type="b-quick"]  .imc-type-dot{ background:#f59e0b; }
+.imc-card[data-type="b-quick"]  .imc-type-label{ color:rgba(161,97,0,.72); }
+.imc-card[data-type="c-chat"]   .imc-type-dot{ background:#f59e0b; }
+.imc-card[data-type="c-chat"]   .imc-type-label{ color:rgba(161,97,0,.72); }
+.imc-card[data-type="d"]        .imc-type-dot{ background:#f59e0b; }
+.imc-card[data-type="d"]        .imc-type-label{ color:rgba(161,97,0,.72); }
 .imc-card[data-type="d-input"]  .imc-type-dot { background:#f97316; animation:pulse-dot 1.4s ease-in-out infinite; }
 .imc-card[data-type="d-input"]  .imc-type-label{ color:rgba(194,65,12,.7); }
 .imc-card[data-type="e-review"] .imc-type-dot { background:#a855f7; }
@@ -1349,6 +1427,15 @@ body {
 .imc-time{
   font-size:10px;color:rgba(0,0,0,.22);
 }
+.imc-action-hint{
+  font-size:10px;font-weight:700;
+  padding:2px 7px;border-radius:999px;
+  color:rgba(0,0,0,.42);
+  background:rgba(0,0,0,.045);
+}
+.imc-card[data-type="b-quick"] .imc-action-hint{color:rgba(161,97,0,.78);background:rgba(245,158,11,.1);}
+.imc-card[data-type="c-chat"] .imc-action-hint{color:rgba(161,97,0,.78);background:rgba(245,158,11,.1);}
+.imc-card[data-type="d"] .imc-action-hint{color:rgba(29,78,216,.72);background:rgba(59,130,246,.09);}
 
 /* ── TITLE ── */
 .imc-title{
@@ -1456,8 +1543,8 @@ body {
 
 /* ── a-status: even lighter ── */
 .imc-card[data-type="a-status"]{ padding:7px 12px 7px 10px; }
-.imc-card[data-type="a-status"] .imc-type-dot  { background:#22c55e; }
-.imc-card[data-type="a-status"] .imc-type-label{ color:rgba(21,128,61,.5); }
+.imc-card[data-type="a-status"] .imc-type-dot  { background:#3b82f6; }
+.imc-card[data-type="a-status"] .imc-type-label{ color:rgba(29,78,216,.55); }
 .imc-card[data-type="a-status"] .imc-source    { opacity:.4; }
 .imc-card[data-type="a-status"] .imc-time      { opacity:.35; }
 .imc-card[data-type="a-status"] .imc-title{
@@ -2054,9 +2141,9 @@ body {
 .hdw-backdrop{
   display:none;
   position:absolute;inset:0;
-  background:rgba(0,0,0,.28);
-  backdrop-filter:blur(2px);
-  -webkit-backdrop-filter:blur(2px);
+  background:rgba(0,0,0,.18);
+  backdrop-filter:blur(1px);
+  -webkit-backdrop-filter:blur(1px);
   z-index:900;
   opacity:0;
   transition:opacity .25s;
@@ -2065,13 +2152,13 @@ body {
 .hdw-drawer{
   position:absolute;
   top:0;left:0;bottom:0;
-  width:340px;
+  width:360px;
   max-width:92vw;
-  background:rgba(252,252,253,.97);
+  background:rgba(247,248,250,.96);
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
   border-right:1px solid rgba(0,0,0,.08);
-  box-shadow:8px 0 32px rgba(0,0,0,.12);
+  box-shadow:10px 0 34px rgba(0,0,0,.11);
   z-index:901;
   display:flex;flex-direction:column;
   transform:translateX(-100%);
@@ -2080,19 +2167,28 @@ body {
 .hdw-drawer.open{ transform:translateX(0); }
 .hdw-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:18px 18px 14px;
+  padding:16px 16px 13px;
   border-bottom:1px solid rgba(0,0,0,.07);
   flex-shrink:0;
 }
 .hdw-title{
-  display:flex;align-items:center;gap:8px;
-  font-size:15px;font-weight:700;color:rgba(0,0,0,.85);letter-spacing:.1px;
+  display:flex;align-items:center;gap:9px;
+  font-size:15px;font-weight:700;color:rgba(0,0,0,.84);letter-spacing:.1px;
 }
-.hdw-title-icon{ font-size:17px; }
+.hdw-title-icon{
+  width:28px;height:28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.045);
+  color:rgba(0,0,0,.42);
+}
+.hdw-title-stack{display:flex;flex-direction:column;gap:1px;}
+.hdw-subtitle{
+  font-size:11px;font-weight:500;color:rgba(0,0,0,.34);
+}
 .hdw-total{
   font-size:11px;font-weight:700;
-  background:rgba(0,0,0,.07);
-  color:rgba(0,0,0,.5);
+  background:rgba(0,0,0,.06);
+  color:rgba(0,0,0,.44);
   border-radius:20px;padding:1px 8px;
 }
 .hdw-close{
@@ -2110,7 +2206,7 @@ body {
   transition:background .14s,color .14s;
   white-space:nowrap;
 }
-.hdw-clear:hover{ background:rgba(255,59,48,.08);color:rgba(200,30,20,.75); }
+.hdw-clear:hover{ background:rgba(0,0,0,.055);color:rgba(0,0,0,.58); }
 .hdw-empty{
   display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:8px;
@@ -2119,47 +2215,103 @@ body {
 }
 .hdw-body{
   flex:1;overflow-y:auto;
-  padding:12px 0 24px;
+  padding:10px 12px 22px;
 }
 .hdw-body::-webkit-scrollbar{ width:4px; }
 .hdw-body::-webkit-scrollbar-thumb{ background:rgba(0,0,0,.12);border-radius:4px; }
 /* Date group header */
 .hdw-date-group{
-  padding:10px 18px 4px;
-  font-size:11px;font-weight:700;
-  color:rgba(0,0,0,.3);
+  padding:12px 4px 7px;
+  font-size:10.5px;font-weight:700;
+  color:rgba(0,0,0,.32);
   letter-spacing:.5px;text-transform:uppercase;
 }
 /* Row */
-.hdw-row{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:10px 18px;
-  transition:background .14s;
+.hdw-card{
+  display:grid;grid-template-columns:8px minmax(0,1fr) auto;
+  align-items:start;gap:9px;
+  padding:10px 11px;
+  border-radius:8px;
+  background:rgba(255,255,255,.38);
+  border:1px solid rgba(255,255,255,.52);
+  overflow:hidden;
+  transition:background .16s,border-color .16s,box-shadow .2s,transform .2s;
 }
-.hdw-row:hover{ background:rgba(0,0,0,.03); }
-.hdw-row-dot{
+.hdw-card + .hdw-card{ margin-top:6px; }
+.hdw-card.is-clickable{ cursor:pointer; }
+.hdw-card:hover{
+  background:rgba(255,255,255,.58);
+  border-color:rgba(255,255,255,.74);
+  box-shadow:0 8px 22px rgba(0,0,0,.055);
+  transform:translateY(-1px);
+}
+.hdw-card-dot{
   width:7px;height:7px;border-radius:50%;
-  flex-shrink:0;margin-top:5px;
+  margin-top:6px;background:rgba(0,0,0,.18);
 }
-.hdw-row-body{ flex:1;min-width:0; }
-.hdw-row-title{
-  font-size:13px;font-weight:500;color:rgba(0,0,0,.8);
+.hdw-card-body{ min-width:0; }
+.hdw-card-top{
+  display:flex;align-items:flex-start;gap:8px;
+}
+.hdw-card-title{
+  flex:1;min-width:0;
+  font-size:13px;font-weight:600;color:rgba(0,0,0,.76);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   line-height:1.4;
 }
-.hdw-row-meta{
-  display:flex;align-items:center;gap:6px;margin-top:2px;
+.hdw-card-time{
+  flex-shrink:0;
+  font-size:10.5px;font-weight:500;color:rgba(0,0,0,.28);
+  margin-top:1px;
 }
-.hdw-row-source{ font-size:11px;color:rgba(0,0,0,.35); }
-.hdw-row-time{   font-size:11px;color:rgba(0,0,0,.25); }
+.hdw-card-meta{
+  display:flex;align-items:center;gap:6px;margin-top:5px;
+  min-width:0;
+}
 .hdw-row-tag{
-  font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;
-  background:rgba(0,0,0,.06);color:rgba(0,0,0,.4);
+  font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;
+  background:rgba(0,0,0,.045);color:rgba(0,0,0,.38);
 }
-.hdw-row-tag.done-read{   background:rgba(34,197,94,.1); color:rgba(21,128,61,.75);  }
-.hdw-row-tag.done-finish{ background:rgba(139,92,246,.1);color:rgba(109,40,217,.75); }
-.hdw-row-action{
-  font-size:11px;color:rgba(0,0,0,.35);font-style:italic;
+.hdw-row-tag.done-read,
+.hdw-row-tag.done-finish{
+  background:rgba(0,0,0,.045);
+  color:rgba(0,0,0,.38);
+}
+.hdw-card-detail{
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  margin-top:0;
+  transform:translateY(-3px);
+  color:rgba(0,0,0,.42);
+  font-size:11.5px;
+  line-height:1.55;
+  transition:max-height .28s cubic-bezier(.2,.8,.2,1),opacity .18s ease,transform .22s ease,margin-top .22s ease;
+}
+.hdw-card:hover .hdw-card-detail,
+.hdw-card.is-expanded .hdw-card-detail,
+.hdw-card:focus-within .hdw-card-detail{
+  max-height:72px;
+  opacity:1;
+  margin-top:7px;
+  transform:translateY(0);
+}
+.hdw-card:focus-visible{
+  outline:2px solid rgba(0,0,0,.12);
+  outline-offset:2px;
+}
+.hdw-card-open{
+  color:rgba(0,0,0,.24);
+  margin-top:2px;
+}
+@media(prefers-reduced-motion:reduce){
+  .hdw-card,
+  .hdw-card-detail{
+    transition:none;
+  }
+  .hdw-card:hover{
+    transform:none;
+  }
 }
 
 /* ══ DC Section Header & Queue Badge ══ */
@@ -2233,41 +2385,105 @@ body {
 .hist-side-tab {
   position: absolute;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 187px;
+  transform:none;
   z-index: 50;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 9px 7px;
-  border-radius: 0 10px 10px 0;
-  background: rgba(255,255,255,0.5);
+  justify-content:center;
+  gap:7px;
+  width:24px;
+  height:44px;
+  padding:0;
+  box-sizing:border-box;
+  overflow:hidden;
+  border-radius:0 12px 12px 0;
+  background: rgba(255,255,255,0.34);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.65);
-  border-left: none;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.55);
+  border-left:none;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.035), inset 0 1px 0 rgba(255,255,255,0.58);
   cursor: pointer;
-  color: rgba(0,0,0,0.38);
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  color: rgba(0,0,0,0.24);
+  transition: width .22s cubic-bezier(.2,.8,.2,1), height .22s cubic-bezier(.2,.8,.2,1), background .18s, color .18s, box-shadow .18s, transform .22s cubic-bezier(.2,.8,.2,1);
 }
-.hist-side-tab:hover {
-  background: rgba(255,255,255,0.75);
-  color: rgba(0,0,0,0.62);
-  box-shadow: 2px 0 12px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,0.8);
+.hist-side-tab:hover,
+.hist-side-tab.is-peeking,
+.hist-side-tab:focus {
+  width:34px;
+  height:116px;
+  padding:8px 0;
+  justify-content:flex-start;
+  background: rgba(255,255,255,0.72);
+  color: rgba(0,0,0,0.56);
+  transform:none;
+  box-shadow: 4px 0 18px rgba(0,0,0,0.075), inset 0 1px 0 rgba(255,255,255,0.82);
+}
+.hist-side-tab:focus-visible{
+  outline:2px solid rgba(0,0,0,.12);
+  outline-offset:2px;
+}
+.hist-side-tab svg{
+  flex:0 0 auto;
+  opacity:.62;
+  transition:opacity .18s;
+}
+.hist-side-tab:hover svg,
+.hist-side-tab.is-peeking svg,
+.hist-side-tab:focus svg{
+  opacity:1;
+}
+.hist-side-label{
+  font-size:11px;font-weight:700;
+  color:rgba(0,0,0,.48);
+  line-height:1.05;
+  white-space:nowrap;
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  letter-spacing:.02em;
+  opacity:0;
+  max-height:0;
+  overflow:hidden;
+  transform:translateY(-5px);
+  transition:opacity .14s,transform .18s,max-height .18s;
+  transition-delay:0s;
+}
+.hist-side-tab:hover .hist-side-label,
+.hist-side-tab.is-peeking .hist-side-label,
+.hist-side-tab:focus .hist-side-label{
+  opacity:1;
+  max-height:46px;
+  transform:translateY(0);
+  transition-delay:.06s;
 }
 .hist-side-count {
   font-size: 10px;
   font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
-  background: rgba(0,122,255,0.12);
-  color: rgba(0,122,255,0.8);
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: rgba(0,0,0,0.055);
+  color: rgba(0,0,0,0.42);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 3px;
+  padding: 0 4px;
+  opacity:0;
+  max-height:0;
+  overflow:hidden;
+  transform:translateY(-4px);
+  transition:opacity .14s,transform .18s,max-height .18s;
+  transition-delay:0s;
+}
+.hist-side-tab:hover .hist-side-count,
+.hist-side-tab.is-peeking .hist-side-count,
+.hist-side-tab:focus .hist-side-count{
+  opacity:1;
+  max-height:18px;
+  transform:translateY(0);
+  transition-delay:.08s;
 }
 
 /* ══ Chat Tab (iframe) ══ */
@@ -2408,8 +2624,10 @@ body {
     </details>
 
     <!-- HISTORY SIDE TAB -->
-    <div class="hist-side-tab" id="histSideTab" onclick="openHistoryDrawer()" title="历史消息">
+    <div class="hist-side-tab" id="histSideTab" tabindex="0" onmouseenter="this.classList.add('is-peeking')" onmouseleave="this.classList.remove('is-peeking')" onclick="openHistoryDrawer()" title="历史消息">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+      <span class="hist-side-label">History</span>
+      <span class="hist-side-count" id="histSideCount">0</span>
     </div>
 
     <!-- SCROLLABLE MAIN -->
@@ -2435,7 +2653,7 @@ body {
 
           <!-- INLINE MESSAGES: shown in Case 2 -->
           <div id="pdmAgentSection" class="imc-section" style="display:none;">
-            <div class="dc-section-head">
+            <div class="dc-section-head is-muted" aria-label="今日消息">
               <div class="sec-label" id="dcSectionLabel">Dispatch Center</div>
               <button class="dc-badge" id="dcBadge" style="display:none;" onclick="toggleQueuePanel(event)">0</button>
               <div class="dc-queue-panel" id="dcQueuePanel"></div>
@@ -3525,7 +3743,8 @@ if(user.view==='pdm'){
   }
 
   // Approve: AI actions → doing, HU action → todo, create A card
-  document.getElementById('pdmAgentYes').addEventListener('click', function(){
+  const pdmAgentYesBtn = document.getElementById('pdmAgentYes');
+  if(pdmAgentYesBtn) pdmAgentYesBtn.addEventListener('click', function(){
     if(this.disabled) return;
     _setAllAgentBtns(true);
 
@@ -3617,7 +3836,7 @@ const INLINE_MSGS = [
     summary: '自动化测试全部通过（通过率 100%）。修复内容：成就 Lv.7 / Lv.11 解锁 bug、iOS 低内存崩溃。包体积 2.3 MB，回滚方案已就绪。发布窗口：今日 22:00 前（低峰期）。',
     tags: [],
     actions: [
-      { label: '🚀 Publish Now', cls: 'imc-btn-purple', action: 'publish' },
+      { label: 'Publish Now', cls: 'imc-btn-amber', action: 'publish' },
       { label: 'Schedule', cls: 'imc-btn-ghost', action: 'schedule' },
     ],
   },
@@ -3627,11 +3846,11 @@ const INLINE_MSGS = [
     type: 'c-chat',
     source: 'Minion Agent',
     time: '14:37',
-    title: 'X 官号上线发布任务 · 需要你的输入',
+    title: 'X 官号上线发布任务',
     summary: '「逃离校园」上线前发布流程已就绪，Minion 需要你提供发布文案和发送时间，其余步骤将自动执行。',
     tags: [],
     actions: [
-      { label: '💬 Start Chat', cls: 'imc-btn-purple', action: 'openChatTab' },
+      { label: 'Start Chat', cls: 'imc-btn-amber', action: 'openChatTab' },
     ],
     chat: {
       agentName: 'Minion Agent',
@@ -3749,8 +3968,8 @@ const INLINE_MSGS = [
     summary: '自动化测试全部通过（100%）。修复内容：成就 Lv.7 / Lv.11 解锁 bug、iOS 低内存崩溃。回滚方案已就绪，发布窗口今日 22:00 前。',
     tags: [],
     actions: [
-      { label: '🚀 Publish Now', cls: 'imc-btn-purple', action: 'publish' },
-      { label: 'Schedule',       cls: 'imc-btn-ghost',  action: 'schedule' },
+      { label: 'Publish Now', cls: 'imc-btn-amber', action: 'publish' },
+      { label: 'Schedule', cls: 'imc-btn-ghost',  action: 'schedule' },
     ],
     statusPill: null,
   },
@@ -3774,10 +3993,10 @@ const INLINE_MSGS = [
     urgency: null,
     source: 'Minion Agent',
     time: '08:50',
-    title: 'TikTok 官号上线发布任务 · 需要你的输入',
+    title: 'TikTok 官号上线发布任务',
     summary: '「逃离校园」TikTok 发布流程就绪，Minion 需要你提供发布文案与投放时间段，其余步骤自动执行。',
     tags: [],
-    actions: [{ label: '💬 Start Chat', cls: 'imc-btn-ghost', action: 'openChatTab' }],
+    actions: [{ label: 'Start Chat', cls: 'imc-btn-amber', action: 'openChatTab' }],
     chatScene: 'x-release',
     statusPill: null,
   },
@@ -3791,7 +4010,7 @@ const INLINE_MSGS = [
     title: 'TikTok 脚本翻译监修待处理',
     summary: '「逃离校园」TikTok 宣传脚本机器翻译已完成（JP / KO / TW），等待监修确认，截止本周五。',
     tags: [],
-    actions: [],
+    actions: [{ label: 'Review', cls: 'imc-btn-blue', action: 'jump' }],
     jump: 'i18n-expert.html',
     statusPill: null,
   },
@@ -3807,8 +4026,8 @@ let queuePanelOpen = false;
 
 /* ── Queue panel helpers ── */
 const DC_TYPE_COLORS = {
-  'b-quick':'#8b5cf6','c-chat':'#8b5cf6','d':'#3b82f6',
-  'a-status':'#22c55e','d-input':'#f59e0b','e-review':'#f59e0b',
+  'b-quick':'#f59e0b','c-chat':'#f59e0b','d':'#3b82f6',
+  'a-status':'#3b82f6','d-input':'#f59e0b','e-review':'#f59e0b',
 };
 
 function renderQueuePanel(allPending){
@@ -3871,30 +4090,86 @@ function renderInlineMsgs(ids){
   const allPending = (ids ? INLINE_MSGS.filter(m => ids.includes(m.id)) : INLINE_MSGS)
     .filter(m => !consumedIds.has(m.id));
 
-  /* Show only the active message (or first if none selected) */
-  let toShow = null;
-  if(activeMsgId && allPending.find(m => m.id === activeMsgId)){
-    toShow = allPending.find(m => m.id === activeMsgId);
-  } else if(allPending.length > 0){
-    toShow = allPending[0];
-    activeMsgId = toShow.id;
+  const ordered = getOrderedInlineMessages(allPending);
+  const activeIdx = getActiveInlineIndex(ordered);
+  const current = ordered[activeIdx];
+  const pagerHtml = ordered.length > 1 ? buildInlinePager(activeIdx, ordered.length) : '';
+
+  if(current){
+    const currentGroup = document.createElement('div');
+    currentGroup.className = `imc-group ${current.type === 'a-status' ? 'status' : 'action'}`;
+    appendInlineMessage(currentGroup, current, 0, pagerHtml);
+    list.appendChild(currentGroup);
   }
 
-  if(toShow){
-    const card = buildImcCard(toShow, false, 0);
-    list.appendChild(card);
-    checkImcExpand(card);
-  }
+  const badge = document.getElementById('dcBadge');
+  const panel = document.getElementById('dcQueuePanel');
+  if(badge) badge.style.display = 'none';
+  if(panel) panel.classList.remove('open');
 
-  /* Update queue badge & panel */
-  renderQueuePanel(allPending);
-
-  /* Show/hide "Dispatch Center" section label */
+  /* Show/hide muted section label */
   const dcLabel = document.getElementById('dcSectionLabel');
   if(dcLabel) dcLabel.style.display = allPending.length > 0 ? '' : 'none';
 }
 
-function buildImcCard(msg, done, idx){
+function getOrderedInlineMessages(messages){
+  const actionMsgs = messages.filter(m => m.type !== 'a-status');
+  const statusMsgs = messages.filter(m => m.type === 'a-status');
+  return actionMsgs.concat(statusMsgs);
+}
+
+function getActiveInlineIndex(ordered){
+  if(!ordered.length){
+    activeMsgId = null;
+    return -1;
+  }
+  let idx = activeMsgId ? ordered.findIndex(m => m.id === activeMsgId) : -1;
+  if(idx < 0) idx = 0;
+  activeMsgId = ordered[idx].id;
+  return idx;
+}
+
+function buildInlinePager(activeIdx, total){
+  return `<div class="imc-pager" aria-label="Message ${activeIdx + 1} of ${total}">
+    <button class="imc-pager-btn" type="button" onclick="event.stopPropagation();shiftInlineMessage(-1)" aria-label="Previous message">‹</button>
+    <span class="imc-pager-count">${activeIdx + 1} / ${total}</span>
+    <button class="imc-pager-btn" type="button" onclick="event.stopPropagation();shiftInlineMessage(1)" aria-label="Next message">›</button>
+  </div>`;
+}
+
+function appendInlineMessage(parent, msg, idx, pagerHtml = ''){
+  if(msg.type === 'a-status'){
+    const wrap = document.createElement('div');
+    wrap.className = 'imc-status-list' + (pagerHtml ? ' has-pager' : '');
+    wrap.innerHTML = buildStatusDigestRow(msg) + pagerHtml;
+    parent.appendChild(wrap);
+    return;
+  }
+  const card = buildImcCard(msg, false, idx, pagerHtml);
+  parent.appendChild(card);
+  checkImcExpand(card);
+}
+
+function shiftInlineMessage(delta){
+  const pending = (activeCaseIds ? INLINE_MSGS.filter(m => activeCaseIds.includes(m.id)) : INLINE_MSGS)
+    .filter(m => !consumedIds.has(m.id));
+  const ordered = getOrderedInlineMessages(pending);
+  if(ordered.length <= 1) return;
+  const currentIdx = getActiveInlineIndex(ordered);
+  const nextIdx = (currentIdx + delta + ordered.length) % ordered.length;
+  activeMsgId = ordered[nextIdx].id;
+  renderInlineMsgs(activeCaseIds);
+}
+
+function buildStatusDigestRow(msg){
+  return `
+    <div class="imc-status-row" onclick="dismissCard('${msg.id}','Read')" title="点击后标记为已读">
+      <div class="imc-status-title">${msg.title}</div>
+      <div class="imc-status-summary">${msg.summary}</div>
+    </div>`;
+}
+
+function buildImcCard(msg, done, idx, pagerHtml = ''){
   const card = document.createElement('div');
   card.className = 'imc-card' + (done ? ' imc-done' : '');
   card.dataset.type = msg.type;
@@ -3914,19 +4189,9 @@ function buildImcCard(msg, done, idx){
   }
 
   /* Header */
-  const urgencyHtml = msg.urgency
-    ? `<span class="imc-urgency-badge">${msg.urgency}</span>` : '';
-  const header = `
-    <div class="imc-header">
-      <div class="imc-type-dot"></div>
-      <span class="imc-type-label">${msg.typeLabel}</span>
-      <span class="imc-header-sep">·</span>
-      <span class="imc-source">${msg.source}</span>
-      <span class="imc-header-sep">·</span>
-      <span class="imc-time">${msg.time}</span>
-      <span class="imc-header-spacer"></span>
-      ${urgencyHtml}
-    </div>`;
+  const header = msg.urgency
+    ? `<div class="imc-header"><span class="imc-header-spacer"></span><span class="imc-urgency-badge">${msg.urgency}</span></div>`
+    : '';
 
   /* Tags */
   const tagsHtml = (msg.tags||[]).length
@@ -3949,13 +4214,13 @@ function buildImcCard(msg, done, idx){
   /* Actions: driven by type and done state */
   let actionsHtml = '';
   if(msg.type === 'a-status'){
-    actionsHtml = `<div class="imc-dismiss-btn"><button onclick="dismissCard('${msg.id}','Read')">Mark as read</button></div>`;
+    actionsHtml = '';
   } else if(msg.type === 'd-input' || msg.type === 'e-review'){
     if(!done){
       const arrowColor = msg.type === 'd-input' ? 'rgba(194,65,12,.5)' : 'rgba(126,34,206,.5)';
       actionsHtml = `<div class="imc-actions" style="justify-content:flex-end;padding-top:4px;">
         <span style="font-size:12px;color:${arrowColor};display:flex;align-items:center;gap:4px;">
-          点击卡片前往对话
+          Open chat
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </span>
       </div>`;
@@ -3971,6 +4236,11 @@ function buildImcCard(msg, done, idx){
     actionsHtml = `<div class="imc-actions">${btnHtml}</div>`;
   }
 
+  if(pagerHtml){
+    card.classList.add('has-pager');
+    if(!actionsHtml) card.classList.add('imc-pager-only');
+  }
+
   card.innerHTML = header + `
     <div class="imc-title" ${msg.type === 'd' ? `onclick="handleImcAction('${msg.id}','jump')" style="cursor:pointer;display:flex;align-items:center;gap:6px;"` : ''}>
       <span style="flex:1;">${msg.title}</span>
@@ -3983,7 +4253,8 @@ function buildImcCard(msg, done, idx){
     </div>
     ${tagsHtml}
     ${pillHtml}
-    ${actionsHtml}`;
+    ${actionsHtml}
+    ${pagerHtml}`;
 
   return card;
 }
@@ -4113,8 +4384,11 @@ function consumeImcMsg(msgId){
   /* Auto-advance: pick next pending */
   const remaining = (activeCaseIds ? INLINE_MSGS.filter(m => activeCaseIds.includes(m.id)) : INLINE_MSGS)
     .filter(m => !consumedIds.has(m.id));
-  activeMsgId = remaining.length > 0 ? remaining[0].id : null;
+  const orderedRemaining = getOrderedInlineMessages(remaining);
+  activeMsgId = orderedRemaining.length > 0 ? orderedRemaining[0].id : null;
+  renderInlineMsgs(activeCaseIds);
   renderHistory(activeCaseIds);
+  updateHistoryEntry();
   renderQueuePanel(remaining);
   /* Hide section label if nothing left */
   const dcLabel = document.getElementById('dcSectionLabel');
@@ -4125,20 +4399,11 @@ function consumeImcMsg(msgId){
 let historyOpen = false;
 const HISTORY_CAP = 5; // max rows shown inline; older → archive link
 
-/* Static mock history — simulates a full backlog across all 3 B/C/A types */
+/* Static mock history — keep a small sample backlog */
 const MOCK_HISTORY = [
-  { id:'h1',  type:'b-quick', typeLabel:'Quick Action', title:'Q2 促销活动补偿审批',          source:'小秘 Agent',   time:'昨天 17:42', done:'Done', action:'Approved' },
-  { id:'h2',  type:'a-status',typeLabel:'Status',       title:'出差申请 OA 审批通过',           source:'OA System',    time:'昨天 15:10', done:'Read', action:null },
-  { id:'h3',  type:'c-chat',  typeLabel:'Chat Task',    title:'EDM 发送时间确认 · Summer Sale', source:'Minion Agent', time:'昨天 11:28', done:'Done', action:'Chat done' },
-  { id:'h4',  type:'b-quick', typeLabel:'Quick Action', title:'新用户福利包补发审批',            source:'小秘 Agent',   time:'6月5日 16:03',done:'Done', action:'Approved' },
-  { id:'h5',  type:'a-status',typeLabel:'Status',       title:'报销请款 OA 已完成',             source:'OA System',    time:'6月5日 09:55',done:'Read', action:null },
-  { id:'h6',  type:'c-chat',  typeLabel:'Chat Task',    title:'Instagram 官号内容排期',         source:'Minion Agent', time:'6月4日 14:20',done:'Done', action:'Chat done' },
-  { id:'h7',  type:'b-quick', typeLabel:'Quick Action', title:'CP「魔法少女」周边补货审批',      source:'小秘 Agent',   time:'6月4日 10:47',done:'Done', action:'Help sent' },
-  { id:'h8',  type:'a-status',typeLabel:'Status',       title:'年假申请 OA 审批通过',           source:'OA System',    time:'6月3日 18:31',done:'Read', action:null },
-  { id:'h9',  type:'c-chat',  typeLabel:'Chat Task',    title:'X Campaign 文案与发送时间确认',   source:'Minion Agent', time:'6月3日 11:05',done:'Done', action:'Chat done' },
-  { id:'h10', type:'b-quick', typeLabel:'Quick Action', title:'付费活动道具批次补偿',            source:'小秘 Agent',   time:'6月2日 16:58',done:'Done', action:'Approved' },
-  { id:'h11', type:'a-status',typeLabel:'Status',       title:'团建费用报销 OA 完成',           source:'OA System',    time:'6月2日 09:22',done:'Read', action:null },
-  { id:'h12', type:'c-chat',  typeLabel:'Chat Task',    title:'TikTok 官号上线发布任务',        source:'Minion Agent', time:'6月1日 15:40',done:'Done', action:'Chat done' },
+  { id:'h1',  type:'d',       typeLabel:'Jump Task',    title:'翻译监修 · JA→EN（逃离校园）', source:'i18n 系统',    time:'昨天 17:42', done:'Done', action:'Reviewed', detail:'日语词条已完成英文监修，历史记录可跳转回 i18n 工作区查看上下文。' },
+  { id:'h2',  type:'a-status',typeLabel:'Status',       title:'出差申请 OA 审批通过',           source:'OA System',    time:'昨天 15:10', done:'Read', action:null, detail:'审批流程已完成，申请人已收到通过通知。' },
+  { id:'h3',  type:'c-chat',  typeLabel:'Chat Task',    title:'X 官号上线发布任务',             source:'Minion Agent', time:'昨天 11:28', done:'Done', action:'Chat done', chatScene:'x-release', detail:'发布文案与发送时间已确认，可跳转回对应会话查看执行上下文。' },
 ];
 
 /* Default case — must be called after MOCK_HISTORY and HISTORY_CAP are declared */
@@ -4589,65 +4854,81 @@ document.addEventListener('keydown', function(e){
 });
 
 /* ── History Drawer ── */
-const TYPE_COLORS_DRAWER = {
-    'b-quick':'#8b5cf6','c-chat':'#8b5cf6','d':'#3b82f6','a-status':'#22c55e',
-};
-
-function openHistoryDrawer(){
-  /* Build full list: live consumed first, then all MOCK_HISTORY */
+function getHistoryItems(){
   const liveMsgs = INLINE_MSGS
     .filter(m => consumedIds.has(m.id))
     .map(m => ({
       id:m.id, type:m.type, title:m.title, source:m.source,
-      time:'今天 ' + m.time, done: m.type==='a-status'?'Read':'Done',
+      time:m.time.startsWith('今天') ? m.time : '今天 ' + m.time,
+      done: m.type==='a-status'?'Read':'Done',
+      detail:m.summary || '',
+      chatScene:m.chatScene || null,
     }));
   const liveIds = new Set(liveMsgs.map(m => m.id));
-  const all = [...liveMsgs, ...MOCK_HISTORY.filter(m => !liveIds.has(m.id))];
+  return [...liveMsgs, ...MOCK_HISTORY.filter(m => !liveIds.has(m.id))];
+}
+
+function splitHistoryTime(timeLabel){
+  const parts = (timeLabel || '').trim().split(/\s+/).filter(Boolean);
+  if(parts.length <= 1) return { date: parts[0] || '', time: '' };
+  return { date: parts[0], time: parts.slice(1).join(' ') };
+}
+
+function updateHistoryEntry(){
+  const sideCount = document.getElementById('histSideCount');
+  if(sideCount) sideCount.textContent = getHistoryItems().length;
+}
+
+function openHistoryDrawer(){
+  const all = getHistoryItems();
 
   /* Group by time label */
   const groups = {};
   all.forEach(m => {
-    const g = m.time.startsWith('今天') ? '今天'
-            : m.time.startsWith('昨天') ? '昨天'
-            : m.time.replace(/\s.*/,'');
+    const g = splitHistoryTime(m.time).date || 'Earlier';
     if(!groups[g]) groups[g] = [];
     groups[g].push(m);
   });
 
   const body = document.getElementById('hdwBody');
-  body.innerHTML = Object.entries(groups).map(([date, items]) => `
+  body.innerHTML = all.length === 0 ? `<div class="hdw-empty">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+    <span>暂无历史记录</span>
+  </div>` : Object.entries(groups).map(([date, items]) => `
     <div class="hdw-date-group">${date}</div>
     ${items.map(m => {
-      const color = TYPE_COLORS_DRAWER[m.type] || 'rgba(0,0,0,.2)';
       const tagCls = m.done === 'Read' ? 'done-read' : 'done-finish';
-      // b-quick: show action taken; c-chat: link to chat; d: show toast
       const actionTaken = consumedActions[m.id] || m.action || null;
-      const doneLabel = actionTaken || m.done;
+      const doneLabel = actionTaken || m.done || 'Done';
+      const time = splitHistoryTime(m.time).time;
+      const detail = m.detail || '';
+      const chatScene = m.chatScene || 'x-release';
       const clickAttr = m.type === 'c-chat'
-        ? `onclick="window.location.href='chat.html?scene=x-release'" style="cursor:pointer;" title="查看会话"`
+        ? `onclick="openChatTab('${chatScene}');closeHistoryDrawer();" title="打开会话"`
         : m.type === 'd'
-        ? `onclick="showToast('跳转至对应任务（模拟）')" style="cursor:pointer;" title="跳转任务"`
+        ? `onclick="openI18nPanel();closeHistoryDrawer();" title="打开任务"`
         : '';
-      const actionNote = (m.type === 'b-quick' && actionTaken)
-        ? `<span class="hdw-row-action">· ${actionTaken}</span>` : '';
-      return `<div class="hdw-row" ${clickAttr}>
-        <div class="hdw-row-dot" style="background:${color}"></div>
-        <div class="hdw-row-body">
-          <div class="hdw-row-title">${m.title}</div>
-          <div class="hdw-row-meta">
-            <span class="hdw-row-source">${m.source}</span>
-            ${actionNote}
-            <span class="hdw-row-time">${m.time}</span>
+      const clickableCls = clickAttr ? ' is-clickable' : '';
+      return `<div class="hdw-card${clickableCls}" tabindex="0" onmouseenter="this.classList.add('is-expanded')" onmouseleave="this.classList.remove('is-expanded')" onfocusin="this.classList.add('is-expanded')" onfocusout="this.classList.remove('is-expanded')" ${clickAttr}>
+        <div class="hdw-card-dot"></div>
+        <div class="hdw-card-body">
+          <div class="hdw-card-top">
+            <div class="hdw-card-title">${m.title}</div>
+            ${time ? `<span class="hdw-card-time">${time}</span>` : ''}
+          </div>
+          <div class="hdw-card-meta">
             <span class="hdw-row-tag ${tagCls}">${doneLabel}</span>
           </div>
+          ${detail ? `<div class="hdw-card-detail">${detail}</div>` : ''}
         </div>
-        ${m.type === 'c-chat' || m.type === 'd' ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
+        ${m.type === 'c-chat' || m.type === 'd' ? `<svg class="hdw-card-open" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
       </div>`;
     }).join('')}
   `).join('');
 
   document.getElementById('hdwTotal').textContent = all.length;
   document.getElementById('hdwClearBtn').style.display = all.length > 0 ? '' : 'none';
+  updateHistoryEntry();
   document.getElementById('hdwBackdrop').classList.add('open');
   document.getElementById('hdwDrawer').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -4673,16 +4954,23 @@ function clearHistory(){
   </div>`;
   document.getElementById('hdwTotal').textContent = '0';
   document.getElementById('hdwClearBtn').style.display = 'none';
+  updateHistoryEntry();
   showToast('历史记录已清空');
 }
+updateHistoryEntry();
 </script>
 <!-- ══ HISTORY DRAWER ══ -->
 <div class="hdw-backdrop" id="hdwBackdrop" onclick="closeHistoryDrawer()"></div>
 <aside class="hdw-drawer" id="hdwDrawer" role="dialog" aria-modal="true" aria-label="历史消息">
   <div class="hdw-header">
     <div class="hdw-title">
-      <span class="hdw-title-icon">🗂</span>
-      <span>历史消息</span>
+      <span class="hdw-title-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+      </span>
+      <span class="hdw-title-stack">
+        <span>History</span>
+        <span class="hdw-subtitle">Consumed messages</span>
+      </span>
       <span class="hdw-total" id="hdwTotal">0</span>
     </div>
     <div style="display:flex;align-items:center;gap:4px;">
