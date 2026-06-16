@@ -1381,6 +1381,34 @@ body {
 .imc-summary{
   font-size:12px;line-height:1.58;
   color:rgba(0,0,0,.46);
+  /* default: clamp to 2 lines */
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+/* expanded state: show all */
+.imc-card.imc-expanded .imc-summary{
+  -webkit-line-clamp:unset;
+  overflow:visible;
+}
+/* expand toggle row */
+.imc-expand-toggle{
+  display:flex;align-items:center;gap:4px;
+  margin-top:5px;
+  font-size:11px;color:rgba(0,0,0,.3);
+  cursor:pointer;
+  user-select:none;
+  width:fit-content;
+  transition:color .14s;
+}
+.imc-expand-toggle:hover{ color:rgba(0,0,0,.55); }
+.imc-expand-chevron{
+  transition:transform .2s cubic-bezier(.4,0,.2,1);
+  flex-shrink:0;
+}
+.imc-card.imc-expanded .imc-expand-chevron{
+  transform:rotate(180deg);
 }
 .imc-tags{
   display:flex;flex-wrap:wrap;gap:5px;
@@ -1482,6 +1510,9 @@ body {
 }
 .imc-card[data-type="a-status"] .imc-summary{
   font-size:12px;color:rgba(0,0,0,.36);line-height:1.55;
+}
+.imc-card[data-type="a-status"].imc-expanded .imc-summary{
+  -webkit-line-clamp:unset;overflow:visible;
 }
 
 /* Status pill (Type A) */
@@ -3990,11 +4021,24 @@ function buildImcCard(msg, done, idx){
       ${msg.type === 'd' ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
     </div>
     <div class="imc-summary">${msg.summary}</div>
+    <div class="imc-expand-toggle" onclick="toggleImcExpand(event,'imc-${msg.id}')">
+      <svg class="imc-expand-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="imc-expand-label">展开</span>
+    </div>
     ${tagsHtml}
     ${pillHtml}
     ${actionsHtml}`;
 
   return card;
+}
+
+function toggleImcExpand(e, cardId){
+  e.stopPropagation();
+  const card = document.getElementById(cardId);
+  if(!card) return;
+  const expanded = card.classList.toggle('imc-expanded');
+  const label = card.querySelector('.imc-expand-label');
+  if(label) label.textContent = expanded ? '收起' : '展开';
 }
 
 /* ── Core consumption: animate card out → history ── */
