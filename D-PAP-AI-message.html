@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PAP — 消息系统 (Dev)</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
 /* ── DS3 DESIGN TOKENS (from source) ── */
@@ -27,11 +29,77 @@
   --ds3-glass-inset:inset 0 1px 0 #fff9;
 }
 
-html,body{width:100%;height:100%;overflow:hidden;}
+html,body{height:100%;overflow:hidden;}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #e4e6ef;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(200,210,240,.4) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(190,205,235,.3) 0%, transparent 65%);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Desktop Client Window ── */
+.desktop-stage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+}
+.client-window {
+  width: min(960px, 96vw);
+  height: min(760px, 92vh);
+  background: #f0f1f5;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.6),
+    0 24px 80px rgba(31,38,135,0.18),
+    0 8px 24px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.window-titlebar {
+  flex-shrink: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 0 14px;
+  background: rgba(255,255,255,0.35);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+}
+.titlebar-left { display: flex; align-items: center; gap: 14px; }
+.window-controls { display: flex; align-items: center; gap: 7px; }
+.window-controls span { width: 12px; height: 12px; border-radius: 50%; display: block; }
+.wc-close  { background: #ff5f57; border: 0.5px solid rgba(0,0,0,0.08); }
+.wc-min    { background: #febc2e; border: 0.5px solid rgba(0,0,0,0.08); }
+.wc-max    { background: #28c840; border: 0.5px solid rgba(0,0,0,0.08); }
+.titlebar-nav { display: flex; align-items: center; gap: 4px; }
+.titlebar-icon-btn {
+  width: 32px; height: 32px; border: none; border-radius: 8px;
+  background: transparent; color: rgba(0,0,0,0.45); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.titlebar-icon-btn:hover { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.7); }
+.titlebar-icon-btn.active { background: rgba(0,0,0,0.07); color: rgba(0,0,0,0.78); }
+.titlebar-right { display: flex; align-items: center; gap: 4px; }
+.client-tabs { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.tab-panel { display: none; flex: 1; min-height: 0; overflow: hidden; }
+.tab-panel.active { display: flex; flex-direction: column; position: relative; }
 
 /* ── ROOT ── */
 .ds3-root{
-  width:100vw;height:100vh;
+  flex:1;min-height:0;width:100%;
+  display:flex;flex-direction:column;
   color:var(--ds3-text-primary);
   background:linear-gradient(160deg,#f0f4f8 0%,#e8edf5 50%,#f5f0fa 100%);
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;
@@ -42,18 +110,18 @@ html,body{width:100%;height:100%;overflow:hidden;}
 .ds3-nebula-canvas{
   z-index:0;pointer-events:none;
   width:100%;height:100%;
-  position:fixed;top:0;left:0;
+  position:absolute;top:0;left:0;
 }
 
 /* ── UI LAYER ── */
 .ds3-ui-layer{
-  z-index:1;width:100%;height:100%;
+  z-index:1;flex:1;min-height:0;width:100%;
   display:flex;flex-direction:column;position:relative;
 }
 
 /* ── SCROLLABLE CONTENT ── */
 .ds3-scrollbar{
-  width:100%;height:100%;overflow-y:auto;
+  flex:1;min-height:0;width:100%;overflow-y:auto;
   padding:40px 40px 100px;
 }
 .ds3-scrollbar::-webkit-scrollbar{width:4px;height:4px;}
@@ -376,7 +444,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
 
 /* Video player modal */
 .qp-video-modal{
-  display:none;position:fixed;inset:0;z-index:9999;
+  display:none;position:absolute;inset:0;z-index:9999;
   background:rgba(0,0,0,.82);
   align-items:center;justify-content:center;
   backdrop-filter:blur(6px);
@@ -446,7 +514,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
 
 /* Lightbox */
 .qp-lightbox{
-  display:none;position:fixed;inset:0;z-index:9999;
+  display:none;position:absolute;inset:0;z-index:9999;
   background:rgba(0,0,0,.75);
   align-items:center;justify-content:center;
   backdrop-filter:blur(4px);
@@ -876,7 +944,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
 
 /* ── CASES DOCK ── */
 .ds3-case-dock{
-  z-index:40;pointer-events:auto;
+  z-index:9999;pointer-events:auto;
   display:flex;flex-direction:column;align-items:flex-end;gap:8px;
   position:fixed;bottom:20px;right:20px;
 }
@@ -1263,8 +1331,8 @@ html,body{width:100%;height:100%;overflow:hidden;}
 /* B-type (quick & chat) dot/label color */
 .imc-card[data-type="b-quick"]  .imc-type-dot{ background:#8b5cf6; }
 .imc-card[data-type="b-quick"]  .imc-type-label{ color:rgba(109,40,217,.8); }
-.imc-card[data-type="b-chat"]   .imc-type-dot{ background:#8b5cf6; }
-.imc-card[data-type="b-chat"]   .imc-type-label{ color:rgba(109,40,217,.8); }
+.imc-card[data-type="c-chat"]   .imc-type-dot{ background:#8b5cf6; }
+.imc-card[data-type="c-chat"]   .imc-type-label{ color:rgba(109,40,217,.8); }
 .imc-card[data-type="c"]        .imc-type-dot{ background:#3b82f6; }
 .imc-card[data-type="c"]        .imc-type-label{ color:rgba(29,78,216,.8); }
 
@@ -1542,7 +1610,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
 
 /* Panel overlay backdrop */
 .msg-backdrop{
-  position:fixed;inset:0;z-index:200;
+  position:absolute;inset:0;z-index:200;
   background:rgba(0,0,0,.18);
   -webkit-backdrop-filter:blur(2px);
   backdrop-filter:blur(2px);
@@ -1553,7 +1621,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
 
 /* Notification panel */
 .msg-panel{
-  position:fixed;top:0;right:0;bottom:0;z-index:201;
+  position:absolute;top:0;right:0;bottom:0;z-index:201;
   width:min(420px, 100vw);
   background:rgba(248,250,254,.92);
   -webkit-backdrop-filter:blur(40px) saturate(200%);
@@ -1770,7 +1838,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
    MINION CHAT OVERLAY
 ════════════════════════════════════════════ */
 .chat-overlay{
-  position:fixed;inset:0;z-index:300;
+  position:absolute;inset:0;z-index:300;
   display:flex;flex-direction:column;
   background:rgba(248,250,254,.96);
   -webkit-backdrop-filter:blur(40px) saturate(200%);
@@ -1993,7 +2061,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
 /* ── History Drawer ── */
 .hdw-backdrop{
   display:none;
-  position:fixed;inset:0;
+  position:absolute;inset:0;
   background:rgba(0,0,0,.28);
   backdrop-filter:blur(2px);
   -webkit-backdrop-filter:blur(2px);
@@ -2003,7 +2071,7 @@ html,body{width:100%;height:100%;overflow:hidden;}
 }
 .hdw-backdrop.open{ display:block; opacity:1; }
 .hdw-drawer{
-  position:fixed;
+  position:absolute;
   top:0;left:0;bottom:0;
   width:340px;
   max-width:92vw;
@@ -2043,6 +2111,20 @@ html,body{width:100%;height:100%;overflow:hidden;}
   transition:background .15s,color .15s;
 }
 .hdw-close:hover{ background:rgba(0,0,0,.07);color:rgba(0,0,0,.7); }
+.hdw-clear{
+  font-size:11px;font-weight:500;color:rgba(0,0,0,.35);
+  border:none;background:transparent;cursor:pointer;
+  padding:4px 8px;border-radius:6px;
+  transition:background .14s,color .14s;
+  white-space:nowrap;
+}
+.hdw-clear:hover{ background:rgba(255,59,48,.08);color:rgba(200,30,20,.75); }
+.hdw-empty{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:8px;
+  padding:64px 24px;
+  color:rgba(0,0,0,.28);font-size:13px;text-align:center;
+}
 .hdw-body{
   flex:1;overflow-y:auto;
   padding:12px 0 24px;
@@ -2088,9 +2170,139 @@ html,body{width:100%;height:100%;overflow:hidden;}
   font-size:11px;color:rgba(0,0,0,.35);font-style:italic;
 }
 
+/* ══ History Side Tab ══ */
+.hist-side-tab {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 9px 7px;
+  border-radius: 0 10px 10px 0;
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.65);
+  border-left: none;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.7);
+  cursor: pointer;
+  color: rgba(0,0,0,0.38);
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.hist-side-tab:hover {
+  background: rgba(255,255,255,0.75);
+  color: rgba(0,0,0,0.62);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.hist-side-count {
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: rgba(0,122,255,0.12);
+  color: rgba(0,122,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+/* ══ Chat Tab (iframe) ══ */
+.chat-tab-frame{width:100%;height:100%;border:none;display:block;}
+
+/* ══ i18n Expert Tab ══ */
+.i18n-shell{display:flex;width:100%;height:100%;background:#fff;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;}
+.i18n-icon-rail{width:44px;flex-shrink:0;background:#1c1c2e;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;}
+.i18n-rail-btn{width:32px;height:32px;border-radius:8px;border:none;background:transparent;color:rgba(255,255,255,.35);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;}
+.i18n-rail-btn:hover,.i18n-rail-btn.active{background:rgba(255,255,255,.14);color:#fff;}
+.i18n-rail-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);margin:6px auto;}
+.i18n-sidebar{width:214px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid #eaeaea;background:#fafafa;}
+.i18n-sidebar-hd{padding:14px 14px 6px;display:flex;align-items:center;gap:8px;}
+.i18n-sidebar-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0;}
+.i18n-sidebar-title{font-size:13px;font-weight:600;color:#111;}
+.i18n-sidebar-meta{display:flex;gap:4px;align-items:center;padding:0 14px 6px;}
+.i18n-filter-chip{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid #dde;background:#fff;color:#555;cursor:pointer;}
+.i18n-filter-chip.on{background:#eef2ff;border-color:#818cf8;color:#4338ca;}
+.i18n-search-wrap{padding:0 10px 6px;}
+.i18n-search{width:100%;box-sizing:border-box;padding:5px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#333;outline:none;background:#fff;}
+.i18n-total{font-size:11px;color:#999;padding:2px 14px 6px;}
+.i18n-task-items{flex:1;overflow-y:auto;}
+.i18n-task-item{padding:9px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background .1s;}
+.i18n-task-item:hover{background:#f0f4ff;}
+.i18n-task-item.on{background:#eff6ff;}
+.i18n-task-item-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;}
+.i18n-task-item-name{font-size:12.5px;font-weight:500;color:#111;}
+.i18n-task-item-time{font-size:10px;color:#bbb;}
+.i18n-task-item-sub{font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* Main */
+.i18n-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.i18n-topbar{height:44px;flex-shrink:0;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid #eaeaea;gap:10px;}
+.i18n-pending{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#fef3c7;color:#92400e;letter-spacing:.05em;}
+.i18n-topbar-title{font-size:13px;font-weight:600;color:#111;flex:1;}
+.i18n-topbar-actions{display:flex;align-items:center;gap:8px;}
+.i18n-topbar-btn{width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:6px;color:#999;display:flex;align-items:center;justify-content:center;transition:background .12s;}
+.i18n-topbar-btn:hover{background:#f0f0f0;color:#555;}
+.i18n-scroll{flex:1;min-height:0;overflow-y:auto;padding:20px 24px 16px;}
+.i18n-msg{display:flex;gap:10px;}
+.i18n-msg-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0;}
+.i18n-msg-body{flex:1;}
+.i18n-msg-sender{font-size:12.5px;font-weight:600;color:#111;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.i18n-msg-time-lbl{font-size:11px;color:#bbb;font-weight:400;}
+.i18n-msg-text{font-size:13px;color:#374151;line-height:1.7;}
+.i18n-msg-text b{font-weight:600;color:#111;}
+.i18n-msg-text ul{padding-left:18px;margin:6px 0;}
+.i18n-msg-text li{margin:2px 0;}
+.i18n-msg-text .i18n-link{display:inline-flex;align-items:center;gap:4px;padding:1px 6px;background:#f0f0ff;border-radius:4px;color:#4338ca;font-size:12px;font-weight:500;border:1px solid #c7d2fe;text-decoration:none;cursor:default;}
+.i18n-review-btn{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 16px;background:#111;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+.i18n-review-btn:hover{background:#333;}
+.i18n-reviewed-badge{display:none;margin-top:14px;padding:8px 14px;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;color:#065f46;font-size:13px;font-weight:500;}
+.i18n-reply-bar{flex-shrink:0;border-top:1px solid #eaeaea;padding:8px 16px;display:flex;align-items:center;gap:8px;}
+.i18n-reply-icons{display:flex;gap:4px;}
+.i18n-reply-icon{color:#bbb;cursor:pointer;font-size:14px;}
+.i18n-reply-input{flex:1;border:none;font-size:13px;color:#333;outline:none;background:transparent;padding:4px 0;font-family:inherit;}
+.i18n-send-btn{font-size:12px;font-weight:600;color:#999;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;}
+.i18n-send-btn:hover{color:#555;}
+
 </style>
 </head>
 <body>
+<div class="desktop-stage">
+<div class="client-window">
+
+  <!-- Window Title Bar -->
+  <div class="window-titlebar">
+    <div class="titlebar-left">
+      <div class="window-controls">
+        <span class="wc-close"></span>
+        <span class="wc-min"></span>
+        <span class="wc-max"></span>
+      </div>
+      <div class="titlebar-nav">
+        <button class="titlebar-icon-btn active" id="tabBtn-home" title="Dispatch Center" onclick="switchToDispatch()">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"/></svg>
+        </button>
+        <button class="titlebar-icon-btn" id="tabBtn-apps" title="Chat">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="titlebarLabel" style="position:absolute;left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:rgba(0,0,0,.42);letter-spacing:.3px;pointer-events:none;">
+      Dispatch Center
+    </div>
+    <div class="titlebar-right">
+      <button class="titlebar-icon-btn" title="设置">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="client-tabs">
+  <div class="tab-panel active" id="tab-dispatch">
+
 <div class="ds3-root">
   <!-- NEBULA CANVAS -->
   <canvas class="ds3-nebula-canvas" id="nebulaCanvas"></canvas>
@@ -2136,6 +2348,11 @@ html,body{width:100%;height:100%;overflow:hidden;}
       </div>
     </details>
 
+    <!-- HISTORY SIDE TAB -->
+    <div class="hist-side-tab" id="histSideTab" onclick="openHistoryDrawer()" title="历史消息">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+    </div>
+
     <!-- SCROLLABLE MAIN -->
     <div class="ds3-scrollbar">
 
@@ -2159,15 +2376,9 @@ html,body{width:100%;height:100%;overflow:hidden;}
 
           <!-- INLINE MESSAGES: shown in Case 2 -->
           <div id="pdmAgentSection" class="imc-section" style="display:none;">
-            <div class="sec-label">Dispatch Center</div>
+            <div class="sec-label" id="dcSectionLabel">Dispatch Center</div>
             <div id="inlineMsgList"></div>
             <!-- HISTORY TOGGLE -->
-            <button class="imc-history-toggle" id="historyToggle" onclick="toggleHistory()" style="display:none;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              <span id="historyToggleLabel">History</span>
-              <span class="imc-history-count" id="historyCount">0</span>
-            </button>
-            <div class="imc-history-list" id="historyList"></div>
           </div>
 
           <!-- DOING（A票执行层，始终存在） -->
@@ -2300,31 +2511,31 @@ html,body{width:100%;height:100%;overflow:hidden;}
           </span>
           <span class="ds3-case-option-title">OA 审批完成通知</span>
         </button>
-        <button class="ds3-case-option" type="button" onclick="switchPdmCase(3)" style="display:none;">
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(3)">
           <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
             B1 <span style="font-size:9px;padding:1px 6px;background:rgba(139,92,246,.12);color:rgba(109,40,217,.85);border-radius:4px;font-weight:700;">快捷任务</span>
           </span>
-          <span class="ds3-case-option-title">小秘 · CP 道具补偿</span>
+          <span class="ds3-case-option-title">Release Agent · v1.2.4 热修发布</span>
         </button>
-        <button class="ds3-case-option" type="button" onclick="switchPdmCase(4)" style="display:none;">
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(4)">
           <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
             B2 <span style="font-size:9px;padding:1px 6px;background:rgba(139,92,246,.12);color:rgba(109,40,217,.85);border-radius:4px;font-weight:700;">会话任务</span>
           </span>
           <span class="ds3-case-option-title">Minion · X 官号发布任务</span>
         </button>
-        <button class="ds3-case-option" type="button" onclick="switchPdmCase(5)" style="display:none;">
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(5)">
           <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
             C1 <span style="font-size:9px;padding:1px 6px;background:rgba(59,130,246,.1);color:rgba(29,78,216,.85);border-radius:4px;font-weight:700;">跳转任务</span>
           </span>
           <span class="ds3-case-option-title">i18n · 翻译监修</span>
         </button>
-        <button class="ds3-case-option" type="button" onclick="switchPdmCase(6)">
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(6)" style="display:none;">
           <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
             D1 <span style="font-size:9px;padding:1px 6px;background:rgba(249,115,22,.1);color:rgba(194,65,12,.85);border-radius:4px;font-weight:700;">Need Input</span>
           </span>
           <span class="ds3-case-option-title">Minion · 受众分组确认</span>
         </button>
-        <button class="ds3-case-option" type="button" onclick="switchPdmCase(7)">
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(7)" style="display:none;">
           <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
             E1 <span style="font-size:9px;padding:1px 6px;background:rgba(168,85,247,.1);color:rgba(126,34,206,.85);border-radius:4px;font-weight:700;">Review</span>
           </span>
@@ -3124,6 +3335,9 @@ function switchPdmCase(n){
     if(agentSec) agentSec.style.display = '';
     if(brief)    brief.style.display    = '';
     typeBrief('下午好，<b>林晨曦</b>。Agent 刚在运营群中拆解完今日可执行任务，结合 memory + brain-doc 交叉比对后识别出 <b>2 项任务</b>，其中 <b>1 项</b>需你在今日优先确认。');
+    // Reset consumed state for fresh case preview
+    consumedIds.clear();
+    Object.keys(consumedActions).forEach(k => delete consumedActions[k]);
     // Determine which message IDs to show for this case
     const caseMap = { 2:['A1','A2'], 3:['B1'], 4:['B2'], 5:['C1'], 6:['D1'], 7:['E1'] };
     activeCaseIds = caseMap[n] || null;
@@ -3328,28 +3542,27 @@ const INLINE_MSGS = [
     type: 'b-quick',
     typeLabel: 'Quick Action',
     urgency: null,
-    source: '小秘 Agent',
+    source: 'Release Agent',
     time: '10:23',
-    title: 'CP「逃离校园」道具补偿',
-    summary: '「校园合成」Lv.7 / Lv.11 成就 bug 影响约 153 名玩家，待补 70 张合成卡。活动今日 23:59 截止，需先补偿再排查。',
+    title: '「逃离校园」v1.2.4 热修包待发布',
+    summary: '自动化测试全部通过（通过率 100%）。修复内容：成就 Lv.7 / Lv.11 解锁 bug、iOS 低内存崩溃。包体积 2.3 MB，回滚方案已就绪。发布窗口：今日 22:00 前（低峰期）。',
     tags: [],
     actions: [
-      { label: 'Approve', cls: 'imc-btn-purple', action: 'approve' },
-      { label: 'Help', cls: 'imc-btn-ghost', action: 'help' },
+      { label: '🚀 Publish Now', cls: 'imc-btn-purple', action: 'publish' },
+      { label: 'Schedule', cls: 'imc-btn-ghost', action: 'schedule' },
     ],
   },
   /* B-3: Minion · X Official Account Release */
   {
     id: 'B2',
-    type: 'b-chat',
-    typeLabel: 'Chat Task',
+    type: 'c-chat',
     source: 'Minion Agent',
     time: '14:37',
     title: 'X 官号上线发布任务 · 需要你的输入',
     summary: '「逃离校园」上线前发布流程已就绪，Minion 需要你提供发布文案和发送时间，其余步骤将自动执行。',
     tags: [],
     actions: [
-      { label: '💬 Start Chat', cls: 'imc-btn-purple', action: 'navigateToChat' },
+      { label: '💬 Start Chat', cls: 'imc-btn-purple', action: 'openChatTab' },
     ],
     chat: {
       agentName: 'Minion Agent',
@@ -3421,7 +3634,7 @@ const INLINE_MSGS = [
   /* C-1: Translation review jump */
   {
     id: 'C1',
-    type: 'c',
+    type: 'd',
     typeLabel: 'Jump Task',
     source: 'i18n 系统',
     time: '09:45',
@@ -3476,6 +3689,10 @@ function renderInlineMsgs(ids){
     const card = buildImcCard(msg, false, i);
     list.appendChild(card);
   });
+
+  /* Show/hide "Dispatch Center" section label */
+  const dcLabel = document.getElementById('dcSectionLabel');
+  if(dcLabel) dcLabel.style.display = msgs.length > 0 ? '' : 'none';
 }
 
 function buildImcCard(msg, done, idx){
@@ -3554,9 +3771,9 @@ function buildImcCard(msg, done, idx){
   }
 
   card.innerHTML = header + `
-    <div class="imc-title" ${msg.type === 'c' ? `onclick="handleImcAction('${msg.id}','jump')" style="cursor:pointer;display:flex;align-items:center;gap:6px;"` : ''}>
+    <div class="imc-title" ${msg.type === 'd' ? `onclick="handleImcAction('${msg.id}','jump')" style="cursor:pointer;display:flex;align-items:center;gap:6px;"` : ''}>
       <span style="flex:1;">${msg.title}</span>
-      ${msg.type === 'c' ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
+      ${msg.type === 'd' ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
     </div>
     <div class="imc-summary">${msg.summary}</div>
     ${tagsHtml}
@@ -3619,15 +3836,12 @@ function handleImcAction(msgId, action){
     openChatOverlay(msg);
     return;
   }
+  if(action === 'openChatTab'){
+    openChatTab(msg.chatScene || 'x-release');
+    return;
+  }
   if(action === 'jump'){
-    showToast('正在跳转至 i18n 咨询会话…');
-    const card = document.getElementById('imc-' + msgId);
-    if(card){
-      const actEl = card.querySelector('.imc-actions');
-      if(actEl) actEl.innerHTML = `<div class="imc-done-chip">↗ Jumped</div>`;
-    }
-    consumedActions[msgId] = 'Jumped';
-    setTimeout(() => dismissCard(msgId, 'Jumped'), 800);
+    openI18nPanel();
     return;
   }
   if(action === 'approve'){
@@ -3639,6 +3853,23 @@ function handleImcAction(msgId, action){
     showToast('已批准 — Agent 正在执行操作');
     consumedActions[msgId] = 'Approved';
     setTimeout(() => dismissCard(msgId, 'Done'), 1600);
+    return;
+  }
+  if(action === 'publish'){
+    const card = document.getElementById('imc-' + msgId);
+    if(card){
+      const actEl = card.querySelector('.imc-actions');
+      if(actEl) actEl.innerHTML = `<div style="font-size:12.5px;color:rgba(0,0,0,.4);display:flex;align-items:center;gap:6px;"><span class="imc-spinner"></span> 正在推送至 App Store / Google Play…</div>`;
+    }
+    showToast('🚀 发布已授权 — v1.2.4 热修包正在发布');
+    consumedActions[msgId] = 'Published';
+    setTimeout(() => dismissCard(msgId, 'Published'), 1800);
+    return;
+  }
+  if(action === 'schedule'){
+    showToast('已进入定时发布队列 — 22:00 自动发布');
+    consumedActions[msgId] = 'Scheduled';
+    setTimeout(() => dismissCard(msgId, 'Scheduled'), 600);
     return;
   }
   if(action === 'help'){
@@ -3655,30 +3886,35 @@ function consumeImcMsg(msgId){
   const card = document.getElementById('imc-' + msgId);
   if(card) card.remove();
   renderHistory(activeCaseIds);
+  /* Hide section label if no messages remain */
+  const remaining = (activeCaseIds ? INLINE_MSGS.filter(m => activeCaseIds.includes(m.id)) : INLINE_MSGS)
+    .filter(m => !consumedIds.has(m.id));
+  const dcLabel = document.getElementById('dcSectionLabel');
+  if(dcLabel) dcLabel.style.display = remaining.length > 0 ? '' : 'none';
 }
 
 /* ── History panel ── */
 let historyOpen = false;
-
-/* Default to D1 after all variables are declared */
-switchPdmCase(6);
 const HISTORY_CAP = 5; // max rows shown inline; older → archive link
 
 /* Static mock history — simulates a full backlog across all 3 B/C/A types */
 const MOCK_HISTORY = [
   { id:'h1',  type:'b-quick', typeLabel:'Quick Action', title:'Q2 促销活动补偿审批',          source:'小秘 Agent',   time:'昨天 17:42', done:'Done', action:'Approved' },
   { id:'h2',  type:'a-status',typeLabel:'Status',       title:'出差申请 OA 审批通过',           source:'OA System',    time:'昨天 15:10', done:'Read', action:null },
-  { id:'h3',  type:'b-chat',  typeLabel:'Chat Task',    title:'EDM 发送时间确认 · Summer Sale', source:'Minion Agent', time:'昨天 11:28', done:'Done', action:'Chat done' },
+  { id:'h3',  type:'c-chat',  typeLabel:'Chat Task',    title:'EDM 发送时间确认 · Summer Sale', source:'Minion Agent', time:'昨天 11:28', done:'Done', action:'Chat done' },
   { id:'h4',  type:'b-quick', typeLabel:'Quick Action', title:'新用户福利包补发审批',            source:'小秘 Agent',   time:'6月5日 16:03',done:'Done', action:'Approved' },
   { id:'h5',  type:'a-status',typeLabel:'Status',       title:'报销请款 OA 已完成',             source:'OA System',    time:'6月5日 09:55',done:'Read', action:null },
-  { id:'h6',  type:'b-chat',  typeLabel:'Chat Task',    title:'Instagram 官号内容排期',         source:'Minion Agent', time:'6月4日 14:20',done:'Done', action:'Chat done' },
+  { id:'h6',  type:'c-chat',  typeLabel:'Chat Task',    title:'Instagram 官号内容排期',         source:'Minion Agent', time:'6月4日 14:20',done:'Done', action:'Chat done' },
   { id:'h7',  type:'b-quick', typeLabel:'Quick Action', title:'CP「魔法少女」周边补货审批',      source:'小秘 Agent',   time:'6月4日 10:47',done:'Done', action:'Help sent' },
   { id:'h8',  type:'a-status',typeLabel:'Status',       title:'年假申请 OA 审批通过',           source:'OA System',    time:'6月3日 18:31',done:'Read', action:null },
-  { id:'h9',  type:'b-chat',  typeLabel:'Chat Task',    title:'X Campaign 文案与发送时间确认',   source:'Minion Agent', time:'6月3日 11:05',done:'Done', action:'Chat done' },
+  { id:'h9',  type:'c-chat',  typeLabel:'Chat Task',    title:'X Campaign 文案与发送时间确认',   source:'Minion Agent', time:'6月3日 11:05',done:'Done', action:'Chat done' },
   { id:'h10', type:'b-quick', typeLabel:'Quick Action', title:'付费活动道具批次补偿',            source:'小秘 Agent',   time:'6月2日 16:58',done:'Done', action:'Approved' },
   { id:'h11', type:'a-status',typeLabel:'Status',       title:'团建费用报销 OA 完成',           source:'OA System',    time:'6月2日 09:22',done:'Read', action:null },
-  { id:'h12', type:'b-chat',  typeLabel:'Chat Task',    title:'TikTok 官号上线发布任务',        source:'Minion Agent', time:'6月1日 15:40',done:'Done', action:'Chat done' },
+  { id:'h12', type:'c-chat',  typeLabel:'Chat Task',    title:'TikTok 官号上线发布任务',        source:'Minion Agent', time:'6月1日 15:40',done:'Done', action:'Chat done' },
 ];
+
+/* Default case — must be called after MOCK_HISTORY and HISTORY_CAP are declared */
+switchPdmCase(4);
 
 function toggleHistory(){
   historyOpen = !historyOpen;
@@ -3689,7 +3925,7 @@ function toggleHistory(){
 function renderHistory(ids){
   const TYPE_COLORS = {
     'b-quick':'#8b5cf6',
-    'b-chat':'#8b5cf6','c':'#3b82f6','a-status':'#22c55e',
+    'c-chat':'#8b5cf6','d':'#3b82f6','a-status':'#22c55e',
   };
 
   /* Live consumed messages from current case */
@@ -3705,51 +3941,6 @@ function renderHistory(ids){
   const liveIds = new Set(liveMsgs.map(m => m.id));
   const combined = [...liveMsgs, ...MOCK_HISTORY.filter(m => !liveIds.has(m.id))];
 
-  const toggleBtn = document.getElementById('historyToggle');
-  const countEl   = document.getElementById('historyCount');
-  const labelEl   = document.getElementById('historyToggleLabel');
-  const historyEl = document.getElementById('historyList');
-  if(!toggleBtn) return;
-
-  if(combined.length === 0){
-    toggleBtn.style.display = 'none';
-    historyEl.innerHTML = '';
-    return;
-  }
-
-  toggleBtn.style.display = 'flex';
-  countEl.textContent = combined.length;
-  labelEl.textContent = 'History';
-
-  const overflow = combined.length > HISTORY_CAP;
-  const visible  = combined.slice(0, HISTORY_CAP);
-  const hiddenN  = combined.length - visible.length;
-
-  historyEl.innerHTML = visible.map(m => {
-    const color = TYPE_COLORS[m.type] || 'rgba(0,0,0,.2)';
-    const actionTaken = consumedActions[m.id];
-    const doneLabel = actionTaken || m.done || (m.type === 'a-status' ? 'Read' : 'Done');
-    const clickAttr = m.type === 'b-chat'
-      ? `onclick="window.location.href='chat.html?scene=x-release'" style="cursor:pointer;"`
-      : m.type === 'c'
-      ? `onclick="showToast('跳转至：${(m.jumpDest||{label:'对应任务'}).label || '对应任务'}')" style="cursor:pointer;"`
-      : '';
-    const actionNote = (m.type === 'b-quick' && actionTaken)
-      ? `<span class="imc-hr-action">· ${actionTaken}</span>` : '';
-    return `<div class="imc-history-row" ${clickAttr}>
-      <div class="imc-hr-dot" style="background:${color}"></div>
-      <span class="imc-hr-title">${m.title}</span>
-      <span class="imc-hr-source">${m.source}${actionNote}</span>
-      <span class="imc-hr-done">${doneLabel}</span>
-    </div>`;
-  }).join('') + (overflow
-    ? `<div class="imc-history-row imc-history-more" onclick="openHistoryDrawer()">
-        <span style="flex:1;font-size:12px;color:rgba(0,0,0,.35);">另有 ${hiddenN} 条更早记录</span>
-        <span style="font-size:11px;color:rgba(0,0,0,.25);">全部历史 →</span>
-      </div>`
-    : '');
-
-  if(historyOpen) historyEl.classList.add('open');
 }
 
 /* ── Update brief chips after consumption ── */
@@ -3777,7 +3968,7 @@ function showToast(text){
     el = document.createElement('div');
     el.id = 'sysToast';
     el.style.cssText = [
-      'position:fixed','bottom:72px','left:50%',
+      'position:absolute','bottom:72px','left:50%',
       'transform:translateX(-50%) translateY(8px)',
       'background:rgba(15,15,15,.82)','color:#fff',
       'font-size:13px','font-weight:500',
@@ -3788,7 +3979,7 @@ function showToast(text){
       '-webkit-backdrop-filter:blur(16px)',
       'backdrop-filter:blur(16px)',
     ].join(';');
-    document.body.appendChild(el);
+    (document.getElementById('tab-dispatch') || document.body).appendChild(el);
   }
   el.textContent = text;
   el.style.opacity = '1';
@@ -3817,7 +4008,7 @@ function openInputChatOverlay(msg) {
 
   const overlay = document.createElement('div');
   overlay.id = 'inputChatOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;';
+  overlay.style.cssText = 'position:absolute;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;';
   overlay.innerHTML = `
     <div style="background:#1c1c2e;border-radius:16px;padding:24px;width:380px;max-width:92vw;box-shadow:0 8px 40px rgba(0,0,0,.4);color:#fff;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -3831,7 +4022,7 @@ function openInputChatOverlay(msg) {
       ${fieldsHtml}
       <button onclick="submitInputChat('${msg.id}')" style="margin-top:16px;width:100%;padding:9px;background:#f97316;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">提交 · 继续执行</button>
     </div>`;
-  document.body.appendChild(overlay);
+  (document.getElementById('tab-dispatch') || document.body).appendChild(overlay);
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
@@ -3858,7 +4049,7 @@ function openReviewChatOverlay(msg) {
 
   const overlay = document.createElement('div');
   overlay.id = 'reviewChatOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;';
+  overlay.style.cssText = 'position:absolute;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;';
   overlay.innerHTML = `
     <div style="background:#1c1c2e;border-radius:16px;padding:24px;width:440px;max-width:92vw;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.4);color:#fff;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -3875,7 +4066,7 @@ function openReviewChatOverlay(msg) {
         <button onclick="submitReviewChat('${msg.id}','reject')" style="flex:1;padding:9px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:14px;cursor:pointer;">✗ 重新生成</button>
       </div>
     </div>`;
-  document.body.appendChild(overlay);
+  (document.getElementById('tab-dispatch') || document.body).appendChild(overlay);
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
@@ -3891,6 +4082,78 @@ function submitReviewChat(msgId, action) {
     consumedActions[msgId] = 'Rejected';
     setTimeout(() => dismissCard(msgId, 'Re-generate'), 600);
   }
+}
+
+function setTitleTab(tabId) {
+  document.querySelectorAll('.titlebar-nav .titlebar-icon-btn').forEach(btn => btn.classList.remove('active'));
+  const btn = document.getElementById('tabBtn-' + tabId);
+  if (btn) btn.classList.add('active');
+}
+
+function switchToDispatch() {
+  setTitleTab('home');
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-dispatch').classList.add('active');
+  const label = document.getElementById('titlebarLabel');
+  if (label) label.textContent = 'Dispatch Center';
+  // Stop iframes
+  const frame = document.getElementById('chatTabFrame');
+  if (frame) frame.src = '';
+  const i18nFrame = document.getElementById('i18nTabFrame');
+  if (i18nFrame) i18nFrame.src = '';
+}
+
+function openChatTab(scene) {
+  const frame = document.getElementById('chatTabFrame');
+  if (frame) frame.src = 'chat.html?scene=' + (scene || 'x-release');
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-chat').classList.add('active');
+  setTitleTab('apps');
+  const label = document.getElementById('titlebarLabel');
+  if (label) label.textContent = 'Chat';
+}
+
+function closeChatTab() {
+  const frame = document.getElementById('chatTabFrame');
+  if (frame) frame.src = '';
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-dispatch').classList.add('active');
+  setTitleTab('home');
+  const label = document.getElementById('titlebarLabel');
+  if (label) label.textContent = 'Dispatch Center';
+}
+
+function openI18nPanel() {
+  const frame = document.getElementById('i18nTabFrame');
+  if (frame) frame.src = 'i18n-expert.html';
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-i18n').classList.add('active');
+  setTitleTab('apps');
+  const label = document.getElementById('titlebarLabel');
+  if (label) label.textContent = 'i18n Expert';
+}
+
+function closeI18nPanel() {
+  const frame = document.getElementById('i18nTabFrame');
+  if (frame) frame.src = '';
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-dispatch').classList.add('active');
+  setTitleTab('home');
+  const label = document.getElementById('titlebarLabel');
+  if (label) label.textContent = 'Dispatch Center';
+}
+
+function markI18nReviewed() {
+  const reviewBtn = document.getElementById('i18nReviewBtn');
+  const reviewedBadge = document.getElementById('i18nReviewedBadge');
+  const pendingBadge = document.getElementById('i18nPendingBadge');
+  if (reviewBtn) reviewBtn.style.display = 'none';
+  if (reviewedBadge) reviewedBadge.style.display = 'block';
+  if (pendingBadge) { pendingBadge.textContent = 'REVIEWED'; pendingBadge.style.background = '#ecfdf5'; pendingBadge.style.color = '#065f46'; }
+  // Dismiss the C1 card and return after delay
+  consumedActions['C1'] = 'Reviewed';
+  setTimeout(() => dismissCard('C1', 'Reviewed'), 600);
+  setTimeout(() => closeI18nPanel(), 1600);
 }
 
 function openChatOverlay(msg){
@@ -3911,17 +4174,30 @@ function openChatOverlay(msg){
   document.getElementById('chatInput').value           = '';
   document.getElementById('chatInputRow').style.display= 'flex';
   document.getElementById('chatOverlay').classList.add('open');
+  setTitleTab('apps');
+  const label = document.getElementById('titlebarLabel');
+  if (label) label.textContent = chat.taskName || 'Chat';
   setTimeout(()=> advanceChatStep(), 400);
 }
 
 function closeChatOverlay(){
   document.getElementById('chatOverlay').classList.remove('open');
   activeChatMsgId = null;
+  setTitleTab('home');
+  const label = document.getElementById('titlebarLabel');
+  if (label) label.textContent = 'Dispatch Center';
 }
 
 function closeChatDone(){
   document.getElementById('chatOverlay').classList.remove('open');
   activeChatMsgId = null;
+  setTitleTab('home');
+  const label = document.getElementById('titlebarLabel');
+  if (label) label.textContent = 'Dispatch Center';
+}
+
+function closeI18nAndReturn(){
+  closeI18nPanel();
 }
 
 function advanceChatStep(){
@@ -4086,7 +4362,7 @@ document.addEventListener('keydown', function(e){
 
 /* ── History Drawer ── */
 const TYPE_COLORS_DRAWER = {
-  'b-quick':'#8b5cf6','b-chat':'#8b5cf6','c':'#3b82f6','a-status':'#22c55e',
+    'b-quick':'#8b5cf6','c-chat':'#8b5cf6','d':'#3b82f6','a-status':'#22c55e',
 };
 
 function openHistoryDrawer(){
@@ -4116,12 +4392,12 @@ function openHistoryDrawer(){
     ${items.map(m => {
       const color = TYPE_COLORS_DRAWER[m.type] || 'rgba(0,0,0,.2)';
       const tagCls = m.done === 'Read' ? 'done-read' : 'done-finish';
-      // b-quick: show action taken; b-chat: link to chat; c: show toast
+      // b-quick: show action taken; c-chat: link to chat; d: show toast
       const actionTaken = consumedActions[m.id] || m.action || null;
       const doneLabel = actionTaken || m.done;
-      const clickAttr = m.type === 'b-chat'
+      const clickAttr = m.type === 'c-chat'
         ? `onclick="window.location.href='chat.html?scene=x-release'" style="cursor:pointer;" title="查看会话"`
-        : m.type === 'c'
+        : m.type === 'd'
         ? `onclick="showToast('跳转至对应任务（模拟）')" style="cursor:pointer;" title="跳转任务"`
         : '';
       const actionNote = (m.type === 'b-quick' && actionTaken)
@@ -4137,12 +4413,13 @@ function openHistoryDrawer(){
             <span class="hdw-row-tag ${tagCls}">${doneLabel}</span>
           </div>
         </div>
-        ${m.type === 'b-chat' || m.type === 'c' ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
+        ${m.type === 'c-chat' || m.type === 'd' ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
       </div>`;
     }).join('')}
   `).join('');
 
   document.getElementById('hdwTotal').textContent = all.length;
+  document.getElementById('hdwClearBtn').style.display = all.length > 0 ? '' : 'none';
   document.getElementById('hdwBackdrop').classList.add('open');
   document.getElementById('hdwDrawer').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -4152,6 +4429,23 @@ function closeHistoryDrawer(){
   document.getElementById('hdwBackdrop').classList.remove('open');
   document.getElementById('hdwDrawer').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+function clearHistory(){
+  /* Clear live consumed records */
+  consumedIds.clear();
+  Object.keys(consumedActions).forEach(k => delete consumedActions[k]);
+  /* Clear mock history in-place */
+  MOCK_HISTORY.length = 0;
+  /* Update drawer UI */
+  const body = document.getElementById('hdwBody');
+  body.innerHTML = `<div class="hdw-empty">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+    <span>暂无历史记录</span>
+  </div>`;
+  document.getElementById('hdwTotal').textContent = '0';
+  document.getElementById('hdwClearBtn').style.display = 'none';
+  showToast('历史记录已清空');
 }
 </script>
 <!-- ══ HISTORY DRAWER ══ -->
@@ -4163,12 +4457,31 @@ function closeHistoryDrawer(){
       <span>历史消息</span>
       <span class="hdw-total" id="hdwTotal">0</span>
     </div>
-    <button class="hdw-close" onclick="closeHistoryDrawer()" aria-label="关闭">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+    <div style="display:flex;align-items:center;gap:4px;">
+      <button class="hdw-clear" id="hdwClearBtn" onclick="clearHistory()" title="清空全部历史">Clear all</button>
+      <button class="hdw-close" onclick="closeHistoryDrawer()" aria-label="关闭">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
   </div>
   <div class="hdw-body" id="hdwBody"></div>
 </aside>
 
+  </div><!-- /tab-panel #tab-dispatch -->
+
+  <!-- ══ Chat Tab ══ -->
+  <div class="tab-panel" id="tab-chat">
+    <iframe class="chat-tab-frame" id="chatTabFrame" src="" allowfullscreen></iframe>
+  </div><!-- /tab-panel #tab-chat -->
+
+  <!-- ══ i18n Expert Tab ══ -->
+  <!-- ══ i18n Expert Tab ══ -->
+  <div class="tab-panel" id="tab-i18n">
+    <iframe class="chat-tab-frame" id="i18nTabFrame" src="" allowfullscreen></iframe>
+  </div><!-- /tab-panel #tab-i18n -->
+
+  </div><!-- /client-tabs -->
+</div><!-- /client-window -->
+</div><!-- /desktop-stage -->
 </body>
 </html>
