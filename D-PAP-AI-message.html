@@ -1342,6 +1342,34 @@ body {
 .imc-card:hover{
   background:rgba(0,0,0,.035);
 }
+.imc-card.is-clickable{
+  cursor:pointer;
+}
+.imc-card[data-type="c-chat"] .imc-title{
+  padding-right:30px;
+}
+.imc-chat-indicator{
+  position:absolute;top:8px;right:9px;
+  width:22px;height:22px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(0,0,0,.38);
+  background:rgba(0,0,0,.045);
+  border:1px solid rgba(0,0,0,.07);
+  opacity:0;
+  transform:translateY(-2px) scale(.96);
+  pointer-events:none;
+  transition:opacity .16s,transform .18s,background .16s,color .16s;
+}
+.imc-card[data-type="c-chat"]:hover .imc-chat-indicator,
+.imc-card[data-type="c-chat"]:focus .imc-chat-indicator,
+.imc-card[data-type="c-chat"]:focus-within .imc-chat-indicator{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+.imc-card[data-type="c-chat"]:hover .imc-chat-indicator{
+  background:rgba(0,0,0,.065);
+  color:rgba(0,0,0,.56);
+}
 .imc-group.action .imc-card{
   background:rgba(255,255,255,.34);
   border:1px solid rgba(255,255,255,.48);
@@ -3849,9 +3877,7 @@ const INLINE_MSGS = [
     title: 'X 官号上线发布任务',
     summary: '「逃离校园」上线前发布流程已就绪，Minion 需要你提供发布文案和发送时间，其余步骤将自动执行。',
     tags: [],
-    actions: [
-      { label: 'Start Chat', cls: 'imc-btn-amber', action: 'openChatTab' },
-    ],
+    actions: [],
     chat: {
       agentName: 'Minion Agent',
       taskName: 'X 官号上线发布任务',
@@ -3996,7 +4022,7 @@ const INLINE_MSGS = [
     title: 'TikTok 官号上线发布任务',
     summary: '「逃离校园」TikTok 发布流程就绪，Minion 需要你提供发布文案与投放时间段，其余步骤自动执行。',
     tags: [],
-    actions: [{ label: 'Start Chat', cls: 'imc-btn-amber', action: 'openChatTab' }],
+    actions: [],
     chatScene: 'x-release',
     statusPill: null,
   },
@@ -4176,6 +4202,22 @@ function buildImcCard(msg, done, idx, pagerHtml = ''){
   card.id = 'imc-' + msg.id;
   card.style.animationDelay = (idx * 0.07) + 's';
 
+  if (msg.type === 'c-chat') {
+    card.classList.add('is-clickable');
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('title', 'Open chat');
+    card.addEventListener('click', () => {
+      openChatTab(msg.chatScene || 'x-release');
+    });
+    card.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        openChatTab(msg.chatScene || 'x-release');
+      }
+    });
+  }
+
   /* Whole-card click navigation for d-input and e-review */
   if ((msg.type === 'd-input' || msg.type === 'e-review') && msg.chatScene) {
     card.style.cursor = 'pointer';
@@ -4215,6 +4257,8 @@ function buildImcCard(msg, done, idx, pagerHtml = ''){
   let actionsHtml = '';
   if(msg.type === 'a-status'){
     actionsHtml = '';
+  } else if(msg.type === 'c-chat'){
+    actionsHtml = '';
   } else if(msg.type === 'd-input' || msg.type === 'e-review'){
     if(!done){
       const arrowColor = msg.type === 'd-input' ? 'rgba(194,65,12,.5)' : 'rgba(126,34,206,.5)';
@@ -4236,12 +4280,18 @@ function buildImcCard(msg, done, idx, pagerHtml = ''){
     actionsHtml = `<div class="imc-actions">${btnHtml}</div>`;
   }
 
+  const chatIndicatorHtml = msg.type === 'c-chat'
+    ? `<div class="imc-chat-indicator" aria-hidden="true">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+      </div>`
+    : '';
+
   if(pagerHtml){
     card.classList.add('has-pager');
     if(!actionsHtml) card.classList.add('imc-pager-only');
   }
 
-  card.innerHTML = header + `
+  card.innerHTML = header + chatIndicatorHtml + `
     <div class="imc-title" ${msg.type === 'd' ? `onclick="handleImcAction('${msg.id}','jump')" style="cursor:pointer;display:flex;align-items:center;gap:6px;"` : ''}>
       <span style="flex:1;">${msg.title}</span>
       ${msg.type === 'd' ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
