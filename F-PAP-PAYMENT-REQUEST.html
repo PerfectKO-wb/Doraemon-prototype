@@ -819,15 +819,6 @@
         .tab-panel { display: none; flex: 1; flex-direction: column; min-height: 0; }
         .tab-panel.active { display: flex; }
 
-        /* Checkbox column */
-        .col-chk { width: 40px; }
-        .inv-table .col-chk { text-align: center; }
-        .inv-table thead th.col-chk { text-align: center; }
-        .row-checkbox {
-            width: 16px; height: 16px; cursor: pointer; accent-color: var(--button-default);
-        }
-        .inv-table tbody tr.row-selected { background: #f0f7ff; }
-
         /* Bulk action bar */
         .bulk-bar {
             height: 44px;
@@ -1504,11 +1495,7 @@
     <!-- ========== Main content ========== -->
     <main class="main">
         <div class="main-header">
-            <div class="page-tabs">
-                <button class="page-tab active" data-panel="invoice" onclick="switchPageTab('invoice')">Invoice</button>
-                <button class="page-tab" data-panel="expense" onclick="switchPageTab('expense')">Expense</button>
-            </div>
-            <button class="bell-btn" title="Notifications">
+            <button class="bell-btn" title="Notifications" style="margin-left:auto;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                 <span class="bell-badge">23</span>
             </button>
@@ -1539,19 +1526,10 @@
                 </div>
         </div>
 
-            <!-- PIC filter (Mail tab only) -->
-            <div class="pic-select" id="picSelect" style="display:none;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                <span id="picLabel">PIC</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
             </div><!-- end left filters -->
 
             <div class="toolbar-right">
                 <span class="toolbar-hint" id="uploadHint">JPG / PNG / PDF</span>
-                <button class="btn-primary" id="confirmMailBtn" style="display:none;">
-                    Confirm
-                </button>
                 <button class="btn-primary" id="uploadBtn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Upload Invoice
@@ -1609,21 +1587,17 @@
                 <div class="table-scroll" id="mailTableScroll">
                     <table class="inv-table" id="mailTable">
                         <colgroup>
-                            <col class="col-chk">
                             <col class="col-type">
                             <col class="col-title">
                             <col class="col-source">
-                            <col class="col-pic">
                             <col class="col-state">
                             <col class="col-time">
                         </colgroup>
                         <thead>
                             <tr>
-                                <th class="col-chk"><input type="checkbox" id="chkAll" class="row-checkbox" title="Select all"></th>
                                 <th class="col-type">Type</th>
                                 <th class="col-title">File Name</th>
                                 <th class="col-source">Source Mailbox</th>
-                                <th class="col-pic">PIC</th>
                                 <th class="col-state">State</th>
                                 <th class="col-time">Received At</th>
                             </tr>
@@ -1898,8 +1872,6 @@
     </div>
 </div>
 
-<div class="pic-pop" id="picPop"></div>
-
 <script>
     // ========== Data ==========
     const listItems = [
@@ -2154,7 +2126,7 @@
         // Show/hide footer and update nav hint
         const footer = document.getElementById('viewerFooter');
         if (isMailFile) {
-            footer.classList.add('visible');
+            footer.classList.toggle('visible', f.state !== 'parsing');
             updateViewerNavHint();
         } else {
             footer.classList.remove('visible');
@@ -2189,7 +2161,6 @@
         if (!f) return;
         if (f.state === 'needs-check' || f.state === 'no-need') {
             f.state = 'parsing';
-            f.selected = false;
             renderMailTable();
             showToast('Confirmed — sent to parsing');
         }
@@ -2200,7 +2171,6 @@
         const f = mailFiles.find(x => x.id === currentMailId);
         if (f && (f.state === 'needs-check' || f.state === 'parsing')) {
             f.state = 'no-need';
-            f.selected = false;
             renderMailTable();
         }
         advanceToNextMail();
@@ -2210,7 +2180,8 @@
         const overlay = document.getElementById('viewerParsing');
         const paper = document.getElementById('invoicePaper');
         if (parsingTimer) { clearTimeout(parsingTimer); parsingTimer = null; }
-        if (f.state === 'parsing') {
+        // Parsing animation only applies to uploaded invoices, not mail files
+        if (f.state === 'parsing' && !isMailFile) {
             overlay.style.display = 'flex';
             paper.style.visibility = 'hidden';
             parsingTimer = setTimeout(() => {
@@ -2264,56 +2235,7 @@
         { id: 'zou',  name: '邹卓洋',   color: '#EC4899', initials: '邹' },
         { id: 'qiu',  name: '邱奕凯',   color: '#6366F1', initials: '邱' },
     ];
-    let selectedPic = CURRENT_USER_ID; // default: current user
-
-    function openPicPop() {
-        const trigger = document.getElementById('picSelect');
-        const pop = document.getElementById('picPop');
-        const rect = trigger.getBoundingClientRect();
-        pop.innerHTML = `
-            <div class="pic-pop-item ${!selectedPic ? 'selected' : ''}" data-pic="">
-                <span class="pp-avatar" style="background:#6B7280;font-size:10px;">G</span>
-                All
-                ${!selectedPic ? '<svg class="pp-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-            </div>
-            <div style="height:1px;background:var(--border-divider);margin:4px 0;"></div>
-            ${PIC_LIST.map(p => `
-                <div class="pic-pop-item ${selectedPic === p.id ? 'selected' : ''}" data-pic="${p.id}">
-                    <span class="pp-avatar" style="background:${p.color}">${p.initials}</span>
-                    ${p.id === CURRENT_USER_ID ? `${p.name} <span style="font-size:11px;color:var(--text-disabled);margin-left:2px;">@me</span>` : p.name}
-                    ${selectedPic === p.id ? '<svg class="pp-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-                </div>`).join('')}
-        `;
-        pop.style.left = rect.left + 'px';
-        pop.style.top = (rect.bottom + 4) + 'px';
-        pop.classList.add('open');
-        pop.querySelectorAll('.pic-pop-item').forEach(item => {
-            item.addEventListener('click', () => {
-                selectedPic = item.dataset.pic || null;
-                updatePicTrigger();
-                closePicPop();
-                renderMailTable();
-            });
-        });
-    }
-    function closePicPop() {
-        document.getElementById('picPop').classList.remove('open');
-    }
-    function updatePicTrigger() {
-        const sel = document.getElementById('picSelect');
-        const lbl = document.getElementById('picLabel');
-        if (selectedPic) {
-            const p = PIC_LIST.find(x => x.id === selectedPic);
-            if (p) {
-                const label = p.id === CURRENT_USER_ID ? '@me' : p.name;
-                lbl.innerHTML = `<span class="ps-avatar" style="background:${p.color}">${p.initials}</span> ${label}`;
-                sel.classList.add('active');
-            }
-        } else {
-            lbl.textContent = 'PIC';
-            sel.classList.remove('active');
-        }
-    }
+    const selectedPic = CURRENT_USER_ID; // always filter by current user
 
     // ========== Row preview popover ==========
     const PREVIEW_POP = document.getElementById('rowPreviewPop');
@@ -2419,11 +2341,18 @@
 
     // ========== Mail Inbox Data ==========
     let mailFiles = [
-        { id: 'm1', name: 'AWS_Invoice_2026-05_JP.pdf',     type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-31 09:12', selected: false, category: 'Tech',    pic: 'yi' },
-        { id: 'm2', name: 'GCP_May2026_Invoice.pdf',        type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-30 18:44', selected: false, category: 'Tech',    pic: 'huang' },
-        { id: 'm3', name: 'Slack_Business_2026-05.pdf',     type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-30 11:22', selected: false, category: 'Ads',     pic: 'wang' },
-        { id: 'm4', name: 'Adobe_CC_Invoice_SG_May.pdf',    type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-29 16:05', selected: false, category: 'Finance', pic: 'okino' },
-        { id: 'm5', name: 'Notion_Team_Invoice_2026.pdf',   type: 'pdf', source: 'billing@ctw.inc', state: 'parsing',     receivedAt: '2026-05-28 10:33', selected: false, category: 'Ads',     pic: 'zou' },
+        { id: 'm01', name: 'AWS_Invoice_2026-05_JP.pdf',         type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-31 09:12', selected: false, category: 'Tech',    pic: 'yi' },
+        { id: 'm02', name: 'GCP_May2026_Invoice.pdf',            type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-31 08:55', selected: false, category: 'Tech',    pic: 'yi' },
+        { id: 'm03', name: 'Stripe_Invoice_SG_2026-05.pdf',      type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-30 18:44', selected: false, category: 'Finance', pic: 'yi' },
+        { id: 'm04', name: 'Slack_Business_2026-05.pdf',         type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-30 11:22', selected: false, category: 'Ads',     pic: 'yi' },
+        { id: 'm05', name: 'Adobe_CC_Invoice_SG_May.pdf',        type: 'pdf', source: 'billing@ctw.inc', state: 'no-need',     receivedAt: '2026-05-29 16:05', selected: false, category: 'Finance', pic: 'yi' },
+        { id: 'm06', name: 'Notion_Team_Invoice_2026.pdf',       type: 'pdf', source: 'billing@ctw.inc', state: 'no-need',     receivedAt: '2026-05-28 10:33', selected: false, category: 'Ads',     pic: 'yi' },
+        { id: 'm07', name: 'Figma_Professional_May2026.pdf',     type: 'pdf', source: 'billing@ctw.inc', state: 'parsing',     receivedAt: '2026-05-28 09:15', selected: false, category: 'Tech',    pic: 'yi' },
+        { id: 'm08', name: 'GitHub_Team_Invoice_2026-05.pdf',    type: 'pdf', source: 'billing@ctw.inc', state: 'parsing',     receivedAt: '2026-05-27 22:04', selected: false, category: 'Tech',    pic: 'yi' },
+        { id: 'm09', name: 'Zoom_Pro_May_Invoice.pdf',           type: 'pdf', source: 'billing@ctw.inc', state: 'parsing',     receivedAt: '2026-05-27 14:50', selected: false, category: 'Ops',     pic: 'yi' },
+        { id: 'm10', name: 'Datadog_Invoice_2026-05.pdf',        type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-26 11:30', selected: false, category: 'Tech',    pic: 'yi' },
+        { id: 'm11', name: 'Twilio_SendGrid_May2026.pdf',        type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-25 16:18', selected: false, category: 'Tech',    pic: 'yi' },
+        { id: 'm12', name: 'Cloudflare_Pro_Invoice_May.pdf',     type: 'pdf', source: 'billing@ctw.inc', state: 'no-need',     receivedAt: '2026-05-24 10:05', selected: false, category: 'Tech',    pic: 'yi' },
     ];
 
     const MAIL_STATE_LABELS = {
@@ -2434,7 +2363,7 @@
         'no-need': 'No need',
     };
 
-    function getMailSelected() { return mailFiles.filter(f => f.selected); }
+    // ========== Tab switching ==========
 
     function filteredMailFiles() {
         let list = [...mailFiles].sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
@@ -2453,7 +2382,6 @@
     function renderMailTable() {
         const tbody = document.getElementById('mailTbody');
         const emptyEl = document.getElementById('mailEmptyState');
-        const chkAll = document.getElementById('chkAll');
 
         const list = filteredMailFiles();
 
@@ -2464,43 +2392,22 @@
         }
         emptyEl.style.display = 'none';
 
-        const checkableCount = list.filter(f => f.state === 'needs-check' || f.state === 'parsing').length;
-        const checkedCount = list.filter(f => f.selected && (f.state === 'needs-check' || f.state === 'parsing')).length;
-        chkAll.indeterminate = checkedCount > 0 && checkedCount < checkableCount;
-        chkAll.checked = checkableCount > 0 && checkedCount === checkableCount;
-
         tbody.innerHTML = list.map(f => {
-            const canCheck = f.state === 'needs-check' || f.state === 'parsing';
-            return `<tr data-mid="${f.id}" class="${f.selected ? 'row-selected' : ''}">
-                <td class="col-chk">
-                    <input type="checkbox" class="row-checkbox mail-chk" data-mid="${f.id}" ${f.selected ? 'checked' : ''} ${!canCheck ? 'disabled style="opacity:0.3;"' : ''}>
-                </td>
+            return `<tr data-mid="${f.id}">
                 <td class="col-type">${fileIcon(f.type)}</td>
                 <td class="col-title">
                     <span class="file-cell"><span class="fname">${f.name}</span></span>
                 </td>
                 <td class="col-source">${f.source}</td>
-                <td class="col-pic">${(() => { const p = PIC_LIST.find(x => x.id === f.pic); return p ? `<span class="pic-cell"><span class="pc-avatar" style="background:${p.color}">${p.initials}</span>${p.name}</span>` : '—'; })()}</td>
                 <td class="col-state"><span class="tag ${f.state}">${MAIL_STATE_LABELS[f.state] || f.state}</span></td>
                 <td class="col-time">${f.receivedAt}</td>
             </tr>`;
         }).join('');
 
-        // row checkbox events
-        tbody.querySelectorAll('.mail-chk').forEach(chk => {
-            chk.addEventListener('change', () => {
-                const mid = chk.dataset.mid;
-                const f = mailFiles.find(x => x.id === mid);
-                if (f) f.selected = chk.checked;
-                renderMailTable();
-            });
-        });
-
         // hover to preview
         let mailHoverTimer = null;
         tbody.querySelectorAll('tr[data-mid]').forEach(tr => {
             tr.addEventListener('mouseenter', (e) => {
-                if (e.target.closest('.mail-chk')) return;
                 const mid = tr.dataset.mid;
                 mailHoverTimer = setTimeout(() => {
                     const f = mailFiles.find(x => x.id === mid);
@@ -2511,10 +2418,9 @@
                     });
                 }, 350);
             });
-            tr.addEventListener('mousemove', (e) => { if (!e.target.closest('.mail-chk')) repositionPreview(e); });
+            tr.addEventListener('mousemove', (e) => { repositionPreview(e); });
             tr.addEventListener('mouseleave', () => { clearTimeout(mailHoverTimer); hidePopTimer = setTimeout(hideRowPreview, 80); });
             tr.addEventListener('click', (e) => {
-                if (e.target.closest('.mail-chk')) return;
                 openViewer(null, tr.dataset.mid);
             });
         });
@@ -2522,29 +2428,7 @@
         // update count badge
         document.getElementById('tabMailInboxCount').textContent = mailFiles.filter(f => f.state === 'needs-check').length;
 
-        // update button disabled states based on selection
-        const selectedItems = list.filter(f => f.selected);
-        const hasPending    = selectedItems.some(f => f.state === 'parsing');
-        const hasNeedsCheck = selectedItems.some(f => f.state === 'needs-check');
-        const confirmBtn = document.getElementById('confirmMailBtn');
-        if (selectedItems.length === 0) {
-            confirmBtn.disabled = false;
-        } else {
-            confirmBtn.disabled = hasPending;
-        }
-
         updateCatTrigger();
-    }
-
-    function confirmMailCheck() {
-        const ids = getMailSelected().filter(f => f.state === 'needs-check').map(f => f.id);
-        if (!ids.length) return;
-        ids.forEach(id => {
-            const f = mailFiles.find(x => x.id === id);
-            if (f) { f.state = 'parsing'; f.selected = false; }
-        });
-        renderMailTable();
-        showToast(`${ids.length} file${ids.length > 1 ? 's' : ''} confirmed — sent to parsing`);
     }
 
     // ========== Tab switching ==========
@@ -2557,8 +2441,6 @@
         const isUploaded = tab === 'uploaded';
         document.getElementById('uploadBtn').style.display = isUploaded ? '' : 'none';
         document.getElementById('uploadHint').style.display = isUploaded ? '' : 'none';
-        document.getElementById('confirmMailBtn').style.display = isUploaded ? 'none' : '';
-        document.getElementById('picSelect').style.display = isUploaded ? 'none' : '';
         if (tab === 'mail-inbox') renderMailTable();
     }
 
@@ -2574,7 +2456,6 @@
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('#dateSelect')) closeMonthPop();
-        if (!e.target.closest('#picSelect') && !e.target.closest('#picPop')) closePicPop();
     });
 
     document.getElementById('viewerClose').addEventListener('click', closeViewer);
@@ -2590,13 +2471,6 @@
             closeMonthPop();
         }
     });
-
-    document.getElementById('picSelect').addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.getElementById('picPop').classList.contains('open') ? closePicPop() : openPicPop();
-    });
-    updatePicTrigger();
-
     renderNavList();
     renderTable();
     applyDateLabel();
@@ -2605,15 +2479,6 @@
     document.querySelectorAll('.tab-item[data-tab]').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
-
-    // Mail Inbox: select-all
-    document.getElementById('chkAll').addEventListener('change', (e) => {
-        mailFiles.forEach(f => { if (f.state === 'needs-check' || f.state === 'parsing') f.selected = e.target.checked; });
-        renderMailTable();
-    });
-
-    // Bulk action: confirm check
-    document.getElementById('confirmMailBtn').addEventListener('click', confirmMailCheck);
 
     // ===== Page-level tab switching =====
     function switchPageTab(name) {
