@@ -1,315 +1,297 @@
-# PAP · People · Agent · People
+# D系统3.0 · PAP（People · Agent · People）立项
 
-* Status: draft
-* Last updated: 2026-06-21
-* Owner: D 系统产品团队
-
-> 关联文档：[D 系统 3.0 大背景与目标](../D系统3.0背景与功能/D系统3.0大背景与目标.md) · [PAP 编排式 Agent 系统 PRD](../../其他系统需求/立项PRD.md) · [PAP 通用员工视图 PRD](PRD-PAP通用员工视图.md) · [Dispatch Center 设计规范](D员工任务管理-Dispatch%20Center.md) · [PAP×Minion 交互设计](PAP×Minion交互设计.md)
+| 文档信息 | 内容 |
+|---|---|
+| 当前版本 | v0.1 |
+| 创建日期 | 2026/6/21 |
+| 项目周期 | 待填写 |
+| 是否资本化 | 待确认 |
+| OA项目编号 | 待填写 |
 
 ---
 
 ## 原型链接
 
-| 视图 | 适用角色 | 原型链接 | 备注 |
-|---|---|---|---|
-| 通用员工视图 · Dispatch Center | 一线员工（客服 / 翻译官 / 运营等） | | |
-| 通用员工视图 · Finance | 财务员工 | | |
-| PAP Manager · 任务管理 | 决策者 | | |
-| PAP Manager · AI Center | 决策者 | | |
-| 翻译官视图 | 翻译官 | | |
-| 维护者视图 | 系统维护者 | | |
+| 视图 | 适用角色 | 原型链接 |
+|---|---|---|
+| 通用员工视图 · Dispatch Center | 一线员工（客服 / 翻译官 / 运营等） | |
+| 通用员工视图 · Finance | 财务员工 | |
+| PAP Manager · 任务管理 | 决策者 | |
+| PAP Manager · AI Center | 决策者 | |
+| 翻译官视图 | 翻译官 | |
+| 维护者视图 | 系统维护者 | |
 
 ---
 
-## 整体方案
+## 1. 项目概述
 
-| 核心定位 | **PAP 是 D 系统 3.0 的人机协作总线**：连接决策者、一线员工与 AI Agent，承担任务拆解、分发、执行跟踪与结果验收的全链路职责 |
+### 1.1 项目背景
+
+D 系统要成为「人 · AI Agent · 人」控制链的基础设施，从决策层开始，拆解任务，分发任务，并管理人类节点使用合适的工具高效完成工作。
+
+当前 D 系统 2.0 的主要局限：
+
+- 员工自行制定工作任务，工具散落各子系统（CS、Adnext、Auxin、i18n 等），切换成本高，容易遗漏
+- AI Agent 能力（Minion / Admin Agent）已具备，但与人工步骤之间缺乏统一协作接口，AI 产出无法自然交接给下一个人或 Agent
+- 决策者没有全局视图，团队目标进展、员工工作状态只能靠人工汇报获取
+- 没有标准化渠道让 Agent 在执行过程中触达对应员工，信息传递依赖 IM，不可追溯
+
+### 1.2 项目描述
+
+**PAP（People · Agent · People）** 是 D 系统 3.0 的人机协作总线，覆盖三类角色：
+
+**整体流程：**
+
+\[决策者制定目标\] → \[PAP + Agent 拆解编排任务\] → \[一线员工接收并执行\] → \[Agent 辅助执行 / 请求人工介入\] → \[结果验收回流\] → \[决策者汇总监控\]
+
+**核心转变：** 从「员工自行制定工作任务」转为「AI 根据岗位职责主动分派任务，并进行评估和验收」。
+
+**项目涉及三个主要模块：**
+
+1. **通用员工视图**：接收任务（操作型 / 审查型）、响应 Agent 请求（Dispatch Center）、任务引导与产出提交
+2. **PAP Manager（决策者视图）**：制定目标、协同拆解、汇总监控各岗位员工与 Agent 工作情况
+3. **Agent 编排层**：PAP 作为唯一 Trigger 源，读取 Mission Storybook 进行编排，路由给 Minion Agent / Admin Agent / 人工，并管理执行回调
+
+### 1.3 项目有可能成功理由
+
+| 字段 | 内容 |
 |---|---|
-| 人机模型 | People · Agent · People——决策者制定目标 → PAP + Agent 拆解编排 → 一线员工执行/验收 → Agent 辅助 → 结果回流 |
-| 与 D 系统 2.0 的区别 | D 2.0：员工自行制定任务，工具散落各子系统；D 3.0：AI 根据岗位职责主动分派任务，PAP 是唯一任务总线与协作界面 |
-| 三类角色 | **一线员工**：接收任务、执行/审查、提交产出；**决策者**：制定目标、协同拆解、汇总监控；**维护者**：构建工作流、工具与 Agent |
-| 执行层 | Minion Agent（Auxin/Adnext）/ Admin Agent（G123 Web）作为 subagent，PAP 负责编排与路由 |
-
-一句话概括：**PAP 让 AI 知道该让谁做什么，让人知道自己该做什么、做完了没有。**
-
----
-
-## Background
-
-### 现状问题
-
-D 系统 2.0 时代，工作协同依赖员工自行分配任务、靠 IM 和表格手工追踪进度。随着业务规模扩大和 AI Agent 能力落地，这套模式的局限日益明显：
-
-* **任务来源分散，无统一入口**：一线员工面对 CS、CS Expert、Adnext、Auxin、i18n 系统等多个工具，需要主动在各系统查找自己的工作，容易遗漏，切换成本高。
-* **AI 能力孤立，无法编排进流程**：已有 Minion Agent（Auxin/Adnext）、Admin Agent（G123 Web）等 AI 执行能力，但与人工步骤之间缺乏统一的协作接口，AI 做完的结果无法自然交接给下一个人或 Agent。
-* **决策者缺乏全局视图**：团队目标是否推进、哪些任务卡住了、哪些员工工作量过高，没有可靠的实时数据，只能依赖人工汇报或主动追问。
-* **工作质量因人而异**：大量重复性、标准化工作（入稿、登记、发布、Checklist 验证）靠员工记忆驱动，质量取决于个人经验，缺少系统性的引导与验收机制。
-* **AI 产出无法触达员工**：Agent 执行任务过程中需要人工介入（提供信息、审查结果、确认发布）时，没有标准化渠道通知对应员工，信息传递依赖 IM，不可追溯。
-
-### 新判断
-
-D 系统 3.0 的核心判断是：**工作的驱动力从「人决定做什么」转变为「AI 根据岗位职责和业务目标主动分派任务」**。
-
-这个转变要求一个新的基础设施：
-
-1. **统一任务总线**：所有人工任务、AI 任务、人机协作任务都经过同一个系统流转，可追踪、可审计。
-2. **双向协作通道**：PAP 不只是任务列表——它是 AI Agent 和人之间的实时协作界面。Agent 可以通过 PAP 向人请求补充信息；人可以通过 PAP 授权 Agent 执行操作。
-3. **角色分层视图**：不同角色（一线员工 / 决策者 / 维护者）看到的是同一套数据，但视图聚焦各不相同，减少信息噪音。
-
-PAP（People · Agent · People）正是这套基础设施的产品载体。
+| 已完成的原型 | 见顶部原型链接表 |
+| 执行层已就绪 | Minion Agent（Auxin/Adnext API）与 Admin Agent（G123 Web）已具备操作能力，无需重做 API 集成 |
+| 知识资产已有雏形 | `game-launch-checklist.yaml` 已结构化定义游戏上线全流程，可直接迁移为首个 Storybook |
+| PAP 已存在 | 全员任务系统已上线，员工已接入统一任务总线，本项目是增量扩展 |
+| 团队准备情况 | 产研测试人员待确认 |
 
 ---
 
-## Business Goal
+## 2. OA 资本化立项信息
 
-| 指标 | 目标 | 衡量方式 | 衡量周期 |
-|---|---|---|---|
-| 员工任务感知响应时效 | 较现状缩短 ≥ 50% | 从任务产生到员工开始处理的中位时长 | 上线后 30 天 |
-| 跨系统切换次数 | 下降 ≥ 60% | 员工完成单项工作需要访问的外部系统数量 | 上线后 30 天 |
-| Agent 任务请求响应率 | ≥ 90% 在 SLA 内完成 | Agent 推送的 Quick Action / Chat Task 在规定时限内被消费的比例 | 上线后 30 天 |
-| 决策者信息获取时效 | 从「主动追问」→「随时可查」 | 决策者获取特定员工 / 目标进展所需时间，目标 < 30 秒 | 上线后 60 天 |
-| 工作流自动化率 | 首个 Mission（游戏上线）≥ 60% 步骤由 Agent 自动完成 | `@minion` + `@admin` 步骤数 / 总步骤数 | Phase 1 完成时 |
-| 操作可追溯率 | 100% | 每个人工决策动作均有 PAP 记录，可按 Mission / 员工 / 时间查询 | 持续 |
+| 字段 | 内容 | 说明 |
+|---|---|---|
+| OA事件类型 | 资本立项 | 对应 OA 审批字段 |
+| 是否资本化 | 待确认 | 对应 OA 审批字段 |
+| OA项目编号 | 待填写 | 对应 OA「编号」 |
+| 项目名称 | \[D系统\] PAP 人机协作总线 | 对应 OA「名称」 |
+| 项目周期 | 待填写 | 对应 OA「项目周期」 |
+| 项目描述 | 构建 D 系统 3.0 人机协作总线，覆盖通用员工视图、决策者视图与 Agent 编排层 | 对应 OA「描述」 |
+| OA审批链接 | 待补充 | OA 流程创建后补充 |
 
 ---
 
-## Requirement Description
+## 3. 参与人员
 
-### 1. 角色与视图矩阵
+| 角色 | 姓名/团队 | 职责 |
+|---|---|---|
+| 产品负责人 | | 输出 PRD、协调需求评审、跟进变更记录、排期 |
+| 研发负责人 | | 产品方案确认 & 技术方案评估 |
+| 前端研发 | | 前端页面及交互开发 |
+| 后端研发 | | PAP 编排引擎、推送接口、callback 路由、消息持久化 |
+| 测试负责人 | | 测试用例设计、测试执行、缺陷回归 |
+| OA审批人 | | 完成资本立项审批 |
+| 运维/发布负责人 | | 上线发布、回滚预案、发布记录维护 |
 
-PAP 按角色提供差异化视图，底层共用同一套任务数据：
+---
 
-| 角色 | 核心诉求 | 主视图 | 典型操作 |
-|---|---|---|---|
-| **一线员工** | 知道今天该做什么，做完交差 | 通用员工视图 | 接收任务 · 执行/提交产出 · 响应 Agent 请求 |
-| **决策者** | 知道整体进展，随时能介入 | PAP Manager | 制定目标 · 协同拆解任务 · 汇总监控 · 审核结果 |
-| **维护者** | 构建和维护系统能力 | 维护者视图 | 编写 Workflow · 接入工具 · 管理 Agent · 查看日志 |
+## 4. 预算信息
 
-### 2. 整体架构
+### 4.1 预算汇总
 
-```mermaid
-flowchart TD
-    Decision["决策者\n制定目标 / 发布 Mission"]
-    PAP["PAP 中枢\nTrigger · 编排 · 路由 · 状态推进"]
-    Minion["Minion Agent\nAuxin / Adnext"]
-    Admin["Admin Agent\nG123 Web"]
-    Employee["一线员工\n执行 / 审查 / 验收"]
-    DC["Dispatch Center\nAgent → 员工消息触达"]
-    Maintainer["维护者\nWorkflow · Tools · Agents · Logs"]
-
-    Decision -->|"发布 Mission / 协同拆解"| PAP
-    PAP -->|"@minion 派发"| Minion
-    PAP -->|"@admin 派发"| Admin
-    PAP -->|"@role 派发"| Employee
-    Minion -->|"Need Input / Review"| DC
-    Admin -->|"状态通知 / 请求授权"| DC
-    DC -->|"员工响应 / 授权"| PAP
-    Employee -->|"提交产出 / 确认验收"| PAP
-    PAP -->|"进度 / 汇总"| Decision
-    Maintainer -->|"配置 Workflow / Skill"| PAP
-```
-
-### 3. 一线员工视图
-
-一线员工通过 PAP 接收和完成两类任务：
-
-**操作型任务（人工执行）**：执行具体工作并提交产出物（文件、链接、表单等）。PAP 提供任务引导（完成所需的系统入口、质量衡量标准），并在完成后触发验收流程。
-
-**审查型任务（AI 产出审查）**：审查 Agent 的工作结果（文案、配置、数据）。PAP 展示 Agent 产出内容，员工标记「通过/修改意见」，结果回流给 Agent。
-
-**Dispatch Center（Agent → 员工触达）**：Agent 在执行过程中主动推送的消息与请求，包含四种类型：
-
-```mermaid
-flowchart LR
-    A["Type A · Status\n系统状态通知"]
-    B["Type B · Quick Action\n快捷决策（Approve/Help）"]
-    C["Type C · Chat Task\n多轮会话输入"]
-    D["Type D · Jump Task\n跳转至目标系统"]
-```
-
-详细规范见 [Dispatch Center 设计规范](D员工任务管理-Dispatch%20Center.md)。
-
-**执行监控**：PAP 对可监控的工作类型（如客服是否在 CS / CS Expert 上有工作行为）进行过程跟踪，支持汇报每日工作量和工作结果。
-
-### 4. 决策者视图（PAP Manager）
-
-决策者通过 PAP Manager 完成从目标制定到结果汇总的全链路管理。
-
-```mermaid
-flowchart TD
-    Goal["制定目标 / 发布 Mission"] --> Breakdown["协同 Agent 拆解子任务\n（Storybook 编排）"]
-    Breakdown --> Monitor["汇总监控\n员工工作情况 / Agent 运行状态"]
-    Monitor --> Review["审核产出\n人 / AI 工作结果"]
-    Review --> Done["Mission 完成\n全量追溯报告"]
-```
-
-核心功能模块：
-
-* **任务目标发布 Agent**：输入高层目标，Agent 辅助拆解成可执行步骤并填入 Storybook。
-* **员工工作情况汇总**：按岗位/员工查看任务完成率、工作量、延误情况。
-* **Agent 运行情况汇总**：查看各 subagent 的执行状态、成功率、耗时、异常。
-* **协同型任务**：帮助 Agent 完成信息补充或子任务拆解中的判断节点。
-* **审核型任务**：对 AI 或人的关键产出进行最终审核确认。
-
-### 5. 维护者视图
-
-维护者负责 PAP 系统能力的构建与维护，是 PAP 可运行的基础保障：
-
-| 模块 | 职责 |
+| 字段 | 内容 |
 |---|---|
-| **Works** | 构建并维护工作流（Workflow / Storybook），定义步骤、路由、依赖、验收规则 |
-| **Tools** | 为 AI Agent 和员工构建工具（定制接口 & 定制前端页面交互） |
-| **Agents** | 任务管理、任务分析等专用 Agent 的配置与迭代 |
-| **Logs** | AI 运行状态监控、token 消耗统计、计费报表 |
+| 预算总额 | |
+| 资本化金额 | |
+| 非资本化金额 | |
+| 预算类型 | 技术开发 |
+| 预算归属部门 | tech |
+| 预算确认人 | |
+| 预算确认时间 | |
 
-### 6. 知识层：Mission Storybook + Skill Knowledge Card
+---
 
-PAP 编排的「做什么 + 路由给谁 + 怎么做」由两层知识模型支撑：
+# 模块一：通用员工视图
+
+## 1.1 功能概述
+
+一线员工通过通用员工视图接收 PAP 分派的任务，响应 Agent 的协作请求，完成工作并提交产出。视图由三个区域构成：**Dispatch Center**（Agent 推送的消息与请求）、**To Do**（待执行的人工任务）、**Doing**（当前推进中的工作）。
+
+## 1.2 入口与页面结构
+
+| 区域 | 说明 |
+|---|---|
+| Dispatch Center | 嵌入主内容区，展示 Agent / 系统推送的消息与任务请求，有未处理消息时渲染，无消息时不显示 |
+| To Do | 员工当前待执行的人工任务队列 |
+| Doing | 员工正在推进中的工作，展示 A 票执行状态与任务引导 |
+| 左侧固定 History 标签 | 始终可见，点击打开历史消息抽屉 |
+
+## 1.3 Dispatch Center · 消息类型
+
+Dispatch Center 接收四种类型的消息，类型决定交互方式：
+
+| 类型 | 类型标识 | 说明 | 消费方式 |
+|---|---|---|---|
+| Status | `a-status` | 系统状态通知，只读告知 | 点击「Mark as read」→ 归档，记录 `Read` |
+| Quick Action | `b-quick` | Agent 已完成分析，员工做一次授权决策 | 点击 execute / defer / escalate 按钮 → 触发 callback → 归档 |
+| Chat Task | `c-chat` | 需员工通过多轮会话提供输入或确认 | 点击「Start Chat」→ 客户端标签页打开 Agent 会话 → 会话完成后归档，记录 `Chat done` |
+| Jump Task | `d` | 需员工前往另一个系统操作 | 点击标题行 → 客户端标签页打开目标系统 → 归档，记录 `Jumped` |
+
+## 1.4 Dispatch Center · Quick Action 按钮规范
+
+Quick Action 的按钮由语义 Slot 决定样式和排列，label 允许自定义，最多 3 个：
+
+| Semantic | 语义 | 排列位置 | 示例 label |
+|---|---|---|---|
+| `execute` | 主操作，立即执行，通常不可逆 | 最左 | Approve / Publish Now / Confirm |
+| `defer` | 推迟处理 | 中间 | Schedule / Remind Me |
+| `escalate` | 上报，转交决策者介入 | 最右 | Help |
+
+`escalate` 路径通知决策者介入，原卡片挂起；其他按钮触发 PAP → callback → 创建方的执行链路。
+
+## 1.5 Dispatch Center · 消息队列规则
+
+- 同一时刻**只展示一条**消息卡片（最新或当前激活）
+- 多条未处理消息时，标题旁显示红色数字徽标，点击徽标展开队列浮层，可切换激活消息
+- 消费一条后自动展示下一条
+- 左侧固定 History 图标标签始终可见，与消息是否存在无关
+
+## 1.6 Dispatch Center · 历史抽屉
+
+| 区域 | 内容 |
+|---|---|
+| 未处理（Unread） | 当前所有未消费消息，点击后激活为主区域当前卡片 |
+| 已处理（按日期分组） | 已消费消息，记录操作动作（Approved / Help sent / Chat done / Jumped / Read） |
+| 清空功能 | 支持一键清空已处理历史 |
+
+## 1.7 Dispatch Center · 卡片状态
+
+| 状态 | 说明 |
+|---|---|
+| 展示中 | 消息在主区域展示，等待用户消费 |
+| 执行中 | Quick Action 点击后等待 callback 返回（显示 spinner） |
+| 失败 | callback 返回 `failed`，卡片保留并显示错误态，等待人工处理或重试 |
+| 已消费 | 卡片动画退出，写入历史 |
+
+---
+
+# 模块二：PAP Manager（决策者视图）
+
+## 2.1 功能概述
+
+决策者通过 PAP Manager 完成目标制定、任务监控和结果审核。视图分为两个子模块：**任务管理**（Mission 任务树 · 步骤状态追踪）和 **AI Center**（员工与 Agent 工作情况汇总）。
+
+## 2.2 入口与页面结构
+
+| 页面 | 说明 |
+|---|---|
+| PAP Manager · 任务管理 | 展示 Mission 列表与单 Mission 的步骤任务树，支持发布目标、协同拆解、审核验收 |
+| PAP Manager · AI Center | 汇总展示各岗位员工工作情况和各 Agent 运行情况 |
+
+## 2.3 任务管理 · 功能说明
+
+**Mission 任务树**：展示 Mission 下所有步骤的层级结构，每个步骤包含：
+
+| 字段 | 说明 |
+|---|---|
+| 步骤名称 | 来自 Storybook 定义 |
+| 负责方 | `@minion` / `@admin` / `@角色名` |
+| 状态 | To do / Running / Need Input / Review / Done / Failed |
+| 依赖关系 | 前置步骤完成后方可开始，视觉标注依赖链 |
+
+**Need Input / Review 状态**：Minion 执行过程中需要人工介入的步骤会标注对应状态，决策者可通过 hover tooltip 查看「谁在等 · 等什么」，点击后跳转至对应会话。
+
+**核心操作：**
+
+1. 发布 Mission：填写目标、类型、上线日期等输入参数 → PAP 加载 Storybook 生成执行计划
+2. 协同拆解：对 Agent 无法自动判断的步骤提供决策输入
+3. 验收确认：对 `confirm_by` 指向决策者的步骤进行最终审核
+
+## 2.4 AI Center · 功能说明
+
+| 模块 | 内容 |
+|---|---|
+| 员工工作情况 | 按岗位/员工查看任务完成率、工作量、延误情况 |
+| Agent 运行情况 | 查看各 subagent 的执行状态、成功率、耗时、异常 |
+
+---
+
+# 模块三：Agent 编排层
+
+## 3.1 功能概述
+
+PAP 作为唯一 Trigger 源和人机任务总线，根据 Mission Storybook 生成结构化执行计划，按 `route` 路由给 Minion Agent / Admin Agent / 相关人员，并管理全链路的执行回调与状态推进。
+
+## 3.2 路由规则
+
+| 路由标记 | 执行者 | 负责范围 |
+|---|---|---|
+| `@minion` | Minion Agent | 涉及 Auxin / Adnext 的任务 |
+| `@admin` | Admin Agent | 涉及 G123 Web 的任务 |
+| `@<role>` | 相关负责人（人） | 没有任何 Agent 能做的任务（原创设计 / 外部沟通 / 最终业务判断等） |
+
+路由决策完全由 Storybook 中每个 Step 的 `route` 字段声明，PAP 不做隐式推断。
+
+## 3.3 Subagent 执行闭环
+
+1. 接收 PAP 派发的步骤（route + skill + 参数 + 依赖）
+2. 读取 Skill Knowledge Card，判定依赖与信息是否齐全
+   - **信息齐全**：直接调用接口执行
+   - **缺信息**：反向在 PAP 建任务，向对应员工请求补充（通过 Dispatch Center 推送 Chat Task / Quick Action）
+3. 员工在 PAP 提交信息后回调给 subagent，subagent 收齐后执行
+4. 执行完成后，通过 PAP 请 `confirm_by` 指定的确认人验收
+5. 确认通过后，subagent 通知 PAP Task Done，PAP 推进 Mission 进度
+
+## 3.4 PAP ↔ Subagent 接口契约
+
+| 方向 | 内容 | 载体 |
+|---|---|---|
+| PAP → subagent | 派发步骤（route + skill + 参数 + 依赖） | PAP 派发接口 |
+| subagent → PAP | 反向建人工任务，请求补足信息 | PAP 任务创建 API |
+| PAP → subagent | 回调补足信息 / 确认结果 | callback Webhook |
+| subagent → PAP | Task Done / failed 通知 | PAP 状态更新接口 |
+
+## 3.5 知识层：Mission Storybook + Skill Knowledge Card
 
 | 层级 | 名称 | 读取方 | 作用 |
 |---|---|---|---|
-| 第 1 层 | Mission Storybook | PAP 中枢 | 定义做什么、路由给谁、依赖顺序 |
-| 第 2 层 | Skill Knowledge Card | subagent | 定义怎么做、需要什么输入、缺信息找谁 |
+| 第 1 层 | Mission Storybook | PAP 中枢 | 定义做什么、路由给谁、依赖顺序、验收规则 |
+| 第 2 层 | Skill Knowledge Card | subagent | 定义怎么做、需要什么输入、缺信息找谁、完成后找谁确认 |
 
-详细规范见 [PAP 编排式 Agent 系统 PRD](../../其他系统需求/立项PRD.md)。
-
-### 7. Subagent 执行闭环
-
-```mermaid
-sequenceDiagram
-    participant PAP as PAP 中枢
-    participant Agent as subagent（Minion / Admin）
-    participant Employee as 一线员工
-    participant Decision as 决策者
-
-    PAP->>Agent: 派发步骤（route + skill + 参数 + 依赖）
-    Agent->>Agent: 读 Knowledge Card，判定依赖
-    alt 信息齐全
-        Agent->>Agent: 直接调用接口执行
-    else 缺信息
-        Agent->>PAP: 反向建任务 @员工
-        PAP->>Employee: Dispatch Center 推送 Chat Task / Quick Action
-        Employee->>PAP: 完成响应（提供信息 / 授权）
-        PAP-->>Agent: 回调补足信息
-        Agent->>Agent: 收齐后执行
-    end
-    Agent->>PAP: 提交结果，请求验收
-    PAP->>Decision: 通知确认人验收
-    Decision->>PAP: 确认通过
-    PAP-->>Agent: 回调确认结果
-    Agent->>PAP: Task Done
-    PAP->>Decision: Mission 进度推进
-```
+首个 Mission：游戏上线（复用并迁移现有 `game-launch-checklist.yaml`）。
 
 ---
 
-## Scope
+## 5. 范围说明
 
 ### In scope（Phase 1）
 
-* 通用员工视图：Dispatch Center 四种消息类型 · 消息队列 · 历史抽屉 · Chat Task / Jump Task 客户端标签页交互。
-* 通用员工视图：To Do / Doing 区域（接收人工任务 · 提交产出 · 执行引导）。
-* PAP Manager：Mission 任务树视图 · 步骤状态追踪（含 Minion Need Input / Review 交互态）。
-* PAP 编排引擎：Trigger · 加载 Storybook · 按 `route` 派发 · 按 `depends_on` 推进。
-* subagent 执行闭环：判定依赖 → 直调接口 / 反向摇人 → 回调收齐 → 执行 → 验收 → 终态通知。
-* 首个端到端 Mission：游戏上线（复用并迁移 `game-launch-checklist.yaml`）。
+- 通用员工视图：Dispatch Center 四种消息类型 · 消息队列 · 历史抽屉
+- 通用员工视图：To Do / Doing 区域（接收任务 · 提交产出 · 执行引导）
+- PAP Manager：Mission 任务树 · 步骤状态追踪（含 Need Input / Review 交互态）
+- Agent 编排层：Trigger · Storybook 编排 · 路由派发 · 依赖推进 · subagent 执行闭环
+- 首个端到端 Mission：游戏上线
 
-### Out of scope（后续 / 非目标）
+### Out of scope（后续）
 
-* 维护者视图（Works / Tools / Agents / Logs）——后续独立规划。
-* 工作过程监控（如客服在 CS 系统的行为采集）——依赖各子系统接口，后续。
-* 员工工作量汇报 Dashboard——后续。
-* Workflow 自学习（从人工行为自动提炼 Storybook）——远期愿景。
-* 移动端适配——后续。
-
----
-
-## Feasibility And Principle Check
-
-### 现状可行性
-
-* **PAP 已存在**：全员任务系统，员工已接入统一任务总线，本 PRD 是在现有基础上增量扩展。
-* **执行层已就绪**：Minion（Auxin/Adnext API）和 Admin Agent（G123 Web）已具备操作能力，无需重做 API 集成。
-* **知识资产已有雏形**：`game-launch-checklist.yaml` 已结构化定义游戏上线全流程，可直接迁移为首个 Storybook。
-* **原型已验证关键交互**：Dispatch Center、PAP Manager（含 Minion Need Input / Review）均已有 HTML 原型验证可行性。
-* **主要新增工作**：服务端推送接口、callback 路由、消息持久化、编排引擎实现。
-
-### 原则契合
-
-* **AI 主动分派，人被动接收**：与 D 系统 3.0「AI 根据岗位职责分派任务」的核心目标完全一致。
-* **Agent-First / 能做直接做，做不了发任务**：subagent 执行闭环与此原则一致。
-* **每个决策可追溯**：所有步骤与回调落为 PAP 任务，天然具备完整审计链。
-* **复用优先**：复用 PAP、Minion、Admin Agent 与现有 Workflow YAML，新增集中在编排层与视图层。
-
-### 风险
-
-* PAP 现有 API 能力可能不足以支撑程序化建任务 + callback + 确认的完整契约。
-* subagent 反向摇人 → 回调收齐的状态机较复杂，超时/重试/取消语义需明确。
-* 决策者视图的数据聚合依赖多个子系统接口，接入成本待评估。
+- 维护者视图（Works / Tools / Agents / Logs）
+- 工作过程监控（客服在 CS 系统的行为采集）
+- 员工工作量汇报 Dashboard
+- 移动端适配
+- Workflow 自学习
 
 ---
 
-## Decision
-
-* 待评审：本 PRD 处于 `draft`，待各角色视图范围与 Phase 1 优先级对齐后推进至 `approved`。
-
----
-
-## Acceptance Criteria
-
-**通用员工视图**
-- [ ] Dispatch Center：四种消息类型卡片正确渲染与消费，消息队列 + 徽标 + 历史抽屉完整可用。
-- [ ] To Do / Doing：员工能接收 PAP 派发的人工任务，提交产出后触发验收流程。
-- [ ] Chat Task 在客户端标签页打开 Agent 会话，会话完成后卡片归档。
-- [ ] Quick Action callback 流程完整：用户点击 → PAP 回调创建方 → 返回 done/failed → 状态更新。
-
-**PAP Manager**
-- [ ] 决策者能创建 Mission，PAP 基于 Storybook 生成含依赖关系的执行计划。
-- [ ] 任务树视图展示每个步骤的 route、状态（To do / Running / Need Input / Review / Done）。
-- [ ] Minion Need Input / Review 状态在 PAP Manager 中有明确的视觉标识和跳转入口。
-
-**编排层**
-- [ ] PAP 能按 `route` 正确派发步骤给 `@minion` / `@admin` / `@role` 三类执行者。
-- [ ] subagent 信息不足时反向在 PAP 建任务摇人，人提交后回调 subagent，subagent 收齐后执行。
-- [ ] 游戏上线 Mission 可在 PAP 上完整端到端跑通。
-
----
-
-## Progress Log
-
-* 2026-06-21：PAP 立项 PRD 创建（`draft`）。整合 D 系统 3.0 背景目标、三角色模型、Dispatch Center 设计、PAP×Minion 交互设计，形成系统级产品立项文档。
-
----
-
-## Risks And Open Questions
+## 6. 风险与待确认事项
 
 | 风险 | 等级 | 应对 |
 |---|---|---|
-| PAP API 不支持程序化建任务 / callback / 确认 | 高 | Phase 0 优先验证 PAP 接口能力，必要时推动 PAP 扩展 |
-| subagent 反向摇人闭环状态机复杂 | 中 | 明确超时、重试、取消、并发依赖语义；先在游戏上线单 Mission 跑通 |
-| 决策者视图数据聚合依赖多系统 | 中 | Phase 1 先做静态 / mock 展示，逐步替换为真实接口 |
-| Knowledge Card 与真实接口漂移 | 中 | 建立 Card 与 Minion / Admin Skill 清单的定期对账机制 |
-| 员工未及时在 PAP 响应导致 Mission 卡住 | 中 | 设置超时升级/催办，关键路径步骤标注 SLA |
-| 维护者视图范围不清晰影响 Phase 1 边界 | 低 | 本 PRD 明确排除维护者视图，后续独立立项 |
+| PAP API 不支持程序化建任务 / callback / 确认 | 高 | Phase 0 优先验证 PAP 接口能力，必要时推动扩展 |
+| subagent 反向摇人闭环状态机复杂 | 中 | 明确超时、重试、取消语义；先在游戏上线单 Mission 跑通 |
+| PAP 缺少服务端实时推送能力 | 中 | 评估 WebSocket / SSE 接入成本，Phase 1 可降级为轮询 |
+| Quick Action callback 超时 / 失败处理 | 中 | 明确 failed 态卡片行为（保留 + 错误提示 + 重试入口） |
+| Knowledge Card 与真实接口漂移 | 中 | 建立定期对账机制 |
 
-Open questions：
+**待确认：**
 
-* PAP 的「调度大脑」用规则引擎还是 LLM 规划？路由/依赖用结构化规则，意图理解/参数填充用 LLM——两者边界如何划定？
-* `route: "@<role>"` 中角色到具体人的映射在哪维护（PAP 组织架构 or Storybook）？
-* Quick Action callback 失败后，重试由 PAP 发起还是创建方自行重试？重试次数和间隔如何约定？
-* 消息的 TTL（生存时间）由创建方声明还是 PAP 统一配置？超时未响应后消息如何处理？
-* Storybook / Knowledge Card 的版本管理与灰度——改了剧本对进行中的 Mission 是否生效？
-* PAP Manager 中决策者的「协同型任务」（帮助 Agent 拆解）的具体交互形式？
-
----
-
-## Prototype
-
-| 视图 | 文件 | 状态 |
-|---|---|---|
-| 通用员工视图 · Dispatch Center | `D-PAP-AI-message.html` | 完整原型，含四种卡片类型 · 消息队列 · 历史抽屉 |
-| 通用员工视图 · Finance | `F-PAP-EXPENSE-REPORT.html` | 财务报销视图原型 |
-| PAP Manager · 任务管理 | `D-PAP-MANAGER_副本.html` | 含 Minion Need Input / Review 交互态 |
-| PAP Manager · AI Center | `D-PAP-AI-CENTER_副本.html` | AI 任务中心视图 |
-| 翻译官视图 | `D-PAP-WORKER.html` | 翻译官执行视图 |
-| 维护者视图 | — | 待规划 |
+- `route: "@<role>"` 中角色到具体人的映射在哪维护（PAP 组织架构 or Storybook）？
+- 消息的 TTL 由创建方声明还是 PAP 统一配置？超时未响应后如何处理？
+- 是否资本化，项目周期如何定义？
+- 各视图的研发优先级与排期？
