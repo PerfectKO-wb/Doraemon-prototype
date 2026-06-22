@@ -488,6 +488,7 @@
         .inv-table td.col-time { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
         .inv-table td.col-reason { color: var(--text-secondary); font-size: 12px; }
         .inv-table td.col-reason .reason-empty { color: var(--text-disabled); }
+        .inv-table td.col-state { overflow: visible; }
         .inv-table td.col-ops { overflow: visible; }
         .ops-btn.ops-del:hover { color: var(--error); background: var(--error-bg); }
 
@@ -1943,7 +1944,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                     <div>
                         <div class="vf-banner-title">Incomplete — manual entry needed</div>
-                        <div class="vf-banner-sub">AI couldn't extract these fields . Please complete them, then click Confirm to submit the invoice for finance approval.</div>
+                        <div class="vf-banner-sub">AI parsing results may contain errors. Please check or fill in the information manually.</div>
                     </div>
                 </div>
 
@@ -2114,7 +2115,7 @@
     const monthsEN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
     // Tooltip shown next to the "Incomplete" status so users know what it means
-    const INCOMPLETE_HINT = "AI couldn't auto-extract this invoice's fields (the file may be too blurry or it failed validation). Open it to fill in the details, then Confirm to submit for finance approval.";
+    const INCOMPLETE_HINT = "AI parsing results may contain errors. Please check or fill in the information manually.";
 
     // Build a status cell; appends an info hint for the "Incomplete" state
     function stateCellHtml(stateClass, label) {
