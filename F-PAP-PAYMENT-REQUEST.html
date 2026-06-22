@@ -481,10 +481,15 @@
         }
         .inv-table .col-type { width: 80px; }
         .inv-table .col-title { width: auto; }
-        .inv-table .col-state { width: 140px; }
-        .inv-table .col-time { width: 180px; }
-        .inv-table .col-ops { width: 110px; }
+        .inv-table .col-state { width: 130px; }
+        .inv-table .col-reason { width: 220px; }
+        .inv-table .col-time { width: 160px; }
+        .inv-table .col-ops { width: 90px; }
         .inv-table td.col-time { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+        .inv-table td.col-reason { color: var(--text-secondary); font-size: 12px; }
+        .inv-table td.col-reason .reason-empty { color: var(--text-disabled); }
+        .inv-table td.col-ops { overflow: visible; }
+        .ops-btn.ops-del:hover { color: var(--error); background: var(--error-bg); }
 
         .file-cell {
             display: inline-flex; align-items: center; gap: 10px;
@@ -507,9 +512,27 @@
         .tag.denied { color: var(--error); background: var(--error-bg); border: 1px solid var(--error-border); }
         .tag.approved { color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
         .tag.pending { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
-        .tag.unconfirmed { color: #92400e; background: #fefce8; border: 1px solid #fde68a; }
-        .tag.parsing { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
+        .tag.incomplete { color: #92400e; background: #fefce8; border: 1px solid #fde68a; }
+        .tag.parsing { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
         .tag.confirmed { color: #0e7490; background: #ecfeff; border: 1px solid #a5f3fc; }
+        .state-hint {
+            display: inline-flex; vertical-align: middle; margin-left: 5px;
+            color: var(--text-disabled); cursor: help;
+        }
+        .state-hint:hover { color: var(--warn); }
+        .state-hint svg { width: 13px; height: 13px; }
+        .hint-tip {
+            position: fixed; z-index: 200;
+            max-width: 260px;
+            background: #1f2330; color: #fff;
+            font-size: 12px; line-height: 1.5; font-weight: 400;
+            padding: 8px 10px; border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+            pointer-events: none;
+            opacity: 0; transform: translateY(3px);
+            transition: opacity .12s ease, transform .12s ease;
+        }
+        .hint-tip.show { opacity: 1; transform: translateY(0); }
 
         .ops-row { display: inline-flex; align-items: center; gap: 2px; }
         .ops-btn {
@@ -649,11 +672,37 @@
         .viewer-zoom .level { font-size: 13px; min-width: 44px; text-align: center; color: var(--text-default); }
 
         .viewer-body {
-            flex: 1; overflow: auto;
+            flex: 1; overflow: hidden;
             background: #f3f3f1;
+            display: flex; align-items: stretch; justify-content: stretch;
+            padding: 0;
+            position: relative;
+        }
+        .viewer-preview-pane {
+            flex: 1; min-width: 0; overflow: auto;
             display: flex; align-items: flex-start; justify-content: center;
             padding: 24px;
-            position: relative;
+        }
+        .viewer-form-pane { display: none; }
+        /* Split mode: invoice preview (left) + editable fields form (right) */
+        .viewer.split { width: min(1120px, 96vw); }
+        .viewer.split #viewerZoom { display: none; }
+        .viewer.split .viewer-preview-pane {
+            flex: 1 1 48%; padding: 20px;
+            border-right: 1px solid var(--border-divider);
+        }
+        .viewer.split .viewer-form-pane {
+            display: block; flex: 1 1 52%; min-width: 0;
+            overflow: auto; background: #fff; padding: 20px 22px 28px;
+        }
+        .viewer.split .invoice-paper {
+            width: 100%; max-width: 100%;
+            transform: none !important;
+            padding: 28px 30px 40px;
+        }
+        .viewer.split .viewer-fields {
+            box-shadow: none; border-radius: 0;
+            padding: 0; max-width: none;
         }
         .viewer-body::-webkit-scrollbar { width: 8px; height: 8px; }
         .viewer-body::-webkit-scrollbar-thumb { background: #cfcfcd; border-radius: 4px; }
@@ -715,6 +764,49 @@
             font-size: 12px; color: var(--text-secondary);
         }
         @keyframes viewer-spin { to { transform: rotate(360deg); } }
+
+        /* ===== Action Required: editable extracted-fields form ===== */
+        .viewer-fields {
+            width: 100%; max-width: 680px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            padding: 22px 26px 28px;
+        }
+        .vf-banner {
+            display: flex; gap: 10px; align-items: flex-start;
+            background: #fefce8; border: 1px solid #fde68a;
+            border-radius: 8px; padding: 10px 12px; margin-bottom: 18px;
+        }
+        .vf-banner svg { width: 16px; height: 16px; color: #b45309; flex-shrink: 0; margin-top: 1px; }
+        .vf-banner .vf-banner-title { font-size: 12.5px; font-weight: 700; color: #92400e; }
+        .vf-banner .vf-banner-sub { font-size: 12px; color: #a16207; margin-top: 2px; line-height: 1.5; }
+        .vf-section {
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+            color: var(--text-secondary); margin: 22px 0 12px; padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .vf-section:first-of-type { margin-top: 4px; }
+        .vf-row {
+            display: grid; grid-template-columns: 150px 1fr; align-items: center;
+            gap: 12px; margin-bottom: 10px;
+        }
+        .vf-label { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; }
+        .vf-row input, .vf-row select {
+            width: 100%; font: inherit; font-size: 13px;
+            border: 1px solid var(--border-default); border-radius: 6px;
+            padding: 7px 10px; background: #fff; color: var(--text-default); outline: none;
+            transition: border-color .12s, box-shadow .12s;
+        }
+        .vf-row input:focus, .vf-row select:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 3px rgba(28,100,242,.12);
+        }
+        .vf-row input::placeholder { color: var(--text-disabled); }
+        .vf-row.vf-range { grid-template-columns: 150px 1fr; }
+        .vf-range-inputs { display: flex; align-items: center; gap: 8px; }
+        .vf-range-inputs input { flex: 1; min-width: 0; }
+        .vf-range-inputs .vf-sep { color: var(--text-secondary); flex-shrink: 0; }
+
         .invoice-paper {
             width: 780px; max-width: 100%;
             min-height: 100%;
@@ -1559,14 +1651,18 @@
                             <col class="col-type">
                             <col class="col-title">
                             <col class="col-state">
+                            <col class="col-reason">
                             <col class="col-time">
+                            <col class="col-ops">
                         </colgroup>
                         <thead>
                             <tr>
                                 <th class="col-type">Type</th>
                                 <th class="col-title">Invoice Title</th>
                                 <th class="col-state">State</th>
+                                <th class="col-reason">Reject Reason</th>
                                 <th class="col-time">Upload time</th>
+                                <th class="col-ops">Operation</th>
                             </tr>
                         </thead>
                         <tbody id="tbody"></tbody>
@@ -1592,6 +1688,7 @@
                             <col class="col-source">
                             <col class="col-state">
                             <col class="col-time">
+                            <col class="col-ops">
                         </colgroup>
                         <thead>
                             <tr>
@@ -1600,6 +1697,7 @@
                                 <th class="col-source">Source Mailbox</th>
                                 <th class="col-state">State</th>
                                 <th class="col-time">Received At</th>
+                                <th class="col-ops">Operation</th>
                             </tr>
                         </thead>
                         <tbody id="mailTbody"></tbody>
@@ -1755,7 +1853,7 @@
             </button>
             <span class="viewer-filename" id="viewerName">202604091330-jmd.pdf</span>
             <span class="tag pending" id="viewerTag">PENDING</span>
-            <div class="viewer-zoom">
+            <div class="viewer-zoom" id="viewerZoom">
                 <button id="zoomOut" title="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                 <span class="level" id="zoomLevel">100%</span>
                 <button id="zoomIn" title="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
@@ -1767,6 +1865,7 @@
                 <div class="parsing-text">AI is extracting fields from your invoice…</div>
                 <div class="parsing-sub">This usually takes a few seconds.</div>
             </div>
+            <div class="viewer-preview-pane" id="viewerPreviewPane">
             <div class="invoice-paper" id="invoicePaper">
                 <div style="display:flex; justify-content:flex-end; font-size:12px; color:#333;">
                     <div>発行日 : <span style="background:#fffbeb; padding:0 4px;">2026年1月30日</span></div>
@@ -1836,6 +1935,93 @@
                     </tbody>
                 </table>
             </div>
+            </div>
+            <!-- Incomplete: editable extracted-fields form (values empty for the user to fill) -->
+            <div class="viewer-form-pane" id="viewerFormPane">
+            <div class="viewer-fields" id="viewerFields">
+                <div class="vf-banner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <div>
+                        <div class="vf-banner-title">Incomplete — manual entry needed</div>
+                        <div class="vf-banner-sub">AI couldn't extract these fields (the file may be too blurry or it failed validation). Please complete them, then click Confirm to submit the invoice for finance approval.</div>
+                    </div>
+                </div>
+
+                <div class="vf-section">Overview</div>
+                <div class="vf-row"><div class="vf-label">Company</div>
+                    <select id="vfCompany">
+                        <option value="">— Select —</option>
+                        <option value="JP_CTW_INC">JP_CTW_INC</option>
+                        <option value="SG_CTW_INC">SG_CTW_INC</option>
+                        <option value="US_CTW_INC">US_CTW_INC</option>
+                        <option value="KY_CTW_INC">KY_CTW_INC</option>
+                        <option value="SH_WYYCX_INC">SH_WYYCX_INC</option>
+                        <option value="HK_CTW_INC">HK_CTW_INC</option>
+                    </select>
+                </div>
+                <div class="vf-row"><div class="vf-label">Vendor Name</div><input id="vfVendorName" placeholder="Issuing vendor"></div>
+                <div class="vf-row"><div class="vf-label">Invoice No.</div><input id="vfInvoiceNumber" placeholder="e.g. INV-2026-0001"></div>
+
+                <div class="vf-section">Amount</div>
+                <div class="vf-row"><div class="vf-label">Currency</div>
+                    <select id="vfCurrency">
+                        <option value="">— Select —</option>
+                        <option value="JPY">JPY</option>
+                        <option value="USD">USD</option>
+                        <option value="SGD">SGD</option>
+                        <option value="CNY">CNY</option>
+                        <option value="TWD">TWD</option>
+                    </select>
+                </div>
+                <div class="vf-row"><div class="vf-label">Total Amount</div><input id="vfAmount" placeholder="0.00"></div>
+                <div class="vf-row"><div class="vf-label">Tax Amount</div><input id="vfTaxAmount" placeholder="0.00"></div>
+                <div class="vf-row"><div class="vf-label">Amount Due</div><input id="vfAmountDue" placeholder="0.00"></div>
+
+                <div class="vf-section">Category</div>
+                <div class="vf-row"><div class="vf-label">Payment Type</div>
+                    <select id="vfPaymentType">
+                        <option value="">— Select —</option>
+                        <option value="ADMINISTRATIVE">ADMINISTRATIVE</option>
+                        <option value="NON_ADMINISTRATIVE">NON_ADMINISTRATIVE</option>
+                    </select>
+                </div>
+
+                <div class="vf-section">Dates</div>
+                <div class="vf-row"><div class="vf-label">Invoice Date</div><input type="date" id="vfInvoiceDate"></div>
+                <div class="vf-row"><div class="vf-label">Due Date</div><input type="date" id="vfDueDate"></div>
+                <div class="vf-row vf-range"><div class="vf-label">Service Period</div>
+                    <div class="vf-range-inputs">
+                        <input type="date" id="vfServiceStart">
+                        <span class="vf-sep">→</span>
+                        <input type="date" id="vfServiceEnd">
+                    </div>
+                </div>
+
+                <div class="vf-section">Payee Bank Info</div>
+                <div class="vf-row"><div class="vf-label">Requires Finance Payout</div>
+                    <select id="vfRequiresPayout">
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+                <div class="vf-row"><div class="vf-label">Bank Name</div><input id="vfBankName" placeholder="Beneficiary bank name"></div>
+                <div class="vf-row"><div class="vf-label">Branch Name</div><input id="vfBranchName" placeholder="Branch name"></div>
+                <div class="vf-row"><div class="vf-label">Account Type</div>
+                    <select id="vfAccountType">
+                        <option value="">— Select —</option>
+                        <option value="普通預金">普通預金</option>
+                        <option value="当座預金">当座預金</option>
+                        <option value="定期預金">定期預金</option>
+                    </select>
+                </div>
+                <div class="vf-row"><div class="vf-label">Account No.</div><input id="vfAccountNo" placeholder="Account number"></div>
+                <div class="vf-row"><div class="vf-label">Account Name</div><input id="vfAccountName" placeholder="Account holder name"></div>
+                <div class="vf-row"><div class="vf-label">SWIFT Code</div><input id="vfSwiftCode" placeholder="8 or 11 chars"></div>
+                <div class="vf-row"><div class="vf-label">ACH Routing</div><input id="vfAchRouting" placeholder="9-digit routing number"></div>
+                <div class="vf-row"><div class="vf-label">Wire Routing</div><input id="vfWireRouting" placeholder="9-digit routing number"></div>
+                <div class="vf-row"><div class="vf-label">PayNow UEN</div><input id="vfPayNowUen" placeholder="e.g. 201812345K"></div>
+            </div>
+            </div>
         </div>
     </div>
     <div class="viewer-footer" id="viewerFooter">
@@ -1846,6 +2032,7 @@
 </aside>
 
 <div class="toast" id="toast"></div>
+<div class="hint-tip" id="hintTip"></div>
 
 
 <!-- Row hover preview popover -->
@@ -1907,15 +2094,15 @@
     ];
 
     let invoiceFiles = [
-        { id: 1, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied',   time: '2026-04-30 13:25', month: 3, year: 2026, selected: false, category: 'Tech' },
+        { id: 1, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied',   time: '2026-04-30 13:25', month: 3, year: 2026, selected: false, category: 'Tech', rejectReason: 'Invoice amount does not match the payment request.' },
         { id: 2, name: 'zthd_zhidingshengxing_ban.png', type: 'img', state: 'approved', time: '2026-04-30 13:25', month: 3, year: 2026, selected: false, category: 'Ads' },
-        { id: 3, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied',   time: '2026-04-30 13:25', month: 3, year: 2026, selected: false, category: 'Finance' },
+        { id: 3, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'denied',   time: '2026-04-30 13:25', month: 3, year: 2026, selected: false, category: 'Finance', rejectReason: 'Vendor bank details are missing; please re-upload.' },
         { id: 4, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'approved', time: '2026-03-30 13:25', month: 3, year: 2026, selected: false, category: 'Tech' },
         { id: 5, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending',  time: '2026-03-30 13:25', month: 3, year: 2026, selected: false, category: 'Ads' },
         { id: 6, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending',  time: '2026-03-30 13:25', month: 3, year: 2026, selected: false, category: 'Finance' },
         { id: 7, name: 'zthd_zhidingshengxing_ban.pdf', type: 'pdf', state: 'pending',  time: '2026-03-30 13:25', month: 3, year: 2026, selected: false, category: 'Tech' },
         { id: 8, name: '202604091330-jmd.pdf',           type: 'pdf', state: 'pending',       time: '2026-02-30 13:25', month: 2, year: 2026, selected: false, category: 'Ads' },
-        { id: 9, name: 'AWS_Invoice_2026-05_JP.pdf',     type: 'pdf', state: 'unconfirmed',   time: '2026-05-31 09:45', month: 5, year: 2026, selected: false, category: 'Tech' }
+        { id: 9, name: 'AWS_Invoice_2026-05_JP.pdf',     type: 'pdf', state: 'incomplete',   time: '2026-05-31 09:45', month: 5, year: 2026, selected: false, category: 'Tech' }
     ];
 
     let nextId = 10;
@@ -1926,10 +2113,33 @@
 
     const monthsEN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+    // Tooltip shown next to the "Incomplete" status so users know what it means
+    const INCOMPLETE_HINT = "AI couldn't auto-extract this invoice's fields (the file may be too blurry or it failed validation). Open it to fill in the details, then Confirm to submit for finance approval.";
+
+    // Build a status cell; appends an info hint for the "Incomplete" state
+    function stateCellHtml(stateClass, label) {
+        let html = `<span class="tag ${stateClass}">${label}</span>`;
+        if (stateClass === 'incomplete') {
+            html += `<span class="state-hint" data-tip="${INCOMPLETE_HINT}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>`;
+        }
+        return html;
+    }
+
+    // States for which the user may delete the row, per tab
+    const UPLOAD_DELETABLE = ['pending', 'denied', 'incomplete'];
+    const MAIL_DELETABLE = ['pending', 'parsing', 'denied', 'incomplete', 'needs-check'];
+
+    // Small trash button used in the Operation column
+    function deleteBtnHtml(onclickExpr) {
+        return `<button class="ops-btn ops-del" onclick="${onclickExpr}" title="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>`;
+    }
+
     const STATE_LABELS = {
-        pending: 'Pending', denied: 'Denied', approved: 'Approved',
+        pending: 'Pending', denied: 'Failed', approved: 'Approved',
         parsing: 'Parsing', confirmed: 'Confirmed', 'needs-check': 'Need Confirm',
-        unconfirmed: 'Unconfirmed'
+        'incomplete': 'Incomplete'
     };
 
     // ========== Render helpers ==========
@@ -1999,6 +2209,12 @@
         emptyEl.style.display = 'none';
 
         tbody.innerHTML = list.map(f => {
+            const reasonHtml = (f.state === 'denied' && f.rejectReason)
+                ? `<span title="${f.rejectReason}">${f.rejectReason}</span>`
+                : `<span class="reason-empty">—</span>`;
+            const opsHtml = UPLOAD_DELETABLE.includes(f.state)
+                ? deleteBtnHtml(`event.stopPropagation(); removeFile(${f.id})`)
+                : '';
             return `<tr data-id="${f.id}">
                 <td class="col-type">${fileIcon(f.type)}</td>
                 <td class="col-title">
@@ -2006,8 +2222,10 @@
                         <span class="fname">${f.name}</span>
                     </span>
                 </td>
-                <td class="col-state"><span class="tag ${f.state}">${STATE_LABELS[f.state] || f.state}</span></td>
+                <td class="col-state">${stateCellHtml(f.state, STATE_LABELS[f.state] || f.state)}</td>
+                <td class="col-reason">${reasonHtml}</td>
                 <td class="col-time">${f.time}</td>
+                <td class="col-ops">${opsHtml}</td>
             </tr>`;
         }).join('');
 
@@ -2020,6 +2238,12 @@
     function removeFile(id) {
         invoiceFiles = invoiceFiles.filter(f => f.id !== id);
         renderTable();
+        showToast('Invoice removed');
+    }
+
+    function removeMailFile(id) {
+        mailFiles = mailFiles.filter(f => f.id !== id);
+        renderMailTable();
         showToast('Invoice removed');
     }
 
@@ -2093,6 +2317,8 @@
     let activeRowId = null;
     let parsingTimer = null;
     let currentMailId = null; // tracks the currently open mail file
+    let currentViewerFile = null; // the file object currently shown in the drawer
+    let currentViewerIsMail = false;
 
     function openViewer(id, mailId) {
         let f, stateLabels, isMailFile = false;
@@ -2107,6 +2333,8 @@
             currentMailId = null;
         }
         if (!f) return;
+        currentViewerFile = f;
+        currentViewerIsMail = isMailFile;
         document.getElementById('viewerName').textContent = f.name;
         const tag = document.getElementById('viewerTag');
         tag.className = `tag ${f.state}`;
@@ -2123,16 +2351,67 @@
             tr.classList.toggle('active', isMailFile && tr.dataset.mid === mailId);
         });
 
-        // Show/hide footer and update nav hint
+        const isUnconfirmed = f.state === 'incomplete';
+        // Toggle between the invoice paper preview and the editable fields form
+        applyUnconfirmedView(isUnconfirmed);
+
+        // Show/hide footer and configure its buttons
         const footer = document.getElementById('viewerFooter');
-        if (isMailFile) {
+        const skipBtn = document.getElementById('viewerSkipBtn');
+        const confirmBtn = document.getElementById('viewerConfirmBtn');
+        const navHint = document.getElementById('viewerNavHint');
+        if (isUnconfirmed) {
+            footer.classList.add('visible');
+            skipBtn.style.display = 'none';
+            confirmBtn.textContent = 'Confirm & Submit';
+            navHint.textContent = '';
+        } else if (isMailFile) {
             footer.classList.toggle('visible', f.state !== 'parsing');
+            skipBtn.style.display = '';
+            confirmBtn.textContent = 'Confirm';
             updateViewerNavHint();
         } else {
             footer.classList.remove('visible');
+            skipBtn.style.display = '';
+            confirmBtn.textContent = 'Confirm';
         }
 
         applyParsingState(f, isMailFile);
+    }
+
+    // Incomplete: show a split view — invoice preview on the left, fill-in fields form on the right
+    function applyUnconfirmedView(isUnconfirmed) {
+        const drawer = document.getElementById('viewerDrawer');
+        if (isUnconfirmed) {
+            resetViewerFields();
+            drawer.classList.add('split');
+        } else {
+            drawer.classList.remove('split');
+        }
+    }
+
+    function resetViewerFields() {
+        document.querySelectorAll('#viewerFields input').forEach(i => { i.value = ''; });
+        document.querySelectorAll('#viewerFields select').forEach(s => { s.selectedIndex = 0; });
+    }
+
+    // Confirm an unconfirmed invoice: move it into "pending" for finance review
+    function confirmUnconfirmed() {
+        const f = currentViewerFile;
+        if (!f) return;
+        f.state = 'pending';
+        if (currentViewerIsMail) renderMailTable(); else renderTable();
+        closeViewer();
+        showToast('Invoice confirmed — submitted for finance review');
+    }
+
+    // Footer Confirm dispatcher: unconfirmed files submit fields, mail files use the mail flow
+    function onViewerConfirm() {
+        if (currentViewerFile && currentViewerFile.state === 'incomplete') {
+            confirmUnconfirmed();
+            return;
+        }
+        confirmMailInViewer();
     }
 
     function updateViewerNavHint() {
@@ -2205,10 +2484,13 @@
         document.getElementById('viewerMask').classList.remove('open');
         document.getElementById('viewerDrawer').classList.remove('open');
         activeRowId = null;
+        currentViewerFile = null;
+        currentViewerIsMail = false;
         document.querySelectorAll('#tbody tr.active').forEach(tr => tr.classList.remove('active'));
         if (parsingTimer) { clearTimeout(parsingTimer); parsingTimer = null; }
         document.getElementById('viewerParsing').style.display = 'none';
         document.getElementById('invoicePaper').style.visibility = '';
+        applyUnconfirmedView(false);
     }
     function applyZoom() {
         document.getElementById('zoomLevel').textContent = `${zoom}%`;
@@ -2353,13 +2635,17 @@
         { id: 'm10', name: 'Datadog_Invoice_2026-05.pdf',        type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-26 11:30', selected: false, category: 'Tech',    pic: 'yi' },
         { id: 'm11', name: 'Twilio_SendGrid_May2026.pdf',        type: 'pdf', source: 'billing@ctw.inc', state: 'needs-check', receivedAt: '2026-05-25 16:18', selected: false, category: 'Tech',    pic: 'yi' },
         { id: 'm12', name: 'Cloudflare_Pro_Invoice_May.pdf',     type: 'pdf', source: 'billing@ctw.inc', state: 'no-need',     receivedAt: '2026-05-24 10:05', selected: false, category: 'Tech',    pic: 'yi' },
+        { id: 'm13', name: 'Linear_Annual_Invoice_2026.pdf',     type: 'pdf', source: 'billing@ctw.inc', state: 'incomplete', receivedAt: '2026-05-23 14:12', selected: false, category: 'Tech',    pic: 'yi' },
+        { id: 'm14', name: 'Vercel_Pro_Invoice_2026-05.pdf',     type: 'pdf', source: 'billing@ctw.inc', state: 'incomplete', receivedAt: '2026-05-22 09:48', selected: false, category: 'Tech',    pic: 'yi' },
     ];
 
     const MAIL_STATE_LABELS = {
         'needs-check': 'Need Confirm',
         'parsing': 'Pending',
+        'incomplete': 'Incomplete',
+        'pending': 'Pending',
         'confirmed': 'Confirmed',
-        'denied': 'Denied',
+        'denied': 'Failed',
         'no-need': 'No need',
     };
 
@@ -2393,14 +2679,18 @@
         emptyEl.style.display = 'none';
 
         tbody.innerHTML = list.map(f => {
+            const opsHtml = MAIL_DELETABLE.includes(f.state)
+                ? deleteBtnHtml(`event.stopPropagation(); removeMailFile('${f.id}')`)
+                : '';
             return `<tr data-mid="${f.id}">
                 <td class="col-type">${fileIcon(f.type)}</td>
                 <td class="col-title">
                     <span class="file-cell"><span class="fname">${f.name}</span></span>
                 </td>
                 <td class="col-source">${f.source}</td>
-                <td class="col-state"><span class="tag ${f.state}">${MAIL_STATE_LABELS[f.state] || f.state}</span></td>
+                <td class="col-state">${stateCellHtml(f.state, MAIL_STATE_LABELS[f.state] || f.state)}</td>
                 <td class="col-time">${f.receivedAt}</td>
+                <td class="col-ops">${opsHtml}</td>
             </tr>`;
         }).join('');
 
@@ -2460,7 +2750,7 @@
 
     document.getElementById('viewerClose').addEventListener('click', closeViewer);
     document.getElementById('viewerMask').addEventListener('click', closeViewer);
-    document.getElementById('viewerConfirmBtn').addEventListener('click', confirmMailInViewer);
+    document.getElementById('viewerConfirmBtn').addEventListener('click', onViewerConfirm);
     document.getElementById('viewerSkipBtn').addEventListener('click', skipMailInViewer);
     document.getElementById('zoomIn').addEventListener('click', () => { zoom = Math.min(200, zoom + 10); applyZoom(); });
     document.getElementById('zoomOut').addEventListener('click', () => { zoom = Math.max(50, zoom - 10); applyZoom(); });
@@ -2470,6 +2760,32 @@
             closeViewer();
             closeMonthPop();
         }
+    });
+
+    // ===== Status hint tooltip (e.g. "Incomplete") =====
+    function showHintTip(el) {
+        const tip = document.getElementById('hintTip');
+        tip.textContent = el.getAttribute('data-tip') || '';
+        tip.classList.add('show');
+        const r = el.getBoundingClientRect();
+        const tr = tip.getBoundingClientRect();
+        let top = r.top - tr.height - 8;
+        if (top < 8) top = r.bottom + 8;
+        let left = r.left + r.width / 2 - tr.width / 2;
+        left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
+        tip.style.top = top + 'px';
+        tip.style.left = left + 'px';
+    }
+    function hideHintTip() {
+        document.getElementById('hintTip').classList.remove('show');
+    }
+    document.addEventListener('mouseover', (e) => {
+        const hint = e.target.closest && e.target.closest('.state-hint');
+        if (hint) showHintTip(hint);
+    });
+    document.addEventListener('mouseout', (e) => {
+        const hint = e.target.closest && e.target.closest('.state-hint');
+        if (hint) hideHintTip();
     });
     renderNavList();
     renderTable();
