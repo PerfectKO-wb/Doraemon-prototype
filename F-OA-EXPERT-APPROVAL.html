@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OA Expert · Approval</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+    --bg-base:#ffffff; --bg-subtle:#f7f7f5; --bg-hover:#f1f1ef;
+    --text-default:#37352f; --text-secondary:#6b6a66; --text-disabled:#a3a29e;
+    --border-divider:#ededeb; --border-default:#e3e2df;
+    --primary:#2383e2; --primary-soft:#e7f1fd;
+    --green:#0f7b3f; --green-soft:#e9f7ef;
+    --mono:'SFMono-Regular',ui-monospace,Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','Noto Sans JP',sans-serif;
+    font-size:14px;color:var(--text-default);background:var(--bg-base);
+    height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+.app{display:flex;height:100vh;}
+
+/* ===== Column 1: Nav sidebar ===== */
+.nav{width:212px;flex-shrink:0;border-right:1px solid var(--border-divider);background:var(--bg-subtle);display:flex;flex-direction:column;}
+.nav-brand{display:flex;align-items:center;gap:8px;padding:14px 14px 10px;}
+.nav-brand .logo{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#3b82f6,#2563eb);display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;}
+.nav-brand .name{font-weight:700;font-size:15px;}
+.nav-brand .collapse{margin-left:auto;color:var(--text-disabled);cursor:pointer;}
+.nav-scroll{flex:1;overflow-y:auto;padding:4px 8px 8px;}
+.nav-scroll::-webkit-scrollbar{width:5px;}
+.nav-scroll::-webkit-scrollbar-thumb{background:#d7d7d3;border-radius:3px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;color:var(--text-secondary);font-size:13px;font-weight:500;}
+.nav-item:hover{background:var(--bg-hover);}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;}
+.nav-sec{font-size:11px;font-weight:600;color:var(--text-disabled);padding:14px 8px 5px;text-transform:none;letter-spacing:.02em;}
+.ag{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-default);}
+.ag:hover{background:var(--bg-hover);}
+.ag.active{background:var(--primary-soft);color:#1a5fb4;font-weight:600;}
+.ag .ic{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0;}
+.ag .dotr{margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--primary);}
+.nav-user{display:flex;align-items:center;gap:9px;padding:10px 12px;border-top:1px solid var(--border-divider);}
+.nav-user .ava{width:26px;height:26px;border-radius:50%;background:#7c3aed;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;}
+.nav-user .u-name{font-size:13px;font-weight:600;line-height:1.2;}
+.nav-user .u-mail{font-size:11px;color:var(--text-disabled);}
+
+/* ===== Column 2: OA Expert conversation list ===== */
+.conv{width:258px;flex-shrink:0;border-right:1px solid var(--border-divider);display:flex;flex-direction:column;background:var(--bg-base);}
+.conv-head{display:flex;align-items:center;gap:9px;padding:14px 16px 8px;}
+.conv-head .clogo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#22b8cf,#0e8a9c);display:grid;place-items:center;color:#fff;font-weight:800;font-size:11px;}
+.conv-head .ctitle{font-weight:700;font-size:15px;}
+.conv-head .cact{margin-left:auto;display:flex;gap:10px;color:var(--text-disabled);}
+.conv-head .cact svg{width:16px;height:16px;cursor:pointer;}
+.waiting{margin:2px 16px 10px;display:inline-flex;align-items:center;gap:6px;align-self:flex-start;background:var(--bg-subtle);border:1px solid var(--border-divider);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--text-secondary);font-weight:600;}
+.conv-search{margin:0 16px 10px;position:relative;}
+.conv-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--text-disabled);}
+.conv-search input{width:100%;height:32px;border:1px solid var(--border-default);border-radius:8px;background:var(--bg-subtle);padding:0 10px 0 30px;font:inherit;font-size:13px;}
+.conv-search input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(35,131,226,.12);}
+.conv-count{padding:2px 18px 8px;font-size:12px;color:var(--text-disabled);font-weight:600;}
+.conv-list{flex:1;overflow-y:auto;padding:0 8px;}
+.conv-list::-webkit-scrollbar{width:5px;}
+.conv-list::-webkit-scrollbar-thumb{background:#d7d7d3;border-radius:3px;}
+.ci{padding:10px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;}
+.ci:hover{background:var(--bg-hover);}
+.ci.active{background:var(--primary-soft);border-color:#cfe2fb;}
+.ci-top{display:flex;align-items:baseline;gap:6px;}
+.ci-title{font-size:13px;font-weight:600;color:var(--text-default);line-height:1.35;flex:1;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.ci-date{font-size:11px;color:var(--text-disabled);flex-shrink:0;}
+.ci-sub{font-size:12px;color:var(--text-secondary);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.conv-empty{padding:18px;text-align:center;font-size:12px;color:var(--text-disabled);}
+
+/* ===== Column 3: Main approval content ===== */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg-base);}
+.main-top{display:flex;align-items:center;gap:12px;padding:14px 26px;border-bottom:1px solid var(--border-divider);}
+.badge-active{background:var(--green-soft);color:var(--green);font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;letter-spacing:.04em;}
+.main-title{font-size:15px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.main-top .ava{width:28px;height:28px;border-radius:50%;background:#ef4444;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.main-scroll{flex:1;overflow-y:auto;padding:26px;}
+.main-scroll::-webkit-scrollbar{width:7px;}
+.main-scroll::-webkit-scrollbar-thumb{background:#d7d7d3;border-radius:4px;}
+
+.appr-card{max-width:920px;margin:0 auto;border:1px solid var(--border-divider);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,15,15,.04);}
+.ac-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border-divider);background:var(--bg-subtle);}
+.ac-head .ah-ic{width:30px;height:30px;border-radius:8px;background:var(--primary-soft);display:grid;place-items:center;color:var(--primary);flex-shrink:0;}
+.ac-head .ah-title{font-weight:700;font-size:14px;}
+.ac-head .ah-from{margin-left:auto;font-size:12px;color:var(--text-secondary);}
+.ac-body{padding:20px;}
+.ac-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.panel-label{font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;}
+.kv{display:flex;flex-direction:column;gap:7px;}
+.kv-row{display:flex;font-size:13px;}
+.kv-k{width:84px;flex-shrink:0;color:var(--text-disabled);}
+.kv-v{font-weight:600;color:var(--text-default);}
+.json-box{background:#1f2430;color:#d7e0ee;border-radius:10px;padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:300px;}
+.json-box .jk{color:#8fb6ff;}
+.json-box .js{color:#a5e8a0;}
+.json-box .jn{color:#f6c177;}
+.section-gap{margin-top:22px;}
+.timeline{display:flex;flex-direction:column;gap:0;margin-top:6px;}
+.tl{display:flex;gap:12px;padding-bottom:16px;position:relative;}
+.tl:not(:last-child)::before{content:'';position:absolute;left:8px;top:18px;bottom:-2px;width:2px;background:var(--border-default);}
+.tl .dot{width:18px;height:18px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;z-index:1;}
+.tl.done .dot{background:var(--green);color:#fff;}
+.tl.cur .dot{background:var(--primary);color:#fff;}
+.tl.todo .dot{background:#fff;border:2px solid var(--border-default);}
+.tl .dot svg{width:10px;height:10px;}
+.tl-title{font-size:13px;font-weight:600;}
+.tl-sub{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+
+.reply{border-top:1px solid var(--border-divider);padding:12px 26px;}
+.reply-box{display:flex;align-items:center;gap:10px;border:1px solid var(--border-default);border-radius:12px;padding:8px 12px;}
+.reply-box svg.lead{width:16px;height:16px;stroke:var(--text-disabled);}
+.reply-box input{flex:1;border:none;font:inherit;font-size:13px;background:transparent;}
+.reply-box input:focus{outline:none;}
+.reply-send{display:inline-flex;align-items:center;gap:6px;color:var(--text-disabled);font-size:13px;font-weight:600;cursor:pointer;}
+.reply-send .sbtn{width:26px;height:26px;border-radius:8px;background:var(--bg-hover);display:grid;place-items:center;}
+@media(max-width:1100px){.nav{display:none;}}
+</style>
+</head>
+<body>
+<div class="app">
+    <!-- Column 1: nav -->
+    <aside class="nav">
+        <div class="nav-brand">
+            <div class="logo">D</div>
+            <span class="name">Doraemon</span>
+            <svg class="collapse" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </div>
+        <div class="nav-scroll">
+            <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New Chat</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>Workspace</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Works</div>
+
+            <div class="nav-sec">Expert Agent</div>
+            <div class="ag active"><span class="ic" style="background:#0e8a9c;">OA</span>OA<span class="dotr"></span></div>
+            <div class="ag"><span class="ic" style="background:#2563eb;">BD</span>BD</div>
+            <div class="ag"><span class="ic" style="background:#0f7b3f;">F</span>F</div>
+            <div class="ag"><span class="ic" style="background:#7c3aed;">M</span>Management</div>
+            <div class="ag"><span class="ic" style="background:#f59e0b;">E</span>Executive</div>
+            <div class="ag"><span class="ic" style="background:#ef4444;">O</span>Operation</div>
+            <div class="ag"><span class="ic" style="background:#ec4899;">T</span>Tech</div>
+            <div class="ag"><span class="ic" style="background:#3b82f6;">C</span>Creative</div>
+            <div class="ag"><span class="ic" style="background:#14b8a6;">CS</span>CS</div>
+            <div class="ag"><span class="ic" style="background:#22c55e;">CP</span>CP</div>
+            <div class="ag"><span class="ic" style="background:#f97316;">M</span>Marketing</div>
+            <div class="ag"><span class="ic" style="background:#8b5cf6;">i</span>i18n</div>
+
+            <div class="nav-sec">AI U</div>
+            <div class="ag"><span class="ic" style="background:#0ea5e9;">T</span>Tech Table机器人</div>
+            <div class="ag"><span class="ic" style="background:#64748b;">测</span>测试项目_AI回归测试</div>
+        </div>
+        <div class="nav-user">
+            <div class="ava" id="navAva">王</div>
+            <div>
+                <div class="u-name" id="navName">王彬</div>
+                <div class="u-mail" id="navMail">bin.wang@ctw.inc</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Column 2: OA Expert conversations -->
+    <section class="conv">
+        <div class="conv-head">
+            <div class="clogo">OA</div>
+            <span class="ctitle">OA Expert</span>
+            <span class="cact">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+            </span>
+        </div>
+        <span class="waiting">Active</span>
+        <div class="conv-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input type="text" placeholder="Search approvals">
+        </div>
+        <div class="conv-count" id="convCount">1 Total</div>
+        <div class="conv-list" id="convList"></div>
+    </section>
+
+    <!-- Column 3: main -->
+    <main class="main">
+        <div class="main-top">
+            <span class="badge-active">ACTIVE</span>
+            <span class="main-title" id="mainTitle">费用报销 OA 审批</span>
+            <div class="ava" id="topAva">财</div>
+        </div>
+        <div class="main-scroll">
+            <div class="appr-card">
+                <div class="ac-head">
+                    <div class="ah-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                    <span class="ah-title" id="cardTitle">Expense Reimbursement Approval</span>
+                    <span class="ah-from" id="cardFrom">From: —</span>
+                </div>
+                <div class="ac-body">
+                    <div class="ac-grid">
+                        <div>
+                            <div class="panel-label">审批对象 / Approval Target</div>
+                            <div class="kv" id="kvTarget"></div>
+                        </div>
+                        <div>
+                            <div class="panel-label">申请内容 / Request Payload</div>
+                            <div class="json-box" id="jsonPayload"></div>
+                        </div>
+                    </div>
+
+                    <div class="section-gap">
+                        <div class="panel-label">审批进度 / Approval Flow</div>
+                        <div class="timeline" id="timeline"></div>
+                    </div>
+
+                    <div class="section-gap">
+                        <div class="panel-label">审批结果 / Result</div>
+                        <div class="json-box" id="jsonResult"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="reply">
+            <div class="reply-box">
+                <svg class="lead" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                <input type="text" placeholder="reply…">
+                <span class="reply-send">Send <span class="sbtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span></span>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+function qp(name){ return new URLSearchParams(location.search).get(name) || ''; }
+
+const data = {
+    id:     qp('id')     || 'ER-2026-03-YK',
+    name:   qp('name')   || '王 彬',
+    email:  qp('email')  || 'bin.wang@ctw.inc',
+    dept:   qp('dept')   || 'Finance',
+    period: qp('period') || 'Mar 2026',
+    amount: qp('amount') || '4210.50',
+    region: qp('region') || 'CN',
+    status: qp('status') || 'oa-approved',
+};
+
+const CUR = { CN:'¥', JP:'¥', US:'$' };
+const cur = CUR[data.region] || '¥';
+const amtNum = parseFloat(String(data.amount).replace(/[^0-9.]/g,'')) || 0;
+const amtStr = cur + amtNum.toLocaleString('en-US', { minimumFractionDigits:2 });
+
+const STATUS_TEXT = {
+    'oa-approved': { label:'已通过 Approved', approver:'张总 (Finance Director)', cls:'done' },
+    'oa-rejected': { label:'已驳回 Rejected', approver:'张总 (Finance Director)', cls:'rej' },
+    'oa-pending':  { label:'审批中 Pending',  approver:'—', cls:'cur' },
+};
+const st = STATUS_TEXT[data.status] || STATUS_TEXT['oa-approved'];
+
+// Title
+const titleText = `${data.name} 费用报销 OA 审批：${data.period}`;
+document.getElementById('mainTitle').textContent = titleText;
+document.getElementById('cardTitle').textContent = `Expense Reimbursement Approval · ${data.period}`;
+document.getElementById('cardFrom').textContent = `From: ${data.email}`;
+document.title = `OA Expert · ${data.name} ${data.period}`;
+
+// Nav user (current operator = finance)
+// keep default 王彬 operator as in screenshot
+
+// Approval target k/v
+document.getElementById('kvTarget').innerHTML = `
+    <div class="kv-row"><span class="kv-k">报销单号</span><span class="kv-v" style="font-family:var(--mono);">${data.id}</span></div>
+    <div class="kv-row"><span class="kv-k">报销人</span><span class="kv-v">${data.name}</span></div>
+    <div class="kv-row"><span class="kv-k">所属部门</span><span class="kv-v">${data.dept}</span></div>
+    <div class="kv-row"><span class="kv-k">报销期间</span><span class="kv-v">${data.period}</span></div>
+    <div class="kv-row"><span class="kv-k">报销区域</span><span class="kv-v">${data.region}</span></div>
+    <div class="kv-row"><span class="kv-k">报销金额</span><span class="kv-v" style="color:var(--green);">${amtStr}</span></div>
+`;
+
+function jsonHtml(obj){
+    const json = JSON.stringify(obj, null, 2);
+    return json
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/"([^"]+)":/g, '<span class="jk">"$1"</span>:')
+        .replace(/: "([^"]*)"/g, ': <span class="js">"$1"</span>')
+        .replace(/: (\d+\.?\d*)/g, ': <span class="jn">$1</span>');
+}
+
+document.getElementById('jsonPayload').innerHTML = jsonHtml({
+    request_type: 'expense_reimbursement',
+    report_id: data.id,
+    applicant: { name: data.name, email: data.email, department: data.dept },
+    period: data.period,
+    region: data.region,
+    currency: { CN:'CNY', JP:'JPY', US:'USD' }[data.region] || 'CNY',
+    amount: amtNum,
+    finance_review: 'approved',
+});
+
+document.getElementById('jsonResult').innerHTML = jsonHtml({
+    oa_status: data.status,
+    result: st.label.split(' ')[1] || st.label,
+    approver: st.approver,
+    approved_amount: amtNum,
+    approved_at: data.status === 'oa-pending' ? null : '2026-04-02 14:30',
+    session_id: 'OA-' + data.id,
+});
+
+// Timeline
+const approved = data.status === 'oa-approved';
+const rejected = data.status === 'oa-rejected';
+const tlCheck = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
+const tlX = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+document.getElementById('timeline').innerHTML = `
+    <div class="tl done"><div class="dot">${tlCheck}</div><div><div class="tl-title">员工提交报销单</div><div class="tl-sub">${data.name} · ${data.email}</div></div></div>
+    <div class="tl done"><div class="dot">${tlCheck}</div><div><div class="tl-title">财务审核通过</div><div class="tl-sub">Finance review · ${amtStr}</div></div></div>
+    <div class="tl ${approved?'done':(rejected?'cur':'cur')}">
+        <div class="dot" ${rejected?'style="background:#dc2626;"':''}>${approved?tlCheck:(rejected?tlX:'')}</div>
+        <div><div class="tl-title">OA 审批 — ${st.label}</div><div class="tl-sub">审批人：${st.approver}</div></div>
+    </div>
+`;
+
+// Conversation list (active = current report)
+document.getElementById('convCount').textContent = '1 Total';
+document.getElementById('convList').innerHTML = `
+    <div class="ci active">
+        <div class="ci-top"><span class="ci-title">${titleText}</span><span class="ci-date">04-02</span></div>
+        <div class="ci-sub">${data.id} · ${amtStr} · ${st.label}</div>
+    </div>
+`;
+
+// Avatar initials
+document.getElementById('topAva').textContent = (data.name.trim()[0] || '财');
+</script>
+</body>
+</html>
