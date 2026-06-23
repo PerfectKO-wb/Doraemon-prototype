@@ -1,0 +1,2695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F Expert · Expense Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+    /* Notion-inspired neutral palette (Rams + Vinh + Frost lens) */
+    --bg-base: #ffffff;
+    --bg-container: #ffffff;
+    --bg-hover: #f1f1ef;
+    --bg-active: #e9e9e7;
+    --bg-subtle: #f7f7f5;
+    --bg-surface: #fbfbfa;
+    --text-default: #37352f;
+    --text-secondary: #6b6a64;
+    --text-tertiary: #91908b;
+    --text-disabled: #b0aea6;
+    --border-divider: #ededeb;
+    --border-default: #e0e0dd;
+    --border-strong: #c9c8c2;
+    --button-default: #37352f;
+    --primary: #2383e2;
+    --primary-dark: #0b6fc9;
+    --primary-bg: #e7f1fb;
+    --error: #e03e3e; --error-bg: #fdebec; --error-border: #f3c9c9;
+    --success: #0f7b6c; --success-bg: #eef5f2; --success-border: #c7e2da;
+    --warn: #cb912f; --warn-bg: #faf3e4; --warn-border: #ecdcae;
+    --teal-grad: #2383e2;
+    --shadow-xs: 0 0 0 1px rgba(15,15,15,.03);
+    --shadow-sm: rgba(15,15,15,.04) 0 0 0 1px, rgba(15,15,15,.05) 0 2px 4px;
+    --shadow-md: rgba(15,15,15,.04) 0 0 0 1px, rgba(15,15,15,.08) 0 3px 6px, rgba(15,15,15,.06) 0 9px 24px;
+    --shadow-lg: rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 6px 12px, rgba(15,15,15,.14) 0 14px 40px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+    --font-mono: ui-monospace, 'DM Mono', 'SFMono-Regular', 'Courier New', monospace;
+}
+@keyframes pulse-dot {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.55; transform:scale(.75); }
+}
+@keyframes row-in {
+    from { opacity:0; transform:translateY(5px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Helvetica Neue',sans-serif;
+    font-size:14px;color:var(--text-default);
+    background:var(--bg-base);height:100vh;overflow:hidden;
+    -webkit-font-smoothing:antialiased;letter-spacing:-.01em;
+}
+button{font-family:inherit;}
+.app{display:flex;width:100%;height:100vh;}
+
+/* ===== Sidebar ===== */
+/* ===== Narrow icon sidebar ===== */
+.sidebar {
+    width: 56px; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center;
+    height: 100vh;
+    background: var(--bg-subtle);
+    border-right: 1px solid var(--border-divider);
+}
+.sb-logo {
+    width: 34px; height: 34px; margin: 12px 0 4px;
+    border-radius: 8px;
+    background: #37352f;
+    display: grid; place-items: center; color: #fff;
+    flex-shrink: 0; cursor: pointer;
+}
+.sb-logo svg { width: 20px; height: 20px; }
+.sb-actions {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; padding: 4px 0 6px;
+}
+.sb-icon {
+    width: 36px; height: 36px; border: none; background: none;
+    border-radius: 8px; cursor: pointer;
+    display: grid; place-items: center;
+    color: var(--text-secondary); flex-shrink: 0;
+}
+.sb-icon:hover { background: var(--bg-hover); }
+.sb-icon svg { width: 17px; height: 17px; }
+.sb-sep {
+    width: 24px; height: 1px; background: var(--border-divider);
+    flex-shrink: 0; margin: 2px 0 4px;
+}
+.sb-agents {
+    flex: 1; overflow-y: auto;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 5px; padding: 4px 0;
+}
+.sb-agents::-webkit-scrollbar { display: none; }
+.sb-agent {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: none; cursor: pointer;
+    display: grid; place-items: center;
+    color: #fff; font-size: 11px; font-weight: 700; font-family: inherit;
+    flex-shrink: 0; position: relative;
+    transition: transform .12s, box-shadow .12s;
+}
+.sb-agent:hover { transform: scale(1.08); }
+.sb-agent.active { box-shadow: 0 0 0 2px var(--bg-container), 0 0 0 3.5px #10b981; }
+.sb-dot {
+    position: absolute; top: 1px; right: 1px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #22c55e; border: 1.5px solid var(--bg-container);
+    pointer-events: none;
+}
+.sb-bottom {
+    border-top: 1px solid var(--border-divider);
+    padding: 10px 0; width: 100%;
+    display: flex; justify-content: center; flex-shrink: 0;
+}
+.sb-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-size: 12px; font-weight: 600;
+    cursor: pointer; overflow: hidden;
+    background: #6b5bd2;
+}
+.nav-section {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 12px 6px; font-size: 11px; font-weight: 500;
+    color: var(--text-disabled); letter-spacing: 0.3px;
+}
+.nav-section .section-actions { display: flex; gap: 4px; }
+.nav-section .section-actions button {
+    width: 18px; height: 18px; display: grid; place-items: center;
+    border: none; background: none; border-radius: 4px;
+    color: var(--text-disabled); cursor: pointer;
+}
+.nav-section .section-actions button:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.nav-section .section-actions svg { width: 13px; height: 13px; }
+.nav-item {
+    display: flex; align-items: center; gap: 10px;
+    height: 34px; padding: 0 10px; border-radius: 8px; cursor: pointer;
+    color: var(--text-default); font-size: 13px; transition: background .12s;
+}
+.nav-item:hover { background: var(--bg-hover); }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-secondary); }
+.nav-item.active { background: var(--bg-active); }
+.nav-item .nav-badge {
+    margin-left: auto; background: #ef4444; color: #fff;
+    font-size: 10px; font-weight: 700; border-radius: 8px;
+    padding: 1px 6px; min-width: 18px; text-align: center;
+}
+/* Sub-nav (2nd level) */
+.nav-sub {
+    display: flex; align-items: center; gap: 8px;
+    height: 30px; padding: 0 10px 0 28px; border-radius: 6px; cursor: pointer;
+    color: var(--text-secondary); font-size: 12px; transition: background .12s;
+}
+.nav-sub:hover { background: var(--bg-hover); color: var(--text-default); }
+.nav-sub.active { background: var(--bg-active); color: var(--primary); font-weight: 600; }
+.nav-sub svg { width: 13px; height: 13px; flex-shrink: 0; color: inherit; }
+.nav-sub .nav-badge {
+    margin-left: auto; background: #ef4444; color: #fff;
+    font-size: 10px; font-weight: 700; border-radius: 8px;
+    padding: 1px 5px; min-width: 16px; text-align: center;
+}
+.agent-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: grid; place-items: center; color: #fff;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.icon-btn {
+    border: none; background: none; cursor: pointer;
+    border-radius: 5px; display: grid; place-items: center;
+    color: var(--text-secondary); padding: 0;
+}
+.icon-btn:hover { background: var(--bg-hover); color: var(--text-default); }
+
+/* ===== List panel (2nd-level nav + report list) ===== */
+.expert-avatar-lp {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: #0f7b6c;
+    display: grid; place-items: center; flex-shrink: 0;
+    color: #fff; font-size: 19px; font-weight: 700;
+    font-family: inherit;
+}
+.avatar-stack { display: flex; align-items: center; margin-top: 4px; }
+.avatar-chip {
+    width: 22px; height: 22px; border-radius: 11px;
+    border: 1.5px solid #fff; margin-left: -6px;
+    display: grid; place-items: center;
+    color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0;
+}
+.avatar-chip:first-child { margin-left: 0; }
+.avatar-more {
+    height: 22px; min-width: 28px; border-radius: 11px;
+    border: 1.5px solid #fff; margin-left: -6px;
+    background: var(--bg-active); padding: 0 6px;
+    display: grid; place-items: center;
+    font-size: 11px; color: var(--text-secondary); font-weight: 500;
+}
+.chip {
+    height: 32px; padding: 0 12px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border-default); background: var(--bg-container); font-family: inherit;
+    color: var(--text-default);
+}
+.chip:hover { background: var(--bg-hover); }
+.chip.solid { background: var(--button-default); color: #fff; border-color: var(--button-default); }
+.list-filter-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.lp-nav-section { font-size: 11px; font-weight: 600; color: var(--text-disabled);
+    letter-spacing: .4px; padding: 10px 16px 6px; text-transform: uppercase; }
+.list-card {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; cursor: pointer; position: relative; transition: background .1s;
+}
+.list-card + .list-card { border-top: 1px solid var(--border-divider); }
+.list-card:hover { background: var(--bg-hover); }
+.list-card.active { background: var(--bg-active); }
+.list-card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--bg-subtle); display: grid; place-items: center;
+    color: var(--text-secondary); flex-shrink: 0;
+}
+.list-card-icon svg { width: 20px; height: 20px; }
+.list-card-content { flex: 1; min-width: 0; }
+.list-card-title {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 14px; font-weight: 600; line-height: 20px;
+}
+.list-card-title .chev { width: 14px; height: 14px; color: var(--text-disabled); }
+.list-card-desc { font-size: 12px; line-height: 18px; color: var(--text-secondary); margin-top: 2px; }
+.list-card-meta {
+    font-size: 11px; color: var(--text-disabled); margin-top: 6px;
+    display: flex; align-items: center; gap: 6px;
+}
+.list-card-meta svg { width: 12px; height: 12px; }
+.list-card-dot {
+    position: absolute; top: 18px; right: 16px;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--primary);
+}
+
+/* ===== List panel ===== */
+.list-panel{
+    width:340px;flex-shrink:0;display:flex;flex-direction:column;
+    height:100vh;background:var(--bg-container);
+    border-right:1px solid var(--border-divider);
+}
+.lp-header{
+    padding:10px 16px 14px;border-bottom:1px solid var(--border-divider);
+}
+.lp-expert-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
+.lp-expert-title-col { flex: 1; min-width: 0; }
+.lp-expert-title {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 17px; font-weight: 700; line-height: 24px;
+}
+.list-count {
+    font-size: 12px; color: var(--text-secondary);
+    padding: 10px 16px 6px;
+}
+.list-count strong { color: var(--text-default); font-weight: 700; }
+.lp-search{
+    display:flex;align-items:center;gap:8px;
+    height:34px;padding:0 10px;
+    border:1px solid var(--border-default);border-radius:8px;
+    background:var(--bg-container);
+}
+.lp-search svg{width:14px;height:14px;color:var(--text-disabled);flex-shrink:0;}
+.lp-search input{
+    flex:1;border:none;outline:none;
+    font:inherit;font-size:13px;
+    color:var(--text-default);background:transparent;
+}
+.lp-search input::placeholder{color:var(--text-disabled);}
+.lp-tabs{display:flex;border-bottom:1px solid var(--border-divider);}
+.lp-tab{
+    padding:0 16px;height:48px;border:none;background:none;font:inherit;
+    font-size:13px;font-weight:500;color:var(--text-secondary);
+    cursor:pointer;position:relative;transition:color .15s; white-space:nowrap;
+}
+.lp-tab:hover{color:var(--text-default);}
+.lp-tab.active{color:var(--text-default);font-weight:600;}
+.lp-tab.active::after{
+    content:'';position:absolute;bottom:0;left:12px;right:12px;
+    height:2px;background:var(--text-default);
+    border-radius:2px 2px 0 0;
+}
+.lp-tab .tc{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:18px;height:16px;padding:0 5px;border-radius:4px;
+    background:var(--bg-active);font-size:10px;font-weight:600;
+    color:var(--text-secondary);margin-left:5px;font-family:var(--font-mono);
+}
+.lp-tab.active .tc{background:var(--bg-active);color:var(--text-default);}
+.lp-list{flex:1;overflow-y:auto;}
+.lp-list::-webkit-scrollbar{width:4px;}
+.lp-list::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:2px;}
+.report-item{
+    display:flex;align-items:center;gap:10px;
+    padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--border-divider);
+    transition:background .15s;
+}
+.report-item:hover{background:var(--bg-hover);}
+.report-item.active{background:var(--bg-active);box-shadow:inset 2px 0 0 var(--text-default);}
+.ri-avatar{
+    width:34px;height:34px;border-radius:8px;flex-shrink:0;
+    display:grid;place-items:center;color:#fff;
+    font-size:13px;font-weight:600;
+}
+.ri-info{flex:1;min-width:0;}
+.ri-name{font-size:13px;font-weight:700;margin-bottom:2px;}
+.ri-meta{font-size:11px;color:var(--text-secondary);}
+.ri-right{text-align:right;flex-shrink:0;}
+.ri-amount{font-size:12px;font-weight:700;margin-bottom:3px;}
+.tag{
+    display:inline-flex;align-items:center;
+    height:20px;padding:0 8px;border-radius:4px;
+    font-size:12px;font-weight:500;white-space:nowrap;
+    line-height:1;font-family:inherit;
+}
+.tag.draft          { background:#e7e7e4; color:#4f4d47; }
+.tag.pending,
+.tag.oa-pending     { background:#fdecc8; color:#7a5314; }
+.tag.reviewing      { background:#fadec9; color:#8a4413; }
+.tag.approved,
+.tag.oa-approved    { background:#dbeddb; color:#1c5239; }
+.tag.rejected,
+.tag.oa-rejected    { background:#ffe2dd; color:#9b211b; }
+.tag.needs-revision { background:#e8deee; color:#5e3a82; }
+.tag.region-cn      { background:#d3e5ef; color:#1c4a73; }
+.tag.region-jp      { background:#f5e0e9; color:#8a2f55; }
+.tag.region-us      { background:#dbeddb; color:#1c5239; }
+.tag.region-tw      { background:#fdecc8; color:#8a5a1c; }
+.rv-col-region { width:70px; text-align:center; }
+/* JP review table */
+.jp-rv-table { width:100%; border-collapse:collapse; font-size:13px; table-layout:fixed; }
+.jp-rv-table th { font-size:11px; font-weight:600; color:var(--text-secondary); padding:8px 12px; border-bottom:1.5px solid var(--border-divider); background:var(--bg-subtle); text-align:left; white-space:normal; }
+.jp-rv-table td { padding:10px 12px; border-bottom:1px solid var(--border-divider); vertical-align:middle; }
+.jp-rv-table tbody tr:hover td { background:var(--bg-hover); }
+.jp-rv-table .num { text-align:center; color:var(--text-disabled); font-size:11px; font-family:var(--font-mono); font-weight:600; }
+.jp-rv-table .amt { text-align:right; font-weight:700; font-family:var(--font-mono); }
+.vc-link {
+    display:inline-flex; align-items:center; gap:5px;
+    height:26px; padding:0 10px; border:1px solid var(--border-default);
+    border-radius:6px; background:var(--bg-container); cursor:pointer;
+    font:inherit; font-size:12px; font-weight:500; color:var(--text-default);
+    transition:all .15s; white-space:nowrap;
+}
+.vc-link:hover { background:var(--bg-hover); border-color:var(--border-strong); }
+.vc-link svg { color:var(--text-secondary); flex-shrink:0; }
+
+/* ===== Detail area ===== */
+.detail-area{
+    flex:1;display:flex;flex-direction:column;overflow:hidden;
+}
+.dp-header{
+    height:58px;display:flex;align-items:center;
+    padding:0 20px;border-bottom:1px solid var(--border-divider);
+    background:var(--bg-container);flex-shrink:0;
+    justify-content:flex-end;
+    box-shadow:0 1px 0 var(--border-divider);
+}
+.dp-actions{display:flex;align-items:center;gap:8px;}
+.btn-approve{
+    height:32px;padding:0 14px;border-radius:6px;border:1px solid #176f4a;
+    background:#1f9d61;color:#fff;
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+    box-shadow:var(--shadow-xs);transition:background .15s;
+}
+.btn-approve:hover{background:#188a53;}
+.btn-approve svg{width:13px;height:13px;}
+.btn-reject{
+    height:32px;padding:0 14px;border-radius:6px;
+    border:1px solid var(--error-border);background:var(--error-bg);
+    color:var(--error);font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+    transition:all .15s;
+}
+.btn-reject:hover{background:#fbdada;border-color:var(--error);}
+.btn-ghost{
+    height:32px;padding:0 14px;border-radius:6px;
+    border:1px solid var(--border-default);background:var(--bg-container);
+    color:var(--text-default);font:inherit;font-size:13px;font-weight:500;cursor:pointer;
+    transition:all .15s ease;
+}
+.btn-ghost:hover{background:var(--bg-hover);border-color:var(--border-strong);}
+
+/* ===== Content split ===== */
+/* ===== 3rd-column two-state layout ===== */
+#reviewListView {
+    display:flex; flex-direction:column; flex:1; overflow:hidden;
+}
+.rv-header {
+    position:relative;
+    height:58px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 24px; border-bottom:1px solid var(--border-divider);
+    background:var(--bg-container); flex-shrink:0;
+    box-shadow:0 1px 0 var(--border-divider);
+}
+.rv-title { font-size:16px; font-weight:700; letter-spacing:-.2px; }
+.seg-toggle {
+    position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);
+    display:inline-flex; align-items:center; gap:4px;
+    background:var(--bg-active); border-radius:10px; padding:4px;
+}
+.seg-item {
+    display:inline-flex; align-items:center; gap:7px;
+    height:32px; padding:0 18px; border-radius:8px;
+    font-size:13px; font-weight:600; color:var(--text-secondary);
+    text-decoration:none; cursor:pointer;
+    transition:background .15s, color .15s, box-shadow .15s;
+}
+.seg-item svg { width:15px; height:15px; }
+.seg-item:hover { color:var(--text-default); }
+.seg-item.active {
+    background:var(--bg-container); color:var(--text-default);
+    box-shadow:0 1px 2px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.05);
+}
+.rv-toolbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 20px; border-bottom:1px solid var(--border-divider);
+    background:var(--bg-container); flex-shrink:0; height:48px; gap:12px;
+}
+.rv-search {
+    display:flex; align-items:center; gap:6px;
+    background:var(--bg-container); border:1px solid var(--border-default);
+    border-radius:8px; padding:0 10px; height:34px;
+}
+.rv-search svg { width:14px; height:14px; color:var(--text-disabled); flex-shrink:0; }
+.rv-search input {
+    border:none; background:none; outline:none; font:inherit; font-size:13px;
+    color:var(--text-default); width:140px;
+}
+.rv-search input::placeholder { color:var(--text-disabled); }
+.rv-list { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:10px; }
+.rv-list::-webkit-scrollbar { width:5px; }
+.rv-list::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+/* ===== Review list table ===== */
+.er-table-wrap-rv { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+.er-table-scroll-rv { flex:1; overflow-y:auto; }
+.er-table-scroll-rv::-webkit-scrollbar { width:5px; }
+.er-table-scroll-rv::-webkit-scrollbar-thumb { background:#d4d8e0; border-radius:3px; }
+.er-table-rv { width:100%; border-collapse:collapse; font-size:13px; }
+.er-table-rv thead th {
+    padding:0 14px; height:36px; text-align:left;
+    font-size:11px; font-weight:500; letter-spacing:.01em;
+    color:var(--text-tertiary);
+    background:var(--bg-subtle); white-space:nowrap;
+    position:sticky; top:0; z-index:1;
+    border-bottom:1px solid var(--border-divider);
+}
+.er-table-rv tbody tr { border-bottom:1px solid var(--border-divider); cursor:pointer; transition:background .12s; animation:row-in .2s ease-out both; }
+.er-table-rv tbody tr:nth-child(1) { animation-delay:.03s; }
+.er-table-rv tbody tr:nth-child(2) { animation-delay:.06s; }
+.er-table-rv tbody tr:nth-child(3) { animation-delay:.09s; }
+.er-table-rv tbody tr:nth-child(4) { animation-delay:.12s; }
+.er-table-rv tbody tr:nth-child(5) { animation-delay:.15s; }
+.er-table-rv tbody tr:last-child { border-bottom:none; }
+.er-table-rv tbody tr:hover td { background:var(--bg-hover); }
+.er-table-rv tbody tr.tr-selected td { background:var(--primary-bg); }
+.er-table-rv td { padding:12px 14px; vertical-align:middle; }
+.rv-col-check  { width:42px; }
+.rv-col-emp    { min-width:160px; }
+.rv-col-period { width:105px; }
+.rv-col-sub    { width:105px; color:var(--text-secondary); font-size:12px; }
+.rv-col-amt    { width:130px; text-align:right; font-weight:700; font-family:var(--font-mono); }
+.rv-col-oa-status { width:110px; }
+.rv-col-link   { width:120px; }
+.oa-link {
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:12px; font-weight:600; color:var(--primary);
+    text-decoration:none; white-space:nowrap;
+}
+.oa-link:hover { text-decoration:underline; }
+.oa-link svg { flex-shrink:0; }
+.rv-emp-name   { font-weight:600; color:var(--text-default); }
+.rv-emp-sub    { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.rv-row-check  {
+    width:16px; height:16px; border-radius:4px;
+    border:1.5px solid var(--border-strong); background:var(--bg-container);
+    display:grid; place-items:center; cursor:pointer; transition:all .12s;
+}
+.rv-row-check.checked { background:var(--primary); border-color:var(--primary); }
+.rv-row-check svg { display:none; }
+.rv-row-check.checked svg { display:block; }
+.rv-card {
+    background:var(--bg-container); border:1px solid var(--border-divider);
+    border-radius:10px; padding:14px 16px; cursor:pointer;
+    display:flex; align-items:center; gap:12px; transition:all .15s;
+    box-shadow:var(--shadow-xs);
+}
+.rv-card:hover { border-color:var(--border-strong); background:var(--bg-hover); }
+.rv-card.active { border-color:var(--border-strong); background:var(--primary-bg); }
+.rv-card-avatar {
+    width:38px; height:38px; border-radius:8px; flex-shrink:0;
+    display:grid; place-items:center; color:#fff;
+    font-size:15px; font-weight:600;
+}
+.rv-card-info { flex:1; min-width:0; }
+.rv-card-name { font-size:14px; font-weight:700; margin-bottom:3px; }
+.rv-card-meta { font-size:11px; color:var(--text-secondary); display:flex; gap:10px; }
+.rv-card-right { text-align:right; flex-shrink:0; }
+.rv-card-amount { font-size:14px; font-weight:700; margin-bottom:4px; letter-spacing:-.3px; }
+
+#reviewDetailView {
+    display:none; flex-direction:column; flex:1; overflow:hidden;
+}
+.dp-back {
+    display:flex; align-items:center; gap:6px; padding:0 20px;
+    height:42px; border-bottom:1px solid var(--border-divider);
+    background:var(--bg-subtle); flex-shrink:0;
+}
+.dp-back button {
+    display:flex; align-items:center; gap:4px; border:none; background:none;
+    font:inherit; font-size:12px; color:var(--text-secondary); cursor:pointer; padding:0;
+}
+.dp-back button:hover { color:var(--text-default); }
+
+.content-split{
+    flex:1;display:flex;overflow:hidden;
+}
+/* Report side */
+.report-side{
+    flex:1;overflow-y:auto;padding:20px;min-width:0;
+}
+.report-side::-webkit-scrollbar{width:5px;}
+.report-side::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+
+/* Docs side */
+.docs-side{
+    width:360px;flex-shrink:0;border-left:1px solid var(--border-divider);
+    display:flex;flex-direction:column;background:var(--bg-container);
+    overflow:hidden;
+}
+.docs-tabs{
+    display:flex;gap:0;border-bottom:1px solid var(--border-divider);
+    overflow-x:auto;flex-shrink:0;
+    background:var(--bg-subtle);
+}
+.docs-tabs::-webkit-scrollbar{height:3px;}
+.docs-tabs::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:2px;}
+.doc-tab{
+    flex-shrink:0;height:42px;padding:0 14px;border:none;background:none;
+    font:inherit;font-size:12px;font-weight:500;color:var(--text-secondary);
+    cursor:pointer;white-space:nowrap;position:relative;transition:color .15s;
+}
+.doc-tab:hover{color:var(--text-default);}
+.doc-tab.active{color:var(--text-default);font-weight:600;}
+.doc-tab.active::after{
+    content:'';position:absolute;bottom:0;left:8px;right:8px;
+    height:2px;background:var(--text-default);border-radius:2px 2px 0 0;
+}
+.doc-preview{
+    flex:1;overflow-y:auto;display:flex;flex-direction:column;
+    background:var(--bg-subtle);
+}
+.doc-preview::-webkit-scrollbar{width:5px;}
+.doc-preview::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+
+/* Bill screenshot mock */
+.bill-mock{
+    margin:12px;background:#fff;border-radius:12px;
+    border:1px solid var(--border-divider);overflow:hidden;
+    box-shadow:var(--shadow-md);
+}
+.bill-mock-header{
+    padding:14px 14px 12px;text-align:center;
+    background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+    color:#fff;
+}
+.bill-mock-header .bm-app{font-size:11px;opacity:.85;margin-bottom:2px;font-weight:600;letter-spacing:.3px;}
+.bill-mock-header .bm-title{font-size:14px;font-weight:700;}
+.bill-mock-header .bm-period{font-size:11px;opacity:.8;margin-top:2px;}
+.bill-mock-header .bm-amount{font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-.5px;}
+.bill-group{border-bottom:1px solid var(--border-divider);}
+.bill-group-label{
+    padding:7px 14px;font-size:10px;font-weight:700;
+    color:var(--text-secondary);background:var(--bg-subtle);
+    letter-spacing:.4px;text-transform:uppercase;
+}
+.bill-row{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 14px;border-bottom:1px solid var(--border-divider);
+    transition:background .12s;
+}
+.bill-row:last-child{border-bottom:none;}
+.bill-row:hover{background:var(--bg-hover);}
+.br-icon{
+    width:32px;height:32px;border-radius:10px;flex-shrink:0;
+    display:grid;place-items:center;font-size:14px;
+    background:var(--bg-subtle);
+}
+.br-info{flex:1;min-width:0;}
+.br-merchant{font-size:12px;font-weight:600;}
+.br-date{font-size:11px;color:var(--text-secondary);margin-top:1px;}
+.br-amount{font-size:13px;font-weight:700;color:#0f172a;flex-shrink:0;}
+
+/* Invoice mock */
+.invoice-mock{
+    margin:12px;background:#fff;border-radius:12px;
+    border:1px solid var(--border-divider);padding:16px;
+    box-shadow:var(--shadow-md);
+}
+.im-top{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    margin-bottom:12px;padding-bottom:10px;
+    border-bottom:2px solid #0f172a;
+}
+.im-type{font-size:10px;color:var(--text-secondary);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px;}
+.im-title{font-size:15px;font-weight:800;color:#0f172a;}
+.im-code{font-size:10px;color:var(--text-secondary);margin-top:4px;}
+.im-stamp{
+    width:52px;height:52px;border-radius:50%;
+    border:2px solid #dc2626;display:grid;place-items:center;
+    color:#dc2626;font-size:9px;font-weight:700;text-align:center;
+    line-height:1.3;flex-shrink:0;
+}
+.im-field{display:flex;gap:8px;margin-bottom:6px;font-size:11px;}
+.im-label{color:var(--text-secondary);width:90px;flex-shrink:0;}
+.im-value{font-weight:600;flex:1;}
+.im-divider{height:1px;background:var(--border-divider);margin:10px 0;}
+.im-items{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px;}
+.im-items th{border:1px solid var(--border-default);padding:5px 6px;background:var(--bg-subtle);font-weight:700;text-align:center;}
+.im-items td{border:1px solid var(--border-divider);padding:5px 6px;text-align:center;}
+.im-total-row{
+    display:flex;justify-content:space-between;
+    padding-top:8px;border-top:2px solid #0f172a;
+    font-weight:800;font-size:13px;
+}
+.im-warn-box{
+    margin-top:10px;padding:8px 10px;border-radius:8px;
+    background:#fffbeb;border:1px solid #fde68a;
+    font-size:11px;color:#92400e;font-weight:500;
+    display:flex;align-items:flex-start;gap:6px;
+}
+.im-warn-box svg{width:13px;height:13px;flex-shrink:0;margin-top:1px;}
+
+/* ===== Report table (same as employee Step 4) ===== */
+.report-meta{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+    padding:16px 18px;background:var(--bg-subtle);
+    border:1px solid var(--border-divider);border-radius:10px;
+    margin-bottom:16px;
+}
+.rm-field{}
+.rm-label{font-size:11px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+.rm-value{font-size:14px;font-weight:700;}
+
+/* Submitter info bar (matches employee report Step 2) */
+.uploader-bar{
+    display:flex;align-items:center;gap:14px;
+    margin:0 0 16px;padding:12px 16px;
+    background:var(--bg-subtle);
+    border:1px solid var(--border-divider);border-radius:10px;
+}
+.ub-avatar{
+    width:38px;height:38px;flex-shrink:0;border-radius:50%;
+    display:grid;place-items:center;font-size:14px;font-weight:500;color:#fff;
+    background:#787774;
+}
+.ub-fields{display:flex;flex-wrap:wrap;gap:6px 36px;flex:1;min-width:0;}
+.ub-field{display:flex;flex-direction:column;gap:2px;}
+.ub-label{font-size:10px;font-weight:600;color:var(--text-disabled);text-transform:uppercase;letter-spacing:.04em;}
+.ub-val{font-size:13px;font-weight:600;color:var(--text-default);}
+
+.report-table-wrap{
+    background:var(--bg-container);border:1px solid var(--border-divider);
+    border-radius:10px;overflow:hidden;box-shadow:var(--shadow-xs);
+}
+.rpt-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+.rpt-table th{
+    background:var(--bg-subtle);padding:8px 12px;text-align:left;
+    font-size:11px;font-weight:600;color:var(--text-secondary);
+    border-bottom:1px solid var(--border-divider);letter-spacing:.2px;
+    line-height:1.4;
+}
+.rpt-table th .th-sub{
+    display:block;font-size:10px;font-weight:400;color:var(--text-disabled);
+    letter-spacing:0;margin-top:1px;
+}
+.rpt-table td{
+    padding:9px 12px;border-bottom:1px solid var(--border-divider);
+    vertical-align:middle;
+}
+.rpt-table tr:last-child td{border-bottom:none;}
+.rpt-table tr.flagged td{background:#fef2f2;}
+.rpt-table tr.no-inv td{background:#fffbeb;}
+.rpt-table .row-flag-btn{
+    width:24px;height:24px;border:1.5px solid var(--border-default);
+    border-radius:6px;background:none;cursor:pointer;
+    display:grid;place-items:center;color:var(--text-disabled);
+    transition:all .15s;
+}
+.rpt-table .row-flag-btn:hover{border-color:#dc2626;color:#dc2626;background:#fef2f2;}
+.rpt-table .row-flag-btn.on{border-color:#dc2626;color:#dc2626;background:#fef2f2;}
+.rpt-table .row-flag-btn svg{width:10px;height:10px;}
+/* Category select */
+.cat-cell { display:flex; align-items:center; gap:5px; }
+.cat-select {
+    border:1px solid var(--border-default); border-radius:6px;
+    padding:3px 6px; font:inherit; font-size:11px;
+    background:var(--bg-container); color:var(--text-default);
+    cursor:pointer; flex:1; min-width:0;
+    transition:border-color .15s;
+}
+.cat-select:hover { border-color:var(--primary); }
+.cat-select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(35,131,226,.14); }
+.cat-select.ai-pre { border-color:#a78bfa; background:#faf5ff; }
+.cat-ai-badge {
+    font-size:9px; font-weight:800; padding:1px 5px; border-radius:4px;
+    background:#ede9fe; color:#7c3aed; white-space:nowrap; flex-shrink:0;
+    letter-spacing:.04em;
+}
+.report-total{
+    padding:14px 18px;border-top:2px solid var(--border-divider);
+    background:var(--bg-subtle);
+    display:flex;align-items:center;justify-content:flex-end;gap:12px;
+}
+.total-label{font-size:13px;font-weight:600;color:var(--text-secondary);}
+.total-amount{font-size:22px;font-weight:700;color:var(--text-default);letter-spacing:-.5px;}
+
+.flag-summary{
+    display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;
+}
+.flag-chip{
+    display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;
+    font-size:11px;font-weight:600;cursor:pointer;
+    background:var(--error-bg);border:1px solid var(--error-border);color:var(--error);
+    transition:all .15s;
+}
+.flag-chip:hover{background:#fbdada;}
+.flag-chip svg{width:10px;height:10px;}
+
+/* OA Package modal */
+.oap-modal { max-height:90vh; overflow-y:auto; }
+.oap-stats {
+    display:flex; gap:12px; margin:14px 0 16px;
+    background:var(--bg-subtle); border:1px solid var(--border-divider);
+    border-radius:10px; padding:12px 16px;
+}
+.oap-stat { flex:1; text-align:center; }
+.oap-stat-val { font-size:18px; font-weight:700; letter-spacing:-.5px; color:var(--text-default); }
+.oap-stat-lbl { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.oap-copy-btn {
+    display:flex; align-items:center; gap:6px;
+    padding:0 14px; height:34px; border-radius:8px; border:1px solid var(--border-default);
+    background:var(--bg-container); font:inherit; font-size:12px; font-weight:600;
+    color:var(--text-default); cursor:pointer; white-space:nowrap; transition:all .15s; flex-shrink:0;
+}
+.oap-copy-btn:hover { border-color:var(--border-strong); background:var(--bg-hover); }
+.oap-copy-btn.copied { border-color:var(--success-border); color:var(--success); background:var(--success-bg); }
+.oap-csv-btn {
+    display:flex; align-items:center; gap:6px;
+    padding:0 16px; height:34px; border-radius:6px; border:1px solid var(--primary-dark);
+    background:var(--primary); color:#fff; font:inherit; font-size:13px; font-weight:600;
+    cursor:pointer; transition:background .15s;
+}
+.oap-csv-btn:hover { background:var(--primary-dark); }
+.oap-csv-btn svg { flex-shrink:0; }
+/* OA package table */
+.oap-tbl { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+.oap-tbl thead tr { background:var(--bg-subtle); border-bottom:1px solid var(--border-divider); }
+.oap-tbl th { padding:8px 12px; text-align:left; font-weight:600; color:var(--text-secondary); white-space:normal; }
+.oap-tbl td { padding:8px 12px; border-bottom:1px solid var(--border-divider); vertical-align:middle; }
+.oap-tbl tr:last-child td { border-bottom:none; }
+.oap-tbl tr:hover td { background:var(--bg-hover); }
+.oap-tbl-total td { font-weight:700; background:var(--bg-subtle); border-top:2px solid var(--border-divider) !important; }
+
+/* OA action bar */
+#oaActionBar {
+    flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding:10px 20px; border-top:1px solid var(--border-divider);
+    background:var(--bg-subtle);
+    box-shadow:0 -1px 0 var(--border-divider);
+}
+.oa-bar-left {
+    display:flex; align-items:center; gap:8px;
+    font-size:13px; color:var(--text-secondary);
+}
+.oa-bar-left svg { color:var(--primary); flex-shrink:0; }
+/* Approved tab checkboxes */
+.rv-card-check {
+    width:16px; height:16px; border-radius:4px;
+    border:1.5px solid var(--border-strong); background:var(--bg-container);
+    display:grid; place-items:center; flex-shrink:0; cursor:pointer; transition:all .12s;
+}
+.rv-card-check.checked {
+    background:var(--primary); border-color:var(--primary);
+}
+.rv-card-check.checked svg { display:block; }
+.rv-card-check svg { display:none; }
+.rv-card.selectable { cursor:default; }
+.rv-card.selectable:hover { border-color:var(--border-default); box-shadow:var(--shadow-xs); transform:none; }
+.rv-card.selectable.selected { border-color:var(--border-strong); background:var(--primary-bg); }
+/* OA report list */
+.oa-report-row {
+    display:flex; align-items:center; gap:10px;
+    padding:7px 0; border-bottom:1px solid var(--border-divider); font-size:12px;
+}
+.oa-report-row:last-child { border-bottom:none; }
+.oa-report-avatar {
+    width:24px; height:24px; border-radius:7px; color:#fff;
+    font-size:11px; font-weight:700; display:grid; place-items:center; flex-shrink:0;
+}
+
+/* reject modal */
+.modal-overlay{
+    position:fixed;inset:0;background:rgba(15,15,15,.4);
+    z-index:1000;display:none;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+    background:#fff;border-radius:10px;width:480px;
+    box-shadow:var(--shadow-lg);padding:24px;
+}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:6px;letter-spacing:-.2px;}
+.modal-sub{font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;}
+.flag-list-preview{
+    background:var(--error-bg);border:1px solid var(--error-border);
+    border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;
+}
+.flag-list-preview .flp-title{font-weight:700;color:var(--error);margin-bottom:6px;}
+.flag-list-preview li{color:#7f1d1d;padding:2px 0;padding-left:12px;list-style:disc;list-style-position:inside;}
+.modal textarea{
+    width:100%;border:1px solid var(--border-default);border-radius:8px;
+    padding:10px 12px;font:inherit;font-size:13px;resize:vertical;
+    min-height:80px;outline:none;transition:border-color .15s;
+}
+.modal textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(35,131,226,.14);}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+
+.toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:#37352f;color:#fff;padding:11px 18px;border-radius:8px;
+    font-size:13px;font-weight:500;opacity:0;transition:all .25s;
+    pointer-events:none;z-index:9999;
+    box-shadow:var(--shadow-lg);
+}
+.toast.visible{opacity:1;transform:translateX(-50%) translateY(0);}
+.empty-tip{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    height:100%;color:var(--text-disabled);gap:12px;
+}
+.empty-tip svg{width:38px;height:38px;}
+.empty-tip p{font-size:13px;font-weight:500;}
+
+/* ===== Document preview modal ===== */
+.doc-modal-overlay {
+    position:fixed; inset:0; background:rgba(15,15,15,.4);
+    z-index:9000; display:none; align-items:center; justify-content:center;
+}
+.doc-modal-overlay.open { display:flex; }
+.doc-modal {
+    width:700px; max-width:92vw; max-height:88vh;
+    background:var(--bg-container); border-radius:12px; overflow:hidden;
+    box-shadow:var(--shadow-lg); display:flex; flex-direction:column;
+    animation:modalIn .18s ease;
+}
+@keyframes modalIn { from { transform:scale(.94) translateY(12px); opacity:0; } to { transform:none; opacity:1; } }
+.doc-modal-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; border-bottom:1px solid var(--border-divider);
+    background:var(--bg-subtle); flex-shrink:0; gap:12px;
+}
+.doc-modal-title-wrap { display:flex; align-items:center; gap:8px; min-width:0; }
+.doc-modal-tag {
+    font-size:10px; font-weight:700; padding:2px 7px; border-radius:5px;
+    flex-shrink:0; text-transform:uppercase; letter-spacing:.4px;
+}
+.doc-modal-close {
+    border:none; background:none; cursor:pointer; color:var(--text-secondary);
+    padding:5px; border-radius:7px; display:grid; place-items:center;
+    transition:background .12s; flex-shrink:0;
+}
+.doc-modal-close:hover { background:var(--bg-hover); color:var(--text-default); }
+.doc-modal-body { flex:1; overflow-y:auto; padding:20px; }
+.doc-modal-body::-webkit-scrollbar { width:5px; }
+.doc-modal-body::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+.doc-modal-meta {
+    display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;
+    padding:10px 14px; background:var(--bg-subtle); border-radius:10px;
+    border:1px solid var(--border-divider); font-size:12px;
+}
+.doc-modal-meta-item { display:flex; flex-direction:column; gap:2px; }
+.doc-modal-meta-label { font-size:10px; font-weight:700; color:var(--text-disabled); text-transform:uppercase; }
+.doc-modal-meta-value { font-weight:600; color:var(--text-default); }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar">
+    <div class="sb-logo" title="Doraemon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="sb-actions">
+        <button class="sb-icon" title="New Chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button class="sb-icon" title="Workspace">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </button>
+    </div>
+    <div class="sb-sep"></div>
+    <div class="sb-agents">
+        <button class="sb-agent" style="background:#ef4444" title="Alarm Agent">A<span class="sb-dot"></span></button>
+        <button class="sb-agent" style="background:#1e3a5f" title="D Expert">D</button>
+        <button class="sb-agent active" style="background:#0f7b6c" title="F Expert">F</button>
+        <button class="sb-agent" style="background:#f43f5e" title="HR Agent"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></button>
+        <button class="sb-agent" style="background:#f97316" title="X Agent">X</button>
+        <button class="sb-agent" style="background:#ec4899" title="P Agent"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="7" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="5" cy="17" r="2"/><circle cx="19" cy="17" r="2"/></svg></button>
+        <button class="sb-agent" style="background:#2563eb" title="Tech Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
+        <button class="sb-agent" style="background:#4d7c0f" title="Ops Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+        <button class="sb-agent" style="background:#0d9488" title="CS Agent">CS</button>
+        <button class="sb-agent" style="background:#16a34a" title="Partner Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <button class="sb-agent" style="background:#ea580c" title="Analytics Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+        <button class="sb-agent" style="background:#7c3aed" title="Voice Agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+    </div>
+    <div class="sb-bottom">
+        <div class="sb-avatar" title="王 彬">王</div>
+    </div>
+</aside>
+
+<!-- ===== List panel (F Expert nav + report list) ===== -->
+<div class="list-panel">
+    <div class="lp-header">
+        <div class="lp-expert-row">
+            <div class="expert-avatar-lp">F</div>
+            <div class="lp-expert-title-col">
+                <div class="lp-expert-title">
+                    F Expert
+                    <svg style="width:16px;height:16px;color:var(--text-disabled);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </div>
+                <div class="avatar-stack">
+                    <div class="avatar-chip" style="background:#1C64F2;">i</div>
+                    <div class="avatar-chip" style="background:#F59E0B;">A</div>
+                    <div class="avatar-chip" style="background:#8B5CF6;">S</div>
+                    <div class="avatar-chip" style="background:#EC4899;">D</div>
+                    <div class="avatar-chip" style="background:#10B981;">L</div>
+                    <div class="avatar-more">+99</div>
+                </div>
+            </div>
+        </div>
+        <div class="list-filter-row">
+            <button class="chip solid">Waiting</button>
+        </div>
+        <div class="lp-search" style="margin-top:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="search">
+        </div>
+    </div>
+    <div class="list-count"><strong>103</strong> total</div>
+
+    <!-- Navigation items -->
+    <div class="lp-nav-items" style="border-bottom:1px solid var(--border-divider);">
+        <div class="list-card" onclick="location.href='F-PAP-PAYMENT-REQUEST.html'">
+            <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
+            <div class="list-card-content">
+                <div class="list-card-title">Invoice Collection <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Submit payment request</div>
+                <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending · 26 invoices</div>
+            </div>
+            <span class="list-card-dot"></span>
+        </div>
+        <div class="list-card" onclick="location.href='F-PAP-PAYMENT-REVIEW.html'">
+            <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11.5" cy="14.5" r="2.5"/><line x1="15" y1="18" x2="13.5" y2="16.5"/></svg></div>
+            <div class="list-card-content">
+                <div class="list-card-title">Invoice Review <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Review and approve invoices</div>
+                <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending · 18 invoices</div>
+            </div>
+            <span class="list-card-dot"></span>
+        </div>
+        <div class="list-card" style="display:none;" onclick="location.href='F-PAP-EXPENSE-REPORT.html'">
+            <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+            <div class="list-card-content">
+                <div class="list-card-title">Expense Report <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Submit monthly expense reports</div>
+                <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Draft · 2 reports</div>
+            </div>
+        </div>
+        <div class="list-card active" style="display:none;">
+            <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></div>
+            <div class="list-card-content">
+                <div class="list-card-title">Expense Review <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div class="list-card-desc">Finance review of expense reports</div>
+                <div class="list-card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending · 2 reports</div>
+            </div>
+        </div>
+        <div class="list-card" onclick="location.href='F-PAP-JE-REVIEW-CHAT.html'">
+            <div class="list-card-content">
+                <div class="list-card-title" style="font-size:13px;">JE-DRAFT-2026-0502</div>
+                <div class="list-card-desc">INV-2026-089 · JPY</div>
+            </div>
+            <span class="list-card-dot" style="background:#d97706;top:14px;"></span>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===== Main area (3rd column) ===== -->
+<div class="detail-area">
+
+    <!-- State 1: Report list view -->
+    <div id="reviewListView">
+        <div class="rv-header">
+            <span class="rv-title">Expense Review</span>
+            <div class="seg-toggle" role="tablist">
+                <a class="seg-item" href="F-PAP-PAYMENT-REVIEW.html" role="tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9h.01"/><path d="M9 13h.01"/><path d="M9 17h.01"/></svg>
+                    Enterprise
+                </a>
+                <a class="seg-item active" href="F-PAP-EXPENSE-REVIEW_副本.html" role="tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Individual
+                </a>
+            </div>
+        </div>
+        <!-- Unified toolbar: tabs left, search right -->
+        <div class="rv-toolbar">
+            <div style="flex:1;"></div>
+            <div class="rv-search">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9a9a98" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Search reports…">
+            </div>
+        </div>
+        <!-- Table -->
+        <div class="er-table-wrap-rv">
+            <div class="er-table-scroll-rv">
+                <table class="er-table-rv">
+                    <thead><tr id="rvThead"></tr></thead>
+                    <tbody id="listItems"></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Approved tab: selection action bar -->
+        <div id="oaActionBar" style="display:none;">
+            <div class="oa-bar-left">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span id="oaBarCount">0 selected</span>
+                <span id="oaBarAmount" style="font-weight:700;margin-left:4px;"></span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <button class="btn-ghost" style="height:32px;font-size:12px;" onclick="clearOaSelection()">Clear</button>
+                <button class="btn-approve" style="height:32px;font-size:12px;" onclick="exportSelectedXlsx()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export Expense Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- State 2: Report detail view -->
+    <div id="reviewDetailView">
+        <div class="dp-back">
+            <button onclick="closeDetail()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+                Expense Review
+            </button>
+        </div>
+        <div class="dp-header" id="dpHeader">
+            <div class="dp-actions" id="dpActions"></div>
+        </div>
+        <div class="content-split" id="contentSplit">
+            <div class="empty-tip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <p>Select a report to review</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- OA submission modal -->
+<div class="modal-overlay" id="oaModal">
+    <div class="modal" style="width:520px;">
+        <div class="modal-title">Submit OA for Approval</div>
+        <div class="modal-sub">The following expense reports will be bundled into one OA request and sent to the approver.</div>
+        <div id="oaReportList" style="background:var(--bg-subtle);border:1px solid var(--border-divider);border-radius:10px;padding:10px 14px;margin-bottom:16px;max-height:200px;overflow-y:auto;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:13px;">
+            <span style="color:var(--text-secondary);">Total reimbursement amount</span>
+            <span id="oaModalTotal" style="font-size:16px;font-weight:800;letter-spacing:-.5px;"></span>
+        </div>
+        <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;">Remarks <span style="font-weight:400;color:var(--text-disabled);">(optional)</span></label>
+            <textarea id="oaRemarks" placeholder="Add remarks for the approver…" rows="2"
+                style="width:100%;border:1px solid var(--border-default);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;resize:none;outline:none;box-sizing:border-box;"
+                onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-default)'"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-ghost" onclick="closeOaModal()">Cancel</button>
+            <button class="btn-approve" onclick="confirmOaSubmit()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Confirm & Submit
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- OA Package Ready modal -->
+<div class="modal-overlay" id="oaPackageModal" onclick="closeOaPackageModal()">
+    <div class="modal oap-modal" onclick="event.stopPropagation()" style="width:640px;max-width:96vw;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#1f9d61;display:grid;place-items:center;flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+                <div class="modal-title" style="margin-bottom:0;">OA Submitted</div>
+                <div style="font-size:12px;color:var(--text-secondary);">A shareable preview link has been generated for the approver.</div>
+            </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="oap-stats" id="oapStats"></div>
+
+        <!-- Shareable link -->
+        <div style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;">
+                Shareable Preview Link
+                <span style="font-weight:400;color:var(--text-disabled);">— send to approver</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input id="oapLinkInput" type="text" readonly
+                    style="flex:1;border:1px solid var(--border-default);border-radius:8px;padding:8px 12px;font:inherit;font-size:12px;color:var(--primary);background:var(--bg-subtle);outline:none;cursor:text;min-width:0;">
+                <button class="oap-copy-btn" id="oapCopyBtn" onclick="copyOaLink()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy Link
+                </button>
+            </div>
+        </div>
+
+        <!-- Per-employee summary table -->
+        <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">Reports Included</div>
+        <div id="oapTable" style="border:1px solid var(--border-divider);border-radius:10px;overflow:hidden;margin-bottom:16px;max-height:240px;overflow-y:auto;"></div>
+
+        <div class="modal-actions" style="padding-top:0;">
+            <button class="btn-ghost" onclick="closeOaPackageModal()">Close</button>
+            <button class="oap-csv-btn" onclick="downloadOaCsv()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download CSV
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Reject modal -->
+<div class="modal-overlay" id="rejectModal">
+    <div class="modal">
+        <div class="modal-title">Return Report to Employee</div>
+        <div class="modal-sub">The report will be returned for revision. The employee will see the flagged rows and your comments.</div>
+        <div class="flag-list-preview" id="flagListPreview" style="display:none;">
+            <div class="flp-title">⚑ Flagged items</div>
+            <ul id="flagListUl"></ul>
+        </div>
+        <textarea id="rejectReason" placeholder="Describe the issues, e.g. Row 3 invoice amount (¥1,645) does not match the sum of transactions (¥525). Please provide the correct invoice."></textarea>
+        <div class="modal-actions">
+            <button class="btn-ghost" onclick="closeRejectModal()">Cancel</button>
+            <button class="btn-reject" onclick="confirmReject()">Confirm Return</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Document preview modal -->
+<div id="docModal" class="doc-modal-overlay" onclick="closeDocModal()">
+    <div class="doc-modal" onclick="event.stopPropagation()">
+        <div class="doc-modal-header">
+            <div class="doc-modal-title-wrap">
+                <span id="docModalTag" class="doc-modal-tag"></span>
+                <span id="docModalTitle" style="font-size:14px;font-weight:700;color:var(--text-default);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+            </div>
+            <button class="doc-modal-close" onclick="closeDocModal()" title="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="doc-modal-body" id="docModalBody"></div>
+    </div>
+</div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+// ============ Data ============
+const EMPLOYEE_EMAILS = {
+    '王 彬': 'bin.wang@ctw.inc',
+    '张磊':  'lei.zhang@ctw.inc',
+    '王芳':  'fang.wang@ctw.inc',
+    '李 响': 'xiang.li@ctw.inc',
+    'James Carter': 'james.carter@ctw.inc',
+    '岩田 聡一郎': 'soichiro.iwata@ctw.inc',
+};
+const ALL_REPORTS = [
+    {
+        id:'ER-2026-05-YK', employee:'王 彬', dept:'Finance', period:'May 2026',
+        amount:4965.72, submitted:'2026-06-04', status:'pending', oaStatus:null, region:'CN', avatarColor:'#7c3aed',
+        bill:{ app:'支付宝', period:'2026年5月', totalOut:4965.72 },
+        invoices:[
+            { id:'INV-001', date:'2026/6/12', issuer:'上海绿地停车管理有限公司', amount:1645.00, invoiceNo:'31012026260000001', taxNo:'91310000MA1FP3X', category:'停车/洗车服务费', taxRate:9, rowIds:[0,1,2,3,4,5,6,7,8,9], warnMsg:'替票：本发票金额与行项目合计存在差异 Δ¥120.00', file:'13.pdf', path:'员工报销单据/发票/2026_06_12_24/13.pdf' },
+            { id:'INV-002', date:'2026/6/12', issuer:'上海陌家企业管理有限公司', amount:2029.00, invoiceNo:'31012026260000002', taxNo:'91310000MA1FP3Y', category:'住房补贴', taxRate:6, rowIds:[10,11], warnMsg:null, file:'14.pdf', path:'员工报销单据/发票/2026_06_12_24/14.pdf' },
+            { id:'INV-003', date:'2026/6/12', issuer:'特来电新能源股份有限公司', amount:534.14, invoiceNo:'31012026260000003', taxNo:'91310000MA1FP3Z', category:'充电服务费', taxRate:9, rowIds:[12,13,14,15], warnMsg:null, file:'24.pdf', path:'员工报销单据/发票/2026_06_12_24/24.pdf' },
+        ],
+        rows:[
+            // 车辆类
+            { date:'2026/5/9',  merchant:'洗车费',                cat:'车辆费',   amount:88,     invId:'INV-001', desc:'车辆日常维护',      actualDesc:'洗车',        remarks:'',        flag:false },
+            { date:'2026/5/15', merchant:'洗车费',                cat:'车辆费',   amount:88,     invId:'INV-001', desc:'车辆日常维护',      actualDesc:'洗车',        remarks:'',        flag:false },
+            { date:'2026/5/22', merchant:'洗车费',                cat:'车辆费',   amount:88,     invId:'INV-001', desc:'车辆日常维护',      actualDesc:'洗车',        remarks:'',        flag:false },
+            { date:'2026/5/1',  merchant:'停车费（世纪公园）',     cat:'车辆费',   amount:56,     invId:'INV-001', desc:'外出办公停车',      actualDesc:'停车',        remarks:'',        flag:false },
+            { date:'2026/5/2',  merchant:'停车费（滨江）',         cat:'车辆费',   amount:40,     invId:'INV-001', desc:'外出办公停车',      actualDesc:'停车',        remarks:'',        flag:false },
+            { date:'2026/5/3',  merchant:'停车费（滨江·陌家）',    cat:'车辆费',   amount:45,     invId:'INV-001', desc:'外出办公停车',      actualDesc:'停车',        remarks:'',        flag:false },
+            { date:'2026/5/7',  merchant:'停车费（世纪汇）',       cat:'车辆费',   amount:40,     invId:'INV-001', desc:'外出办公停车',      actualDesc:'停车',        remarks:'',        flag:false },
+            { date:'2026/5/8',  merchant:'停车费（恒丰路）',       cat:'车辆费',   amount:30,     invId:'INV-001', desc:'外出办公停车',      actualDesc:'停车',        remarks:'',        flag:false },
+            { date:'2026/5/9',  merchant:'停车费（滨江·金科路）',  cat:'车辆费',   amount:60,     invId:'INV-001', desc:'外出办公停车',      actualDesc:'停车',        remarks:'',        flag:false },
+            { date:'2026/5/10', merchant:'停车费（嘉定绿洲）',     cat:'车辆费',   amount:30,     invId:'INV-001', desc:'外出办公停车',      actualDesc:'停车',        remarks:'',        flag:false },
+            // 住房
+            { date:'2026/5/1',  merchant:'住房补贴',               cat:'员工福利',         amount:1700,   invId:'INV-002', desc:'5月住房补贴',       actualDesc:'住房补贴',    remarks:'',        flag:false },
+            { date:'2026/5/16', merchant:'住房补贴（补发）',        cat:'员工福利',         amount:329,    invId:'INV-002', desc:'5月住房补贴（补）',  actualDesc:'住房补贴补发',remarks:'补发部分', flag:false },
+            // 充电
+            { date:'2026/5/4',  merchant:'充电（特来电）',          cat:'车辆费',   amount:135.26, invId:'INV-003', desc:'新能源充电',        actualDesc:'充电桩充电',  remarks:'',        flag:false },
+            { date:'2026/5/7',  merchant:'充电（特来电）',          cat:'车辆费',   amount:129.29, invId:'INV-003', desc:'新能源充电',        actualDesc:'充电桩充电',  remarks:'',        flag:false },
+            { date:'2026/5/9',  merchant:'充电（特来电）',          cat:'车辆费',   amount:132.35, invId:'INV-003', desc:'新能源充电',        actualDesc:'充电桩充电',  remarks:'',        flag:false },
+            { date:'2026/5/12', merchant:'充电（特来电）',          cat:'车辆费',   amount:137.24, invId:'INV-003', desc:'新能源充电',        actualDesc:'充电桩充电',  remarks:'',        flag:false },
+        ],
+        comments:[
+            { author:'系统', time:'06/04 09:01', text:'Report submitted by 王 彬 for May 2026. Total ¥5,094.72, 3 invoices attached.', issue:false, avatarColor:'#6b7280' },
+            { author:'王 彬', time:'06/04 09:02', text:'备注：5月住房补贴分两次到账，合计2029元，替票1张（INV-002）。停车/洗车均为工作车辆相关费用，替票INV-001。', issue:false, avatarColor:'#7c3aed' },
+        ]
+    },
+    {
+        id:'ER-2026-05-ZL', employee:'张磊', dept:'Tech', period:'May 2026',
+        amount:2254.00, submitted:'2026-06-03', status:'pending', oaStatus:null, region:'CN', avatarColor:'#0e7490',
+        bill:{ app:'微信', period:'2026年5月', totalOut:2340.00 },
+        invoices:[
+            { id:'INV-A01', date:'2026/5/28', issuer:'上海差旅科技有限公司', amount:2340, invoiceNo:'31012026270000001', taxNo:'91310000MA1FP4A', category:'差旅服务费', taxRate:6, rowIds:[0,1,2,3], warnMsg:null },
+        ],
+        rows:[
+            { date:'2026/5/20', merchant:'高铁票 上海→北京',    cat:'差旅费', amount:654,   invId:'INV-A01', desc:'出差交通', actualDesc:'差旅', remarks:'', flag:false },
+            { date:'2026/5/20', merchant:'如家酒店 北京（2晚）', cat:'住宿费',  amount:760,   invId:'INV-A01', desc:'出差住宿', actualDesc:'差旅', remarks:'', flag:false },
+            { date:'2026/5/22', merchant:'高铁票 北京→上海',     cat:'差旅费', amount:654,   invId:'INV-A01', desc:'出差交通', actualDesc:'差旅', remarks:'', flag:false },
+            { date:'2026/5/22', merchant:'打车（到机场）',        cat:'交通费',  amount:186,   invId:'INV-A01', desc:'出差交通', actualDesc:'滴滴', remarks:'', flag:false },
+        ],
+        comments:[]
+    },
+    {
+        id:'ER-2026-05-WF', employee:'王芳', dept:'Marketing', period:'May 2026',
+        amount:890.50, submitted:'2026-06-04', status:'pending', oaStatus:null, region:'CN', avatarColor:'#b45309',
+        bill:{ app:'支付宝', period:'2026年5月', totalOut:890.50 },
+        invoices:[
+            { id:'INV-B01', date:'2026/5/31', issuer:'上海办公直销有限公司', amount:890.50, invoiceNo:'31012026280000001', taxNo:'91310000MA1FP5B', category:'办公用品', taxRate:13, rowIds:[0,1,2], warnMsg:null },
+        ],
+        rows:[
+            { date:'2026/5/6',  merchant:'打印纸（A4×5箱）', cat:'办公用品', amount:320,    invId:'INV-B01', desc:'办公耗材', actualDesc:'文具耗材', remarks:'', flag:false },
+            { date:'2026/5/14', merchant:'墨盒×3',            cat:'办公用品', amount:285,    invId:'INV-B01', desc:'办公耗材', actualDesc:'打印耗材', remarks:'', flag:false },
+            { date:'2026/5/18', merchant:'便利贴/文具套装',   cat:'办公用品', amount:285.50, invId:'INV-B01', desc:'办公用品', actualDesc:'文具',     remarks:'', flag:false },
+        ],
+        comments:[]
+    },
+    // Finance-approved, not yet submitted to OA
+    {
+        id:'ER-2026-04-YK', employee:'王 彬', dept:'Finance', period:'Apr 2026',
+        amount:3812.00, submitted:'2026-05-03', status:'approved', oaStatus:null, region:'CN', avatarColor:'#7c3aed', bill:null,
+        invoices:[
+            { id:'INV-D01', date:'2026/4/10', issuer:'上海市新能源汽车充电服务有限公司', amount:1083.88, invoiceNo:'31012026290000010', taxNo:'91310000MA1FQ2A', category:'充电服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-D02', date:'2026/4/18', issuer:'上海金泉停车场管理有限公司',         amount:1648.12, invoiceNo:'31012026290000011', taxNo:'91310000MA1FQ2B', category:'停车服务费', taxRate:6, rowIds:[1], warnMsg:null, file:null, path:null },
+            { id:'INV-D03', date:'2026/4/28', issuer:'上海翊达住宿管理有限公司',           amount:1080.00, invoiceNo:'31012026290000012', taxNo:'91310000MA1FQ2C', category:'住宿服务费', taxRate:6, rowIds:[2], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/4/10', merchant:'特来电充电桩', cat:'车辆费', amount:1083.88, invId:'INV-D01', desc:'4月新能源充电费', actualDesc:'充电服务费', remarks:'', flag:false },
+            { date:'2026/4/18', merchant:'公司停车场（月租）', cat:'车辆费', amount:1648.12, invId:'INV-D02', desc:'4月停车费', actualDesc:'停车服务费', remarks:'月租', flag:false },
+            { date:'2026/4/28', merchant:'汉庭酒店（出差北京）', cat:'住宿费', amount:1080.00, invId:'INV-D03', desc:'北京出差住宿', actualDesc:'住宿服务费', remarks:'2晚', flag:false },
+        ],
+        comments:[]
+    },
+    // Finance-approved + OA approved
+    {
+        id:'ER-2026-03-YK', employee:'王 彬', dept:'Finance', period:'Mar 2026',
+        amount:4210.50, submitted:'2026-04-02', status:'approved', oaStatus:'oa-approved', region:'CN', avatarColor:'#7c3aed', bill:null,
+        invoices:[
+            { id:'INV-E01', date:'2026/3/8',  issuer:'上海市新能源汽车充电服务有限公司', amount:1083.88, invoiceNo:'31012026290000020', taxNo:'91310000MA1FQ3A', category:'充电服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-E02', date:'2026/3/15', issuer:'上海金泉停车场管理有限公司',         amount:2000.00, invoiceNo:'31012026290000021', taxNo:'91310000MA1FQ3B', category:'停车服务费', taxRate:6, rowIds:[1], warnMsg:null, file:null, path:null },
+            { id:'INV-E03', date:'2026/3/25', issuer:'滴滴出行科技有限公司',               amount:1126.62, invoiceNo:'31012026290000022', taxNo:'91310000MA1FQ3C', category:'出行服务费', taxRate:6, rowIds:[2], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/3/8',  merchant:'特来电充电桩', cat:'车辆费', amount:1083.88, invId:'INV-E01', desc:'3月充电费', actualDesc:'充电服务费', remarks:'', flag:false },
+            { date:'2026/3/15', merchant:'公司停车场（月租）', cat:'车辆费', amount:2000.00, invId:'INV-E02', desc:'3月停车费', actualDesc:'停车服务费', remarks:'月租', flag:false },
+            { date:'2026/3/25', merchant:'滴滴打车（客户接送）', cat:'交通费', amount:1126.62, invId:'INV-E03', desc:'客户接送交通', actualDesc:'出行服务费', remarks:'', flag:false },
+        ],
+        comments:[
+            { author:'王 彬', time:'04/02 09:15', text:'3月报销已整理完毕，发票均已上传。', issue:false, avatarColor:'#7c3aed' },
+        ]
+    },
+    // In OA queue
+    {
+        id:'ER-2026-02-ZL', employee:'张磊', dept:'Tech', period:'Feb 2026',
+        amount:1560.00, submitted:'2026-03-01', status:'approved', oaStatus:'oa-pending', region:'CN', avatarColor:'#0e7490', bill:null,
+        invoices:[
+            { id:'INV-F01', date:'2026/2/12', issuer:'上海虹桥火车站',   amount:780.00, invoiceNo:'31012026290000030', taxNo:'91310000MA1FQ4A', category:'交通运输服务', taxRate:9, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-F02', date:'2026/2/14', issuer:'如家酒店（北京）', amount:780.00, invoiceNo:'31012026290000031', taxNo:'91310000MA1FQ4B', category:'住宿服务费',    taxRate:6, rowIds:[1], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/2/12', merchant:'沪宁高铁往返', cat:'交通费', amount:780.00, invId:'INV-F01', desc:'2月出差交通', actualDesc:'交通运输服务', remarks:'往返票', flag:false },
+            { date:'2026/2/14', merchant:'如家酒店北京南站店', cat:'住宿费', amount:780.00, invId:'INV-F02', desc:'2月出差住宿', actualDesc:'住宿服务费', remarks:'2晚×390', flag:false },
+        ],
+        comments:[]
+    },
+    // OA rejected (standalone, not part of the 3-report package)
+    {
+        id:'ER-2026-01-WF', employee:'王芳', dept:'Marketing', period:'Jan 2026',
+        amount:2140.00, submitted:'2026-02-01', status:'approved', oaStatus:'oa-rejected',
+        oaApprover:'张总', rejectReason:'业务目的描述不清晰，请补充说明后重新提交。',
+        region:'CN', avatarColor:'#e11d48', bill:null,
+        invoices:[
+            { id:'INV-G01', date:'2026/1/22', issuer:'上海智慧餐饮管理有限公司', amount:2140.00, invoiceNo:'31012026290000040', taxNo:'91310000MA1FQ5A', category:'餐饮服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/1/22', merchant:'海底捞（陆家嘴店）', cat:'业务招待', amount:2140.00, invId:'INV-G01', desc:'Q1经销商答谢宴', actualDesc:'餐饮服务费', remarks:'', flag:false },
+        ],
+        comments:[
+            { author:'OA 张总', time:'02/10 09:30', text:'[OA Rejected] 业务目的描述不清晰，请补充说明后重新提交。', issue:true, avatarColor:'#dc2626' },
+        ]
+    },
+    // Needs revision — waiting for employee
+    {
+        id:'ER-2026-04-LX', employee:'李 响', dept:'Sales', period:'Apr 2026',
+        amount:890.00, submitted:'2026-05-10', status:'needs-revision', oaStatus:null,
+        rejectReason:'请补充5月10日出租车发票原件扫描件。',
+        region:'CN', avatarColor:'#059669', bill:null,
+        invoices:[
+            { id:'INV-H01', date:'2026/4/28', issuer:'上海市出租汽车管理处', amount:320.00, invoiceNo:'31012026290000050', taxNo:'91310000MA1FQ6A', category:'出行服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-H02', date:'2026/4/30', issuer:'上海鑫嘉酒店管理有限公司', amount:570.00, invoiceNo:'31012026290000051', taxNo:'91310000MA1FQ6B', category:'住宿服务费', taxRate:6, rowIds:[1], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/4/28', merchant:'出租车（客户拜访）', cat:'交通费', amount:320.00, invId:'INV-H01', desc:'客户拜访交通', actualDesc:'出行服务费', remarks:'', flag:true },
+            { date:'2026/4/30', merchant:'速8酒店（苏州出差）', cat:'住宿费', amount:570.00, invId:'INV-H02', desc:'苏州出差住宿', actualDesc:'住宿服务费', remarks:'1晚', flag:false },
+        ],
+        comments:[
+            { author:'王 彬', time:'05/12 14:00', text:'[Returned] 请补充4月28日出租车发票原件扫描件，当前上传图片不清晰。', issue:true, avatarColor:'#7c3aed' },
+        ]
+    },
+    // ── Multi-invoice demo: one expense item needs two invoices ──
+    {
+        id:'ER-2026-05-LX', employee:'李 响', dept:'Sales', period:'May 2026',
+        amount:3589, submitted:'2026-06-05', status:'pending', oaStatus:null, region:'CN', avatarColor:'#059669',
+        bill:null,
+        invoices:[
+            { id:'INV-C01', date:'2026/5/30', issuer:'品雅餐饮管理（上海）有限公司', amount:2000, invoiceNo:'31012026290000001', taxNo:'91310000MA1FQ1A', category:'餐饮服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-C02', date:'2026/5/30', issuer:'外滩壹号宴会服务有限公司',   amount:1500, invoiceNo:'31012026290000002', taxNo:'91310000MA1FQ1B', category:'餐饮服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-C03', date:'2026/5/28', issuer:'滴滴出行科技有限公司',       amount:89,   invoiceNo:'31012026290000003', taxNo:'91310000MA1FQ1C', category:'出行服务费',  taxRate:6, rowIds:[1], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            // 一条报销事项 → 两张发票（餐厅单张开票上限，分拆两张）
+            { date:'2026/5/30', merchant:'Q2客户答谢宴', cat:'业务招待', amount:3500, invIds:['INV-C01','INV-C02'], desc:'Q2客户答谢商务晚宴', actualDesc:'商务宴请-外滩', remarks:'餐厅单张开票上限2000，分拆两张', flag:false },
+            { date:'2026/5/28', merchant:'打车（机场接客户）', cat:'交通费', amount:89, invId:'INV-C03', desc:'接机出行', actualDesc:'滴滴出行-浦东机场', remarks:'', flag:false },
+        ],
+        comments:[
+            { author:'李 响', time:'06/05 10:12', text:'Q2答谢宴餐厅单张发票限额2000元，分两张开票，合计3500元，请知悉。', issue:false, avatarColor:'#059669' },
+        ]
+    },
+    // ── OA Package OA-20260601-RJKT — 3 reports bundled, OA rejected due to 王芳's report ──
+    {
+        id:'ER-2026-05-WF2', employee:'王芳', dept:'Marketing', period:'May 2026',
+        amount:3120.00, submitted:'2026-06-01', status:'approved', oaStatus:'oa-rejected',
+        oaRef:'OA-20260601-RJKT', oaApprover:'张总',
+        rejectReason:'业务招待费用描述不清晰，需补充客户名称及业务目的说明后重新提交。',
+        region:'CN', avatarColor:'#e11d48', bill:null, invoices:[], rows:[
+            { date:'2026/5/20', merchant:'外滩会所商务宴请', cat:'业务招待', amount:3120, invId:'', desc:'客户答谢宴', actualDesc:'', remarks:'', flag:false },
+        ], comments:[
+            { author:'OA 张总', time:'06/08 10:15', text:'[OA Rejected] 业务招待费用描述不清晰，需补充客户名称及业务目的说明后重新提交。', issue:true, avatarColor:'#dc2626' },
+        ]
+    },
+    {
+        id:'ER-2026-05-ZL2', employee:'张磊', dept:'Tech', period:'May 2026',
+        amount:1840.00, submitted:'2026-06-01', status:'approved', oaStatus:'oa-rejected',
+        oaRef:'OA-20260601-RJKT', oaApprover:'张总',
+        rejectReason:'业务招待费用描述不清晰，需补充客户名称及业务目的说明后重新提交。',
+        region:'CN', avatarColor:'#0e7490', bill:null, invoices:[], rows:[
+            { date:'2026/5/18', merchant:'滴滴出行', cat:'交通费', amount:260, invId:'', desc:'拜访客户交通', actualDesc:'', remarks:'', flag:false },
+            { date:'2026/5/22', merchant:'上海虹桥火车票', cat:'交通费', amount:1580, invId:'', desc:'出差往返', actualDesc:'', remarks:'', flag:false },
+        ], comments:[
+            { author:'OA 张总', time:'06/08 10:15', text:'[OA Rejected] 同批次报销因其他报告问题被整体退回，本报告内容无误。', issue:true, avatarColor:'#dc2626' },
+        ]
+    },
+    {
+        id:'ER-2026-05-YK2', employee:'王 彬', dept:'Finance', period:'May 2026',
+        amount:920.00, submitted:'2026-06-01', status:'approved', oaStatus:'oa-rejected',
+        oaRef:'OA-20260601-RJKT', oaApprover:'张总',
+        rejectReason:'业务招待费用描述不清晰，需补充客户名称及业务目的说明后重新提交。',
+        region:'CN', avatarColor:'#7c3aed', bill:null, invoices:[], rows:[
+            { date:'2026/5/25', merchant:'便利店采购', cat:'办公耗材', amount:920, invId:'', desc:'部门用品采购', actualDesc:'', remarks:'', flag:false },
+        ], comments:[
+            { author:'OA 张总', time:'06/08 10:15', text:'[OA Rejected] 同批次报销因其他报告问题被整体退回，本报告内容无误。', issue:true, avatarColor:'#dc2626' },
+        ]
+    },
+    {
+        id:'ER-2026-07-JP', employee:'岩田 聡一郎', dept:'Finance', period:'Jul 2026',
+        amount:102800, submitted:'2026-07-18', status:'approved', oaStatus:'oa-approved', region:'JP', avatarColor:'#1d4ed8',
+        bill:null, invoices:[], rows:[], comments:[
+            { author:'岩田 聡一郎', time:'07/18 11:30', text:'7月分の出張精算です。台湾出張・上海出張の領収書を添付します。', issue:false, avatarColor:'#1d4ed8' },
+        ],
+        jpRows:[
+            { date:'2026/7/1',  purpose:'台湾出張', amount:45000, remarks:'',         voucher:'領収書_台湾出張_0701.jpg' },
+            { date:'2026/7/15', purpose:'上海出張', amount:45000, remarks:'往復航空券', voucher:'eチケット_上海_0715.pdf' },
+            { date:'2026/7/18', purpose:'上海出張', amount:12800, remarks:'交通費含む', voucher:'領収書_交通費_0718.jpg' },
+        ]
+    },
+    // ── US region — OA approved (mirrors F-PAP-EXPENSE-REPORT_副本) ──
+    {
+        id:'ER-2026-06-US', employee:'James Carter', dept:'US Office', period:'Jun 2026',
+        amount:3240, submitted:'2026-07-03', status:'approved', oaStatus:'oa-approved', region:'US', avatarColor:'#2563eb',
+        bill:null, invoices:[], rows:[], comments:[
+            { author:'James Carter', time:'07/03 09:20', text:'June expense report for the US office — client visit, team offsite and SaaS renewal. Budget approval attached.', issue:false, avatarColor:'#2563eb' },
+        ],
+        jpRows:[
+            { date:'2026/6/5',  purpose:'Client visit — San Francisco', amount:1800, remarks:'Flight + hotel', voucher:'receipt_SF_flight_hotel.pdf' },
+            { date:'2026/6/12', purpose:'Team offsite — Austin',        amount:980,  remarks:'',              voucher:'receipt_Austin_offsite.pdf' },
+            { date:'2026/6/20', purpose:'SaaS subscription renewal',     amount:460,  remarks:'Annual plan',   voucher:'invoice_SaaS_annual.pdf' },
+        ]
+    },
+    // ── TW region — OA approved (mirrors F-PAP-EXPENSE-REPORT_副本) ──
+    {
+        id:'ER-2026-07-TW', employee:'陳 怡君', dept:'Taipei Office', period:'Jul 2026',
+        amount:16380, submitted:'2026-07-15', status:'approved', oaStatus:'oa-approved', region:'TW', avatarColor:'#b45309',
+        bill:null, invoices:[], rows:[], comments:[
+            { author:'陳 怡君', time:'07/15 14:10', text:'7月台北報銷：計程車與聚餐走零用金，東京出差機票隨薪資發放，發票已附。', issue:false, avatarColor:'#b45309' },
+        ],
+        jpRows:[
+            { date:'2026/7/3',  company:'台灣大車隊', purpose:'客戶拜訪計程車費',   amount:680,   disb:'petty',  remarks:'非出差，零用金', voucher:'發票_台灣大車隊_0703.jpg' },
+            { date:'2026/7/9',  company:'長榮航空',   purpose:'台北—東京 出差機票', amount:12500, disb:'salary', remarks:'出差', voucher:'發票_長榮航空_0709.pdf' },
+            { date:'2026/7/12', company:'王品餐飲',   purpose:'團隊聚餐',           amount:3200,  disb:'petty',  remarks:'',     voucher:'發票_王品_0712.jpg' },
+        ]
+    },
+];
+
+// This view only shows reports that have been OA-approved.
+const REPORTS = ALL_REPORTS.filter(r => r.oaStatus === 'oa-approved');
+
+// Bill screenshot real images per report
+const BILL_IMAGES = {
+    'ER-2026-05-YK': [
+        { file:'微信图片_20260612130548_129_2.jpg', path:'员工报销单据/订单流水/微信图片_20260612130548_129_2.jpg', app:'微信' },
+        { file:'微信图片_20260612130549_130_2.jpg', path:'员工报销单据/订单流水/微信图片_20260612130549_130_2.jpg', app:'微信' },
+        { file:'微信图片_20260612130550_131_2.jpg', path:'员工报销单据/订单流水/微信图片_20260612130550_131_2.jpg', app:'微信' },
+        { file:'微信图片_20260612130551_132_2.jpg', path:'员工报销单据/订单流水/微信图片_20260612130551_132_2.jpg', app:'微信' },
+        { file:'微信图片_20260612130552_133_2.jpg', path:'员工报销单据/订单流水/微信图片_20260612130552_133_2.jpg', app:'微信' },
+    ],
+};
+const BILL_ROWS = {
+    'ER-2026-05-YK': [
+        { cat:'车辆',    icon:'🚗', rows:[
+            {date:'5/9', merchant:'洗车费', amount:88}, {date:'5/15', merchant:'洗车费', amount:88}, {date:'5/22', merchant:'洗车费', amount:88},
+            {date:'5/1', merchant:'停车费（世纪公园）', amount:56}, {date:'5/2', merchant:'停车费（滨江）', amount:40}, {date:'5/3', merchant:'停车费（滨江·陌家）', amount:45},
+            {date:'5/7', merchant:'停车费（世纪汇）', amount:40}, {date:'5/8', merchant:'停车费（恒丰路）', amount:30}, {date:'5/9', merchant:'停车费（滨江·金科路）', amount:60}, {date:'5/10', merchant:'停车费（嘉定绿洲）', amount:30},
+        ]},
+        { cat:'生活',    icon:'🏠', rows:[
+            {date:'5/1', merchant:'住房补贴', amount:1700}, {date:'5/16', merchant:'住房补贴（补发）', amount:329},
+        ]},
+        { cat:'充电',    icon:'⚡', rows:[
+            {date:'5/4', merchant:'充电（特来电）', amount:135.26},{date:'5/7', merchant:'充电（特来电）', amount:129.29},{date:'5/9', merchant:'充电（特来电）', amount:132.35},{date:'5/12', merchant:'充电（特来电）', amount:137.24},
+        ]},
+        { cat:'餐饮',    icon:'🍱', rows:[
+            {date:'5/1', merchant:'餐费', amount:29},{date:'5/2', merchant:'餐费', amount:32},{date:'5/3', merchant:'餐费', amount:35},{date:'5/4', merchant:'餐费', amount:33},
+        ]},
+    ],
+    'ER-2026-05-ZL': [
+        { cat:'出行', icon:'🚄', rows:[{date:'5/20', merchant:'高铁票 上海→北京', amount:654},{date:'5/22', merchant:'高铁票 北京→上海', amount:654}]},
+        { cat:'住宿', icon:'🏨', rows:[{date:'5/20', merchant:'如家酒店 北京', amount:760}]},
+        { cat:'打车', icon:'🚕', rows:[{date:'5/22', merchant:'滴滴 到机场', amount:186}]},
+        { cat:'餐饮', icon:'🍱', rows:[{date:'5/21', merchant:'餐费', amount:86}]},
+    ],
+    'ER-2026-05-WF': [
+        { cat:'办公', icon:'📦', rows:[{date:'5/6', merchant:'打印纸 A4×5箱', amount:320},{date:'5/14', merchant:'墨盒×3', amount:285},{date:'5/18', merchant:'便利贴/文具套装', amount:285.50}]},
+    ]
+};
+
+// ============ State ============
+let currentTab = 'all';
+let activeId = null;
+let activeDocTab = 'bill';
+let activeBillImgIdx = 0;
+let selectedOaIds = new Set();
+
+// ============ List ============
+function switchTab(btn, tab) {
+    document.querySelectorAll('.lp-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTab = tab;
+    selectedOaIds.clear();
+    renderList();
+    updateOaBar();
+}
+const OA_STATUS_LABELS = {
+    'oa-pending':  'Pending',
+    'oa-approved': 'Approved',
+    'oa-rejected': 'Rejected',
+};
+
+const RV_STATUS_LABELS = {
+    'draft':          'Draft',
+    'pending':        'Pending',
+    'approved':       'Approved',
+    'needs-revision': 'Needs Revision',
+};
+
+// OA Expert session link — jumps to the matching approval flow in OA Expert.
+// Available once submitted to OA (approved / rejected); pending has no link.
+function oaLinkCell(r) {
+    const hasLink = r.oaStatus === 'oa-approved' || r.oaStatus === 'oa-rejected';
+    if (!hasLink) return `<span style="color:var(--text-disabled);">—</span>`;
+    const q = new URLSearchParams({
+        id: r.id, name: r.employee, email: EMPLOYEE_EMAILS[r.employee] || '',
+        dept: r.dept || '', period: r.period, amount: String(r.amount),
+        region: r.region || 'CN', status: r.oaStatus,
+    }).toString();
+    const url = `F-OA-EXPERT-APPROVAL.html?${q}`;
+    return `<a href="${url}" target="_blank" rel="noopener" class="oa-link" title="Open OA Expert approval flow" onclick="event.stopPropagation();">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        OA approval flow
+    </a>`;
+}
+
+function renderList() {
+    const filtered = currentTab==='all' ? REPORTS : REPORTS.filter(r=>r.status===currentTab);
+
+    // Select-all checkbox state for the header
+    const allChecked = filtered.length > 0 && filtered.every(r => selectedOaIds.has(r.id));
+    document.getElementById('rvThead').innerHTML =
+        `<th class="rv-col-check" onclick="toggleSelectAll()">
+            <div class="rv-row-check${allChecked?' checked':''}" title="Select all">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+         </th>
+         <th class="rv-col-emp">Employee</th>
+         <th class="rv-col-region">Region</th>
+         <th class="rv-col-period">Period</th>
+         <th class="rv-col-sub">Submitted</th>
+         <th class="rv-col-amt">Amount</th>
+         <th class="rv-col-oa-status">OA Status</th>
+         <th class="rv-col-link">Link</th>`;
+
+    const colSpan = 8;
+    document.getElementById('listItems').innerHTML = filtered.map(r => {
+        const checked = selectedOaIds.has(r.id);
+        const trClass = checked ? 'tr-selected' : '';
+        const checkCell = `
+            <td class="rv-col-check" onclick="event.stopPropagation();toggleOaSelect('${r.id}')">
+                <div class="rv-row-check${checked?' checked':''}">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+            </td>`;
+        const oaCell = r.oaStatus
+            ? `<span class="tag ${r.oaStatus}">${OA_STATUS_LABELS[r.oaStatus]||r.oaStatus}</span>`
+            : `<span style="color:var(--text-disabled);">—</span>`;
+        return `<tr class="${trClass}" onclick="openReport('${r.id}')">
+            ${checkCell}
+            <td class="rv-col-emp">
+                <div class="rv-emp-name">${r.employee}</div>
+                <div class="rv-emp-sub">${EMPLOYEE_EMAILS[r.employee] || r.dept}</div>
+            </td>
+            <td class="rv-col-region"><span class="tag region-${(r.region||'CN').toLowerCase()}">${r.region||'CN'}</span></td>
+            <td class="rv-col-period">${r.period}</td>
+            <td class="rv-col-sub">${r.submitted}</td>
+            <td class="rv-col-amt">${r.region==='US'?'$':(r.region==='TW'?'NT$':'¥')}${r.amount.toLocaleString('en-US',{minimumFractionDigits:2})}</td>
+            <td class="rv-col-oa-status">${oaCell}</td>
+            <td class="rv-col-link">${oaLinkCell(r)}</td>
+        </tr>`;
+    }).join('') || `<tr><td colspan="${colSpan}" style="padding:48px;text-align:center;color:var(--text-disabled);font-size:13px;">No reports</td></tr>`;
+}
+
+function toggleOaSelect(id) {
+    if (selectedOaIds.has(id)) selectedOaIds.delete(id);
+    else selectedOaIds.add(id);
+    renderList();
+    updateOaBar();
+}
+function toggleSelectAll() {
+    const filtered = currentTab==='all' ? REPORTS : REPORTS.filter(r=>r.status===currentTab);
+    const allChecked = filtered.length > 0 && filtered.every(r => selectedOaIds.has(r.id));
+    if (allChecked) filtered.forEach(r => selectedOaIds.delete(r.id));
+    else filtered.forEach(r => selectedOaIds.add(r.id));
+    renderList();
+    updateOaBar();
+}
+function clearOaSelection() {
+    selectedOaIds.clear();
+    renderList();
+    updateOaBar();
+}
+function updateOaBar() {
+    const bar = document.getElementById('oaActionBar');
+    const n = selectedOaIds.size;
+    if (n === 0) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+    // Sum per currency so mixed CN/JP (¥) and US ($) reports stay correct
+    const totals = {};
+    [...selectedOaIds].forEach(id => {
+        const r = REPORTS.find(x => x.id === id);
+        if (!r) return;
+        const sym = r.region === 'US' ? '$' : (r.region === 'TW' ? 'NT$' : '¥');
+        totals[sym] = (totals[sym] || 0) + r.amount;
+    });
+    const totalStr = Object.entries(totals)
+        .map(([sym, v]) => `${sym}${v.toLocaleString('en-US',{minimumFractionDigits:2})}`)
+        .join('  +  ');
+    document.getElementById('oaBarCount').textContent = `${n} report${n>1?'s':''} selected`;
+    document.getElementById('oaBarAmount').textContent = `· Total ${totalStr}`;
+}
+
+// ============ Excel Export (payment-request OA attachment) ============
+// Produces a multi-sheet workbook: a "Total" summary sheet (姓名/金额 + 合计)
+// plus one detail sheet per selected report — matching 员工日常报销.xlsx.
+
+const CN_MONTH = { Jan:'1月', Feb:'2月', Mar:'3月', Apr:'4月', May:'5月', Jun:'6月',
+                   Jul:'7月', Aug:'8月', Sep:'9月', Oct:'10月', Nov:'11月', Dec:'12月' };
+
+// Convert a number to RMB capitalized Chinese (人民币大写)
+function rmbUpper(num) {
+    if (!isFinite(num)) return '';
+    const digit = ['零','壹','贰','叁','肆','伍','陆','柒','捌','玖'];
+    const frac  = ['角','分'];
+    const unit  = [['元','万','亿'], ['','拾','佰','仟']];
+    let head = num < 0 ? '负' : '';
+    num = Math.abs(num);
+    let s = '';
+    for (let i = 0; i < frac.length; i++) {
+        s += (digit[Math.floor(num * 10 * Math.pow(10, i)) % 10] + frac[i]).replace(/零./, '');
+    }
+    s = s || '整';
+    num = Math.floor(num);
+    for (let i = 0; i < unit[0].length && num > 0; i++) {
+        let p = '';
+        for (let j = 0; j < unit[1].length && num > 0; j++) {
+            p = digit[num % 10] + unit[1][j] + p;
+            num = Math.floor(num / 10);
+        }
+        s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
+    }
+    return head + s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '零元整');
+}
+
+function buildDetailSheet(r) {
+    const sym = r.region === 'US' ? '$' : (r.region === 'TW' ? 'NT$' : '¥');
+    const monthLabel = CN_MONTH[(r.period || '').split(' ')[0]] || r.period;
+    const header = ['开票日期','消费日期','项目类型','费用内容支出说明','金额(人民币元)','发票金额','备注','实际内容支出说明','发票开具主体','发票编号索引（例）'];
+    const aoa = [
+        [`${monthLabel}费用报销单`],
+        [],
+        ['报销人：', r.employee, '', '', '申报日期：', r.submitted],
+        [],
+        header,
+    ];
+
+    let total = 0;
+    if (r.jpRows && r.jpRows.length) {
+        // JP / US style itemized rows
+        r.jpRows.forEach((row, idx) => {
+            const amt = +row.amount || 0;
+            total += amt;
+            aoa.push(['', row.date || '', '', row.purpose || '', amt, '', row.remarks || '', row.purpose || '', '', idx + 1]);
+        });
+    } else {
+        // CN style — join detail rows with their invoice
+        const invById = {};
+        (r.invoices || []).forEach(iv => { invById[iv.id] = iv; });
+        const seenInv = new Set();
+        (r.rows || []).forEach((row, idx) => {
+            const iv = invById[row.invId] || {};
+            const amt = +row.amount || 0;
+            total += amt;
+            const showInvAmt = iv.id && !seenInv.has(iv.id);
+            if (iv.id) seenInv.add(iv.id);
+            aoa.push([
+                iv.date || '', row.date || '', row.cat || '', row.desc || row.merchant || '',
+                amt, showInvAmt ? (+iv.amount || '') : '', row.remarks || '',
+                row.actualDesc || '', iv.issuer || '', row.invId || (idx + 1),
+            ]);
+        });
+    }
+    // Fall back to report total if no line items summed up
+    if (!total) total = +r.amount || 0;
+
+    aoa.push([]);
+    aoa.push(['合计', '', total, '', '', '', '', '', '', '']);
+    if (r.region !== 'US') {
+        aoa.push(['人民币大写', '', rmbUpper(total), '', '', '', '', '', '', '']);
+    }
+    aoa.push([]);
+    aoa.push(['', '', '', '', '负责人：', '']);
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [
+        { wch:12 },{ wch:12 },{ wch:10 },{ wch:24 },{ wch:14 },
+        { wch:12 },{ wch:10 },{ wch:24 },{ wch:24 },{ wch:16 },
+    ];
+    return ws;
+}
+
+function exportSelectedXlsx() {
+    const selected = REPORTS.filter(r => selectedOaIds.has(r.id));
+    if (selected.length === 0) { showToast && showToast('Select at least one report first'); return; }
+    if (typeof XLSX === 'undefined') { showToast && showToast('Export module loading, please retry'); return; }
+
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Total summary
+    const totalAoa = [['姓名', '金额']];
+    let grand = 0;
+    selected.forEach(r => {
+        const amt = +r.amount || 0;
+        grand += amt;
+        totalAoa.push([r.employee, amt]);
+    });
+    totalAoa.push(['合计', grand]);
+    const totalWs = XLSX.utils.aoa_to_sheet(totalAoa);
+    totalWs['!cols'] = [{ wch:16 }, { wch:14 }];
+    XLSX.utils.book_append_sheet(wb, totalWs, 'Total');
+
+    // One detail sheet per report (unique, Excel-safe sheet names ≤31 chars)
+    const usedNames = new Set(['Total']);
+    selected.forEach(r => {
+        let base = (r.employee || 'Report').replace(/[\\\/\?\*\[\]:]/g, ' ').trim().slice(0, 28);
+        let name = base, n = 2;
+        while (usedNames.has(name)) { name = `${base.slice(0, 26)}_${n++}`; }
+        usedNames.add(name);
+        XLSX.utils.book_append_sheet(wb, buildDetailSheet(r), name);
+    });
+
+    const now = new Date();
+    const ymd = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    XLSX.writeFile(wb, `${ymd}员工日常报销.xlsx`);
+
+    showToast && showToast(`Exported ${selected.length} report(s) → ${ymd}员工日常报销.xlsx`);
+}
+
+// ============ OA Modal ============
+
+function openOaModal() {
+    if (selectedOaIds.size === 0) return;
+    const selected = REPORTS.filter(r => selectedOaIds.has(r.id));
+    const total = selected.reduce((s,r) => s+r.amount, 0);
+    document.getElementById('oaModalTotal').textContent = `¥${total.toLocaleString('zh',{minimumFractionDigits:2})}`;
+    document.getElementById('oaRemarks').value = '';
+    document.getElementById('oaReportList').innerHTML = selected.map(r=>`
+        <div class="oa-report-row">
+            <div class="oa-report-avatar" style="background:${r.avatarColor}">${r.employee.charAt(0)}</div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:12px;">${r.employee} <span style="font-weight:400;color:var(--text-secondary);">· ${r.period}</span></div>
+                <div style="font-size:11px;color:var(--text-secondary);">${r.dept} · ${r.invoices.length} invoice(s) · Approved ${r.submitted}</div>
+            </div>
+            <div style="font-weight:700;font-size:13px;flex-shrink:0;">¥${r.amount.toLocaleString('zh',{minimumFractionDigits:2})}</div>
+        </div>`).join('');
+    document.getElementById('oaModal').classList.add('open');
+}
+function closeOaModal() {
+    document.getElementById('oaModal').classList.remove('open');
+}
+// ============ OA Package ============
+let _lastOaPackage = null; // { ref, reports, total, link }
+
+function generateOaRef() {
+    const now = new Date();
+    const ymd = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    const rand = Math.random().toString(36).slice(2,6).toUpperCase();
+    return `OA-${ymd}-${rand}`;
+}
+
+function confirmOaSubmit() {
+    const selected = REPORTS.filter(r => selectedOaIds.has(r.id));
+    const total = selected.reduce((s,r) => s+r.amount, 0);
+    const ref = generateOaRef();
+    const link = `https://f-expert.io/oa/preview/${ref}`;
+    _lastOaPackage = { ref, reports: selected, total, link };
+
+    // Update OA status only — finance status stays 'approved'
+    selected.forEach(r => {
+        r.oaStatus = 'oa-pending';
+    });
+
+    closeOaModal();
+    selectedOaIds.clear();
+    renderList();
+    updateOaBar();
+    refreshTabCounts();
+
+    // Refresh detail actions if still showing one of the submitted reports
+    if (activeId) {
+        const ar = REPORTS.find(x=>x.id===activeId);
+        if (ar) updateDetailActions(ar);
+    }
+
+    // Populate and open OA Package modal
+    openOaPackageModal(_lastOaPackage);
+}
+
+function openOaPackageModal({ ref, reports, total, link }) {
+    // Stats bar
+    const invoiceCount = reports.reduce((s,r) => s + r.invoices.length, 0);
+    document.getElementById('oapStats').innerHTML = `
+        <div class="oap-stat">
+            <div class="oap-stat-val">${reports.length}</div>
+            <div class="oap-stat-lbl">Reports</div>
+        </div>
+        <div style="width:1px;background:var(--border-divider);flex-shrink:0;"></div>
+        <div class="oap-stat">
+            <div class="oap-stat-val">${invoiceCount}</div>
+            <div class="oap-stat-lbl">Invoices</div>
+        </div>
+        <div style="width:1px;background:var(--border-divider);flex-shrink:0;"></div>
+        <div class="oap-stat">
+            <div class="oap-stat-val">¥${total.toLocaleString('zh',{minimumFractionDigits:2})}</div>
+            <div class="oap-stat-lbl">Total Amount</div>
+        </div>
+        <div style="width:1px;background:var(--border-divider);flex-shrink:0;"></div>
+        <div class="oap-stat">
+            <div class="oap-stat-val" style="font-size:13px;word-break:break-all;">${ref}</div>
+            <div class="oap-stat-lbl">OA Reference</div>
+        </div>`;
+
+    // Link
+    const input = document.getElementById('oapLinkInput');
+    input.value = link;
+    const copyBtn = document.getElementById('oapCopyBtn');
+    copyBtn.classList.remove('copied');
+    copyBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Link`;
+
+    // Per-employee table
+    const rows = reports.map(r => `
+        <tr>
+            <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:22px;height:22px;border-radius:6px;background:${r.avatarColor};color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;flex-shrink:0;">${r.employee.charAt(0)}</div>
+                    <span style="font-weight:600;">${r.employee}</span>
+                </div>
+            </td>
+            <td style="color:var(--text-secondary);">${r.dept}</td>
+            <td>${r.period}</td>
+            <td style="text-align:right;font-weight:700;">¥${r.amount.toLocaleString('zh',{minimumFractionDigits:2})}</td>
+            <td style="text-align:center;color:var(--text-secondary);">${r.invoices.length}</td>
+            <td style="text-align:center;">${r.rows.length}</td>
+        </tr>`).join('');
+    document.getElementById('oapTable').innerHTML = `
+        <table class="oap-tbl">
+            <thead><tr>
+                <th style="width:26%;">Employee</th>
+                <th style="width:16%;">Dept</th>
+                <th style="width:16%;">Period</th>
+                <th style="width:18%;text-align:right;">Amount</th>
+                <th style="width:12%;text-align:center;">Invoices</th>
+                <th style="width:12%;text-align:center;">Expense Items</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot><tr class="oap-tbl-total">
+                <td colspan="3" style="font-weight:700;">Total</td>
+                <td style="text-align:right;">¥${total.toLocaleString('zh',{minimumFractionDigits:2})}</td>
+                <td style="text-align:center;">${invoiceCount}</td>
+                <td style="text-align:center;">${reports.reduce((s,r)=>s+r.rows.length,0)}</td>
+            </tr></tfoot>
+        </table>`;
+
+    document.getElementById('oaPackageModal').classList.add('open');
+}
+
+function closeOaPackageModal() {
+    document.getElementById('oaPackageModal').classList.remove('open');
+}
+
+function copyOaLink() {
+    const val = document.getElementById('oapLinkInput').value;
+    navigator.clipboard.writeText(val).catch(()=>{});
+    const btn = document.getElementById('oapCopyBtn');
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+    setTimeout(()=>{
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Link`;
+    }, 2000);
+}
+
+function downloadOaCsv() {
+    if (!_lastOaPackage) return;
+    const { ref, reports } = _lastOaPackage;
+    const BOM = '\uFEFF';
+    const headers = ['OA Ref','Employee','Department','Period','Expense Date','Description','Amount (CNY)','Invoice Amount (CNY)','Invoice Date','Actual Description','Remarks','Invoice ID(s)'];
+
+    const csvRows = [headers];
+    for (const r of reports) {
+        if (!r.rows || r.rows.length === 0) {
+            csvRows.push([ref, r.employee, r.dept, r.period, '', '', r.amount, '', '', '', '', '']);
+            continue;
+        }
+        for (const row of r.rows) {
+            const invIds = row.invIds ? row.invIds.join('+') : (row.invId || '');
+            // Look up invoice amounts and dates
+            const linkedInvs = (row.invIds || (row.invId ? [row.invId] : [])).map(id => r.invoices.find(x=>x.id===id)).filter(Boolean);
+            const invAmount = linkedInvs.map(i=>i.amount).join('+') || '';
+            const invDate = linkedInvs.map(i=>i.date).join('+') || '';
+            csvRows.push([
+                ref,
+                r.employee,
+                r.dept,
+                r.period,
+                row.date || '',
+                row.desc || row.merchant || '',
+                row.amount,
+                invAmount,
+                invDate,
+                row.actualDesc || '',
+                row.remarks || '',
+                invIds,
+            ]);
+        }
+    }
+
+    const csvContent = BOM + csvRows.map(row =>
+        row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')
+    ).join('\r\n');
+
+    const blob = new Blob([csvContent], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${ref}_expense-reports.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`CSV downloaded — ${ref}`);
+}
+
+function closeDetail() {
+    activeId = null;
+    document.getElementById('reviewDetailView').style.display = 'none';
+    document.getElementById('reviewListView').style.display = 'flex';
+    renderList();
+    updateOaBar();
+    refreshTabCounts();
+}
+function refreshTabCounts() {
+    const allEl = document.getElementById('tc-all');
+    if (allEl) allEl.textContent = REPORTS.length;
+}
+
+// ============ Open Report ============
+function openReport(id) {
+    activeId = id;
+    activeDocTab = 'bill';
+    activeBillImgIdx = 0;
+    // Switch to detail view
+    document.getElementById('reviewListView').style.display = 'none';
+    document.getElementById('reviewDetailView').style.display = 'flex';
+    const r = REPORTS.find(x=>x.id===id);
+    if (!r) return;
+
+    // Update dynamic action buttons based on status
+    updateDetailActions(r);
+
+    // JP / US / TW region: simplified row-based review
+    if (r.region === 'JP' || r.region === 'US' || r.region === 'TW') {
+        document.getElementById('contentSplit').innerHTML =
+            `<div class="report-side" id="reportSide" style="flex:1;overflow-y:auto;padding:20px;"></div>`;
+        renderJpReportSide(r);
+        return;
+    }
+
+    const total = r.rows.reduce((s,x)=>s+x.amount,0);
+
+    // OA rejection banner
+    const oaBanner = r.oaStatus === 'oa-rejected' ? `
+        <div style="display:flex;gap:12px;padding:14px 16px;background:#fff1f2;border:1.5px solid #fecdd3;border-radius:10px;margin-bottom:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:700;color:#be123c;margin-bottom:4px;">
+                    OA Rejected
+                    ${r.oaRef ? `<span style="font-weight:400;color:#e11d48;margin-left:8px;font-family:var(--font-mono);font-size:11px;">${r.oaRef}</span>` : ''}
+                    ${r.oaApprover ? `<span style="font-weight:400;color:var(--text-secondary);margin-left:6px;font-size:11px;">by ${r.oaApprover}</span>` : ''}
+                </div>
+                <div style="font-size:13px;color:#9f1239;line-height:1.5;">${r.rejectReason || '—'}</div>
+                ${r.oaRef ? `<div style="margin-top:8px;font-size:11px;color:#e11d48;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:3px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    This report was part of OA package <strong>${r.oaRef}</strong>. Use <strong>Return to Employee</strong> if this report caused the rejection, or <strong>Re-package</strong> to include it in a new OA submission.
+                </div>` : ''}
+            </div>
+        </div>` : '';
+
+    // Status label map for display
+    const statusLabel = { pending:'Pending', approved:'Approved', 'needs-revision':'Needs Revision' };
+    const oaLabel = { 'oa-pending':'OA Reviewing', 'oa-approved':'OA Approved', 'oa-rejected':'OA Rejected' };
+    const oaColors = {
+        'oa-pending':  { bg:'#fefce8', color:'#854d0e', dot:'#eab308' },
+        'oa-approved': { bg:'#f0fdf4', color:'#166534', dot:'#22c55e' },
+        'oa-rejected': { bg:'#fff1f2', color:'#9f1239', dot:'#f43f5e' },
+    };
+    const summaryCard = `
+        <div style="display:flex;flex-wrap:wrap;gap:16px 32px;padding:16px 20px;background:var(--bg-subtle);border-radius:10px;border:1px solid var(--border-divider);margin-bottom:16px;">
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Employee</div>
+                <div style="font-size:13px;font-weight:600;">${r.employee}</div>
+                <div style="font-size:11px;color:var(--text-secondary);">${EMPLOYEE_EMAILS[r.employee]||r.dept}</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Period</div>
+                <div style="font-size:13px;">${r.period}</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Submitted</div>
+                <div style="font-size:13px;color:var(--text-secondary);">${r.submitted}</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Amount</div>
+                <div style="font-size:15px;font-weight:800;color:var(--primary-dark);font-family:var(--font-mono);">${r.region==='US'?'$':(r.region==='TW'?'NT$':'¥')}${r.amount.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
+            </div>
+            ${r.oaStatus ? `<div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">OA Status</div>
+                <span class="tag ${r.oaStatus}">${oaLabel[r.oaStatus]||r.oaStatus}</span>
+            </div>` : ''}
+            ${r.oaRef ? `<div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">OA Package</div>
+                <div style="font-size:12px;font-family:var(--font-mono);color:var(--text-secondary);">${r.oaRef}</div>
+            </div>` : ''}
+        </div>`;
+
+    if (!r.rows.length) {
+        // Build comments section if present
+        const commentsHtml = r.comments && r.comments.length ? `
+            <div style="margin-top:16px;">
+                <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Comments</div>
+                ${r.comments.map(c=>`
+                    <div style="display:flex;gap:10px;margin-bottom:12px;">
+                        <div style="width:28px;height:28px;border-radius:50%;background:${c.avatarColor||'#6b7280'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${c.author[0]}</div>
+                        <div>
+                            <div style="font-size:12px;font-weight:600;margin-bottom:2px;">${c.author} <span style="font-weight:400;color:var(--text-disabled);">${c.time}</span></div>
+                            <div style="font-size:13px;color:${c.issue?'#be123c':'var(--text-secondary)'};">${c.text}</div>
+                        </div>
+                    </div>`).join('')}
+            </div>` : '';
+
+        document.getElementById('contentSplit').innerHTML =
+            `<div style="flex:1;overflow-y:auto;padding:20px;">
+                ${oaBanner ? `<div style="margin-bottom:16px;">${oaBanner}</div>` : ''}
+                ${summaryCard}
+                ${commentsHtml}
+             </div>`;
+        return;
+    }
+
+    document.getElementById('contentSplit').innerHTML =
+        `${oaBanner ? `<div style="padding:16px 16px 0;">${oaBanner}</div>` : ''}
+         <div class="report-side" id="reportSide" style="flex:1;overflow-y:auto;padding:20px;"></div>`;
+    renderReportSide(r);
+}
+
+/**
+ * Status machine — action buttons visible to finance per status:
+ *   pending        → [Return to Employee] [Approve]
+ *   approved       → [Recall] [Submit to OA]   (CN only; JP: no Submit to OA)
+ *   needs-revision → (none — waiting for employee)
+ *   oa-pending     → (none — in OA queue)
+ *   oa-approved    → (none — complete)
+ *   oa-rejected    → [Return to Employee]  (sets status → needs-revision)
+ */
+function updateDetailActions(r) {
+    const el = document.getElementById('dpActions');
+    if (!el) return;
+    el.innerHTML = '';
+
+    const mkGhost = (label, onclick, icon='') => {
+        const b = document.createElement('button');
+        b.className = 'btn-ghost';
+        b.innerHTML = icon + label;
+        b.onclick = onclick;
+        return b;
+    };
+    const mkApprove = (label, onclick, icon='') => {
+        const b = document.createElement('button');
+        b.className = 'btn-approve';
+        b.innerHTML = icon + label;
+        b.onclick = onclick;
+        return b;
+    };
+    const mkWarning = (label, onclick, icon='') => {
+        const b = document.createElement('button');
+        b.className = 'btn-ghost';
+        b.style.cssText = 'color:#b45309;border-color:#fcd34d;background:#fffbeb;';
+        b.innerHTML = icon + label;
+        b.onclick = onclick;
+        return b;
+    };
+
+    const xIcon      = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    const checkIcon  = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>';
+    const returnIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>';
+
+    const s  = r.status;
+    const oa = r.oaStatus || null;
+
+    if (s === 'pending') {
+        el.appendChild(mkGhost('Return to Employee', openRejectModal, xIcon));
+        el.appendChild(mkApprove('Approve', approveReport, checkIcon));
+
+    } else if (s === 'approved' && oa === 'oa-rejected') {
+        const label = document.createElement('span');
+        label.style.cssText = 'font-size:11px;color:var(--text-disabled);margin-right:4px;';
+        label.textContent = 'OA Rejected:';
+        el.appendChild(label);
+        el.appendChild(mkWarning('Return to Employee', returnOaRejectedReport, returnIcon));
+        const repackageIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>';
+        el.appendChild(mkApprove('Re-package', repackageReport, repackageIcon));
+
+    }
+    // needs-revision / approved+no-oa / approved+oa-pending / approved+oa-approved → no buttons
+
+    // Collapse the header bar entirely when there are no actions to show
+    const header = document.getElementById('dpHeader');
+    if (header) header.style.display = el.children.length ? 'flex' : 'none';
+}
+
+
+// Submitter info bar — matches the employee report Step 2 layout
+function reviewUploaderBar(r) {
+    const initial = (r.employee || '?').trim().charAt(0);
+    const email = EMPLOYEE_EMAILS[r.employee] || '—';
+    return `
+        <div class="uploader-bar">
+            <div class="ub-avatar">${initial}</div>
+            <div class="ub-fields">
+                <div class="ub-field"><span class="ub-label">Submitter</span><span class="ub-val">${r.employee}</span></div>
+                <div class="ub-field"><span class="ub-label">Email</span><span class="ub-val">${email}</span></div>
+                <div class="ub-field"><span class="ub-label">Department</span><span class="ub-val">${r.dept || '—'}</span></div>
+                <div class="ub-field"><span class="ub-label">Period</span><span class="ub-val">${r.period || '—'}</span></div>
+                <div class="ub-field"><span class="ub-label">Submit Date</span><span class="ub-val">${r.submitted || '—'}</span></div>
+            </div>
+        </div>`;
+}
+
+function renderJpReportSide(r) {
+    const el = document.getElementById('reportSide');
+    if (!el) return;
+    const rows = r.jpRows || [];
+    const total = rows.reduce((s, x) => s + (+x.amount || 0), 0);
+    const cur = r.region === 'US' ? '$' : (r.region === 'TW' ? 'NT$' : '¥');
+    const regionCode = r.region || 'JP';
+
+    const isTW = regionCode === 'TW';
+    const docLabel = isTW ? 'Invoice' : 'Voucher';
+    // Expense table rows — same column structure as CN
+    const rowsHtml = rows.map((row, i) => {
+        const descVal = isTW ? [row.company, row.purpose].filter(Boolean).join(' · ') : (row.purpose || '—');
+
+        const vCell = row.voucher
+            ? `<button class="vc-link" onclick="showDocModal('voucher',${i})" title="${row.voucher}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span>View</span>
+                </button>`
+            : '<span style="color:var(--text-disabled);font-size:11px;">—</span>';
+
+        // Account Name (accounting category) — AI pre-fill if not manually set, same as CN
+        if (!row.cat && !row._catManual) {
+            const suggested = aiSuggestCat(descVal);
+            if (suggested) row.cat = suggested;
+        }
+        const isAi = !row._catManual;
+        const catOptions = CATEGORY_OPTIONS.map(opt =>
+            `<option value="${opt}"${row.cat===opt?' selected':''}>${opt}</option>`
+        ).join('');
+        const catCell = `<div class="cat-cell">
+            <select class="cat-select${isAi&&row.cat?' ai-pre':''}"
+                onchange="updateJpRowCat('${r.id}',${i},this.value);this.classList.remove('ai-pre');this.nextElementSibling&&this.nextElementSibling.remove();">
+                <option value="">— select —</option>${catOptions}
+            </select>
+            ${isAi && row.cat ? '<span class="cat-ai-badge">AI</span>' : ''}
+        </div>`;
+
+        return `
+        <tr>
+            <td style="text-align:center;color:var(--text-disabled);font-size:11px;font-weight:600;font-family:var(--font-mono);white-space:nowrap;">${i + 1}</td>
+            <td style="color:var(--text-secondary);white-space:nowrap;font-size:11px;">${row.date}</td>
+            <td style="font-weight:600;text-align:right;font-family:var(--font-mono);white-space:nowrap;">${cur}${(+row.amount||0).toLocaleString('en-US')}</td>
+            <td>${descVal}</td>
+            <td style="color:var(--text-secondary);font-size:11px;">${row.remarks||'—'}</td>
+            <td>${catCell}</td>
+            <td style="font-size:12px;">${vCell}</td>
+        </tr>`;
+    }).join('');
+
+    el.innerHTML = `
+        ${reviewUploaderBar(r)}
+
+        <!-- Expense items table -->
+        <div class="report-table-wrap" style="margin-bottom:24px;">
+            <table class="jp-rv-table">
+                <thead>
+                    <tr>
+                        <th style="width:5%;text-align:center;">#</th>
+                        <th style="width:13%;">Date</th>
+                        <th style="width:14%;text-align:right;">Amount (${cur})</th>
+                        <th style="width:27%;">Description</th>
+                        <th style="width:15%;">Remarks</th>
+                        <th style="width:16%;">Account Name</th>
+                        <th style="width:10%;">${docLabel}</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+            <div class="report-total">
+                <span class="total-label">Total</span>
+                <span class="total-amount">${cur}${total.toLocaleString('en-US')}</span>
+            </div>
+        </div>
+
+        <!-- US only: Budget approval document -->
+        ${regionCode === 'US' ? `
+        <div style="margin-bottom:24px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Budget Approval</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border-divider);border-radius:10px;background:var(--bg-subtle);">
+                <div style="width:38px;height:38px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:600;color:var(--text-default);">budget_approval_${(r.period||'').toLowerCase().replace(' ','')}.pdf</div>
+                    <div style="font-size:11px;color:var(--text-disabled);">Approved · 1 file · Budget approval form</div>
+                </div>
+                <button onclick="showDocModal('budget',null)" style="height:28px;padding:0 14px;border:1px solid var(--border-default);border-radius:6px;background:var(--bg-container);font-size:12px;font-weight:600;color:var(--text-default);cursor:pointer;">View</button>
+            </div>
+        </div>` : ''}
+
+        <!-- Comments -->
+        ${r.comments && r.comments.length ? `
+        <div style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Comments</div>
+            ${r.comments.map(c=>`
+                <div style="display:flex;gap:10px;margin-bottom:12px;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:${c.avatarColor||'#6b7280'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${c.author[0]}</div>
+                    <div>
+                        <div style="font-size:12px;font-weight:600;margin-bottom:2px;">${c.author} <span style="font-weight:400;color:var(--text-disabled);">${c.time}</span></div>
+                        <div style="font-size:13px;color:var(--text-secondary);">${c.text}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>` : ''}
+    `;
+}
+
+// ============ Report Side ============
+const CATEGORY_OPTIONS = [
+    '员工福利', '办公用品', '业务招待', '差旅费',
+    '交通费', '住宿费', '车辆费', '餐饮费', '团建费',
+];
+const CATEGORY_AI_MAP = [
+    { keywords:['停车','洗车','充电','车辆'],              cat:'车辆费'  },
+    { keywords:['住房补贴','员工关怀','福利'],              cat:'员工福利'},
+    { keywords:['住宿','酒店','旅馆'],                      cat:'住宿费'  },
+    { keywords:['出差','差旅','机票','高铁','火车','航班'],  cat:'差旅费'  },
+    { keywords:['打车','交通','地铁','滴滴','出行','公交','打的'], cat:'交通费'},
+    { keywords:['餐','饮食','工作餐','团队餐','宵夜'],      cat:'餐饮费'  },
+    { keywords:['办公','打印','文具','耗材','纸张'],        cat:'办公用品'},
+    { keywords:['招待','宴','接待','客户'],                 cat:'业务招待'},
+    { keywords:['团建','活动'],                             cat:'团建费'  },
+];
+function aiSuggestCat(desc) {
+    const text = (desc || '') + '';
+    for (const {keywords, cat} of CATEGORY_AI_MAP) {
+        if (keywords.some(k => text.includes(k))) return cat;
+    }
+    return '';
+}
+function updateRowCat(reportId, rowIdx, value) {
+    const r = REPORTS.find(x => x.id === reportId);
+    if (!r || !r.rows[rowIdx]) return;
+    r.rows[rowIdx].cat = value;
+    r.rows[rowIdx]._catManual = true;
+}
+
+// JP / US / TW rows live on r.jpRows
+function updateJpRowCat(reportId, rowIdx, value) {
+    const r = REPORTS.find(x => x.id === reportId);
+    if (!r || !r.jpRows || !r.jpRows[rowIdx]) return;
+    r.jpRows[rowIdx].cat = value;
+    r.jpRows[rowIdx]._catManual = true;
+}
+
+function renderReportSide(r) {
+    const el = document.getElementById('reportSide');
+    const total = r.rows.reduce((s,x)=>s+x.amount,0);
+    const hasBill = !!(BILL_IMAGES[r.id] && BILL_IMAGES[r.id].length);
+
+    // Normalise each row to always carry invIds[]
+    const rows = r.rows.map((row, i) => ({
+        ...row,
+        _i: i,
+        _invIds: row.invIds || (row.invId ? [row.invId] : []),
+    }));
+
+    // Group by invoice key (joined invIds)
+    const groupMap = {};
+    rows.forEach(row => {
+        const key = row._invIds.length > 0 ? row._invIds.join(',') : '__none__';
+        if (!groupMap[key]) groupMap[key] = { invIds: row._invIds, rows: [] };
+        groupMap[key].rows.push(row);
+    });
+
+    let tableHtml = '';
+    let rowNo = 0;
+    Object.entries(groupMap).forEach(([key, group]) => {
+        const invs = group.invIds.map(id => r.invoices.find(x => x.id === id)).filter(Boolean);
+        const groupTotal = group.rows.reduce((s,x) => s + x.amount, 0);
+        const invTotal   = invs.reduce((s, inv) => s + inv.amount, 0);
+        const diff       = invTotal > 0 ? invTotal - groupTotal : null;
+        const diffLabel  = diff === null ? '' : Math.abs(diff) < 0.01 ? '✓ Match' : `Δ¥${diff.toFixed(2)}`;
+        const multiInv   = invs.length > 1;
+
+        group.rows.forEach(row => {
+            const rowClass = row._invIds.length === 0 ? 'no-inv' : '';
+
+            // Invoice Date: unique dates joined with " + "
+            const invDates = [...new Set(invs.map(inv => inv.date))];
+            const invDateStr = invDates.length > 0 ? invDates.join(' + ') : '—';
+
+            // Invoice Amount: additive if multiple
+            const invAmtStr = multiInv
+                ? `<span style="font-size:11px;">${invs.map(inv => Number.isInteger(inv.amount) ? inv.amount : inv.amount.toFixed(2)).join('+')}</span><br><span style="font-weight:700;">= ¥${invTotal.toFixed(2)}</span>`
+                : invs.length === 1 ? `¥${invs[0].amount.toFixed(2)}` : '—';
+
+            // Invoice links
+            const invLinks = invs.length > 0
+                ? invs.map(inv => `<button onclick="showDocModal('inv','${inv.id}')" style="background:none;border:none;padding:0;color:var(--primary);font-size:12px;cursor:pointer;text-decoration:underline;display:block;">${inv.id}</button>`).join('')
+                : '—';
+
+            const vcLink = hasBill
+                ? `<button onclick="showDocModal('bill',null)" style="background:none;border:none;padding:0;color:#7c3aed;font-size:12px;cursor:pointer;text-decoration:underline;">View</button>`
+                : '<span style="color:var(--text-disabled);font-size:11px;">—</span>';
+
+            // Category: AI pre-fill if not manually set
+            if (!row.cat && !row._catManual) {
+                const suggested = aiSuggestCat(row.desc);
+                if (suggested) { row.cat = suggested; }
+            }
+            const isAi = !row._catManual;
+            const catOptions = CATEGORY_OPTIONS.map(opt =>
+                `<option value="${opt}"${row.cat===opt?' selected':''}>${opt}</option>`
+            ).join('');
+            const catCell = `<div class="cat-cell">
+                <select class="cat-select${isAi&&row.cat?' ai-pre':''}"
+                    onchange="updateRowCat('${r.id}',${row._i},this.value);this.classList.remove('ai-pre');this.nextElementSibling&&this.nextElementSibling.remove();">
+                    <option value="">— select —</option>${catOptions}
+                </select>
+                ${isAi && row.cat ? '<span class="cat-ai-badge">AI</span>' : ''}
+            </div>`;
+
+            rowNo++;
+            tableHtml += `<tr class="${rowClass}" id="tr-${row._i}">
+                <td style="text-align:center;color:var(--text-disabled);font-size:11px;font-weight:600;font-family:var(--font-mono);white-space:nowrap;">${rowNo}</td>
+                <td style="color:var(--text-secondary);white-space:nowrap;font-size:11px;">${invDateStr}</td>
+                <td style="font-weight:600;text-align:right;font-family:var(--font-mono);white-space:nowrap;">¥${row.amount.toFixed(2)}</td>
+                <td>${row.desc}</td>
+                <td style="color:var(--text-secondary);font-size:11px;">${row.remarks||'—'}</td>
+                <td>${catCell}</td>
+                <td style="font-size:12px;">${invLinks}</td>
+            </tr>`;
+        });
+    });
+
+    el.innerHTML = `
+        ${reviewUploaderBar(r)}
+        <div class="report-table-wrap">
+            <table class="rpt-table">
+                <thead><tr>
+                    <th style="width:5%;text-align:center;">#</th>
+                    <th style="width:13%;">Invoice Date</th>
+                    <th style="width:14%;text-align:right;">Invoice Amount (¥)</th>
+                    <th style="width:27%;">Description</th>
+                    <th style="width:15%;">Remarks</th>
+                    <th style="width:16%;">Account Name</th>
+                    <th style="width:10%;">Invoice</th>
+                </tr></thead>
+                <tbody>${tableHtml}</tbody>
+            </table>
+            <div class="report-total">
+                <span class="total-label">Total</span>
+                <span class="total-amount">¥${total.toLocaleString('zh',{minimumFractionDigits:2})}</span>
+            </div>
+        </div>`;
+}
+
+function scrollToRow(idx) {
+    const el = document.getElementById(`tr-${idx}`);
+    if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ============ Document Modal ============
+function showDocModal(type, id) {
+    const r = REPORTS.find(x => x.id === activeId);
+    if (!r) return;
+    const tagEl   = document.getElementById('docModalTag');
+    const titleEl = document.getElementById('docModalTitle');
+    const bodyEl  = document.getElementById('docModalBody');
+
+    if (type === 'inv') {
+        const inv = r.invoices.find(x => x.id === id);
+        if (!inv) return;
+        tagEl.textContent = 'Invoice';
+        tagEl.style.cssText = 'background:#ffe4e6;color:#e11d48;';
+        titleEl.textContent = `${inv.id} · ${inv.issuer}`;
+
+        if (inv.path) {
+            bodyEl.innerHTML = `
+            <div class="doc-modal-meta">
+                <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Invoice ID</span><span class="doc-modal-meta-value">${inv.id}</span></div>
+                <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Date</span><span class="doc-modal-meta-value">${inv.date}</span></div>
+                <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Amount</span><span class="doc-modal-meta-value" style="color:#0f172a;">¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</span></div>
+                <div class="doc-modal-meta-item" style="flex:1;"><span class="doc-modal-meta-label">Account Name</span><span class="doc-modal-meta-value">${inv.category}</span></div>
+            </div>
+            <embed src="${inv.path}" type="application/pdf" width="100%" height="520px"
+                style="border-radius:10px;border:1px solid var(--border-divider);display:block;">
+            <div style="margin-top:12px;display:flex;justify-content:center;">
+                <a href="${inv.path}" target="_blank" style="font-size:12px;color:var(--primary);display:inline-flex;align-items:center;gap:4px;">
+                    Open in new tab
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+            </div>`;
+        } else {
+            // Mock invoice card
+            const taxAmt = inv.amount / (1 + inv.taxRate/100) * (inv.taxRate/100);
+            const preAmt = inv.amount - taxAmt;
+            bodyEl.innerHTML = `
+            <div class="doc-modal-meta">
+                <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Invoice ID</span><span class="doc-modal-meta-value">${inv.id}</span></div>
+                <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Date</span><span class="doc-modal-meta-value">${inv.date}</span></div>
+                <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Amount</span><span class="doc-modal-meta-value" style="color:#0f172a;">¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</span></div>
+                <div class="doc-modal-meta-item" style="flex:1;"><span class="doc-modal-meta-label">Account Name</span><span class="doc-modal-meta-value">${inv.category}</span></div>
+            </div>
+            <div class="invoice-mock">
+                <div class="im-top">
+                    <div>
+                        <div class="im-type">增值税普通发票</div>
+                        <div class="im-title">${inv.category}</div>
+                        <div class="im-code">发票号码：${inv.invoiceNo}</div>
+                    </div>
+                    <div class="im-stamp">已验<br>真</div>
+                </div>
+                <div class="im-field"><span class="im-label">开票日期</span><span class="im-value">${inv.date}</span></div>
+                <div class="im-field"><span class="im-label">购买方</span><span class="im-value">上海创途网络科技有限公司</span></div>
+                <div class="im-field"><span class="im-label">销售方</span><span class="im-value">${inv.issuer}</span></div>
+                <div class="im-divider"></div>
+                <table class="im-items">
+                    <thead><tr><th>名称</th><th>金额</th><th>税率</th><th>税额</th></tr></thead>
+                    <tbody><tr><td style="text-align:left;">${inv.category}</td><td>¥${preAmt.toFixed(2)}</td><td>${inv.taxRate}%</td><td>¥${taxAmt.toFixed(2)}</td></tr></tbody>
+                </table>
+                <div class="im-total-row"><span>价税合计</span><span>¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</span></div>
+                ${inv.warnMsg ? `<div class="im-warn-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>${inv.warnMsg}</span></div>` : ''}
+            </div>`;
+        }
+
+    } else if (type === 'bill') {
+        const images = BILL_IMAGES[r.id] || [];
+        tagEl.textContent = 'Payment Voucher';
+        tagEl.style.cssText = 'background:var(--primary-bg);color:var(--primary-dark);';
+        titleEl.textContent = `${r.employee} · ${r.period} · Bill Screenshots`;
+
+        if (images.length === 0) {
+            bodyEl.innerHTML = `<div style="padding:60px 0;text-align:center;color:var(--text-disabled);">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" style="margin-bottom:10px;opacity:.4;"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <div style="font-size:13px;font-weight:600;color:var(--text-secondary);">No bill screenshots attached</div>
+            </div>`;
+        } else {
+            let activeImg = 0;
+            const renderImgBody = (idx) => {
+                const img = images[idx];
+                const appColor = img.app === '微信' ? 'linear-gradient(135deg,#07c160,#06ae56)' : 'linear-gradient(135deg,#1d4ed8,#3b82f6)';
+                const tabs = images.length > 1 ? images.map((im, i) =>
+                    `<button onclick="switchBillModalImg(${i})" style="flex-shrink:0;height:34px;padding:0 12px;border:none;background:none;font:inherit;font-size:11px;font-weight:${i===idx?'600':'500'};color:${i===idx?'var(--text-default)':'var(--text-secondary)'};cursor:pointer;position:relative;">
+                        ${im.app} ${i+1}
+                        ${i===idx?'<span style="position:absolute;bottom:0;left:8px;right:8px;height:2px;background:var(--text-default);border-radius:2px;"></span>':''}
+                    </button>`).join('') : '';
+                return `
+                ${images.length > 1 ? `<div id="billImgTabs" style="display:flex;gap:0;border-bottom:1px solid var(--border-divider);overflow-x:auto;background:var(--bg-subtle);margin:-20px -20px 16px;">${tabs}</div>` : ''}
+                <div style="border-radius:10px;overflow:hidden;border:1px solid var(--border-divider);box-shadow:0 2px 8px rgba(0,0,0,.08);">
+                    <div style="padding:8px 12px;background:${appColor};color:#fff;font-size:11px;font-weight:600;">${img.app} · ${r.bill?.period || ''} bill screenshot</div>
+                    <img src="${img.path}" alt="${img.file}" style="width:100%;display:block;max-height:480px;object-fit:contain;background:#f8fafc;"
+                        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div style="display:none;flex-direction:column;align-items:center;justify-content:center;height:100px;background:#f8fafc;gap:6px;color:var(--text-disabled);font-size:11px;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>${img.file}</span>
+                    </div>
+                </div>
+                <div style="margin-top:10px;display:flex;justify-content:center;">
+                    <a href="${img.path}" target="_blank" style="font-size:12px;color:var(--primary);display:inline-flex;align-items:center;gap:4px;">
+                        Open in new tab
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
+                </div>`;
+            };
+            window._billModalActiveIdx = 0;
+            window._billModalRender = renderImgBody;
+            bodyEl.innerHTML = renderImgBody(0);
+        }
+
+    } else if (type === 'budget') {
+        const cur = r.region === 'US' ? '$' : (r.region === 'TW' ? 'NT$' : '¥');
+        const total = (r.jpRows || []).reduce((s, x) => s + (+x.amount || 0), 0) || r.amount || 0;
+        tagEl.textContent = 'Budget Approval';
+        tagEl.style.cssText = 'background:#f0fdf4;color:#15803d;';
+        titleEl.textContent = `Budget Approval · ${r.period}`;
+        bodyEl.innerHTML = `
+        <div class="doc-modal-meta">
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Document</span><span class="doc-modal-meta-value">Budget Approval Form</span></div>
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Period</span><span class="doc-modal-meta-value">${r.period}</span></div>
+            <div class="doc-modal-meta-item" style="flex:1;"><span class="doc-modal-meta-label">Requested by</span><span class="doc-modal-meta-value">${r.employee}</span></div>
+        </div>
+        <div style="border:1px solid var(--border-divider);border-radius:12px;overflow:hidden;background:#fff;">
+            <div style="padding:18px 22px;border-bottom:1px solid var(--border-divider);display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <div style="font-size:15px;font-weight:800;color:var(--text-default);letter-spacing:.2px;">CTW Inc. — US Office</div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Budget Approval Form</div>
+                </div>
+                <div style="transform:rotate(-8deg);border:2px solid #15803d;color:#15803d;border-radius:6px;padding:4px 12px;font-size:13px;font-weight:800;letter-spacing:1px;">APPROVED</div>
+            </div>
+            <div style="padding:18px 22px;display:grid;grid-template-columns:1fr 1fr;gap:14px 28px;">
+                <div><div style="font-size:11px;font-weight:600;color:var(--text-disabled);margin-bottom:3px;">Department</div><div style="font-size:13px;font-weight:600;">${r.dept || 'US Office'}</div></div>
+                <div><div style="font-size:11px;font-weight:600;color:var(--text-disabled);margin-bottom:3px;">Period</div><div style="font-size:13px;font-weight:600;">${r.period}</div></div>
+                <div><div style="font-size:11px;font-weight:600;color:var(--text-disabled);margin-bottom:3px;">Requested by</div><div style="font-size:13px;font-weight:600;">${r.employee}</div></div>
+                <div><div style="font-size:11px;font-weight:600;color:var(--text-disabled);margin-bottom:3px;">Budget category</div><div style="font-size:13px;font-weight:600;">Travel &amp; Operating Expenses</div></div>
+                <div><div style="font-size:11px;font-weight:600;color:var(--text-disabled);margin-bottom:3px;">Approved amount</div><div style="font-size:15px;font-weight:800;color:var(--primary-dark);font-family:var(--font-mono);">${cur}${total.toLocaleString('en-US')}</div></div>
+                <div><div style="font-size:11px;font-weight:600;color:var(--text-disabled);margin-bottom:3px;">Approver</div><div style="font-size:13px;font-weight:600;">Michael Reed · VP Operations</div></div>
+            </div>
+            <div style="padding:12px 22px;border-top:1px solid var(--border-divider);background:var(--bg-subtle);display:flex;align-items:center;gap:8px;font-size:12px;color:#15803d;font-weight:600;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Approved on ${r.submitted} · Reference #BA-${(r.id||'').replace(/[^0-9]/g,'').slice(0,6) || '000000'}
+            </div>
+        </div>`;
+
+    } else if (type === 'voucher') {
+        const row = (r.jpRows || [])[id];
+        if (!row) return;
+        const isUS = r.region === 'US';
+        const cur = isUS ? '$' : '¥';
+        const amtStr = `${cur}${(+row.amount || 0).toLocaleString('en-US')}`;
+        tagEl.textContent = 'Receipt';
+        tagEl.style.cssText = 'background:var(--primary-bg);color:var(--primary-dark);';
+        titleEl.textContent = `${row.voucher || 'Voucher'}`;
+        bodyEl.innerHTML = `
+        <div class="doc-modal-meta">
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">File</span><span class="doc-modal-meta-value">${row.voucher || '—'}</span></div>
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Date</span><span class="doc-modal-meta-value">${row.date}</span></div>
+            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Amount</span><span class="doc-modal-meta-value" style="color:var(--text-default);">${amtStr}</span></div>
+            <div class="doc-modal-meta-item" style="flex:1;"><span class="doc-modal-meta-label">Purpose</span><span class="doc-modal-meta-value">${row.purpose}</span></div>
+        </div>
+        <div class="invoice-mock">
+            <div class="im-top">
+                <div>
+                    <div class="im-type">${isUS ? 'OFFICIAL RECEIPT' : '領収書'}</div>
+                    <div class="im-title">${row.purpose}</div>
+                    <div class="im-code">No. ${(row.voucher || '').replace(/\.[a-z0-9]+$/i, '')}</div>
+                </div>
+                <div class="im-stamp">${isUS ? 'PAID' : '領収'}</div>
+            </div>
+            <div class="im-field"><span class="im-label">${isUS ? 'Date' : '日付'}</span><span class="im-value">${row.date}</span></div>
+            <div class="im-field"><span class="im-label">${isUS ? 'Payee' : '宛名'}</span><span class="im-value">${r.employee}</span></div>
+            <div class="im-field"><span class="im-label">${isUS ? 'Issued by' : '発行者'}</span><span class="im-value">${isUS ? 'Merchant / Vendor' : '取引先'}</span></div>
+            <div class="im-field"><span class="im-label">${isUS ? 'Description' : '但し書き'}</span><span class="im-value">${row.purpose}${row.remarks ? (' · ' + row.remarks) : ''}</span></div>
+            <div class="im-divider"></div>
+            <div class="im-total-row"><span>${isUS ? 'Total (incl. tax)' : '合計（税込）'}</span><span>${amtStr}</span></div>
+        </div>
+        <div style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-disabled);">
+            Receipt / e-ticket attached by employee · mock preview
+        </div>`;
+    }
+    document.getElementById('docModal').classList.add('open');
+}
+
+function switchBillModalImg(idx) {
+    window._billModalActiveIdx = idx;
+    document.getElementById('docModalBody').innerHTML = window._billModalRender(idx);
+}
+
+function closeDocModal() {
+    document.getElementById('docModal').classList.remove('open');
+}
+
+// ============ Flag ============
+function toggleFlag(rowIdx) {
+    const r = REPORTS.find(x=>x.id===activeId);
+    if (!r) return;
+    r.rows[rowIdx].flag = !r.rows[rowIdx].flag;
+    renderReportSide(r);
+}
+
+// ============ Actions ============
+function advanceToNext() {
+    const filtered = currentTab === 'all' ? REPORTS : REPORTS.filter(r => r.status === currentTab);
+    const idx = filtered.findIndex(r => r.id === activeId);
+    // Try the item right after current; skip the one we just acted on (its status may have changed)
+    const next = filtered.slice(idx + 1).find(r => r.id !== activeId);
+    if (next) {
+        // Brief delay so toast is readable before the panel swaps
+        setTimeout(() => openReport(next.id), 320);
+        // Still refresh counts and list in background
+        refreshTabCounts();
+        renderList();
+    } else {
+        closeDetail();
+    }
+}
+
+function approveReport() {
+    const r = REPORTS.find(x=>x.id===activeId);
+    if (!r) return;
+    r.status = 'approved';
+    r.oaStatus = null;
+    renderList();
+    showToast('Report approved');
+    advanceToNext();
+}
+
+
+function returnOaRejectedReport() {
+    const r = REPORTS.find(x=>x.id===activeId);
+    if (!r || r.oaStatus !== 'oa-rejected') return;
+    r.status = 'needs-revision';
+    r.oaStatus = null;
+    r.comments.push({
+        author:'王 彬', time:new Date().toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''),
+        text:`[OA Rejected → Returned] ${r.rejectReason||'Please revise and resubmit.'}`, issue:true, avatarColor:'#7c3aed'
+    });
+    renderList();
+    showToast('Report returned to employee for revision');
+    advanceToNext();
+}
+
+/**
+ * Re-package: the report was NOT the cause of OA rejection.
+ * Reset it back to finance-approved so it can be included in a new OA package immediately.
+ */
+function repackageReport() {
+    const r = REPORTS.find(x=>x.id===activeId);
+    if (!r || r.oaStatus !== 'oa-rejected') return;
+    r.status = 'approved';
+    r.oaStatus = null;
+    r.comments.push({
+        author:'王 彬', time:new Date().toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''),
+        text:'[Re-packaged] Report cleared — ready to be included in a new OA submission.', issue:false, avatarColor:'#7c3aed'
+    });
+    renderList();
+    refreshTabCounts();
+    showToast('Report moved to Approved — ready for new OA package');
+    advanceToNext();
+}
+
+function openRejectModal() {
+    const r = REPORTS.find(x=>x.id===activeId);
+    const flagged = r && r.rows ? r.rows.filter(x=>x.flag) : [];
+    const preview = document.getElementById('flagListPreview');
+    const ul = document.getElementById('flagListUl');
+    if (flagged.length) {
+        ul.innerHTML = flagged.map(row=>`<li>${row.date.replace('2026/','')} ${row.merchant} ¥${row.amount.toFixed(2)}</li>`).join('');
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+    document.getElementById('rejectModal').classList.add('open');
+}
+function closeRejectModal() { document.getElementById('rejectModal').classList.remove('open'); }
+function confirmReject() {
+    const reason = document.getElementById('rejectReason').value.trim();
+    if (!reason) { showToast('Please provide a reason'); return; }
+    const r = REPORTS.find(x=>x.id===activeId);
+    if (!r) return;
+    r.status = 'needs-revision';
+    r.rejectReason = reason;
+    r.comments.push({
+        author:'王 彬', time:new Date().toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''),
+        text:`[Returned] ${reason}`, issue:true, avatarColor:'#7c3aed'
+    });
+    closeRejectModal();
+    document.getElementById('rejectReason').value = '';
+    showToast('Report returned to employee for revision');
+    advanceToNext();
+}
+
+let toastTimer;
+function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>el.classList.remove('visible'), 2400);
+}
+
+// Init
+renderList();
+updateOaBar();
+refreshTabCounts();
+</script>
+</body>
+</html>

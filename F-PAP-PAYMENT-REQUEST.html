@@ -324,11 +324,34 @@
             position: relative;
         }
         .main-header {
+            position: relative;
             height: 56px;
             padding: 0 20px 0 24px;
             display: flex; align-items: center; justify-content: space-between;
             border-bottom: 1px solid var(--border-divider);
             flex-shrink: 0;
+        }
+        .seg-toggle {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: inline-flex; align-items: center; gap: 4px;
+            background: var(--bg-active);
+            border-radius: 10px; padding: 4px;
+        }
+        .seg-item {
+            display: inline-flex; align-items: center; gap: 7px;
+            height: 32px; padding: 0 18px;
+            border-radius: 8px;
+            font-size: 13px; font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none; cursor: pointer;
+            transition: background .15s, color .15s, box-shadow .15s;
+        }
+        .seg-item svg { width: 15px; height: 15px; }
+        .seg-item:hover { color: var(--text-default); }
+        .seg-item.active {
+            background: var(--bg-container);
+            color: var(--text-default);
+            box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.05);
         }
         .main-title { font-size: 15px; font-weight: 600; }
         .bell-btn {
@@ -793,6 +816,7 @@
             gap: 12px; margin-bottom: 10px;
         }
         .vf-label { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; }
+        .vf-row.vf-required .vf-label::after { content: " *"; color: #dc2626; font-weight: 700; }
         .vf-row input, .vf-row select {
             width: 100%; font: inherit; font-size: 13px;
             border: 1px solid var(--border-default); border-radius: 6px;
@@ -1588,6 +1612,16 @@
     <!-- ========== Main content ========== -->
     <main class="main">
         <div class="main-header">
+            <div class="seg-toggle" role="tablist">
+                <a class="seg-item active" href="F-PAP-PAYMENT-REQUEST.html" role="tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9h.01"/><path d="M9 13h.01"/><path d="M9 17h.01"/></svg>
+                    Enterprise
+                </a>
+                <a class="seg-item" href="F-PAP-EXPENSE-REPORT_副本.html" role="tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Individual
+                </a>
+            </div>
             <button class="bell-btn" title="Notifications" style="margin-left:auto;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                 <span class="bell-badge">23</span>
@@ -1950,7 +1984,7 @@
 
                 <div class="vf-section">Overview</div>
                 <div class="vf-row"><div class="vf-label">Company</div>
-                    <select id="vfCompany">
+                    <select id="vfCompany" onchange="refreshVfForm()">
                         <option value="">— Select —</option>
                         <option value="JP_CTW_INC">JP_CTW_INC</option>
                         <option value="SG_CTW_INC">SG_CTW_INC</option>
@@ -1960,9 +1994,6 @@
                         <option value="HK_CTW_INC">HK_CTW_INC</option>
                     </select>
                 </div>
-                <div class="vf-row"><div class="vf-label">Vendor Name</div><input id="vfVendorName" placeholder="Issuing vendor"></div>
-                <div class="vf-row"><div class="vf-label">Invoice No.</div><input id="vfInvoiceNumber" placeholder="e.g. INV-2026-0001"></div>
-
                 <div class="vf-section">Amount</div>
                 <div class="vf-row"><div class="vf-label">Currency</div>
                     <select id="vfCurrency">
@@ -1974,22 +2005,13 @@
                         <option value="TWD">TWD</option>
                     </select>
                 </div>
-                <div class="vf-row"><div class="vf-label">Total Amount</div><input id="vfAmount" placeholder="0.00"></div>
-                <div class="vf-row"><div class="vf-label">Tax Amount</div><input id="vfTaxAmount" placeholder="0.00"></div>
-                <div class="vf-row"><div class="vf-label">Amount Due</div><input id="vfAmountDue" placeholder="0.00"></div>
-
-                <div class="vf-section">Category</div>
-                <div class="vf-row"><div class="vf-label">Payment Type</div>
-                    <select id="vfPaymentType">
-                        <option value="">— Select —</option>
-                        <option value="ADMINISTRATIVE">ADMINISTRATIVE</option>
-                        <option value="NON_ADMINISTRATIVE">NON_ADMINISTRATIVE</option>
-                    </select>
-                </div>
+                <div class="vf-row"><div class="vf-label">Total Amount</div><input id="vfAmount"></div>
+                <div class="vf-row"><div class="vf-label">Tax Amount</div><input id="vfTaxAmount"></div>
+                <div class="vf-row"><div class="vf-label">Excl. Tax Amount</div><input id="vfAmountDue"></div>
 
                 <div class="vf-section">Dates</div>
                 <div class="vf-row"><div class="vf-label">Invoice Date</div><input type="date" id="vfInvoiceDate"></div>
-                <div class="vf-row"><div class="vf-label">Due Date</div><input type="date" id="vfDueDate"></div>
+                <div class="vf-row"><div class="vf-label">Invoice Due Date</div><input type="date" id="vfDueDate"></div>
                 <div class="vf-row vf-range"><div class="vf-label">Service Period</div>
                     <div class="vf-range-inputs">
                         <input type="date" id="vfServiceStart">
@@ -1998,16 +2020,17 @@
                     </div>
                 </div>
 
-                <div class="vf-section">Payee Bank Info</div>
+                <div class="vf-section">Payee Info</div>
                 <div class="vf-row"><div class="vf-label">Requires Finance Payout</div>
-                    <select id="vfRequiresPayout">
+                    <select id="vfRequiresPayout" onchange="refreshVfForm()">
                         <option value="YES">YES</option>
                         <option value="NO">NO</option>
                     </select>
                 </div>
-                <div class="vf-row"><div class="vf-label">Bank Name</div><input id="vfBankName" placeholder="Beneficiary bank name"></div>
-                <div class="vf-row"><div class="vf-label">Branch Name</div><input id="vfBranchName" placeholder="Branch name"></div>
-                <div class="vf-row"><div class="vf-label">Account Type</div>
+                <div class="vf-row"><div class="vf-label">Vendor Name</div><input id="vfVendorName"></div>
+                <div class="vf-row vf-payout-row"><div class="vf-label">Bank Name</div><input id="vfBankName"></div>
+                <div class="vf-row vf-payout-row"><div class="vf-label">Branch Name（Kana）</div><input id="vfBranchName"></div>
+                <div class="vf-row vf-payout-row"><div class="vf-label">Account Type</div>
                     <select id="vfAccountType">
                         <option value="">— Select —</option>
                         <option value="普通預金">普通預金</option>
@@ -2015,12 +2038,12 @@
                         <option value="定期預金">定期預金</option>
                     </select>
                 </div>
-                <div class="vf-row"><div class="vf-label">Account No.</div><input id="vfAccountNo" placeholder="Account number"></div>
-                <div class="vf-row"><div class="vf-label">Account Name</div><input id="vfAccountName" placeholder="Account holder name"></div>
-                <div class="vf-row"><div class="vf-label">SWIFT Code</div><input id="vfSwiftCode" placeholder="8 or 11 chars"></div>
-                <div class="vf-row"><div class="vf-label">ACH Routing</div><input id="vfAchRouting" placeholder="9-digit routing number"></div>
-                <div class="vf-row"><div class="vf-label">Wire Routing</div><input id="vfWireRouting" placeholder="9-digit routing number"></div>
-                <div class="vf-row"><div class="vf-label">PayNow UEN</div><input id="vfPayNowUen" placeholder="e.g. 201812345K"></div>
+                <div class="vf-row vf-payout-row"><div class="vf-label">Account No.</div><input id="vfAccountNo"></div>
+                <div class="vf-row vf-payout-row"><div class="vf-label">Account Name</div><input id="vfAccountName"></div>
+                <div class="vf-row vf-payout-row"><div class="vf-label">SWIFT Code</div><input id="vfSwiftCode" oninput="refreshVfForm()"></div>
+                <div class="vf-row vf-payout-row"><div class="vf-label">ACH Routing</div><input id="vfAchRouting" oninput="refreshVfForm()"></div>
+                <div class="vf-row vf-payout-row"><div class="vf-label">Wire Routing</div><input id="vfWireRouting" oninput="refreshVfForm()"></div>
+                <div class="vf-row vf-payout-row"><div class="vf-label">PayNow UEN</div><input id="vfPayNowUen"></div>
             </div>
             </div>
         </div>
@@ -2394,12 +2417,75 @@
     function resetViewerFields() {
         document.querySelectorAll('#viewerFields input').forEach(i => { i.value = ''; });
         document.querySelectorAll('#viewerFields select').forEach(s => { s.selectedIndex = 0; });
+        refreshVfForm();
+    }
+
+    // Derive the region from the selected company
+    function vfRegion() {
+        const c = (document.getElementById('vfCompany') || {}).value || '';
+        if (c === 'JP_CTW_INC') return 'JP';
+        if (c === 'SG_CTW_INC') return 'SG';
+        if (c === 'US_CTW_INC') return 'US';
+        if (c === 'KY_CTW_INC') return 'KY';
+        if (c === 'SH_WYYCX_INC') return 'CN';
+        if (c === 'HK_CTW_INC') return 'HK';
+        return '';
+    }
+
+    // Apply region- and payout-aware visibility + required rules to the Incomplete form
+    function refreshVfForm() {
+        const region = vfRegion();
+        const payoutSel = document.getElementById('vfRequiresPayout');
+        const isYes = !payoutSel || payoutSel.value !== 'NO';
+        const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        const hasIntl = !!(val('vfSwiftCode') || val('vfAchRouting') || val('vfWireRouting'));
+
+        const set = (id, visible, required) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const row = el.closest('.vf-row');
+            if (!row) return;
+            row.style.display = visible ? '' : 'none';
+            row.classList.toggle('vf-required', !!(visible && required));
+            el.dataset.required = (visible && required) ? '1' : '';
+        };
+
+        // Always visible + required
+        set('vfCompany', true, true);
+        set('vfCurrency', true, true);
+        set('vfAmount', true, true);
+        set('vfTaxAmount', true, true);
+        set('vfAmountDue', true, true);
+        set('vfInvoiceDate', true, true);
+        set('vfDueDate', true, true);
+
+        // Payee Info
+        set('vfVendorName', true, true);                              // always visible, required
+        set('vfBankName', isYes, true);                              // all regions
+        set('vfBranchName', isYes && region === 'JP', true);          // JP only
+        set('vfAccountType', isYes && region === 'JP', !hasIntl);     // JP only, required unless intl routing filled
+        set('vfAccountNo', isYes, true);                             // all regions
+        set('vfAccountName', isYes, true);                           // all regions
+        set('vfSwiftCode', isYes, false);
+        set('vfAchRouting', isYes, false);
+        set('vfWireRouting', isYes, false);
+        set('vfPayNowUen', isYes && region === 'SG', false);          // SG only
     }
 
     // Confirm an unconfirmed invoice: move it into "pending" for finance review
     function confirmUnconfirmed() {
         const f = currentViewerFile;
         if (!f) return;
+        const missing = [...document.querySelectorAll('#viewerFields [data-required="1"]')]
+            .filter(el => {
+                const row = el.closest('.vf-row');
+                return row && row.style.display !== 'none' && !el.value.trim();
+            });
+        if (missing.length) {
+            showToast('Please complete all required fields');
+            missing[0].focus();
+            return;
+        }
         f.state = 'pending';
         if (currentViewerIsMail) renderMailTable(); else renderTable();
         closeViewer();

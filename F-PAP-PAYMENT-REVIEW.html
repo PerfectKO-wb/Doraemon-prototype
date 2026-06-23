@@ -342,6 +342,7 @@
             position: relative;
         }
         .main-header {
+            position: relative;
             height: 56px;
             padding: 0 20px 0 24px;
             display: flex; align-items: center; justify-content: space-between;
@@ -350,6 +351,28 @@
         }
         .main-title { font-size: 15px; font-weight: 600; }
         .main-header-actions { display: flex; align-items: center; gap: 10px; }
+        .seg-toggle {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: inline-flex; align-items: center; gap: 4px;
+            background: var(--bg-active);
+            border-radius: 10px; padding: 4px;
+        }
+        .seg-item {
+            display: inline-flex; align-items: center; gap: 7px;
+            height: 32px; padding: 0 18px;
+            border-radius: 8px;
+            font-size: 13px; font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none; cursor: pointer;
+            transition: background .15s, color .15s, box-shadow .15s;
+        }
+        .seg-item svg { width: 15px; height: 15px; }
+        .seg-item:hover { color: var(--text-default); }
+        .seg-item.active {
+            background: var(--bg-container);
+            color: var(--text-default);
+            box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.05);
+        }
 
         .bell-btn {
             width: 32px; height: 32px; border: none; background: none;
@@ -396,6 +419,187 @@
         .state-filter { display: none; } /* replaced by state tabs */
 
         /* Status filter tabs */
+        .list-search {
+            display: inline-flex; align-items: center;
+            height: 32px;
+            border: 1px solid var(--border-default);
+            border-radius: 6px; background: var(--bg-container);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .list-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(35,131,226,0.12); }
+        .ls-scope {
+            position: relative;
+            display: inline-flex; align-items: center; gap: 4px;
+            height: 100%; padding: 0 8px 0 10px;
+            border: none; background: transparent; cursor: pointer;
+            font-size: 13px; font-weight: 500; color: var(--text-default);
+            border-radius: 6px 0 0 6px;
+        }
+        .ls-scope:hover { background: var(--bg-subtle); }
+        .ls-caret { width: 13px; height: 13px; color: var(--text-secondary); flex-shrink: 0; }
+        .ls-divider { width: 1px; height: 16px; background: var(--border-default); flex-shrink: 0; }
+        .ls-icon { width: 14px; height: 14px; color: var(--text-disabled); flex-shrink: 0; margin: 0 6px 0 10px; }
+        .list-search input {
+            border: none; outline: none; background: transparent;
+            font-size: 13px; color: var(--text-default); width: 200px;
+            padding-right: 12px; height: 100%;
+        }
+        .list-search input::placeholder { color: var(--text-disabled); }
+        .ls-menu {
+            position: absolute; top: calc(100% + 6px); left: 0;
+            min-width: 150px; padding: 6px;
+            background: #ffffff;
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            z-index: 60; display: none;
+            text-align: left;
+        }
+        .ls-menu.open { display: block; }
+        .ls-opt {
+            padding: 7px 10px; border-radius: 5px;
+            font-size: 13px; font-weight: 400; color: var(--text-default); cursor: pointer;
+            white-space: nowrap; text-align: left;
+        }
+        .ls-opt:hover { background: var(--bg-subtle); }
+        .ls-opt.active { background: var(--bg-subtle); font-weight: 600; }
+
+        /* Active filter bar */
+        .filter-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+            align-items: end;
+            gap: 14px 18px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            background: var(--bg-base);
+            border: 1px solid var(--border-divider);
+            border-radius: 10px;
+        }
+        .filter-bar:empty { display: none; }
+        .fb-item { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+        .fb-item-wide { grid-column: span 2; }
+        .fb-label {
+            font-size: 12px; line-height: 18px; font-weight: 500;
+            color: var(--text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .fb-select, .fb-input, .fb-date {
+            height: 34px; width: 100%; box-sizing: border-box;
+            border: 1px solid var(--border-default); border-radius: 8px;
+            padding: 0 10px; font-size: 13px; color: var(--text-default);
+            background: var(--bg-container); outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .fb-select:hover, .fb-input:hover, .fb-date:hover { border-color: var(--border-strong); }
+        .fb-select:focus, .fb-input:focus, .fb-date:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 2px rgba(28,100,242,0.12);
+        }
+        .fb-date { font-variant-numeric: tabular-nums; }
+        .fb-range { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .fb-range .fb-date { flex: 1 1 0; min-width: 0; }
+        .fb-sep { color: var(--text-disabled); font-size: 12px; flex-shrink: 0; }
+
+        /* Columns / Filters button */
+        .cols-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            height: 32px; padding: 0 12px;
+            border: 1px solid var(--border-default);
+            border-radius: 6px; background: var(--bg-container);
+            font-size: 13px; font-weight: 500; color: var(--text-default);
+            cursor: pointer; transition: background 0.15s, border-color 0.15s;
+        }
+        .cols-btn:hover { background: var(--bg-subtle); }
+        .cols-btn svg { width: 15px; height: 15px; color: var(--text-secondary); }
+
+        /* Column customization modal */
+        .cols-overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(15,15,15,0.35);
+            display: none; align-items: center; justify-content: center;
+        }
+        .cols-overlay.open { display: flex; }
+        .cols-modal {
+            width: min(880px, 94vw); max-height: 88vh;
+            background: var(--bg-container);
+            border-radius: 12px; overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.24);
+        }
+        .cols-modal-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border-divider);
+        }
+        .cols-modal-title { font-size: 16px; font-weight: 600; color: var(--text-default); }
+        .cols-modal-close {
+            display: inline-flex; border: none; background: transparent; cursor: pointer;
+            color: var(--text-secondary); padding: 4px; border-radius: 6px;
+        }
+        .cols-modal-close:hover { background: var(--bg-subtle); }
+        .cols-modal-close svg { width: 18px; height: 18px; }
+        .cols-modal-body {
+            display: grid; grid-template-columns: 1fr 280px;
+            min-height: 360px; flex: 1; overflow: hidden;
+        }
+        .cols-left { padding: 20px 22px; overflow-y: auto; }
+        .cols-right {
+            padding: 20px 22px;
+            border-left: 1px solid var(--border-divider);
+            background: var(--bg-subtle);
+            overflow-y: auto;
+        }
+        .cols-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; }
+        .cols-search { position: relative; margin-bottom: 18px; }
+        .cols-search input {
+            width: 100%; height: 36px; padding: 0 38px 0 12px;
+            border: 1px solid var(--border-default); border-radius: 8px;
+            font-size: 13px; color: var(--text-default); outline: none;
+            background: var(--bg-container);
+        }
+        .cols-search input:focus { border-color: var(--primary); }
+        .cols-search svg {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            width: 15px; height: 15px; color: var(--text-disabled);
+        }
+        .cols-group-title { font-size: 13px; font-weight: 700; color: var(--text-default); margin-bottom: 12px; }
+        .cols-grid { display: block; }
+        .cols-group { margin-bottom: 20px; }
+        .cols-group:last-child { margin-bottom: 0; }
+        .cols-group-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 16px; }
+        .cols-opt { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-default); cursor: pointer; }
+        .cols-opt.hidden { display: none; }
+        .cols-opt input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+        .cols-opt.required { color: var(--text-secondary); cursor: default; }
+        .cols-opt.required input { cursor: not-allowed; }
+        .cols-selected-title { font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; }
+        .cols-selected-list { display: flex; flex-direction: column; gap: 10px; }
+        .cols-chip {
+            display: flex; align-items: center; justify-content: space-between;
+            height: 40px; padding: 0 14px;
+            background: var(--bg-container);
+            border: 1px solid var(--border-divider); border-radius: 8px;
+            font-size: 13px; color: var(--text-default);
+        }
+        .cols-chip-remove {
+            display: inline-flex; border: none; background: transparent; cursor: pointer;
+            color: var(--text-disabled); padding: 2px; border-radius: 4px;
+        }
+        .cols-chip-remove:hover { color: var(--text-default); background: var(--bg-subtle); }
+        .cols-chip-remove svg { width: 14px; height: 14px; }
+        .cols-chip.required .cols-chip-remove { visibility: hidden; }
+        .cols-modal-foot {
+            display: flex; justify-content: flex-end; gap: 10px;
+            padding: 16px 22px; border-top: 1px solid var(--border-divider);
+        }
+        .cols-cancel, .cols-save {
+            height: 36px; padding: 0 18px; border-radius: 8px;
+            font-size: 13px; font-weight: 500; cursor: pointer;
+        }
+        .cols-cancel { background: var(--bg-container); border: 1px solid var(--border-default); color: var(--text-default); }
+        .cols-cancel:hover { background: var(--bg-subtle); }
+        .cols-save { background: var(--primary); border: 1px solid var(--primary); color: #fff; }
+        .cols-save:hover { filter: brightness(0.95); }
         .status-tabs {
             display: flex; align-items: center; gap: 0;
         }
@@ -485,8 +689,14 @@
             color: var(--text-default);
             vertical-align: middle;
         }
-        .inv-table .col-type { width: 80px; }
-        .inv-table .col-kind { width: 72px; }
+        .inv-table .col-type { width: 70px; }
+        .inv-table .col-kind { width: 64px; }
+        .inv-table .col-uploadby { width: 120px; color: var(--text-secondary); }
+        .inv-table .col-approveby { width: 120px; color: var(--text-secondary); }
+        .inv-table .col-approvetime { width: 160px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+        .inv-table td.col-uploadby, .inv-table td.col-approveby, .inv-table td.col-approvetime {
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
         .kind-badge {
             display: inline-flex; align-items: center; justify-content: center;
             height: 20px; padding: 0 8px;
@@ -507,8 +717,14 @@
         .region-badge.sg { background: #e6fcf5; color: #0c6b47; border-color: #a3e9c8; }
         .region-badge.tw { background: #fff0f3; color: #c01254; border-color: #fcc2d7; }
         .region-badge.us { background: #f3f0ff; color: #6741d9; border-color: #d0bfff; }
-        .inv-table .col-state { width: 140px; }
-        .inv-table .col-time { width: 200px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+        .inv-table .col-state { width: 150px; }
+        .inv-table td.col-state { overflow: visible; }
+        .inv-table .col-time { width: 160px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+        .manual-flag {
+            display: inline-flex; align-items: center; margin-left: 6px;
+            color: var(--warn, #d97706); cursor: help; vertical-align: middle;
+        }
+        .manual-flag svg { width: 14px; height: 14px; }
 
         .file-cell {
             display: inline-flex; align-items: center; gap: 10px;
@@ -529,7 +745,6 @@
             white-space: nowrap;
         }
         .tag.denied { color: var(--error); background: var(--error-bg); border: 1px solid var(--error-border); }
-        .tag.unconfirmed { color: #92400e; background: #fffbeb; border: 1px solid #fde68a; }
         .tag.checked { color: var(--success); background: var(--success-bg); border: 1px solid var(--success-border); }
         .tag.pending { color: var(--text-secondary); background: var(--bg-active); border: 1px solid var(--border-default); }
         .tag.parsing { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
@@ -1278,6 +1493,21 @@
         .edit-banner.visible { display: flex; }
         .edit-banner svg { width: 16px; height: 16px; flex-shrink: 0; }
 
+        /* Notice shown when a Pending invoice came from the Incomplete (manual-entry) flow */
+        .incomplete-notice {
+            display: flex; align-items: flex-start; gap: 9px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #fefce8;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            margin-bottom: 16px;
+        }
+        .incomplete-notice svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+        .incomplete-notice-text { display: flex; flex-direction: column; gap: 2px; }
+        .incomplete-notice-text strong { font-size: 13px; font-weight: 700; }
+        .incomplete-notice-text small { font-size: 12px; font-weight: 400; color: #a16207; line-height: 1.5; }
+
         /* Save & Re-Approve popover (re-uses approve position) */
         .confirm-pop.for-save { bottom: 62px; right: 24px; }
         .confirm-pop.for-save::after { right: 40px; }
@@ -1446,6 +1676,16 @@
     <main class="main list-view" id="listView">
         <div class="main-header">
             <span class="main-title">Invoice list</span>
+            <div class="seg-toggle" role="tablist">
+                <a class="seg-item active" href="F-PAP-PAYMENT-REVIEW.html" role="tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9h.01"/><path d="M9 13h.01"/><path d="M9 17h.01"/></svg>
+                    Enterprise
+                </a>
+                <a class="seg-item" href="F-PAP-EXPENSE-REVIEW_副本.html" role="tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Individual
+                </a>
+            </div>
             <div class="main-header-actions">
                 <button class="bell-btn" title="Notifications">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -1454,15 +1694,19 @@
             </div>
         </div>
 
-        <div class="main-toolbar" style="justify-content:space-between;">
+        <div class="main-toolbar" style="gap:10px;">
             <!-- Status filter tabs -->
             <div class="status-tabs" id="statusTabs">
                 <button class="status-tab active" data-state="all">All <span class="tab-ct" id="ct-all">0</span></button>
-                <button class="status-tab" data-state="unconfirmed">Unconfirmed <span class="tab-ct" id="ct-unconfirmed">0</span></button>
                 <button class="status-tab" data-state="pending">Pending <span class="tab-ct" id="ct-pending">0</span></button>
                 <button class="status-tab" data-state="approved">Approved <span class="tab-ct" id="ct-approved">0</span></button>
                 <button class="status-tab" data-state="denied">Denied <span class="tab-ct" id="ct-denied">0</span></button>
             </div>
+
+            <button type="button" class="cols-btn" id="colsBtn" title="Customize columns" style="margin-left:auto;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+                <span>Filters</span>
+            </button>
 
             <!-- Date picker (right) -->
             <div class="date-select" id="dateSelect" aria-haspopup="dialog">
@@ -1495,22 +1739,48 @@
             <label class="visually-hidden" for="docTypeFilter">Document type</label>
         </div>
 
+        <div class="filter-bar" id="filterBar"></div>
+
         <div class="table-wrap">
             <table class="inv-table">
                 <thead>
-                    <tr>
-                        <th class="col-type">Type</th>
-                        <th class="col-kind">Kind</th>
-                        <th id="titleColHead">Title</th>
-                        <th class="col-state">State</th>
-                        <th class="col-time">Upload time</th>
-                    </tr>
+                    <tr id="invTheadRow"></tr>
                 </thead>
                     </table>
             <div class="table-scroll">
                 <table class="inv-table">
                     <tbody id="tbody"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Column customization modal -->
+        <div class="cols-overlay" id="colsOverlay">
+            <div class="cols-modal" role="dialog" aria-modal="true" aria-labelledby="colsModalTitle">
+                <div class="cols-modal-head">
+                    <span class="cols-modal-title" id="colsModalTitle">Filters</span>
+                    <button type="button" class="cols-modal-close" id="colsClose" title="Close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="cols-modal-body">
+                    <div class="cols-left">
+                        <div class="cols-sub">Choose the filters you want to display in the table.</div>
+                        <div class="cols-search">
+                            <input type="text" id="colsSearch" placeholder="Search columns">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </div>
+                        <div class="cols-grid" id="colsGrid"></div>
+                    </div>
+                    <div class="cols-right">
+                        <div class="cols-selected-title">Selected (<span id="colsSelCount">0</span>)</div>
+                        <div class="cols-selected-list" id="colsSelList"></div>
+                    </div>
+                </div>
+                <div class="cols-modal-foot">
+                    <button type="button" class="cols-cancel" id="colsCancel">Cancel</button>
+                    <button type="button" class="cols-save" id="colsSave">Save</button>
+                </div>
             </div>
         </div>
 
@@ -1553,6 +1823,13 @@
             <div class="detail-right">
                 <div class="summary-scroll">
                     <div class="status-banner" id="statusBanner" style="display:none;"></div>
+                    <div class="incomplete-notice" id="incompleteNotice" style="display:none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <div class="incomplete-notice-text">
+                            <strong>Manually completed by submitter</strong>
+                            <small>AI couldn't auto-extract this invoice, so the submitter filled in the fields by hand. Please double-check the values before approving.</small>
+                        </div>
+                    </div>
                     <div class="edit-banner" id="editBanner">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
                         <span>Editing — make your changes below, then click <strong>Save &amp; Re-Approve</strong>.</span>
@@ -1997,7 +2274,8 @@
             desc: 'Submit monthly expense reports',
             meta: 'Draft · 2 reports',
             icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
-            href: 'F-PAP-EXPENSE-REPORT.html'
+            href: 'F-PAP-EXPENSE-REPORT.html',
+            hidden: true
         },
         {
             key: 'expense-review',
@@ -2005,7 +2283,8 @@
             desc: 'Finance review of expense reports',
             meta: 'Pending · 2 reports',
             icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>',
-            href: 'F-PAP-EXPENSE-REVIEW.html'
+            href: 'F-PAP-EXPENSE-REVIEW.html',
+            hidden: true
         }
     ];
 
@@ -2255,18 +2534,21 @@
     }
 
     let invoices = [
-        { id: 1, name: 'JP_file_8457_p_001.pdf', type: 'pdf', state: 'pending', time: '2026-04-01 10:12', month: 4, year: 2026, region: 'JP', fields: jpFields() },
-        { id: 2, name: 'US_file_8222_p_001.pdf', type: 'pdf', state: 'pending', time: '2026-04-05 10:30', month: 4, year: 2026, region: 'US', fields: usFields() },
-        { id: 4, name: 'SG_file_8413_p_001-004.pdf', type: 'pdf', state: 'pending', time: '2026-04-08 15:10', month: 4, year: 2026, region: 'SG', fields: sgFields() },
-        { id: 10, name: 'AWS_Invoice_2026-05_JP.pdf', type: 'pdf', state: 'unconfirmed', time: '2026-04-09 08:44', month: 4, year: 2026, region: 'JP', fields: jpFields() },
-        { id: 6, name: 'CN_file_8387_p_001.png', type: 'img', state: 'pending', time: '2026-04-12 09:30', month: 4, year: 2026, region: 'CN', fields: cnFields() },
-        { id: 7, name: 'TW_file_8492_p_001.pdf', type: 'pdf', state: 'pending', time: '2026-04-10 09:15', month: 4, year: 2026, region: 'TW', fields: twFields() },
+        { id: 1, name: 'JP_file_8457_p_001.pdf', type: 'pdf', state: 'pending', time: '2026-04-01 10:12', month: 4, year: 2026, region: 'JP', uploadBy: 'Akira Sato', approveBy: '', approveTime: '', fields: jpFields() },
+        { id: 11, name: 'Linear_Annual_Invoice_2026.pdf', type: 'pdf', state: 'pending', time: '2026-04-09 09:10', month: 4, year: 2026, region: 'JP', fromIncomplete: true, uploadBy: 'Akira Sato', approveBy: '', approveTime: '', fields: jpFields() },
+        { id: 2, name: 'US_file_8222_p_001.pdf', type: 'pdf', state: 'pending', time: '2026-04-05 10:30', month: 4, year: 2026, region: 'US', uploadBy: 'Jordan Lee', approveBy: '', approveTime: '', fields: usFields() },
+        { id: 4, name: 'SG_file_8413_p_001-004.pdf', type: 'pdf', state: 'pending', time: '2026-04-08 15:10', month: 4, year: 2026, region: 'SG', uploadBy: 'Wei Tan', approveBy: '', approveTime: '', fields: sgFields() },
+        { id: 6, name: 'CN_file_8387_p_001.png', type: 'img', state: 'pending', time: '2026-04-12 09:30', month: 4, year: 2026, region: 'CN', uploadBy: 'Li Na', approveBy: '', approveTime: '', fields: cnFields() },
+        { id: 7, name: 'TW_file_8492_p_001.pdf', type: 'pdf', state: 'pending', time: '2026-04-10 09:15', month: 4, year: 2026, region: 'TW', uploadBy: 'Chen Yu', approveBy: '', approveTime: '', fields: twFields() },
+        { id: 8, name: 'JP_file_8201_p_001.pdf', type: 'pdf', state: 'approved', time: '2026-04-02 11:05', month: 4, year: 2026, region: 'JP', uploadBy: 'Akira Sato', approveBy: 'Mia Chen', approveTime: '2026-04-03 09:20', fields: jpFields() },
+        { id: 9, name: 'US_file_8155_p_001.pdf', type: 'pdf', state: 'approved', time: '2026-04-04 14:22', month: 4, year: 2026, region: 'US', uploadBy: 'Jordan Lee', approveBy: 'Mia Chen', approveTime: '2026-04-05 10:48', fields: usFields() },
+        { id: 10, name: 'SG_file_8099_p_001.pdf', type: 'pdf', state: 'denied', time: '2026-04-06 16:40', month: 4, year: 2026, region: 'SG', uploadBy: 'Wei Tan', approveBy: 'Mia Chen', approveTime: '2026-04-07 08:55', fields: sgFields() },
     ];
 
     // Vouchers hidden for now (not relevant to current demo scope)
     let vouchers = [];
 
-    const STATE_LABELS = { pending: 'Pending', denied: 'Denied', approved: 'Approved', checked: 'Approved', parsing: 'Parsing', unconfirmed: 'Unconfirmed' };
+    const STATE_LABELS = { pending: 'Pending', denied: 'Denied', approved: 'Approved', checked: 'Approved', parsing: 'Parsing' };
 
     /** 'all' or a key of STATE_LABELS */
     let stateFilter = 'all';
@@ -2351,32 +2633,181 @@
         let rows = inv.concat(vou).sort((a, b) => b.time.localeCompare(a.time));
         if (docTypeFilter === 'invoice') rows = rows.filter(r => r.docType === 'invoice');
         else if (docTypeFilter === 'voucher') rows = rows.filter(r => r.docType === 'voucher');
+        // Active filter widgets (columns + filter-only fields)
+        activeFilterKeys().forEach(key => {
+            const fdef = FILTER_DEFS[key];
+            const val = colFilters[key];
+            if (!fdef || !val) return;
+            if (fdef.kind === 'select') {
+                rows = rows.filter(r => (fdef.get(r) || '') === val);
+            } else if (fdef.kind === 'daterange') {
+                const { start, end } = val;
+                if (!start && !end) return;
+                rows = rows.filter(r => {
+                    const d = (fdef.get(r) || '').slice(0, 10);
+                    if (!d) return false;
+                    if (start && d < start) return false;
+                    if (end && d > end) return false;
+                    return true;
+                });
+            } else {
+                const tv = val.toLowerCase();
+                rows = rows.filter(r => (fdef.get(r) || '').toLowerCase().includes(tv));
+            }
+        });
         return rows;
+    }
+
+    // Available table columns. `required` columns can't be hidden.
+    const COLUMN_DEFS = [
+        { key: 'type', label: 'Type', thClass: 'col-type', defaultOn: false,
+          cell: f => `<td class="col-type">${fileIcon(f.type)}</td>` },
+        { key: 'title', label: 'Title', thClass: '', required: true,
+          cell: f => `<td><span class="file-cell"><span class="fname">${f.name}</span></span></td>` },
+        { key: 'state', label: 'State', thClass: 'col-state', required: true, modalHidden: true,
+          cell: f => `<td class="col-state"><span class="tag ${f.state}">${STATE_LABELS[f.state] || f.state}</span>${(f.fromIncomplete && f.docType === 'invoice') ? '<span class="manual-flag" title="Invoice data manually input as AI extraction failed. Double-check before approving."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>' : ''}</td>` },
+        { key: 'uploadBy', label: 'Upload by', thClass: 'col-uploadby',
+          cell: f => `<td class="col-uploadby" title="${f.uploadBy || ''}">${f.uploadBy || '—'}</td>` },
+        { key: 'uploadTime', label: 'Upload time', thClass: 'col-time',
+          cell: f => `<td class="col-time">${f.time}</td>` },
+        { key: 'approveBy', label: 'Approve by', thClass: 'col-approveby',
+          cell: f => `<td class="col-approveby" title="${f.approveBy || ''}">${f.approveBy || '—'}</td>` },
+        { key: 'approveTime', label: 'Approve time', thClass: 'col-approvetime',
+          cell: f => `<td class="col-approvetime">${f.approveTime || '—'}</td>` },
+    ];
+    let visibleCols = COLUMN_DEFS.filter(c => c.defaultOn !== false).map(c => c.key);
+
+    function activeColumns() {
+        return COLUMN_DEFS.filter(c => visibleCols.includes(c.key));
+    }
+
+    // Filter widget configs (shown above the table). Includes both column-backed
+    // filters and "filter-only" fields (which never render as table columns).
+    const FILTER_DEFS = {
+        type:        { kind: 'select', label: 'Type', get: f => f.type, optLabel: v => ({ pdf: 'PDF', img: 'Image', doc: 'Doc' }[v] || v.toUpperCase()) },
+        title:       { kind: 'text', label: 'Title', get: f => f.name },
+        uploadBy:    { kind: 'select', label: 'Upload by', get: f => f.uploadBy },
+        uploadTime:  { kind: 'daterange', label: 'Upload time', get: f => f.time },
+        approveBy:   { kind: 'select', label: 'Approve by', get: f => f.approveBy },
+        approveTime: { kind: 'daterange', label: 'Approve time', get: f => f.approveTime },
+        // Filter-only fields (not shown as columns)
+        payeeName:         { kind: 'text', label: 'Payee Name', get: f => f.fields && f.fields.payeeName },
+        bankName:          { kind: 'text', label: 'Bank Name', get: f => f.fields && f.fields.bankName },
+        accountNo:         { kind: 'text', label: 'Account No.', get: f => f.fields && f.fields.accountNo },
+        amount:            { kind: 'text', label: 'Amount', get: f => f.fields && f.fields.totalAmount },
+        currency:          { kind: 'select', label: 'Currency', get: f => f.fields && f.fields.currency },
+        reviewer:          { kind: 'select', label: 'Approve By', get: f => f.approveBy },
+        createdBy:         { kind: 'select', label: 'Upload by', get: f => f.uploadBy },
+        branchNameKana:    { kind: 'text', label: 'Branch Name (Kana)', get: f => f.fields && f.fields.branchName },
+        bankCode:          { kind: 'text', label: 'Bank Code', get: f => f.fields && f.fields.bankCode },
+        branchCode:        { kind: 'text', label: 'Branch Code', get: f => f.fields && f.fields.branchCode },
+        accountType:       { kind: 'select', label: 'Account Type', get: f => f.fields && f.fields.accountType },
+        accountHolderKana: { kind: 'text', label: 'Account Name (Kana)', get: f => f.fields && f.fields.accountHolderKana },
+        paymentPurpose:    { kind: 'text', label: 'Payment Purpose', get: f => f.fields && f.fields.purpose },
+        paymentBank:       { kind: 'text', label: 'Payment Bank', get: f => f.fields && f.fields.paymentBank },
+        paymentDueDate:    { kind: 'daterange', label: 'Payment Due Date', get: f => f.fields && f.fields.dueDate },
+        accountingDate:    { kind: 'daterange', label: 'Accounting Date', get: f => f.fields && f.fields.accountingDate },
+    };
+
+    // Filter-only fields, grouped for the Filters modal (off by default)
+    const EXTRA_FILTERS = [
+        { key: 'payeeName', group: 'Basic Info' },
+        { key: 'bankName', group: 'Basic Info' },
+        { key: 'accountNo', group: 'Basic Info' },
+        { key: 'amount', group: 'Basic Info' },
+        { key: 'currency', group: 'Basic Info' },
+        { key: 'reviewer', group: 'Basic Info' },
+        { key: 'createdBy', group: 'Basic Info' },
+        { key: 'branchNameKana', group: 'Bank Account Details' },
+        { key: 'bankCode', group: 'Bank Account Details' },
+        { key: 'branchCode', group: 'Bank Account Details' },
+        { key: 'accountType', group: 'Bank Account Details' },
+        { key: 'accountHolderKana', group: 'Bank Account Details' },
+        { key: 'paymentPurpose', group: 'Payment Details' },
+        { key: 'paymentBank', group: 'Payment Details' },
+        { key: 'paymentDueDate', group: 'Payment Details' },
+        { key: 'accountingDate', group: 'Payment Details' },
+    ];
+
+    /** key -> selected value ('' = no filter) */
+    let colFilters = {};
+
+    // All keys that currently have an active filter widget (columns + extras), in order
+    function activeFilterKeys() {
+        const order = [...COLUMN_DEFS.map(c => c.key), ...EXTRA_FILTERS.map(e => e.key)];
+        return order.filter(k => visibleCols.includes(k) && FILTER_DEFS[k]);
+    }
+
+    function allRowsForOptions() {
+        return invoices.map(f => ({ ...f, docType: 'invoice' }))
+            .concat(vouchers.map(f => ({ ...f, docType: 'voucher' })));
     }
 
     function renderTable() {
         const tbody = document.getElementById('tbody');
         const list = mergedTableRows();
+        const cols = activeColumns();
 
-        document.getElementById('titleColHead').textContent = 'Title';
+        document.getElementById('invTheadRow').innerHTML = cols
+            .map(c => `<th${c.thClass ? ` class="${c.thClass}"` : ''}>${c.label}</th>`)
+            .join('');
 
-        tbody.innerHTML = list.map(f => {
-            return `
-            <tr data-id="${f.id}" data-doc-type="${f.docType}">
-                <td class="col-type">${fileIcon(f.type)}</td>
-                <td class="col-kind"><span class="kind-badge">${f.docType === 'voucher' ? 'Voucher' : 'Invoice'}</span></td>
-                <td><span class="file-cell"><span class="fname">${f.name}</span></span></td>
-                <td class="col-state"><span class="tag ${f.state}">${STATE_LABELS[f.state] || f.state}</span></td>
-                <td class="col-time">${f.time}</td>
-            </tr>
-        `;
-        }).join('');
+        tbody.innerHTML = list.map(f => `
+            <tr data-id="${f.id}" data-doc-type="${f.docType}">${cols.map(c => c.cell(f)).join('')}</tr>
+        `).join('');
         tbody.querySelectorAll('tr').forEach(tr => {
             tr.addEventListener('click', () => {
                 openDetail(Number(tr.dataset.id), tr.dataset.docType);
             });
         });
         renderTabCounts();
+    }
+
+    // Build a filter widget for each active column. Rendered on save/init only
+    // (not inside renderTable) so text inputs keep focus while typing.
+    function renderFilterBar() {
+        const bar = document.getElementById('filterBar');
+        if (!bar) return;
+        const opts = allRowsForOptions();
+        bar.innerHTML = activeFilterKeys().map(key => {
+            const fdef = FILTER_DEFS[key];
+            if (!fdef) return '';
+            const cur = colFilters[key] || '';
+            if (fdef.kind === 'select') {
+                const vals = [...new Set(opts.map(fdef.get).filter(v => v != null && v !== ''))];
+                return `<div class="fb-item"><span class="fb-label">${fdef.label}</span>
+                    <select class="fb-select" data-key="${key}">
+                        <option value="">All</option>
+                        ${vals.map(v => `<option value="${v}" ${v === cur ? 'selected' : ''}>${fdef.optLabel ? fdef.optLabel(v) : v}</option>`).join('')}
+                    </select></div>`;
+            }
+            if (fdef.kind === 'daterange') {
+                const range = (cur && typeof cur === 'object') ? cur : { start: '', end: '' };
+                return `<div class="fb-item fb-item-wide"><span class="fb-label">${fdef.label}</span>
+                    <div class="fb-range">
+                        <input type="date" class="fb-date" data-key="${key}" data-edge="start" value="${range.start || ''}">
+                        <span class="fb-sep">~</span>
+                        <input type="date" class="fb-date" data-key="${key}" data-edge="end" value="${range.end || ''}">
+                    </div></div>`;
+            }
+            return `<div class="fb-item"><span class="fb-label">${fdef.label}</span>
+                <input class="fb-input" data-key="${key}" value="${cur}" placeholder="All"></div>`;
+        }).join('');
+        bar.querySelectorAll('.fb-select').forEach(s => s.addEventListener('change', e => {
+            colFilters[e.target.dataset.key] = e.target.value;
+            renderTable();
+        }));
+        bar.querySelectorAll('.fb-input').forEach(i => i.addEventListener('input', e => {
+            colFilters[e.target.dataset.key] = e.target.value;
+            renderTable();
+        }));
+        bar.querySelectorAll('.fb-date').forEach(d => d.addEventListener('change', e => {
+            const key = e.target.dataset.key;
+            const edge = e.target.dataset.edge;
+            if (!colFilters[key] || typeof colFilters[key] !== 'object') colFilters[key] = { start: '', end: '' };
+            colFilters[key][edge] = e.target.value;
+            renderTable();
+        }));
     }
 
     // ========== Month picker ==========
@@ -2473,9 +2904,11 @@
         // so disabled selects are re-enabled before their value is set.
         applyStateUI(inv.state, 'invoice');
 
-        // Unconfirmed invoices have not been reviewed yet — show blank form for manual entry
-        const invForPopulate = inv.state === 'unconfirmed' ? { fields: {} } : inv;
-        populateInvoiceSummary(invForPopulate);
+        // Distinguish Pending invoices that arrived via the Incomplete (manual-entry) flow
+        document.getElementById('incompleteNotice').style.display =
+            (inv.state === 'pending' && inv.fromIncomplete) ? 'flex' : 'none';
+
+        populateInvoiceSummary(inv);
         applyInvoiceRegion(inv.fields?.region || inv.region || 'JP');
 
         zoom = 100; applyZoom();
@@ -2722,6 +3155,7 @@
         document.getElementById('voucherPaper').style.display = '';
         document.getElementById('invoiceSummary').style.display = 'none';
         document.getElementById('voucherSummary').style.display = '';
+        document.getElementById('incompleteNotice').style.display = 'none';
 
         // Apply state (enable/disable form) BEFORE populating values
         applyStateUI(r.state, 'voucher');
@@ -3097,7 +3531,6 @@
         })();
         const counts = {
             all: baseList.length,
-            unconfirmed: baseList.filter(f => f.state === 'unconfirmed').length,
             pending: baseList.filter(f => f.state === 'pending').length,
             approved: baseList.filter(f => f.state === 'approved' || f.state === 'checked').length,
             denied: baseList.filter(f => f.state === 'denied').length,
@@ -3116,6 +3549,101 @@
         stateFilter = btn.dataset.state;
         renderTable();
     });
+
+    // Filters customization modal
+    (function initColsModal() {
+        const overlay = document.getElementById('colsOverlay');
+        const grid = document.getElementById('colsGrid');
+        const selList = document.getElementById('colsSelList');
+        const selCount = document.getElementById('colsSelCount');
+        const searchInput = document.getElementById('colsSearch');
+        if (!overlay) return;
+        let draft = [];
+
+        // Grouped, selectable filter fields. "Columns" group = table columns;
+        // other groups = filter-only fields.
+        const GROUPS = [
+            { title: 'Columns', items: COLUMN_DEFS.filter(c => !c.modalHidden).map(c => ({ key: c.key, label: c.label, required: !!c.required })) },
+            ...['Basic Info', 'Bank Account Details', 'Payment Details'].map(g => ({
+                title: g,
+                items: EXTRA_FILTERS.filter(e => e.group === g).map(e => ({ key: e.key, label: FILTER_DEFS[e.key].label, required: false })),
+            })),
+        ];
+        const flatItems = GROUPS.flatMap(g => g.items);
+        const itemByKey = k => flatItems.find(i => i.key === k);
+
+        const renderGrid = () => {
+            const q = (searchInput.value || '').trim().toLowerCase();
+            grid.innerHTML = GROUPS.map(group => {
+                const items = group.items.filter(it => !q || it.label.toLowerCase().includes(q));
+                if (!items.length) return '';
+                return `<div class="cols-group">
+                    <div class="cols-group-title">${group.title}</div>
+                    <div class="cols-group-grid">
+                        ${items.map(it => `<label class="cols-opt ${it.required ? 'required' : ''}">
+                            <input type="checkbox" data-key="${it.key}" ${draft.includes(it.key) ? 'checked' : ''} ${it.required ? 'disabled' : ''}>
+                            <span>${it.label}</span>
+                        </label>`).join('')}
+                    </div>
+                </div>`;
+            }).join('');
+            grid.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const key = cb.dataset.key;
+                    if (cb.checked) { if (!draft.includes(key)) draft.push(key); }
+                    else { draft = draft.filter(k => k !== key); }
+                    renderSelected();
+                });
+            });
+        };
+
+        const renderSelected = () => {
+            const chosen = flatItems.filter(it => draft.includes(it.key));
+            selCount.textContent = chosen.length;
+            selList.innerHTML = chosen.map(it => `
+                <div class="cols-chip ${it.required ? 'required' : ''}">
+                    <span>${it.label}</span>
+                    <button type="button" class="cols-chip-remove" data-key="${it.key}" title="Remove">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>`).join('');
+            selList.querySelectorAll('.cols-chip-remove').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const it = itemByKey(btn.dataset.key);
+                    if (it && it.required) return;
+                    draft = draft.filter(k => k !== btn.dataset.key);
+                    renderGrid();
+                    renderSelected();
+                });
+            });
+        };
+
+        const open = () => {
+            draft = visibleCols.slice();
+            searchInput.value = '';
+            renderGrid();
+            renderSelected();
+            overlay.classList.add('open');
+        };
+        const close = () => overlay.classList.remove('open');
+
+        document.getElementById('colsBtn').addEventListener('click', open);
+        document.getElementById('colsClose').addEventListener('click', close);
+        document.getElementById('colsCancel').addEventListener('click', close);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        searchInput.addEventListener('input', renderGrid);
+        document.getElementById('colsSave').addEventListener('click', () => {
+            visibleCols = [
+                ...COLUMN_DEFS.filter(c => c.modalHidden || draft.includes(c.key)).map(c => c.key),
+                ...EXTRA_FILTERS.filter(e => draft.includes(e.key)).map(e => e.key),
+            ];
+            // Drop filter values for fields that are no longer active
+            Object.keys(colFilters).forEach(k => { if (!visibleCols.includes(k)) delete colFilters[k]; });
+            renderFilterBar();
+            renderTable();
+            close();
+        });
+    })();
 
     document.getElementById('stateFilter').addEventListener('change', (e) => {
         stateFilter = e.target.value;
@@ -3187,6 +3715,7 @@
 
     // ========== Init ==========
     renderList();
+    renderFilterBar();
     renderTable();
     applyDateLabel();
 
