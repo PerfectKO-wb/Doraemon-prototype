@@ -3446,7 +3446,7 @@ function runToNeedInput(btn, who, what) {
     badge.dataset.who   = who;
     badge.dataset.what  = what;
     badge.style.cursor  = 'pointer';
-    badge.innerHTML     = '<span class="needs-dot"></span>Need Input';
+    badge.innerHTML     = '<span class="needs-dot"></span>Waiting';
     badge.onclick = e => { e.stopPropagation(); openReplyChat(badge); };
     const chatBtn = right.querySelector('.task-chat-btn');
     right.insertBefore(badge, chatBtn || null);
