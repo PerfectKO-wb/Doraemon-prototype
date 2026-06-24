@@ -3252,14 +3252,14 @@ function _buildDraftPanelHTML() {
     <div class="dcp-hd">
       <span class="dcp-pill">草稿</span>
       <div class="dcp-title">HOTD 游戏上线 — 完成全渠道发布</div>
-      <div class="dcp-sub">7 个任务待确认</div>
+      <div class="dcp-sub">6 个任务待确认</div>
     </div>
 
     <div class="dcp-group">
       <div class="dcp-group-hd">
         <input type="checkbox" class="dcp-cb" checked>
         <span class="dcp-group-title">ADNext X 通知管理登记</span>
-        <span class="dcp-group-count">· 3/3 subtasks</span>
+        <span class="dcp-group-count">· 2/2 subtasks</span>
         <button class="dcp-close-btn" onclick="this.closest('.dcp-group').style.opacity='.38'">×</button>
       </div>
       <div class="dcp-desc">
@@ -3267,12 +3267,6 @@ function _buildDraftPanelHTML() {
         - 完成符合内容比例要求的成品交付
       </div>
       <div class="dcp-tasks">
-        <div class="dcp-task-row">
-          <input type="checkbox" class="dcp-cb" checked>
-          <span class="dcp-exec hu">HU</span>
-          <span class="dcp-task-name">上传官方账号 Follower 数据（提供 JSON 文件）</span>
-          <span class="dcp-owner">工程师</span>
-        </div>
         <div class="dcp-task-row">
           <input type="checkbox" class="dcp-cb" checked>
           <span class="dcp-exec ai">AI</span>
@@ -3384,9 +3378,24 @@ function _buildDraftPanelHTML() {
 
     <div class="dcp-footer">
       <span class="dcp-hint">勾选父或子任务，按依赖链自动下发</span>
-      <button class="dcp-dispatch-btn" onclick="showSnack('已下发 7 个任务，Minion 开始执行')">Dispatch · 7</button>
+      <button class="dcp-dispatch-btn" onclick="_dispatchMission()">Dispatch · 6</button>
     </div>
   </div>`;
+}
+
+function _dispatchMission() {
+  // Expand HOTD goal in the left panel
+  const hotdItem = document.querySelector('.goal-panel .goal-item');
+  if (hotdItem) {
+    const tree = hotdItem.querySelector('.subtask-tree');
+    if (tree) tree.style.display = 'block';
+    hotdItem.classList.add('expanded');
+    setTimeout(() => hotdItem.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  }
+  // Switch to Goal tab
+  const goalTabBtn = document.querySelector('.tab-btn');
+  if (goalTabBtn) switchTab('goal', goalTabBtn);
+  showSnack('已下发 6 个任务，Minion 开始执行');
 }
 
 function _applyCase1(tree) {
