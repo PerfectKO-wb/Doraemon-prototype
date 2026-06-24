@@ -3460,16 +3460,39 @@ function _applyCase2(tree) {
   tree.querySelectorAll('.dep-blocked').forEach(el => el.classList.remove('dep-blocked'));
   tree.querySelectorAll('.task-dep').forEach(el => { el.style.display = 'none'; });
 
-  // "自动生成 Auxin IM 通知内容" → Run leads to Need Input (Human In Loop)
+  // Bind custom run behaviors for the two kept Auxin tasks
   tree.querySelectorAll('.task-row').forEach(row => {
     const titleEl = row.querySelector('.task-title-cell');
-    if (titleEl && titleEl.textContent.includes('自动生成 Auxin IM 通知内容')) {
-      const runBtn = row.querySelector('.run-btn');
-      if (runBtn) {
-        runBtn.onclick = function() {
-          runToNeedInput(this, 'wangbin@ctw.inc', 'Provide Banner link');
-        };
-      }
+    const title   = titleEl ? titleEl.textContent : '';
+    const runBtn  = row.querySelector('.run-btn');
+    if (!runBtn) return;
+
+    if (title.includes('自动生成 Auxin IM 通知内容')) {
+      // Run → Waiting (Human In Loop)
+      runBtn.onclick = function() {
+        runToNeedInput(this, 'wangbin@ctw.inc', 'Provide Banner link');
+      };
+    } else if (title.includes('为各 IM 渠道自动创建 Campaign')) {
+      // Run → Done
+      runBtn.onclick = function() {
+        const btn   = this;
+        const right = btn.closest('.task-right');
+        const tc    = btn.closest('.task-row').querySelector('.task-title-cell');
+        btn.disabled = true;
+        btn.style.opacity = '.5';
+        btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          style="animation:spin .8s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Running...`;
+        setTimeout(() => {
+          btn.remove();
+          if (tc) tc.classList.add('done-title');
+          const badge = document.createElement('span');
+          badge.className   = 'stag done';
+          badge.textContent = 'Done';
+          const chatBtn = right.querySelector('.task-chat-btn');
+          right.insertBefore(badge, chatBtn || null);
+          showSnack('Campaign 创建完成');
+        }, 2200);
+      };
     }
   });
 
