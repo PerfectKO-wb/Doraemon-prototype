@@ -3431,6 +3431,11 @@ function _applyCase1(tree) {
 }
 
 function _applyCase2(tree) {
+  // Remove dependency chain constraints — each subtask is now independently executable
+  tree.querySelectorAll('.dep-chain').forEach(el => el.classList.remove('dep-chain'));
+  tree.querySelectorAll('.dep-blocked').forEach(el => el.classList.remove('dep-blocked'));
+  tree.querySelectorAll('.task-dep').forEach(el => { el.style.display = 'none'; });
+
   const KEEP_AS_IS = [
     '自动生成 Auxin IM 通知内容',
     '为各 IM 渠道自动创建 Campaign',
