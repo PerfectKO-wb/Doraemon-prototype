@@ -3384,9 +3384,10 @@ function _buildDraftPanelHTML() {
 }
 
 function _dispatchMission() {
-  // Expand HOTD goal in the left panel
+  // Show and expand HOTD goal in the left panel
   const hotdItem = document.querySelector('.goal-panel .goal-item');
   if (hotdItem) {
+    hotdItem.style.display = '';
     const tree = hotdItem.querySelector('.subtask-tree');
     if (tree) tree.style.display = 'block';
     hotdItem.classList.add('expanded');
@@ -3462,15 +3463,16 @@ function switchCase(n) {
   // restore tree to original HTML
   _restoreTree();
 
-  // Case 1: HOTD goal not yet created → collapse it
-  // Cases 2 & 3: HOTD goal expanded to show task tree
+  // Case 1: HOTD goal not yet created → hide entirely
+  // Cases 2 & 3: show and expand HOTD goal
   const hotdItem = document.querySelector('.goal-panel .goal-item');
   if (hotdItem) {
     const t = hotdItem.querySelector('.subtask-tree');
     if (n === 1) {
-      if (t) t.style.display = 'none';
+      hotdItem.style.display = 'none';
       hotdItem.classList.remove('expanded');
     } else {
+      hotdItem.style.display = '';
       if (t) t.style.display = 'block';
       hotdItem.classList.add('expanded');
     }
