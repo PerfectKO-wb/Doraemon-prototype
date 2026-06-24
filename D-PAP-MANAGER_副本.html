@@ -3485,6 +3485,7 @@ function switchCase(n) {
   if (n === 1) {
     if (tree) _applyCase1(tree);
   } else if (n === 2) {
+    clearChat();
     _restoreEsc();
   } else if (n === 3) {
     if (tree) _applyCase3(tree);
