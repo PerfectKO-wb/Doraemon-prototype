@@ -3447,7 +3447,15 @@ function runToNeedInput(btn, who, what) {
     badge.dataset.what  = what;
     badge.style.cursor  = 'pointer';
     badge.innerHTML     = '<span class="needs-dot"></span>Waiting';
-    badge.onclick = e => { e.stopPropagation(); openReplyChat(badge); };
+    badge.onclick = e => {
+      e.stopPropagation();
+      const row = badge.closest('.task-row');
+      const tc  = row && row.querySelector('.task-title-cell');
+      badge.className   = 'stag done';
+      badge.innerHTML   = 'Done';
+      if (tc) tc.classList.add('done-title');
+      showSnack('已完成');
+    };
     const chatBtn = right.querySelector('.task-chat-btn');
     right.insertBefore(badge, chatBtn || null);
     showSnack('Minion 需要人工输入，请查看详情');
