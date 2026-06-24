@@ -1096,6 +1096,77 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 
+  /* ─── Draft Confirmation Panel (Case 1) ─── */
+  .dcp { padding: 14px 16px 10px; display: flex; flex-direction: column; gap: 12px; }
+  .dcp-hd { display: flex; flex-direction: column; gap: 3px; }
+  .dcp-pill {
+    display: inline-flex; align-items: center;
+    font-size: 10px; font-weight: 700; letter-spacing: .07em;
+    color: #888; background: #eeeeeb; padding: 2px 8px; border-radius: 100px;
+    width: fit-content; margin-bottom: 2px;
+  }
+  .dcp-title { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+  .dcp-sub   { font-size: 12px; color: #aaa; }
+  .dcp-group { border: 1px solid #e8e8e5; border-radius: 10px; overflow: hidden; }
+  .dcp-group-hd {
+    display: flex; align-items: center; gap: 7px;
+    padding: 9px 12px; background: #fafaf8;
+  }
+  .dcp-group-title { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; color: #1a1a1a; }
+  .dcp-group-count { font-size: 11px; color: #bbb; font-weight: 400; white-space: nowrap; flex-shrink: 0; }
+  .dcp-close-btn {
+    background: none; border: none; cursor: pointer;
+    color: #ccc; font-size: 16px; line-height: 1; padding: 0 2px; flex-shrink: 0;
+    transition: color .12s;
+  }
+  .dcp-close-btn:hover { color: #888; }
+  .dcp-desc {
+    padding: 5px 12px 6px; font-size: 11px; color: #999; line-height: 1.65;
+    border-bottom: 1px solid #f0f0ee;
+  }
+  .dcp-tasks { display: flex; flex-direction: column; }
+  .dcp-task-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 12px 3px;
+  }
+  .dcp-cb {
+    width: 15px; height: 15px; border-radius: 4px;
+    accent-color: #131825; cursor: pointer; flex-shrink: 0;
+  }
+  .dcp-exec {
+    font-size: 9px; font-weight: 700; padding: 2px 5px;
+    border-radius: 4px; flex-shrink: 0; letter-spacing: .04em;
+  }
+  .dcp-exec.ai { background: rgba(0,0,0,.07); color: rgba(0,0,0,.45); }
+  .dcp-exec.hu { background: #e8f4ff; border: 1px solid #b3d9ff; color: #1565c0; }
+  .dcp-task-name { flex: 1; font-size: 12px; color: #333; min-width: 0; }
+  .dcp-owner { font-size: 11px; color: #bbb; flex-shrink: 0; }
+  .dcp-dropdown { margin: 4px 12px 8px 34px; border: 1px solid #e8e8e5; border-radius: 7px; }
+  .dcp-dropdown-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px; cursor: pointer; font-size: 12px; color: #555;
+    background: #fff; user-select: none;
+  }
+  .dcp-dropdown-hd:hover { background: #fafaf8; }
+  .dcp-chev { transition: transform .2s; flex-shrink: 0; }
+  .dcp-dropdown-body {
+    display: none; padding: 8px 10px; font-size: 11px; color: #777;
+    background: #fafaf8; border-top: 1px solid #f0f0ee; line-height: 1.7;
+  }
+  .dcp-dropdown-body.open { display: block; }
+  .dcp-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0 2px;
+  }
+  .dcp-hint { font-size: 11px; color: #ccc; }
+  .dcp-dispatch-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #131825; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 12px; font-weight: 700; cursor: pointer;
+    transition: background .15s;
+  }
+  .dcp-dispatch-btn:hover { background: #2d3a55; }
+
   /* ─── Test Case Dock ─── */
   .case-dock {
     position: fixed;
@@ -3183,30 +3254,159 @@ function _applyGoalState(def) {
   if (nums[2]) nums[2].textContent = def.done;
 }
 
+function _dcpDrop(hd) {
+  const body = hd.nextElementSibling;
+  const chev = hd.querySelector('.dcp-chev');
+  const isOpen = body.classList.toggle('open');
+  if (chev) chev.style.transform = isOpen ? 'rotate(180deg)' : '';
+}
+
+function _buildDraftPanelHTML() {
+  const chevSvg = `<svg class="dcp-chev" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>`;
+  return `<div class="dcp">
+    <div class="dcp-hd">
+      <span class="dcp-pill">草稿</span>
+      <div class="dcp-title">HOTD 游戏上线 — 完成全渠道发布</div>
+      <div class="dcp-sub">7 个任务待确认</div>
+    </div>
+
+    <div class="dcp-group">
+      <div class="dcp-group-hd">
+        <input type="checkbox" class="dcp-cb" checked>
+        <span class="dcp-group-title">ADNext X 通知管理登记</span>
+        <span class="dcp-group-count">· 3/3 subtasks</span>
+        <button class="dcp-close-btn" onclick="this.closest('.dcp-group').style.opacity='.38'">×</button>
+      </div>
+      <div class="dcp-desc">
+        - Minion 自动在 Adnext 创建 X 通知内容（文案 + Banner + 发送时间）<br>
+        - 完成符合内容比例要求的成品交付
+      </div>
+      <div class="dcp-tasks">
+        <div class="dcp-task-row">
+          <input type="checkbox" class="dcp-cb" checked>
+          <span class="dcp-exec hu">HU</span>
+          <span class="dcp-task-name">上传官方账号 Follower 数据（提供 JSON 文件）</span>
+          <span class="dcp-owner">工程师</span>
+        </div>
+        <div class="dcp-task-row">
+          <input type="checkbox" class="dcp-cb" checked>
+          <span class="dcp-exec ai">AI</span>
+          <span class="dcp-task-name">在 Adnext 创建发布内容（文案 + Banner）</span>
+          <span class="dcp-owner">Minion</span>
+        </div>
+        <div class="dcp-dropdown">
+          <div class="dcp-dropdown-hd" onclick="_dcpDrop(this)">
+            HOTD Launch · ADNext X 通知 ${chevSvg}
+          </div>
+          <div class="dcp-dropdown-body">
+            发布日期：2026-06-20 10:00 JST<br>
+            受众：ALL users · Follower 推送<br>
+            内容：游戏上线公告 + Banner
+          </div>
+        </div>
+        <div class="dcp-task-row">
+          <input type="checkbox" class="dcp-cb" checked>
+          <span class="dcp-exec ai">AI</span>
+          <span class="dcp-task-name">用测试账号试发 X 通知并确认发送时间</span>
+          <span class="dcp-owner">Minion</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dcp-group">
+      <div class="dcp-group-hd">
+        <input type="checkbox" class="dcp-cb" checked>
+        <span class="dcp-group-title">Auxin 通知预约</span>
+        <span class="dcp-group-count">· 2/2 subtasks</span>
+        <button class="dcp-close-btn" onclick="this.closest('.dcp-group').style.opacity='.38'">×</button>
+      </div>
+      <div class="dcp-desc">
+        - Minion 自动生成 IM 通知内容并为各渠道创建 Campaign<br>
+        - 完成符合内容比例要求的成品交付
+      </div>
+      <div class="dcp-tasks">
+        <div class="dcp-task-row">
+          <input type="checkbox" class="dcp-cb" checked>
+          <span class="dcp-exec ai">AI</span>
+          <span class="dcp-task-name">自动生成 Auxin IM 通知内容（文案 + Banner）</span>
+          <span class="dcp-owner">Minion</span>
+        </div>
+        <div class="dcp-dropdown">
+          <div class="dcp-dropdown-hd" onclick="_dcpDrop(this)">
+            HOTD Launch · Auxin IM ${chevSvg}
+          </div>
+          <div class="dcp-dropdown-body">
+            渠道：G123 IM · 全区推送<br>
+            发送时间：2026-06-20 10:00 JST<br>
+            内容：游戏上线公告
+          </div>
+        </div>
+        <div class="dcp-task-row">
+          <input type="checkbox" class="dcp-cb" checked>
+          <span class="dcp-exec ai">AI</span>
+          <span class="dcp-task-name">为各 IM 渠道自动创建 Campaign</span>
+          <span class="dcp-owner">Minion</span>
+        </div>
+        <div class="dcp-dropdown">
+          <div class="dcp-dropdown-hd" onclick="_dcpDrop(this)">
+            HOTD Launch · IM Campaign ${chevSvg}
+          </div>
+          <div class="dcp-dropdown-body">
+            目标渠道：G123 IM<br>
+            Campaign 类型：上线公告<br>
+            关联内容：IM 通知内容草稿
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dcp-group">
+      <div class="dcp-group-hd">
+        <input type="checkbox" class="dcp-cb" checked>
+        <span class="dcp-group-title">G123 游戏配置更新</span>
+        <span class="dcp-group-count">· 2/2 subtasks</span>
+        <button class="dcp-close-btn" onclick="this.closest('.dcp-group').style.opacity='.38'">×</button>
+      </div>
+      <div class="dcp-desc">
+        - Admin Agent 在 G123 游戏一览中完成新游戏登记<br>
+        - 确保资源占比与内容标签符合合规划
+      </div>
+      <div class="dcp-tasks">
+        <div class="dcp-task-row">
+          <input type="checkbox" class="dcp-cb" checked>
+          <span class="dcp-exec ai">AI</span>
+          <span class="dcp-task-name">在 G123 游戏一览中登记新游戏</span>
+          <span class="dcp-owner">Admin Agent</span>
+        </div>
+        <div class="dcp-dropdown">
+          <div class="dcp-dropdown-hd" onclick="_dcpDrop(this)">
+            HOTD · G123 游戏登记 ${chevSvg}
+          </div>
+          <div class="dcp-dropdown-body">
+            游戏 ID：HOTD-2026<br>
+            上线日期：2026-06-20<br>
+            配置：公开管理 · 全区展示
+          </div>
+        </div>
+        <div class="dcp-task-row">
+          <input type="checkbox" class="dcp-cb" checked>
+          <span class="dcp-exec ai">AI</span>
+          <span class="dcp-task-name">更新 G123 游戏公开管理配置</span>
+          <span class="dcp-owner">Admin Agent</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dcp-footer">
+      <span class="dcp-hint">勾选父或子任务，按依赖链自动下发</span>
+      <button class="dcp-dispatch-btn" onclick="showSnack('已下发 7 个任务，Minion 开始执行')">Dispatch · 7</button>
+    </div>
+  </div>`;
+}
+
 function _applyCase1(tree) {
-  // done → todo
-  tree.querySelectorAll('.stag.done').forEach(el => {
-    el.className = 'stag todo'; el.textContent = 'To do';
-  });
-  tree.querySelectorAll('.done-title').forEach(el => el.classList.remove('done-title'));
-  // needs-input / pending-verify → todo
-  tree.querySelectorAll('.stag.needs-input, .stag.pending-verify').forEach(el => {
-    el.className = 'stag todo'; el.textContent = 'To do';
-  });
-  // remove dep-blocked styling
-  tree.querySelectorAll('.dep-blocked').forEach(el => el.classList.remove('dep-blocked'));
-  tree.querySelectorAll('.task-dep').forEach(el => { el.style.display = 'none'; });
-  // run-btn → insert "To do" badge + hide button
-  tree.querySelectorAll('.task-right').forEach(right => {
-    const runBtn = right.querySelector('.run-btn');
-    if (!runBtn) return;
-    if (!right.querySelector('.stag.todo')) {
-      const badge = document.createElement('span');
-      badge.className = 'stag todo'; badge.textContent = 'To do';
-      right.insertBefore(badge, runBtn);
-    }
-    runBtn.style.display = 'none';
-  });
+  // Replace tree with draft confirmation panel
+  tree.innerHTML = _buildDraftPanelHTML();
   // clear escalation
   escalateData.splice(0);
   renderEscalationCard();
@@ -3249,6 +3449,14 @@ function switchCase(n) {
 
   // restore tree to original HTML
   _restoreTree();
+
+  // Always expand the HOTD goal (first goal-item) for demo
+  const hotdItem = document.querySelector('.goal-panel .goal-item');
+  if (hotdItem) {
+    const t = hotdItem.querySelector('.subtask-tree');
+    if (t) t.style.display = 'block';
+    hotdItem.classList.add('expanded');
+  }
 
   const def = CASE_DEFS[n];
   _applyGoalState(def);
