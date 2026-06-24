@@ -3438,23 +3438,25 @@ function _applyCase2(tree) {
   tree.querySelectorAll('.task-row').forEach(row => {
     const titleEl = row.querySelector('.task-title-cell');
     const titleText = titleEl ? titleEl.textContent.trim() : '';
-    // Keep the two Auxin tasks and already-Done tasks unchanged
+    // Only keep the two Auxin tasks unchanged
     if (KEEP_AS_IS.some(t => titleText.includes(t))) return;
-    if (row.querySelector('.stag.done')) return;
-    // Keep needs-input / pending-verify special states
-    if (row.querySelector('.stag.needs-input, .stag.pending-verify')) return;
     const right = row.querySelector('.task-right');
     if (!right) return;
-    const todoBadge = right.querySelector('.stag.todo');
-    const runBtn    = right.querySelector('.run-btn');
-    if (todoBadge) {
-      todoBadge.className   = 'stag doing';
-      todoBadge.textContent = 'Doing';
-    } else if (runBtn) {
-      const badge = document.createElement('span');
-      badge.className   = 'stag doing';
-      badge.textContent = 'Doing';
-      right.insertBefore(badge, runBtn);
+    // Remove done-title styling
+    if (titleEl) titleEl.classList.remove('done-title');
+    // Replace any existing status badge or run-btn with Doing
+    right.querySelectorAll('.stag').forEach(el => {
+      el.className   = 'stag doing';
+      el.textContent = 'Doing';
+    });
+    const runBtn = right.querySelector('.run-btn');
+    if (runBtn) {
+      if (!right.querySelector('.stag.doing')) {
+        const badge = document.createElement('span');
+        badge.className   = 'stag doing';
+        badge.textContent = 'Doing';
+        right.insertBefore(badge, runBtn);
+      }
       runBtn.style.display = 'none';
     }
   });
