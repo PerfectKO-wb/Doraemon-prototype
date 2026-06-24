@@ -1101,6 +1101,8 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   /* ─── Draft Confirmation Panel (Case 1) ─── */
   .dcp { padding: 14px 16px 10px; display: flex; flex-direction: column; gap: 12px; }
   .dcp-hd { display: flex; flex-direction: column; gap: 3px; }
@@ -3430,11 +3432,46 @@ function _applyCase1(tree) {
   }, 500);
 }
 
+function runToNeedInput(btn, who, what) {
+  const row   = btn.closest('.task-row');
+  const right = btn.closest('.task-right');
+  btn.disabled = true;
+  btn.style.opacity = '.5';
+  btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+    style="animation:spin .8s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Running...`;
+  setTimeout(() => {
+    btn.remove();
+    const badge = document.createElement('span');
+    badge.className     = 'stag needs-input';
+    badge.dataset.who   = who;
+    badge.dataset.what  = what;
+    badge.style.cursor  = 'pointer';
+    badge.innerHTML     = '<span class="needs-dot"></span>Need Input';
+    badge.onclick = e => { e.stopPropagation(); openReplyChat(badge); };
+    const chatBtn = right.querySelector('.task-chat-btn');
+    right.insertBefore(badge, chatBtn || null);
+    showSnack('Minion 需要人工输入，请查看详情');
+  }, 2200);
+}
+
 function _applyCase2(tree) {
   // Remove dependency chain constraints — each subtask is now independently executable
   tree.querySelectorAll('.dep-chain').forEach(el => el.classList.remove('dep-chain'));
   tree.querySelectorAll('.dep-blocked').forEach(el => el.classList.remove('dep-blocked'));
   tree.querySelectorAll('.task-dep').forEach(el => { el.style.display = 'none'; });
+
+  // "自动生成 Auxin IM 通知内容" → Run leads to Need Input (Human In Loop)
+  tree.querySelectorAll('.task-row').forEach(row => {
+    const titleEl = row.querySelector('.task-title-cell');
+    if (titleEl && titleEl.textContent.includes('自动生成 Auxin IM 通知内容')) {
+      const runBtn = row.querySelector('.run-btn');
+      if (runBtn) {
+        runBtn.onclick = function() {
+          runToNeedInput(this, '运营负责人', '请确认 IM 通知文案和 Banner 是否符合品牌规范，并提供最终审批');
+        };
+      }
+    }
+  });
 
   const KEEP_AS_IS = [
     '自动生成 Auxin IM 通知内容',
