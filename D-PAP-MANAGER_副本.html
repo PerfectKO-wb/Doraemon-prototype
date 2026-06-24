@@ -2123,7 +2123,7 @@
 <!-- ─── Test Case Dock ─── -->
 <div class="case-dock">
   <span class="case-dock-label">Cases</span>
-  <button class="case-btn" id="caseBtn1" onclick="switchCase(1)">1 · 规划中</button>
+  <button class="case-btn" id="caseBtn1" onclick="switchCase(1)">1 · Mission 创建</button>
   <button class="case-btn active" id="caseBtn2" onclick="switchCase(2)">2 · 执行中</button>
   <button class="case-btn" id="caseBtn3" onclick="switchCase(3)">3 · 待验收</button>
 </div>
@@ -2777,8 +2777,32 @@ function sendChat() {
     const lower = text;
     let reply = '';
 
+    // ── @Minion HOTD 游戏上线 Mission 创建 ──────────────────────────────────
+    if (lower.includes('@Minion') && (lower.includes('HOTD') || lower.includes('游戏上线'))) {
+      reply = `已加载 Storybook · HOTD 游戏上线<br><br>
+        <div style="background:#f5f5f2;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#555">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#52c41a;margin-bottom:8px">✓ Mission 已生成</div>
+          <div style="margin-bottom:6px">
+            <span style="color:#aaa;font-size:10px;display:block;margin-bottom:1px">Mission</span>
+            HOTD 游戏上线 — 完成全渠道发布
+          </div>
+          <div style="margin-bottom:6px">
+            <span style="color:#aaa;font-size:10px;display:block;margin-bottom:1px">渠道</span>
+            Adnext · Auxin IM · Auxin 弹窗 · G123 · Sendgrid · PR · YouTube
+          </div>
+          <div style="margin-bottom:6px">
+            <span style="color:#aaa;font-size:10px;display:block;margin-bottom:1px">上线日期</span>
+            2026 / 06 / 20
+          </div>
+          <div>
+            <span style="color:#aaa;font-size:10px;display:block;margin-bottom:1px">任务</span>
+            共 16 个步骤 · 10 AI · 6 人工<br>
+            依赖链已建立。确认后 Minion 将自动执行 AI 任务。
+          </div>
+        </div>`;
+
     // ── Multi-turn mock: CP逃离校园 修改 action ──────────────────────────────
-    if ((lower.includes('修改') || lower.includes('修改action')) && lower.includes('140')) {
+    } else if ((lower.includes('修改') || lower.includes('修改action')) && lower.includes('140')) {
       chatContext = 'cp_action_updated';
       reply = `好的，action 已更新。更新后：<br><br>
         <div style="background:#f5f5f2;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#555">
@@ -3186,6 +3210,11 @@ function _applyCase1(tree) {
   // clear escalation
   escalateData.splice(0);
   renderEscalationCard();
+  // Clear chat and simulate manager typing the @Minion command
+  clearChat();
+  setTimeout(() => {
+    _typeAndSend('@Minion 准备HOTD游戏上线，上线日期6月20日');
+  }, 500);
 }
 
 function _applyCase3(tree) {
