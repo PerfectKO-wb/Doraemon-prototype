@@ -2261,8 +2261,8 @@ function toggleGoal(headerRow) {
     const what = el.dataset.what || '';
     const why  = el.dataset.why  || '';
     tip.innerHTML = [
-      who  ? `<div class="tip-row"><div class="tip-label">需要谁处理</div><div class="tip-val">${who}</div></div>` : '',
-      what ? `<div class="tip-row"><div class="tip-label">需要提供</div><div class="tip-val">${what}</div></div>` : '',
+      who  ? `<div class="tip-row"><div class="tip-label">Assigner</div><div class="tip-val">${who}</div></div>` : '',
+      what ? `<div class="tip-row"><div class="tip-label">Context</div><div class="tip-val">${what}</div></div>` : '',
     ].join('');
     const r = el.getBoundingClientRect();
     tip.style.left = r.left + 'px';
@@ -3467,7 +3467,7 @@ function _applyCase2(tree) {
       const runBtn = row.querySelector('.run-btn');
       if (runBtn) {
         runBtn.onclick = function() {
-          runToNeedInput(this, '运营负责人', '请确认 IM 通知文案和 Banner 是否符合品牌规范，并提供最终审批');
+          runToNeedInput(this, 'wangbin@ctw.inc', 'Provide Banner link');
         };
       }
     }
