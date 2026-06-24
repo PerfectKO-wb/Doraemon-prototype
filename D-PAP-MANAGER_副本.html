@@ -1040,6 +1040,11 @@
   }
   .chat-msg.user .chat-msg-bubble { background: #131825; color: #fff; border-radius: 12px 2px 12px 12px; }
   .chat-msg.ai .chat-msg-bubble { background: #f4f6fb; color: var(--text-primary); border-radius: 2px 12px 12px 12px; }
+  /* Draft panel inside chat bubble */
+  .chat-msg-bubble .dcp { padding: 0; }
+  .chat-msg-bubble .dcp-group { background: #fff; }
+  .chat-msg-bubble .dcp-group-hd { background: #f4f4f0; }
+  .chat-msg-bubble .dcp-dropdown-hd { background: #fafaf8; }
 
   /* Draft card */
   .draft-card {
@@ -2850,27 +2855,7 @@ function sendChat() {
 
     // ── @Minion HOTD 游戏上线 Mission 创建 ──────────────────────────────────
     if (lower.includes('@Minion') && (lower.includes('HOTD') || lower.includes('游戏上线'))) {
-      reply = `已加载 Storybook · HOTD 游戏上线<br><br>
-        <div style="background:#f5f5f2;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#555">
-          <div style="font-size:10px;font-weight:700;letter-spacing:.05em;color:#52c41a;margin-bottom:8px">✓ Mission 已生成</div>
-          <div style="margin-bottom:6px">
-            <span style="color:#aaa;font-size:10px;display:block;margin-bottom:1px">Mission</span>
-            HOTD 游戏上线 — 完成全渠道发布
-          </div>
-          <div style="margin-bottom:6px">
-            <span style="color:#aaa;font-size:10px;display:block;margin-bottom:1px">渠道</span>
-            Adnext · Auxin IM · Auxin 弹窗 · G123 · Sendgrid · PR · YouTube
-          </div>
-          <div style="margin-bottom:6px">
-            <span style="color:#aaa;font-size:10px;display:block;margin-bottom:1px">上线日期</span>
-            2026 / 06 / 20
-          </div>
-          <div>
-            <span style="color:#aaa;font-size:10px;display:block;margin-bottom:1px">任务</span>
-            共 16 个步骤 · 10 AI · 6 人工<br>
-            依赖链已建立。确认后 Minion 将自动执行 AI 任务。
-          </div>
-        </div>`;
+      reply = `目标已创建，截止 2026-06-20<br><br>${_buildDraftPanelHTML()}`;
 
     // ── Multi-turn mock: CP逃离校园 修改 action ──────────────────────────────
     } else if ((lower.includes('修改') || lower.includes('修改action')) && lower.includes('140')) {
@@ -3405,8 +3390,26 @@ function _buildDraftPanelHTML() {
 }
 
 function _applyCase1(tree) {
-  // Replace tree with draft confirmation panel
-  tree.innerHTML = _buildDraftPanelHTML();
+  // Badge-swap: done → todo
+  tree.querySelectorAll('.stag.done').forEach(el => {
+    el.className = 'stag todo'; el.textContent = 'To do';
+  });
+  tree.querySelectorAll('.done-title').forEach(el => el.classList.remove('done-title'));
+  tree.querySelectorAll('.stag.needs-input, .stag.pending-verify').forEach(el => {
+    el.className = 'stag todo'; el.textContent = 'To do';
+  });
+  tree.querySelectorAll('.dep-blocked').forEach(el => el.classList.remove('dep-blocked'));
+  tree.querySelectorAll('.task-dep').forEach(el => { el.style.display = 'none'; });
+  tree.querySelectorAll('.task-right').forEach(right => {
+    const runBtn = right.querySelector('.run-btn');
+    if (!runBtn) return;
+    if (!right.querySelector('.stag.todo')) {
+      const badge = document.createElement('span');
+      badge.className = 'stag todo'; badge.textContent = 'To do';
+      right.insertBefore(badge, runBtn);
+    }
+    runBtn.style.display = 'none';
+  });
   // clear escalation
   escalateData.splice(0);
   renderEscalationCard();
@@ -3450,12 +3453,18 @@ function switchCase(n) {
   // restore tree to original HTML
   _restoreTree();
 
-  // Always expand the HOTD goal (first goal-item) for demo
+  // Case 1: HOTD goal not yet created → collapse it
+  // Cases 2 & 3: HOTD goal expanded to show task tree
   const hotdItem = document.querySelector('.goal-panel .goal-item');
   if (hotdItem) {
     const t = hotdItem.querySelector('.subtask-tree');
-    if (t) t.style.display = 'block';
-    hotdItem.classList.add('expanded');
+    if (n === 1) {
+      if (t) t.style.display = 'none';
+      hotdItem.classList.remove('expanded');
+    } else {
+      if (t) t.style.display = 'block';
+      hotdItem.classList.add('expanded');
+    }
   }
 
   const def = CASE_DEFS[n];
