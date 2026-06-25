@@ -332,6 +332,18 @@
     font-size: 14px; font-weight: 500; color: var(--text-heading);
     line-height: 22px; margin-bottom: 16px;
   }
+  .group-status-tag {
+    display: inline-flex; align-items: center;
+    font-size: 11px; font-weight: 600;
+    padding: 1px 8px; border-radius: 5px;
+    vertical-align: middle; margin-left: 8px;
+    border: 1px solid transparent;
+  }
+  .group-status-tag.todo   { border-color: var(--border); color: var(--text-secondary); }
+  .group-status-tag.doing  { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+  .group-status-tag.done   { border-color: var(--border); color: var(--text-tertiary); }
+  .group-status-tag.reviewing { background: #f5f3ff; border-color: #c4b5fd; color: #6d28d9; }
+  .group-status-tag.need-input { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
 
   .task-group-rows {
     display: flex; flex-direction: column; gap: 16px;
@@ -2283,13 +2295,13 @@ function toggleGoal(headerRow) {
   }
 
   document.addEventListener('mouseover', e => {
-    const badge = e.target.closest('.stag.needs-input, .stag.pending-verify');
+    const badge = e.target.closest('.stag.needs-input, .stag.pending-verify, .group-status-tag.reviewing');
     if (badge && (badge.dataset.who || badge.dataset.what || badge.dataset.why)) {
       showTip(badge);
     }
   });
   document.addEventListener('mouseout', e => {
-    if (e.target.closest('.stag.needs-input, .stag.pending-verify')) hideTip();
+    if (e.target.closest('.stag.needs-input, .stag.pending-verify, .group-status-tag.reviewing')) hideTip();
   });
 })();
 
@@ -2309,6 +2321,7 @@ function runAiTask(btn) {
     reviewTag.title = '点击查看 AI 执行结果';
     reviewTag.onclick = (e) => { e.stopPropagation(); openReviewModal(taskTitle, reviewTag, row, taskRight); };
     taskRight.insertBefore(reviewTag, taskRight.querySelector('.task-chat-btn'));
+    if (typeof _applyGroupStatuses === 'function') _applyGroupStatuses(document.querySelector('.subtask-tree'));
     showSnack('AI 已完成，请 Review 结果');
   }, 2000);
 }
@@ -3455,10 +3468,12 @@ function runToNeedInput(btn, who, what) {
       badge.className   = 'stag done';
       badge.innerHTML   = 'Done';
       if (tc) tc.classList.add('done-title');
+      _applyGroupStatuses(document.querySelector('.subtask-tree'));
       showSnack('已完成');
     };
     const chatBtn = right.querySelector('.task-chat-btn');
     right.insertBefore(badge, chatBtn || null);
+    _applyGroupStatuses(document.querySelector('.subtask-tree'));
     showSnack('Minion 需要人工输入，请查看详情');
   }, 2200);
 }
@@ -3499,6 +3514,7 @@ function _applyCase2(tree) {
           badge.textContent = 'Done';
           const chatBtn = right.querySelector('.task-chat-btn');
           right.insertBefore(badge, chatBtn || null);
+          _applyGroupStatuses(document.querySelector('.subtask-tree'));
           showSnack('Campaign 创建完成');
         }, 2200);
       };
@@ -3537,24 +3553,82 @@ function _applyCase2(tree) {
 }
 
 function _applyCase3(tree) {
-  // AI tasks with run-btn → Done
-  tree.querySelectorAll('.task-right').forEach(right => {
-    const runBtn = right.querySelector('.run-btn');
-    if (!runBtn) return;
-    const row = right.closest('.task-row');
-    const titleCell = row && row.querySelector('.task-title-cell');
-    if (!right.querySelector('.stag.done')) {
-      const badge = document.createElement('span');
-      badge.className = 'stag done'; badge.textContent = 'Done';
-      right.insertBefore(badge, runBtn);
-    }
+  tree.querySelectorAll('.task-row').forEach(row => {
+    const right = row.querySelector('.task-right');
+    const titleCell = row.querySelector('.task-title-cell');
+    if (!right) return;
+
+    // Remove run buttons
+    right.querySelectorAll('.run-btn').forEach(el => el.remove());
+    // Remove all existing status badges
+    right.querySelectorAll('.stag, .needs-badge, .waiting-badge').forEach(el => el.remove());
+
+    // Insert Done badge after assignee/date
+    const badge = document.createElement('span');
+    badge.className = 'stag done';
+    badge.textContent = 'Done';
+    right.appendChild(badge);
+
     if (titleCell) titleCell.classList.add('done-title');
-    runBtn.style.display = 'none';
   });
-  // remove dep-blocked (dependencies are now met)
+  // Force "Auxin IM 通知预约" group to Reviewing (overrides derived Done)
+  tree.querySelectorAll('.task-group-title').forEach(titleEl => {
+    if (titleEl.textContent.trim() === 'Auxin IM 通知预约') {
+      titleEl.dataset.forceStatus = 'reviewing';
+      titleEl.dataset.forceWho = 'bin.wang@ctw.inc';
+    }
+  });
+  // remove dep styling
   tree.querySelectorAll('.dep-blocked').forEach(el => el.classList.remove('dep-blocked'));
   tree.querySelectorAll('.task-dep').forEach(el => { el.style.display = 'none'; });
   _restoreEsc();
+}
+
+/* Derive a single task-row status key from its badges/buttons */
+function _rowStatus(row) {
+  const right = row.querySelector('.task-right');
+  if (!right) return 'todo';
+  if (right.querySelector('.stag.done')) return 'done';
+  if (right.querySelector('.stag.needs-input')) return 'need-input';
+  if (right.querySelector('.stag.pending-verify, .stag.review')) return 'reviewing';
+  if (right.querySelector('.stag.doing')) return 'doing';
+  if (right.querySelector('.stag.todo')) return 'todo';
+  return 'todo'; // run-btn only / no badge → not started
+}
+
+/* Compute & render a status badge on every 一级任务 (task group) from its subtasks */
+function _applyGroupStatuses(tree) {
+  if (!tree) return;
+  const LABELS = {
+    'todo': 'To do', 'doing': 'Doing', 'done': 'Done',
+    'reviewing': 'Reviewing', 'need-input': 'Need Input',
+  };
+  tree.querySelectorAll('.task-group').forEach(group => {
+    const titleEl = group.querySelector('.task-group-title');
+    if (!titleEl) return;
+    const old = titleEl.querySelector('.group-status-tag');
+    if (old) old.remove();
+
+    let status, who = '';
+    if (titleEl.dataset.forceStatus) {
+      status = titleEl.dataset.forceStatus;
+      who = titleEl.dataset.forceWho || '';
+    } else {
+      const rows = [...group.querySelectorAll('.task-row')];
+      if (!rows.length) return;
+      const states = rows.map(_rowStatus);
+      if (states.every(s => s === 'done')) status = 'done';
+      else if (states.includes('need-input')) status = 'need-input';
+      else if (states.includes('reviewing')) status = 'reviewing';
+      else if (states.includes('doing') || states.includes('done')) status = 'doing';
+      else status = 'todo';
+    }
+    const tag = document.createElement('span');
+    tag.className = 'group-status-tag ' + status;
+    tag.textContent = LABELS[status];
+    if (who) tag.dataset.who = who;
+    titleEl.appendChild(tag);
+  });
 }
 
 function switchCase(n) {
@@ -3597,13 +3671,19 @@ function switchCase(n) {
   } else if (n === 3) {
     if (tree) _applyCase3(tree);
   }
+  // Derive 一级任务 status from subtasks (all cases)
+  if (tree) _applyGroupStatuses(tree);
 }
 
 // ── Init ──
 renderTaskTodoCard();
 renderEscalationCard();
-// Save original state for test case switching (after first render)
-requestAnimationFrame(_saveForCases);
+// Save original state for test case switching, then render derived group statuses
+requestAnimationFrame(() => {
+  _saveForCases();
+  const tree = document.querySelector('.subtask-tree');
+  if (tree) _applyGroupStatuses(tree);
+});
 </script>
 </body>
 </html>

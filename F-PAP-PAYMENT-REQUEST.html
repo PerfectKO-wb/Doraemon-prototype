@@ -1467,28 +1467,6 @@
     .vc-picker-btn { padding:5px 14px; border-radius:7px; font-size:12px; font-weight:600; border:1px solid var(--primary); background:var(--primary); color:#fff; cursor:pointer; white-space:nowrap; flex-shrink:0; }
     .vc-picker-empty { font-size:13px; color:var(--text-disabled); text-align:center; padding:20px 0; }
 
-    /* ── Test Case FAB ── */
-    .tc-fab { position:fixed; bottom:24px; left:24px; z-index:1000; display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#6366f1,#4f46e5); color:#fff; padding:10px 18px; border-radius:24px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 16px rgba(99,102,241,.4); transition:all .18s; user-select:none; }
-    .tc-fab:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(99,102,241,.5); }
-    .tc-fab svg { width:16px; height:16px; }
-    .tc-panel { position:fixed; bottom:74px; left:24px; z-index:1001; width:320px; background:var(--bg-container); border:1px solid var(--border-divider); border-radius:16px; box-shadow:0 8px 32px rgba(15,23,42,.16); display:none; flex-direction:column; overflow:hidden; }
-    .tc-panel.open { display:flex; }
-    .tc-panel-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; border-bottom:1px solid var(--border-divider); }
-    .tc-panel-title { font-size:13px; font-weight:700; }
-    .tc-close { width:24px; height:24px; border:none; background:none; cursor:pointer; display:grid; place-items:center; color:var(--text-secondary); border-radius:6px; }
-    .tc-close:hover { background:var(--bg-hover); }
-    .tc-close svg { width:14px; height:14px; }
-    .tc-option { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; cursor:pointer; transition:background .12s; border-bottom:1px solid var(--border-divider); }
-    .tc-option:last-child { border-bottom:none; }
-    .tc-option:hover { background:var(--bg-hover); }
-    .tc-option.active { background:var(--bg-active); }
-    .tc-opt-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
-    .tc-opt-body { flex:1; min-width:0; }
-    .tc-opt-title { font-size:13px; font-weight:700; margin-bottom:3px; }
-    .tc-opt-desc { font-size:11px; color:var(--text-secondary); line-height:1.6; }
-    .tc-check { width:20px; height:20px; border-radius:50%; background:#6366f1; display:grid; place-items:center; flex-shrink:0; margin-top:2px; }
-    .tc-check svg { width:11px; height:11px; stroke:#fff; }
-
     /* ── Info box ── */
     .info-box { display:flex; gap:10px; padding:12px 15px; border-radius:10px; border:1px solid var(--warn-border); background:var(--warn-bg); font-size:12px; color:#92400e; margin-bottom:16px; font-weight:500; }
     .info-box svg { width:15px; height:15px; flex-shrink:0; margin-top:1px; }
@@ -2913,38 +2891,6 @@
     </div>
 </div>
 
-<!-- ===== Expense: Test Case FAB ===== -->
-<div class="tc-fab" id="tcFab" onclick="toggleTcPanel()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
-    Test Case
-</div>
-<div class="tc-panel" id="tcPanel">
-    <div class="tc-panel-header">
-        <span class="tc-panel-title">切换场景 / Switch Scenario</span>
-        <button class="tc-close" onclick="toggleTcPanel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="tc-option active" id="tc-opt-surrogate" onclick="switchScenario('surrogate')">
-        <div class="tc-opt-icon">🔁</div>
-        <div class="tc-opt-body"><div class="tc-opt-title">替票场景</div><div class="tc-opt-desc">一张发票涵盖多条报销事项<br>无付款凭证</div></div>
-        <div class="tc-check" id="tc-check-surrogate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-    </div>
-    <div class="tc-option" id="tc-opt-onebyone" onclick="switchScenario('onebyone')">
-        <div class="tc-opt-icon">🧾</div>
-        <div class="tc-opt-body"><div class="tc-opt-title">一单一票场景</div><div class="tc-opt-desc">每张发票对应一笔流水，全部已关联凭证</div></div>
-        <div class="tc-check" id="tc-check-onebyone" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-    </div>
-    <div class="tc-option" id="tc-opt-withvc" onclick="switchScenario('withvc')" style="border:1.5px dashed #f59e0b;background:#fffbeb;">
-        <div class="tc-opt-icon">🔗</div>
-        <div class="tc-opt-body"><div class="tc-opt-title" style="color:#92400e;">Invoice + Voucher（含未关联）</div><div class="tc-opt-desc">Invoice 和 Voucher 都上传了<br>2 张凭证 AI 未匹配 → 显示未关联提示</div></div>
-        <div class="tc-check" id="tc-check-withvc" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-    </div>
-    <div class="tc-option" id="tc-opt-conflict" onclick="switchScenario('conflict')" style="border:1.5px dashed #f87171;background:#fff5f5;">
-        <div class="tc-opt-icon">⚠️</div>
-        <div class="tc-opt-body"><div class="tc-opt-title" style="color:#dc2626;">冲突演示</div><div class="tc-opt-desc">INV-001 被两个事项同时引用<br>验证双处标红 + 提交阻断效果</div></div>
-        <div class="tc-check" id="tc-check-conflict" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-    </div>
-</div>
-
 <!-- ===== Expense: Voucher picker modal ===== -->
 <div class="modal-overlay" id="vcPickerModal" onclick="closeVcPickerModal()">
     <div class="modal" style="width:480px;" onclick="event.stopPropagation()">
@@ -3143,8 +3089,6 @@ function closeVcPickerModal() { document.getElementById('vcPickerModal').classLi
 function closeInvPickerModal() { document.getElementById('invPickerModal').classList.remove('open'); }
 function uploadNewVcForItem() {}
 function uploadNewInvForMount() {}
-function toggleTcPanel() { document.getElementById('tcPanel').classList.toggle('open'); }
-function switchScenario(name) { toggleTcPanel(); showToast('Switched: ' + name); }
 
 // Init expense list
 renderList();

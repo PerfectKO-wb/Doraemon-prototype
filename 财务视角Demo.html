@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>财务视角 · 流程演示</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e8eaed;
+    --muted: #9aa3b2;
+    --accent: #2b6cff;
+    --accent-hover: #1f5be0;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .app {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(23, 26, 33, 0.8);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .title { font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
+  .title small { color: var(--muted); font-weight: 400; margin-left: 8px; font-size: 13px; }
+  .counter {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .counter b { color: var(--text); }
+
+  .stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 24px;
+  }
+  .frame {
+    width: 100%;
+    max-width: 1100px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+  .frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .frame .big-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 480px;
+    font-size: 72px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    background: linear-gradient(135deg, #1d2330, #11151d);
+    color: #fff;
+  }
+
+  .caption {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 18px auto 6px;
+  }
+  .caption .step-no {
+    flex: none;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .caption .step-text {
+    font-size: 15px;
+    line-height: 1.5;
+    padding-top: 3px;
+  }
+
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 18px 24px 28px;
+  }
+  .dots { display: flex; gap: 8px; }
+  .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: #3a4150;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot:hover { transform: scale(1.25); }
+  .dot.active { background: var(--accent); }
+
+  .btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { border-color: #3a4150; background: #1d212a; }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 6px; text-align: center; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title">财务审核 &amp; 打款<small>财务视角演示</small></div>
+      <div class="counter">第 <b id="cur">1</b> / <span id="total">3</span> 步</div>
+    </header>
+
+    <div class="caption">
+      <span class="step-no" id="capNo">1</span>
+      <span class="step-text" id="capText"></span>
+    </div>
+
+    <main class="stage">
+      <div class="frame">
+        <div class="big-text" id="bigText">PAP 通知</div>
+        <img id="shot" src="流程图/财务审核&打款/1.png" alt="流程截图" style="display:none" />
+      </div>
+    </main>
+
+    <footer>
+      <button class="btn" id="prev">上一步</button>
+      <div class="dots" id="dots"></div>
+      <button class="btn primary" id="next">下一步</button>
+    </footer>
+  </div>
+  <p class="hint">提示：可使用键盘 ← → 切换步骤</p>
+
+  <script>
+    const base = "流程图/财务审核&打款/";
+    // 每一步：text 为大字幕步骤（无截图），img 为对应截图序号
+    const slides = [
+      { big: "PAP 通知", caption: "PAP 通知财务进行审核与打款" },
+      { img: 1, caption: "财务进入 OA Expert，查看报销审批流与审批状态" },
+      { img: 2, caption: "中国：多选后提交打款 OA；其他地区：导出后更新至 P 系统工资数据" },
+    ];
+    const TOTAL = slides.length;
+    let idx = 0;
+
+    const shot = document.getElementById("shot");
+    const bigText = document.getElementById("bigText");
+    const capNo = document.getElementById("capNo");
+    const capText = document.getElementById("capText");
+    const cur = document.getElementById("cur");
+    const prevBtn = document.getElementById("prev");
+    const nextBtn = document.getElementById("next");
+    const dotsWrap = document.getElementById("dots");
+
+    document.getElementById("total").textContent = TOTAL;
+
+    // preload
+    slides.forEach((s) => {
+      if (s.img) {
+        const im = new Image();
+        im.src = base + s.img + ".png";
+      }
+    });
+
+    // build dots
+    const dots = [];
+    for (let i = 0; i < TOTAL; i++) {
+      const d = document.createElement("button");
+      d.className = "dot";
+      d.addEventListener("click", () => go(i));
+      dotsWrap.appendChild(d);
+      dots.push(d);
+    }
+
+    function render() {
+      const s = slides[idx];
+      if (s.big) {
+        bigText.textContent = s.big;
+        bigText.style.display = "flex";
+        shot.style.display = "none";
+      } else {
+        shot.src = base + s.img + ".png";
+        shot.style.display = "block";
+        bigText.style.display = "none";
+      }
+      capNo.textContent = idx + 1;
+      capText.textContent = s.caption;
+      cur.textContent = idx + 1;
+      prevBtn.disabled = idx === 0;
+      nextBtn.textContent = idx === TOTAL - 1 ? "完成" : "下一步";
+      dots.forEach((d, i) => d.classList.toggle("active", i === idx));
+    }
+
+    function go(i) {
+      idx = Math.max(0, Math.min(TOTAL - 1, i));
+      render();
+    }
+
+    prevBtn.addEventListener("click", () => go(idx - 1));
+    nextBtn.addEventListener("click", () => { if (idx < TOTAL - 1) go(idx + 1); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") go(idx + 1);
+      if (e.key === "ArrowLeft") go(idx - 1);
+    });
+
+    render();
+  </script>
+</body>
+</html>

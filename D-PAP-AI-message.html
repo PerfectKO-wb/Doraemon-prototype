@@ -1436,6 +1436,8 @@ body {
 .imc-card[data-type="d-input"]  .imc-type-dot { background:#f97316; animation:pulse-dot 1.4s ease-in-out infinite; }
 .imc-card[data-type="d-input"]  .imc-type-label{ color:rgba(194,65,12,.7); }
 .imc-card[data-type="e-review"] .imc-type-dot { background:#a855f7; }
+.imc-card[data-type="f-form"]   .imc-type-dot { background:#f59e0b; animation:pulse-dot 1.4s ease-in-out infinite; }
+.imc-card[data-type="f-form"]   .imc-type-label { color:rgba(161,97,0,.7); }
 .imc-card[data-type="e-review"] .imc-type-label{ color:rgba(126,34,206,.7); }
 @keyframes pulse-dot {
   0%,100%{ opacity:1; transform:scale(1); }
@@ -1567,6 +1569,66 @@ body {
   color:rgba(21,128,61,.75);
   padding:3px 8px;border-radius:5px;
   background:rgba(34,197,94,.07);
+}
+
+/* ── g-review: inline checklist review card ── */
+.imc-card[data-type="g-review"] .imc-type-dot { background:#a855f7; animation:pulse-dot 1.4s ease-in-out infinite; }
+.imc-card[data-type="g-review"] .imc-type-label { color:rgba(126,34,206,.7); }
+.imc-checklist{ display:flex;flex-direction:column;gap:6px;margin-top:10px; }
+.imc-check-item{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:2px 0;
+}
+.imc-check-dot{
+  width:4px;height:4px;border-radius:50%;flex-shrink:0;
+  background:rgba(126,34,206,.55);margin-top:7px;
+}
+.imc-check-label{
+  font-size:12.5px;color:#333;line-height:1.5;flex:1;
+}
+.imc-review-footer{
+  display:flex;justify-content:flex-end;margin-top:8px;
+}
+.imc-review-submit{
+  padding:6px 16px;border-radius:7px;
+  background:#131825;color:#fff;
+  border:none;cursor:pointer;
+  font-size:12px;font-weight:600;font-family:inherit;
+  transition:background .15s,opacity .15s;
+}
+.imc-review-submit:hover{ background:#2d3a55; }
+.imc-review-submit:disabled{ opacity:.35;cursor:default; }
+
+/* ── f-form: banner link form card ── */
+.imc-form{ display:flex;flex-direction:column;gap:8px;margin-top:10px; }
+.imc-form-field{ display:flex;flex-direction:column;gap:3px; }
+.imc-form-label{
+  font-size:10.5px;font-weight:500;color:rgba(0,0,0,.4);
+  letter-spacing:.01em;
+}
+.imc-form-input{
+  width:100%;box-sizing:border-box;
+  padding:6px 10px;
+  border:1px solid rgba(0,0,0,.1);border-radius:6px;
+  font-size:12px;font-family:inherit;color:#222;
+  background:#fafafa;outline:none;
+  transition:border-color .15s,background .15s;
+}
+.imc-form-input:focus{ border-color:#131825;background:#fff; }
+.imc-form-input::placeholder{ color:rgba(0,0,0,.25); }
+.imc-form-footer{
+  display:flex;justify-content:flex-end;margin-top:6px;
+}
+.imc-form-submit{
+  padding:6px 16px;border-radius:7px;
+  background:#131825;color:#fff;
+  border:none;cursor:pointer;
+  font-size:12px;font-weight:600;font-family:inherit;
+  transition:background .15s;
+}
+.imc-form-submit:hover{ background:#2d3a55; }
+.imc-form-submit:disabled{
+  background:rgba(0,0,0,.15);cursor:default;
 }
 
 /* ── a-status: even lighter ── */
@@ -2855,6 +2917,18 @@ body {
           </span>
           <span class="ds3-case-option-title">多消息堆积</span>
         </button>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(9)">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
+            F1 <span style="font-size:9px;padding:1px 6px;background:rgba(245,158,11,.1);color:rgba(161,97,0,.85);border-radius:4px;font-weight:700;">表单填写</span>
+          </span>
+          <span class="ds3-case-option-title">Minion · Banner 链接提供</span>
+        </button>
+        <button class="ds3-case-option" type="button" onclick="switchPdmCase(10)">
+          <span class="ds3-case-option-label" style="display:flex;align-items:center;gap:5px;">
+            R1 <span style="font-size:9px;padding:1px 6px;background:rgba(168,85,247,.1);color:rgba(126,34,206,.85);border-radius:4px;font-weight:700;">Reviewing</span>
+          </span>
+          <span class="ds3-case-option-title">Minion · Auxin IM 通知预约确认</span>
+        </button>
       </div>
       <button class="ds3-case-trigger" type="button" id="casesTrigger" onclick="toggleCases()">
         <span class="ds3-case-trigger-dot"></span>
@@ -3654,7 +3728,7 @@ function switchPdmCase(n){
     Object.keys(consumedActions).forEach(k => delete consumedActions[k]);
     activeMsgId = null;
     // Determine which message IDs to show for this case
-    const caseMap = { 2:['A1','A2'], 3:['B1'], 4:['B2'], 5:['C1'], 6:['D1'], 7:['E1'], 8:['M1','M2','M3','M4'] };
+    const caseMap = { 2:['A1','A2'], 3:['B1'], 4:['B2'], 5:['C1'], 6:['D1'], 7:['E1'], 8:['M1','M2','M3','M4'], 9:['F1'], 10:['R1'] };
     activeCaseIds = caseMap[n] || null;
     historyOpen = true;
     renderInlineMsgs(activeCaseIds);
@@ -4040,6 +4114,40 @@ const INLINE_MSGS = [
     jump: 'i18n-expert.html',
     statusPill: null,
   },
+  /* ── Case 10: Reviewing — Auxin IM 通知预约完成情况 ── */
+  {
+    id: 'R1',
+    type: 'g-review',
+    typeLabel: 'Review Required',
+    source: 'Minion Agent',
+    time: '14:12',
+    title: '「Auxin IM 通知预约」完成情况确认',
+    summary: 'Minion 已完成 Auxin IM 通知预约相关配置，请确认以下两项内容后标记为通过。',
+    tags: [],
+    actions: [],
+    checkItems: [
+      { key: 'content',  label: '确认 Auxin 通知内容' },
+      { key: 'campaign', label: '各渠道 IM Campaign 情况' },
+    ],
+  },
+  /* ── Case 9: Banner 链接表单填写 ── */
+  {
+    id: 'F1',
+    type: 'f-form',
+    typeLabel: 'Input Required',
+    source: 'Minion Agent',
+    time: '13:45',
+    title: '提供 Banner 链接',
+    summary: 'HOTD 游戏上线任务进行中，Minion 需要以下渠道的 Banner 资源链接以继续执行各渠道配置。',
+    tags: [],
+    actions: [],
+    formFields: [
+      { key: 'adnext_banner',    label: 'ADNext X 通知 Banner',  placeholder: 'https://cdn.example.com/hotd/adnext-banner.png' },
+      { key: 'auxin_im_banner',  label: 'Auxin IM 通知 Banner',  placeholder: 'https://cdn.example.com/hotd/auxin-im-banner.png' },
+      { key: 'auxin_pop_banner', label: 'Auxin 弹窗 Banner',     placeholder: 'https://cdn.example.com/hotd/auxin-popup.png' },
+      { key: 'g123_banner',      label: 'G123 Banner',           placeholder: 'https://cdn.example.com/hotd/g123-banner.png' },
+    ],
+  },
 ];
 
 /* Consumed set */
@@ -4259,6 +4367,8 @@ function buildImcCard(msg, done, idx, pagerHtml = ''){
     actionsHtml = '';
   } else if(msg.type === 'c-chat'){
     actionsHtml = '';
+  } else if(msg.type === 'f-form' || msg.type === 'g-review'){
+    actionsHtml = '';
   } else if(msg.type === 'd-input' || msg.type === 'e-review'){
     if(!done){
       const arrowColor = msg.type === 'd-input' ? 'rgba(194,65,12,.5)' : 'rgba(126,34,206,.5)';
@@ -4286,6 +4396,38 @@ function buildImcCard(msg, done, idx, pagerHtml = ''){
       </div>`
     : '';
 
+  /* Checklist block for g-review type */
+  const checklistHtml = (msg.type === 'g-review' && msg.checkItems && !done)
+    ? `<div class="imc-checklist">
+        ${msg.checkItems.map(item => `
+          <div class="imc-check-item" data-key="${item.key}">
+            <span class="imc-check-dot"></span>
+            <span class="imc-check-label">${item.label}</span>
+          </div>`).join('')}
+        <div class="imc-review-footer">
+          <button class="imc-review-submit" type="button" onclick="submitImcReview('${msg.id}',this)">Confirm</button>
+        </div>
+      </div>` : '';
+
+  /* Form block for f-form type */
+  const formHtml = (msg.type === 'f-form' && msg.formFields && !done)
+    ? `<div class="imc-form">
+        ${msg.formFields.map(f => `
+          <div class="imc-form-field">
+            <label class="imc-form-label">${f.label}</label>
+            <input class="imc-form-input" type="url" data-key="${f.key}" placeholder="${f.placeholder}" autocomplete="off" spellcheck="false">
+          </div>`).join('')}
+        <div class="imc-form-footer">
+          <button class="imc-form-submit" type="button" onclick="submitImcForm('${msg.id}',this)">Submit</button>
+        </div>
+      </div>` : '';
+
+  const expandToggleHtml = (msg.type !== 'f-form' && msg.type !== 'g-review')
+    ? `<div class="imc-expand-toggle" onclick="toggleImcExpand(event,'imc-${msg.id}')">
+        <svg class="imc-expand-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <span class="imc-expand-label">展开</span>
+      </div>` : '';
+
   if(pagerHtml){
     card.classList.add('has-pager');
     if(!actionsHtml) card.classList.add('imc-pager-only');
@@ -4297,16 +4439,35 @@ function buildImcCard(msg, done, idx, pagerHtml = ''){
       ${msg.type === 'd' ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
     </div>
     <div class="imc-summary">${msg.summary}</div>
-    <div class="imc-expand-toggle" onclick="toggleImcExpand(event,'imc-${msg.id}')">
-      <svg class="imc-expand-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-      <span class="imc-expand-label">展开</span>
-    </div>
+    ${expandToggleHtml}
     ${tagsHtml}
     ${pillHtml}
+    ${checklistHtml}
+    ${formHtml}
     ${actionsHtml}
     ${pagerHtml}`;
 
   return card;
+}
+
+function submitImcReview(msgId, btn){
+  if(btn) btn.disabled = true;
+  consumedActions[msgId] = 'Reviewed';
+  dismissCard(msgId, 'Reviewed');
+}
+
+function submitImcForm(msgId, btn){
+  const card = document.getElementById('imc-' + msgId);
+  if(!card) return;
+  const inputs = card.querySelectorAll('.imc-form-input');
+  const filled = [...inputs].filter(i => i.value.trim());
+  if(filled.length === 0){
+    inputs[0] && inputs[0].focus();
+    return;
+  }
+  if(btn) btn.disabled = true;
+  consumedActions[msgId] = 'Submitted';
+  dismissCard(msgId, 'Submitted');
 }
 
 function toggleImcExpand(e, cardId){
@@ -4457,7 +4618,7 @@ const MOCK_HISTORY = [
 ];
 
 /* Default case — must be called after MOCK_HISTORY and HISTORY_CAP are declared */
-switchPdmCase(2);
+switchPdmCase(9);
 
 function toggleHistory(){
   historyOpen = !historyOpen;

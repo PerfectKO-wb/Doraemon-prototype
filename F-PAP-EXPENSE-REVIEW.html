@@ -321,6 +321,26 @@ button{font-family:inherit;}
 .tag.pending::before{background:#eab308;animation:pulse-dot 2s ease-in-out infinite;}
 .tag.approved{background:#f0fdf4;color:#166534;}
 .tag.approved::before{background:#22c55e;}
+.tag.needs-revision{background:#fff7ed;color:#c2410c;}
+.tag.needs-revision::before{background:#f97316;animation:pulse-dot 2s ease-in-out infinite;}
+.tag.oa-pending  { background:#fefce8; color:#854d0e; }
+.tag.oa-pending::before  { background:#eab308; animation:pulse-dot 2s ease-in-out infinite; }
+.tag.oa-approved { background:#f0fdf4; color:#166534; }
+.tag.oa-approved::before { background:#22c55e; }
+.tag.oa-rejected { background:#fff1f2; color:#9f1239; }
+.tag.oa-rejected::before { background:#f43f5e; }
+.tag.region-cn { background:#eff6ff; color:#1d4ed8; }
+.tag.region-cn::before { background:#3b82f6; }
+.tag.region-jp { background:#fff1f2; color:#b91c1c; }
+.tag.region-jp::before { background:#ef4444; }
+.rv-col-region { width:70px; text-align:center; }
+/* JP review table */
+.jp-rv-table { width:100%; border-collapse:collapse; font-size:13px; }
+.jp-rv-table th { font-size:11px; font-weight:600; color:var(--text-secondary); padding:8px 12px; border-bottom:1.5px solid var(--border-divider); background:var(--bg-subtle); text-align:left; white-space:nowrap; }
+.jp-rv-table td { padding:10px 12px; border-bottom:1px solid var(--border-divider); vertical-align:middle; }
+.jp-rv-table tbody tr:hover td { background:var(--bg-hover); }
+.jp-rv-table .num { text-align:center; color:var(--text-disabled); font-size:11px; font-family:var(--font-mono); font-weight:600; }
+.jp-rv-table .amt { text-align:right; font-weight:700; font-family:var(--font-mono); }
 .tag.rejected{background:#fff1f2;color:#9f1239;}
 .tag.rejected::before{background:#f43f5e;}
 .tag.draft{background:#f1f4f8;color:#4a5568;}
@@ -429,6 +449,7 @@ button{font-family:inherit;}
 .rv-col-inv    { width:75px; text-align:center; color:var(--text-secondary); }
 .rv-col-amt    { width:130px; text-align:right; font-weight:700; font-family:var(--font-mono); }
 .rv-col-status { width:110px; }
+.rv-col-oa-status { width:110px; }
 .rv-emp-name   { font-weight:600; color:var(--text-default); }
 .rv-emp-sub    { font-size:11px; color:var(--text-secondary); margin-top:2px; }
 .rv-row-check  {
@@ -951,9 +972,10 @@ button{font-family:inherit;}
         <!-- Unified toolbar: tabs left, search right -->
         <div class="rv-toolbar">
             <div class="lp-tabs" style="border:none;height:auto;flex:1;">
-                <button class="lp-tab active" onclick="switchTab(this,'all')">All <span class="tc" id="tc-all">7</span></button>
-                <button class="lp-tab" onclick="switchTab(this,'pending')">Pending <span class="tc" id="tc-pending">3</span></button>
-                <button class="lp-tab" onclick="switchTab(this,'approved')">Approved <span class="tc" id="tc-approved">3</span></button>
+                <button class="lp-tab active" onclick="switchTab(this,'all')">All <span class="tc" id="tc-all">0</span></button>
+                <button class="lp-tab" onclick="switchTab(this,'pending')">Pending <span class="tc" id="tc-pending">0</span></button>
+                <button class="lp-tab" onclick="switchTab(this,'needs-revision')">Needs Revision <span class="tc" id="tc-needs-revision">0</span></button>
+                <button class="lp-tab" onclick="switchTab(this,'approved')">Approved <span class="tc" id="tc-approved">0</span></button>
             </div>
             <div class="rv-search">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9a9a98" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -999,16 +1021,7 @@ button{font-family:inherit;}
                 <div class="dp-title" id="dpTitle"></div>
                 <div class="dp-sub" id="dpSub"></div>
             </div>
-            <div class="dp-actions">
-                <button class="btn-ghost" onclick="openRejectModal()">
-                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    Return to Employee
-                </button>
-                <button class="btn-approve" onclick="approveReport()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    Approve
-                </button>
-            </div>
+            <div class="dp-actions" id="dpActions"></div>
         </div>
         <div class="content-split" id="contentSplit">
             <div class="empty-tip">
@@ -1139,7 +1152,7 @@ const EMPLOYEE_EMAILS = {
 const REPORTS = [
     {
         id:'ER-2026-05-YK', employee:'王 彬', dept:'Finance', period:'May 2026',
-        amount:4965.72, submitted:'2026-06-04', status:'pending', avatarColor:'#7c3aed',
+        amount:4965.72, submitted:'2026-06-04', status:'pending', oaStatus:null, region:'CN', avatarColor:'#7c3aed',
         bill:{ app:'支付宝', period:'2026年5月', totalOut:4965.72 },
         invoices:[
             { id:'INV-001', date:'2026/6/12', issuer:'上海绿地停车管理有限公司', amount:1645.00, invoiceNo:'31012026260000001', taxNo:'91310000MA1FP3X', category:'停车/洗车服务费', taxRate:9, rowIds:[0,1,2,3,4,5,6,7,8,9], warnMsg:'替票：本发票金额与行项目合计存在差异 Δ¥120.00', file:'13.pdf', path:'员工报销单据/发票/2026_06_12_24/13.pdf' },
@@ -1174,7 +1187,7 @@ const REPORTS = [
     },
     {
         id:'ER-2026-05-ZL', employee:'张磊', dept:'Tech', period:'May 2026',
-        amount:2254.00, submitted:'2026-06-03', status:'pending', avatarColor:'#0e7490',
+        amount:2254.00, submitted:'2026-06-03', status:'pending', oaStatus:null, region:'CN', avatarColor:'#0e7490',
         bill:{ app:'微信', period:'2026年5月', totalOut:2340.00 },
         invoices:[
             { id:'INV-A01', date:'2026/5/28', issuer:'上海差旅科技有限公司', amount:2340, invoiceNo:'31012026270000001', taxNo:'91310000MA1FP4A', category:'差旅服务费', taxRate:6, rowIds:[0,1,2,3], warnMsg:null },
@@ -1189,7 +1202,7 @@ const REPORTS = [
     },
     {
         id:'ER-2026-05-WF', employee:'王芳', dept:'Marketing', period:'May 2026',
-        amount:890.50, submitted:'2026-06-04', status:'pending', avatarColor:'#b45309',
+        amount:890.50, submitted:'2026-06-04', status:'pending', oaStatus:null, region:'CN', avatarColor:'#b45309',
         bill:{ app:'支付宝', period:'2026年5月', totalOut:890.50 },
         invoices:[
             { id:'INV-B01', date:'2026/5/31', issuer:'上海办公直销有限公司', amount:890.50, invoiceNo:'31012026280000001', taxNo:'91310000MA1FP5B', category:'办公用品', taxRate:13, rowIds:[0,1,2], warnMsg:null },
@@ -1201,13 +1214,92 @@ const REPORTS = [
         ],
         comments:[]
     },
-    { id:'ER-2026-04-YK', employee:'王 彬', dept:'Finance', period:'Apr 2026', amount:3812.00, submitted:'2026-05-03', status:'approved', avatarColor:'#7c3aed', bill:null, invoices:[], rows:[], comments:[] },
-    { id:'ER-2026-03-YK', employee:'王 彬', dept:'Finance', period:'Mar 2026', amount:4210.50, submitted:'2026-04-02', status:'approved', avatarColor:'#7c3aed', bill:null, invoices:[], rows:[], comments:[] },
-    { id:'ER-2026-02-ZL', employee:'张磊',  dept:'Tech',    period:'Feb 2026', amount:1560.00, submitted:'2026-03-01', status:'approved', avatarColor:'#0e7490', bill:null, invoices:[], rows:[], comments:[] },
+    // Finance-approved, not yet submitted to OA
+    {
+        id:'ER-2026-04-YK', employee:'王 彬', dept:'Finance', period:'Apr 2026',
+        amount:3812.00, submitted:'2026-05-03', status:'approved', oaStatus:null, region:'CN', avatarColor:'#7c3aed', bill:null,
+        invoices:[
+            { id:'INV-D01', date:'2026/4/10', issuer:'上海市新能源汽车充电服务有限公司', amount:1083.88, invoiceNo:'31012026290000010', taxNo:'91310000MA1FQ2A', category:'充电服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-D02', date:'2026/4/18', issuer:'上海金泉停车场管理有限公司',         amount:1648.12, invoiceNo:'31012026290000011', taxNo:'91310000MA1FQ2B', category:'停车服务费', taxRate:6, rowIds:[1], warnMsg:null, file:null, path:null },
+            { id:'INV-D03', date:'2026/4/28', issuer:'上海翊达住宿管理有限公司',           amount:1080.00, invoiceNo:'31012026290000012', taxNo:'91310000MA1FQ2C', category:'住宿服务费', taxRate:6, rowIds:[2], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/4/10', merchant:'特来电充电桩', cat:'车辆费', amount:1083.88, invId:'INV-D01', desc:'4月新能源充电费', actualDesc:'充电服务费', remarks:'', flag:false },
+            { date:'2026/4/18', merchant:'公司停车场（月租）', cat:'车辆费', amount:1648.12, invId:'INV-D02', desc:'4月停车费', actualDesc:'停车服务费', remarks:'月租', flag:false },
+            { date:'2026/4/28', merchant:'汉庭酒店（出差北京）', cat:'住宿费', amount:1080.00, invId:'INV-D03', desc:'北京出差住宿', actualDesc:'住宿服务费', remarks:'2晚', flag:false },
+        ],
+        comments:[]
+    },
+    // Finance-approved + OA approved
+    {
+        id:'ER-2026-03-YK', employee:'王 彬', dept:'Finance', period:'Mar 2026',
+        amount:4210.50, submitted:'2026-04-02', status:'approved', oaStatus:'oa-approved', region:'CN', avatarColor:'#7c3aed', bill:null,
+        invoices:[
+            { id:'INV-E01', date:'2026/3/8',  issuer:'上海市新能源汽车充电服务有限公司', amount:1083.88, invoiceNo:'31012026290000020', taxNo:'91310000MA1FQ3A', category:'充电服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-E02', date:'2026/3/15', issuer:'上海金泉停车场管理有限公司',         amount:2000.00, invoiceNo:'31012026290000021', taxNo:'91310000MA1FQ3B', category:'停车服务费', taxRate:6, rowIds:[1], warnMsg:null, file:null, path:null },
+            { id:'INV-E03', date:'2026/3/25', issuer:'滴滴出行科技有限公司',               amount:1126.62, invoiceNo:'31012026290000022', taxNo:'91310000MA1FQ3C', category:'出行服务费', taxRate:6, rowIds:[2], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/3/8',  merchant:'特来电充电桩', cat:'车辆费', amount:1083.88, invId:'INV-E01', desc:'3月充电费', actualDesc:'充电服务费', remarks:'', flag:false },
+            { date:'2026/3/15', merchant:'公司停车场（月租）', cat:'车辆费', amount:2000.00, invId:'INV-E02', desc:'3月停车费', actualDesc:'停车服务费', remarks:'月租', flag:false },
+            { date:'2026/3/25', merchant:'滴滴打车（客户接送）', cat:'交通费', amount:1126.62, invId:'INV-E03', desc:'客户接送交通', actualDesc:'出行服务费', remarks:'', flag:false },
+        ],
+        comments:[
+            { author:'王 彬', time:'04/02 09:15', text:'3月报销已整理完毕，发票均已上传。', issue:false, avatarColor:'#7c3aed' },
+        ]
+    },
+    // In OA queue
+    {
+        id:'ER-2026-02-ZL', employee:'张磊', dept:'Tech', period:'Feb 2026',
+        amount:1560.00, submitted:'2026-03-01', status:'approved', oaStatus:'oa-pending', region:'CN', avatarColor:'#0e7490', bill:null,
+        invoices:[
+            { id:'INV-F01', date:'2026/2/12', issuer:'上海虹桥火车站',   amount:780.00, invoiceNo:'31012026290000030', taxNo:'91310000MA1FQ4A', category:'交通运输服务', taxRate:9, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-F02', date:'2026/2/14', issuer:'如家酒店（北京）', amount:780.00, invoiceNo:'31012026290000031', taxNo:'91310000MA1FQ4B', category:'住宿服务费',    taxRate:6, rowIds:[1], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/2/12', merchant:'沪宁高铁往返', cat:'交通费', amount:780.00, invId:'INV-F01', desc:'2月出差交通', actualDesc:'交通运输服务', remarks:'往返票', flag:false },
+            { date:'2026/2/14', merchant:'如家酒店北京南站店', cat:'住宿费', amount:780.00, invId:'INV-F02', desc:'2月出差住宿', actualDesc:'住宿服务费', remarks:'2晚×390', flag:false },
+        ],
+        comments:[]
+    },
+    // OA rejected (standalone, not part of the 3-report package)
+    {
+        id:'ER-2026-01-WF', employee:'王芳', dept:'Marketing', period:'Jan 2026',
+        amount:2140.00, submitted:'2026-02-01', status:'approved', oaStatus:'oa-rejected',
+        oaApprover:'张总', rejectReason:'业务目的描述不清晰，请补充说明后重新提交。',
+        region:'CN', avatarColor:'#e11d48', bill:null,
+        invoices:[
+            { id:'INV-G01', date:'2026/1/22', issuer:'上海智慧餐饮管理有限公司', amount:2140.00, invoiceNo:'31012026290000040', taxNo:'91310000MA1FQ5A', category:'餐饮服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/1/22', merchant:'海底捞（陆家嘴店）', cat:'业务招待', amount:2140.00, invId:'INV-G01', desc:'Q1经销商答谢宴', actualDesc:'餐饮服务费', remarks:'', flag:false },
+        ],
+        comments:[
+            { author:'OA 张总', time:'02/10 09:30', text:'[OA Rejected] 业务目的描述不清晰，请补充说明后重新提交。', issue:true, avatarColor:'#dc2626' },
+        ]
+    },
+    // Needs revision — waiting for employee
+    {
+        id:'ER-2026-04-LX', employee:'李 响', dept:'Sales', period:'Apr 2026',
+        amount:890.00, submitted:'2026-05-10', status:'needs-revision', oaStatus:null,
+        rejectReason:'请补充5月10日出租车发票原件扫描件。',
+        region:'CN', avatarColor:'#059669', bill:null,
+        invoices:[
+            { id:'INV-H01', date:'2026/4/28', issuer:'上海市出租汽车管理处', amount:320.00, invoiceNo:'31012026290000050', taxNo:'91310000MA1FQ6A', category:'出行服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
+            { id:'INV-H02', date:'2026/4/30', issuer:'上海鑫嘉酒店管理有限公司', amount:570.00, invoiceNo:'31012026290000051', taxNo:'91310000MA1FQ6B', category:'住宿服务费', taxRate:6, rowIds:[1], warnMsg:null, file:null, path:null },
+        ],
+        rows:[
+            { date:'2026/4/28', merchant:'出租车（客户拜访）', cat:'交通费', amount:320.00, invId:'INV-H01', desc:'客户拜访交通', actualDesc:'出行服务费', remarks:'', flag:true },
+            { date:'2026/4/30', merchant:'速8酒店（苏州出差）', cat:'住宿费', amount:570.00, invId:'INV-H02', desc:'苏州出差住宿', actualDesc:'住宿服务费', remarks:'1晚', flag:false },
+        ],
+        comments:[
+            { author:'王 彬', time:'05/12 14:00', text:'[Returned] 请补充4月28日出租车发票原件扫描件，当前上传图片不清晰。', issue:true, avatarColor:'#7c3aed' },
+        ]
+    },
     // ── Multi-invoice demo: one expense item needs two invoices ──
     {
         id:'ER-2026-05-LX', employee:'李 响', dept:'Sales', period:'May 2026',
-        amount:3589, submitted:'2026-06-05', status:'pending', avatarColor:'#059669',
+        amount:3589, submitted:'2026-06-05', status:'pending', oaStatus:null, region:'CN', avatarColor:'#059669',
         bill:null,
         invoices:[
             { id:'INV-C01', date:'2026/5/30', issuer:'品雅餐饮管理（上海）有限公司', amount:2000, invoiceNo:'31012026290000001', taxNo:'91310000MA1FQ1A', category:'餐饮服务费', taxRate:6, rowIds:[0], warnMsg:null, file:null, path:null },
@@ -1221,6 +1313,53 @@ const REPORTS = [
         ],
         comments:[
             { author:'李 响', time:'06/05 10:12', text:'Q2答谢宴餐厅单张发票限额2000元，分两张开票，合计3500元，请知悉。', issue:false, avatarColor:'#059669' },
+        ]
+    },
+    // ── OA Package OA-20260601-RJKT — 3 reports bundled, OA rejected due to 王芳's report ──
+    {
+        id:'ER-2026-05-WF2', employee:'王芳', dept:'Marketing', period:'May 2026',
+        amount:3120.00, submitted:'2026-06-01', status:'approved', oaStatus:'oa-rejected',
+        oaRef:'OA-20260601-RJKT', oaApprover:'张总',
+        rejectReason:'业务招待费用描述不清晰，需补充客户名称及业务目的说明后重新提交。',
+        region:'CN', avatarColor:'#e11d48', bill:null, invoices:[], rows:[
+            { date:'2026/5/20', merchant:'外滩会所商务宴请', cat:'业务招待', amount:3120, invId:'', desc:'客户答谢宴', actualDesc:'', remarks:'', flag:false },
+        ], comments:[
+            { author:'OA 张总', time:'06/08 10:15', text:'[OA Rejected] 业务招待费用描述不清晰，需补充客户名称及业务目的说明后重新提交。', issue:true, avatarColor:'#dc2626' },
+        ]
+    },
+    {
+        id:'ER-2026-05-ZL2', employee:'张磊', dept:'Tech', period:'May 2026',
+        amount:1840.00, submitted:'2026-06-01', status:'approved', oaStatus:'oa-rejected',
+        oaRef:'OA-20260601-RJKT', oaApprover:'张总',
+        rejectReason:'业务招待费用描述不清晰，需补充客户名称及业务目的说明后重新提交。',
+        region:'CN', avatarColor:'#0e7490', bill:null, invoices:[], rows:[
+            { date:'2026/5/18', merchant:'滴滴出行', cat:'交通费', amount:260, invId:'', desc:'拜访客户交通', actualDesc:'', remarks:'', flag:false },
+            { date:'2026/5/22', merchant:'上海虹桥火车票', cat:'交通费', amount:1580, invId:'', desc:'出差往返', actualDesc:'', remarks:'', flag:false },
+        ], comments:[
+            { author:'OA 张总', time:'06/08 10:15', text:'[OA Rejected] 同批次报销因其他报告问题被整体退回，本报告内容无误。', issue:true, avatarColor:'#dc2626' },
+        ]
+    },
+    {
+        id:'ER-2026-05-YK2', employee:'王 彬', dept:'Finance', period:'May 2026',
+        amount:920.00, submitted:'2026-06-01', status:'approved', oaStatus:'oa-rejected',
+        oaRef:'OA-20260601-RJKT', oaApprover:'张总',
+        rejectReason:'业务招待费用描述不清晰，需补充客户名称及业务目的说明后重新提交。',
+        region:'CN', avatarColor:'#7c3aed', bill:null, invoices:[], rows:[
+            { date:'2026/5/25', merchant:'便利店采购', cat:'办公耗材', amount:920, invId:'', desc:'部门用品采购', actualDesc:'', remarks:'', flag:false },
+        ], comments:[
+            { author:'OA 张总', time:'06/08 10:15', text:'[OA Rejected] 同批次报销因其他报告问题被整体退回，本报告内容无误。', issue:true, avatarColor:'#dc2626' },
+        ]
+    },
+    {
+        id:'ER-2026-07-JP', employee:'岩田 聡一郎', dept:'Finance', period:'Jul 2026',
+        amount:102800, submitted:'2026-07-18', status:'pending', oaStatus:null, region:'JP', avatarColor:'#1d4ed8',
+        bill:null, invoices:[], rows:[], comments:[
+            { author:'岩田 聡一郎', time:'07/18 11:30', text:'7月分の出張精算です。台湾出張・上海出張の領収書を添付します。', issue:false, avatarColor:'#1d4ed8' },
+        ],
+        jpRows:[
+            { date:'2026/7/1',  purpose:'台湾出張', amount:45000, remarks:'' },
+            { date:'2026/7/15', purpose:'上海出張', amount:45000, remarks:'往復航空券' },
+            { date:'2026/7/18', purpose:'上海出張', amount:12800, remarks:'交通費含む' },
         ]
     },
 ];
@@ -1279,9 +1418,21 @@ function switchTab(btn, tab) {
     renderList();
     updateOaBar();
 }
+const OA_STATUS_LABELS = {
+    'oa-pending':  'Pending',
+    'oa-approved': 'Approved',
+    'oa-rejected': 'Rejected',
+};
+
+const RV_STATUS_LABELS = {
+    'draft':          'Draft',
+    'pending':        'Pending',
+    'approved':       'Approved',
+    'needs-revision': 'Needs Revision',
+};
+
 function renderList() {
     const filtered = currentTab==='all' ? REPORTS : REPORTS.filter(r=>r.status===currentTab);
-    const statusLabels = {pending:'Pending',approved:'Approved',rejected:'Returned',draft:'Draft'};
     const isApproved = currentTab === 'approved';
 
     // Rebuild thead based on current tab
@@ -1289,13 +1440,15 @@ function renderList() {
     document.getElementById('rvThead').innerHTML =
         `${checkTh}
          <th class="rv-col-emp">Employee</th>
+         <th class="rv-col-region">Region</th>
          <th class="rv-col-period">Period</th>
          <th class="rv-col-sub">Submitted</th>
          <th class="rv-col-inv">Invoices</th>
          <th class="rv-col-amt">Amount</th>
-         <th class="rv-col-status">Status</th>`;
+         <th class="rv-col-status">Status</th>
+         <th class="rv-col-oa-status">OA Status</th>`;
 
-    const colSpan = isApproved ? 7 : 6;
+    const colSpan = isApproved ? 9 : 8;
     document.getElementById('listItems').innerHTML = filtered.map(r => {
         const checked = selectedOaIds.has(r.id);
         const trClass = isApproved && checked ? 'tr-selected' : '';
@@ -1308,17 +1461,22 @@ function renderList() {
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
             </td>` : '';
+        const oaCell = r.oaStatus
+            ? `<span class="tag ${r.oaStatus}">${OA_STATUS_LABELS[r.oaStatus]||r.oaStatus}</span>`
+            : `<span style="color:var(--text-disabled);">—</span>`;
         return `<tr class="${trClass}" ${onclickAttr}>
             ${checkCell}
             <td class="rv-col-emp">
                 <div class="rv-emp-name">${r.employee}</div>
                 <div class="rv-emp-sub">${EMPLOYEE_EMAILS[r.employee] || r.dept}</div>
             </td>
+            <td class="rv-col-region"><span class="tag region-${(r.region||'CN').toLowerCase()}">${r.region||'CN'}</span></td>
             <td class="rv-col-period">${r.period}</td>
             <td class="rv-col-sub">${r.submitted}</td>
             <td class="rv-col-inv">${r.invoices.length}</td>
             <td class="rv-col-amt">¥${r.amount.toLocaleString('zh',{minimumFractionDigits:2})}</td>
-            <td class="rv-col-status"><span class="tag ${r.status}">${statusLabels[r.status]||r.status}</span></td>
+            <td class="rv-col-status"><span class="tag ${r.status}">${RV_STATUS_LABELS[r.status]||r.status}</span></td>
+            <td class="rv-col-oa-status">${oaCell}</td>
         </tr>`;
     }).join('') || `<tr><td colspan="${colSpan}" style="padding:48px;text-align:center;color:var(--text-disabled);font-size:13px;">No reports</td></tr>`;
 }
@@ -1350,6 +1508,7 @@ function updateOaBar() {
 }
 
 // ============ OA Modal ============
+
 function openOaModal() {
     if (selectedOaIds.size === 0) return;
     const selected = REPORTS.filter(r => selectedOaIds.has(r.id));
@@ -1387,11 +1546,22 @@ function confirmOaSubmit() {
     const link = `https://f-expert.io/oa/preview/${ref}`;
     _lastOaPackage = { ref, reports: selected, total, link };
 
+    // Update OA status only — finance status stays 'approved'
+    selected.forEach(r => {
+        r.oaStatus = 'oa-pending';
+    });
+
     closeOaModal();
     selectedOaIds.clear();
     renderList();
     updateOaBar();
     refreshTabCounts();
+
+    // Refresh detail actions if still showing one of the submitted reports
+    if (activeId) {
+        const ar = REPORTS.find(x=>x.id===activeId);
+        if (ar) updateDetailActions(ar);
+    }
 
     // Populate and open OA Package modal
     openOaPackageModal(_lastOaPackage);
@@ -1537,8 +1707,10 @@ function closeDetail() {
     refreshTabCounts();
 }
 function refreshTabCounts() {
-    document.getElementById('tc-pending').textContent = REPORTS.filter(r=>r.status==='pending').length;
-    document.getElementById('tc-approved').textContent = REPORTS.filter(r=>r.status==='approved').length;
+    ['pending','approved','needs-revision'].forEach(s => {
+        const el = document.getElementById(`tc-${s}`);
+        if (el) el.textContent = REPORTS.filter(r=>r.status===s).length;
+    });
     document.getElementById('tc-all').textContent = REPORTS.length;
 }
 
@@ -1552,20 +1724,243 @@ function openReport(id) {
     document.getElementById('reviewDetailView').style.display = 'flex';
     const r = REPORTS.find(x=>x.id===id);
     if (!r) return;
+
+    // Update dynamic action buttons based on status
+    updateDetailActions(r);
+
+    // JP region: simplified review
+    if (r.region === 'JP') {
+        const jpTotal = (r.jpRows||[]).reduce((s,x)=>s+(+x.amount||0),0);
+        document.getElementById('dpTitle').innerHTML = `${r.employee} · ${r.period} <span class="tag region-jp" style="margin-left:8px;vertical-align:middle;">JP</span>`;
+        document.getElementById('dpSub').textContent =
+            `Submitted ${r.submitted} · ${(r.jpRows||[]).length} item(s) · Total ¥${jpTotal.toLocaleString('ja-JP')}`;
+        document.getElementById('contentSplit').innerHTML =
+            `<div class="report-side" id="reportSide" style="flex:1;overflow-y:auto;padding:20px;"></div>`;
+        renderJpReportSide(r);
+        return;
+    }
+
     document.getElementById('dpTitle').textContent = `${r.employee} · ${r.period}`;
     const total = r.rows.reduce((s,x)=>s+x.amount,0);
     const flagCount = r.rows.filter(x=>x.flag).length;
     document.getElementById('dpSub').textContent =
         `Submitted ${r.submitted} · ${r.invoices.length} invoice(s) · Total ¥${total.toLocaleString('zh',{minimumFractionDigits:2})}${flagCount?` · ⚑ ${flagCount} flagged`:''}`;
 
+    // OA rejection banner
+    const oaBanner = r.oaStatus === 'oa-rejected' ? `
+        <div style="display:flex;gap:12px;padding:14px 16px;background:#fff1f2;border:1.5px solid #fecdd3;border-radius:10px;margin-bottom:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:700;color:#be123c;margin-bottom:4px;">
+                    OA Rejected
+                    ${r.oaRef ? `<span style="font-weight:400;color:#e11d48;margin-left:8px;font-family:var(--font-mono);font-size:11px;">${r.oaRef}</span>` : ''}
+                    ${r.oaApprover ? `<span style="font-weight:400;color:var(--text-secondary);margin-left:6px;font-size:11px;">by ${r.oaApprover}</span>` : ''}
+                </div>
+                <div style="font-size:13px;color:#9f1239;line-height:1.5;">${r.rejectReason || '—'}</div>
+                ${r.oaRef ? `<div style="margin-top:8px;font-size:11px;color:#e11d48;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:3px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    This report was part of OA package <strong>${r.oaRef}</strong>. Use <strong>Return to Employee</strong> if this report caused the rejection, or <strong>Re-package</strong> to include it in a new OA submission.
+                </div>` : ''}
+            </div>
+        </div>` : '';
+
+    // Status label map for display
+    const statusLabel = { pending:'Pending', approved:'Approved', 'needs-revision':'Needs Revision' };
+    const oaLabel = { 'oa-pending':'OA Reviewing', 'oa-approved':'OA Approved', 'oa-rejected':'OA Rejected' };
+    const oaColors = {
+        'oa-pending':  { bg:'#fefce8', color:'#854d0e', dot:'#eab308' },
+        'oa-approved': { bg:'#f0fdf4', color:'#166534', dot:'#22c55e' },
+        'oa-rejected': { bg:'#fff1f2', color:'#9f1239', dot:'#f43f5e' },
+    };
+    const summaryCard = `
+        <div style="display:flex;flex-wrap:wrap;gap:16px 32px;padding:16px 20px;background:var(--bg-subtle);border-radius:10px;border:1px solid var(--border-divider);margin-bottom:16px;">
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Employee</div>
+                <div style="font-size:13px;font-weight:600;">${r.employee}</div>
+                <div style="font-size:11px;color:var(--text-secondary);">${EMPLOYEE_EMAILS[r.employee]||r.dept}</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Period</div>
+                <div style="font-size:13px;">${r.period}</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Submitted</div>
+                <div style="font-size:13px;color:var(--text-secondary);">${r.submitted}</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Amount</div>
+                <div style="font-size:15px;font-weight:800;color:var(--primary-dark);font-family:var(--font-mono);">¥${r.amount.toLocaleString('zh',{minimumFractionDigits:2})}</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Status</div>
+                <span class="tag ${r.status}">${statusLabel[r.status]||r.status}</span>
+            </div>
+            ${r.oaStatus ? `<div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">OA Status</div>
+                <span class="tag ${r.oaStatus}">${oaLabel[r.oaStatus]||r.oaStatus}</span>
+            </div>` : ''}
+            ${r.oaRef ? `<div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">OA Package</div>
+                <div style="font-size:12px;font-family:var(--font-mono);color:var(--text-secondary);">${r.oaRef}</div>
+            </div>` : ''}
+        </div>`;
+
     if (!r.rows.length) {
-        document.getElementById('contentSplit').innerHTML = '<div class="empty-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><p>This report has been approved.</p></div>';
+        // Build comments section if present
+        const commentsHtml = r.comments && r.comments.length ? `
+            <div style="margin-top:16px;">
+                <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Comments</div>
+                ${r.comments.map(c=>`
+                    <div style="display:flex;gap:10px;margin-bottom:12px;">
+                        <div style="width:28px;height:28px;border-radius:50%;background:${c.avatarColor||'#6b7280'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${c.author[0]}</div>
+                        <div>
+                            <div style="font-size:12px;font-weight:600;margin-bottom:2px;">${c.author} <span style="font-weight:400;color:var(--text-disabled);">${c.time}</span></div>
+                            <div style="font-size:13px;color:${c.issue?'#be123c':'var(--text-secondary)'};">${c.text}</div>
+                        </div>
+                    </div>`).join('')}
+            </div>` : '';
+
+        document.getElementById('contentSplit').innerHTML =
+            `<div style="flex:1;overflow-y:auto;padding:20px;">
+                ${oaBanner ? `<div style="margin-bottom:16px;">${oaBanner}</div>` : ''}
+                ${summaryCard}
+                ${commentsHtml}
+             </div>`;
         return;
     }
 
-    document.getElementById('contentSplit').innerHTML = `
-        <div class="report-side" id="reportSide" style="flex:1;overflow-y:auto;padding:20px;"></div>`;
+    document.getElementById('contentSplit').innerHTML =
+        `${oaBanner ? `<div style="padding:16px 16px 0;">${oaBanner}</div>` : ''}
+         <div class="report-side" id="reportSide" style="flex:1;overflow-y:auto;padding:20px;"></div>`;
     renderReportSide(r);
+}
+
+/**
+ * Status machine — action buttons visible to finance per status:
+ *   pending        → [Return to Employee] [Approve]
+ *   approved       → [Recall] [Submit to OA]   (CN only; JP: no Submit to OA)
+ *   needs-revision → (none — waiting for employee)
+ *   oa-pending     → (none — in OA queue)
+ *   oa-approved    → (none — complete)
+ *   oa-rejected    → [Return to Employee]  (sets status → needs-revision)
+ */
+function updateDetailActions(r) {
+    const el = document.getElementById('dpActions');
+    if (!el) return;
+    el.innerHTML = '';
+
+    const mkGhost = (label, onclick, icon='') => {
+        const b = document.createElement('button');
+        b.className = 'btn-ghost';
+        b.innerHTML = icon + label;
+        b.onclick = onclick;
+        return b;
+    };
+    const mkApprove = (label, onclick, icon='') => {
+        const b = document.createElement('button');
+        b.className = 'btn-approve';
+        b.innerHTML = icon + label;
+        b.onclick = onclick;
+        return b;
+    };
+    const mkWarning = (label, onclick, icon='') => {
+        const b = document.createElement('button');
+        b.className = 'btn-ghost';
+        b.style.cssText = 'color:#b45309;border-color:#fcd34d;background:#fffbeb;';
+        b.innerHTML = icon + label;
+        b.onclick = onclick;
+        return b;
+    };
+
+    const xIcon      = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    const checkIcon  = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>';
+    const returnIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>';
+
+    const s  = r.status;
+    const oa = r.oaStatus || null;
+
+    if (s === 'pending') {
+        el.appendChild(mkGhost('Return to Employee', openRejectModal, xIcon));
+        el.appendChild(mkApprove('Approve', approveReport, checkIcon));
+
+    } else if (s === 'approved' && oa === 'oa-rejected') {
+        const label = document.createElement('span');
+        label.style.cssText = 'font-size:11px;color:var(--text-disabled);margin-right:4px;';
+        label.textContent = 'OA Rejected:';
+        el.appendChild(label);
+        el.appendChild(mkWarning('Return to Employee', returnOaRejectedReport, returnIcon));
+        const repackageIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>';
+        el.appendChild(mkApprove('Re-package', repackageReport, repackageIcon));
+
+    }
+    // needs-revision / approved+no-oa / approved+oa-pending / approved+oa-approved → no buttons
+}
+
+
+function renderJpReportSide(r) {
+    const el = document.getElementById('reportSide');
+    if (!el) return;
+    const rows = r.jpRows || [];
+    const total = rows.reduce((s, x) => s + (+x.amount || 0), 0);
+
+    // Expense table rows
+    const rowsHtml = rows.map((row, i) => `
+        <tr>
+            <td class="num">${i + 1}</td>
+            <td style="color:var(--text-secondary);white-space:nowrap;">${row.date}</td>
+            <td style="font-weight:500;">${row.purpose}</td>
+            <td class="amt">¥${(+row.amount||0).toLocaleString('ja-JP')}</td>
+            <td style="color:var(--text-secondary);font-size:12px;">${row.remarks||'—'}</td>
+        </tr>`
+    ).join('');
+
+    el.innerHTML = `
+        <div style="display:flex;flex-wrap:wrap;gap:12px 32px;padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border:1px solid var(--border-divider);margin-bottom:20px;">
+            <div><div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Employee</div><div style="font-size:13px;font-weight:600;">${r.employee}</div></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Period</div><div style="font-size:13px;">${r.period}</div></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Submitted</div><div style="font-size:13px;color:var(--text-secondary);">${r.submitted}</div></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Region</div><div style="font-size:13px;"><span class="tag region-jp">JP</span></div></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Total</div><div style="font-size:15px;font-weight:800;color:var(--primary-dark);font-family:var(--font-mono);">¥${total.toLocaleString('ja-JP')}</div></div>
+        </div>
+
+        <!-- Expense items table -->
+        <div style="overflow:auto;border:1px solid var(--border-divider);border-radius:8px;margin-bottom:24px;">
+            <table class="jp-rv-table">
+                <thead>
+                    <tr>
+                        <th style="width:36px;text-align:center;">#</th>
+                        <th>Date<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">日付</span></th>
+                        <th>Business Purpose<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">業務目的</span></th>
+                        <th>Amount (¥, incl. tax)<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">金額（税込）</span></th>
+                        <th>Remarks<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">備考</span></th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" style="padding:10px 12px;font-size:12px;font-weight:700;color:var(--text-secondary);border-top:1.5px solid var(--border-divider);">Total</td>
+                        <td style="padding:10px 12px;text-align:right;font-weight:800;font-family:var(--font-mono);font-size:15px;color:var(--primary-dark);border-top:1.5px solid var(--border-divider);">¥${total.toLocaleString('ja-JP')}</td>
+                        <td style="border-top:1.5px solid var(--border-divider);"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Comments -->
+        ${r.comments && r.comments.length ? `
+        <div style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Comments</div>
+            ${r.comments.map(c=>`
+                <div style="display:flex;gap:10px;margin-bottom:12px;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:${c.avatarColor||'#6b7280'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${c.author[0]}</div>
+                    <div>
+                        <div style="font-size:12px;font-weight:600;margin-bottom:2px;">${c.author} <span style="font-weight:400;color:var(--text-disabled);">${c.time}</span></div>
+                        <div style="font-size:13px;color:var(--text-secondary);">${c.text}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>` : ''}
+    `;
 }
 
 // ============ Report Side ============
@@ -1627,6 +2022,7 @@ function renderReportSide(r) {
     }
 
     let tableHtml = '';
+    let rowNo = 0;
     Object.entries(groupMap).forEach(([key, group]) => {
         const invs = group.invIds.map(id => r.invoices.find(x => x.id === id)).filter(Boolean);
         const groupTotal = group.rows.reduce((s,x) => s + x.amount, 0);
@@ -1640,7 +2036,7 @@ function renderReportSide(r) {
         ).join('');
 
         tableHtml += `<tr>
-            <td colspan="11" style="padding:5px 10px;background:var(--bg-subtle);font-size:11px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border-divider);">
+            <td colspan="12" style="padding:5px 10px;background:var(--bg-subtle);font-size:11px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border-divider);">
                 ${invs.length > 0 ? `📄 ${group.invIds.join(' + ')} · ${invs.map(i=>i.issuer).join(' / ')}` : '⚠ No Invoice'}
                 ${invTotal > 0 ? `<span style="margin-left:8px;font-weight:400;">Invoice ¥${invTotal.toFixed(2)} / Rows ¥${groupTotal.toFixed(2)} <span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;margin-left:4px;background:${Math.abs(diff)<0.01?'#dcfce7':'#fff1f0'};color:${Math.abs(diff)<0.01?'#15803d':'#f5222d'}">${diffLabel}</span></span>` : ''}
                 <span style="float:right;">${viewBtns}</span>
@@ -1685,7 +2081,9 @@ function renderReportSide(r) {
                 ${isAi && row.cat ? '<span class="cat-ai-badge">AI</span>' : ''}
             </div>`;
 
+            rowNo++;
             tableHtml += `<tr class="${rowClass}" id="tr-${row._i}">
+                <td style="text-align:center;color:var(--text-disabled);font-size:11px;font-weight:600;font-family:var(--font-mono);white-space:nowrap;">${rowNo}</td>
                 <td style="color:var(--text-secondary);white-space:nowrap;font-size:11px;">${invDateStr}</td>
                 <td style="color:var(--text-secondary);white-space:nowrap;">${row.date.replace('2026/','')}</td>
                 <td>${row.desc}</td>
@@ -1716,6 +2114,7 @@ function renderReportSide(r) {
         <div class="report-table-wrap">
             <table class="rpt-table">
                 <thead><tr>
+                    <th style="width:40px;text-align:center;">#</th>
                     <th>Invoice Date<br><span class="th-sub">开票日期</span></th>
                     <th>Expense Date<br><span class="th-sub">消费日期</span></th>
                     <th>Description<br><span class="th-sub">费用内容支出说明</span></th>
@@ -1895,13 +2294,49 @@ function approveReport() {
     const r = REPORTS.find(x=>x.id===activeId);
     if (!r) return;
     r.status = 'approved';
-    showToast('Report approved — will be submitted to OA');
+    r.oaStatus = null;
+    renderList();
+    showToast('Report approved');
+    advanceToNext();
+}
+
+
+function returnOaRejectedReport() {
+    const r = REPORTS.find(x=>x.id===activeId);
+    if (!r || r.oaStatus !== 'oa-rejected') return;
+    r.status = 'needs-revision';
+    r.oaStatus = null;
+    r.comments.push({
+        author:'王 彬', time:new Date().toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''),
+        text:`[OA Rejected → Returned] ${r.rejectReason||'Please revise and resubmit.'}`, issue:true, avatarColor:'#7c3aed'
+    });
+    renderList();
+    showToast('Report returned to employee for revision');
+    advanceToNext();
+}
+
+/**
+ * Re-package: the report was NOT the cause of OA rejection.
+ * Reset it back to finance-approved so it can be included in a new OA package immediately.
+ */
+function repackageReport() {
+    const r = REPORTS.find(x=>x.id===activeId);
+    if (!r || r.oaStatus !== 'oa-rejected') return;
+    r.status = 'approved';
+    r.oaStatus = null;
+    r.comments.push({
+        author:'王 彬', time:new Date().toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''),
+        text:'[Re-packaged] Report cleared — ready to be included in a new OA submission.', issue:false, avatarColor:'#7c3aed'
+    });
+    renderList();
+    refreshTabCounts();
+    showToast('Report moved to Approved — ready for new OA package');
     advanceToNext();
 }
 
 function openRejectModal() {
     const r = REPORTS.find(x=>x.id===activeId);
-    const flagged = r ? r.rows.filter(x=>x.flag) : [];
+    const flagged = r && r.rows ? r.rows.filter(x=>x.flag) : [];
     const preview = document.getElementById('flagListPreview');
     const ul = document.getElementById('flagListUl');
     if (flagged.length) {
@@ -1918,7 +2353,8 @@ function confirmReject() {
     if (!reason) { showToast('Please provide a reason'); return; }
     const r = REPORTS.find(x=>x.id===activeId);
     if (!r) return;
-    r.status = 'rejected';
+    r.status = 'needs-revision';
+    r.rejectReason = reason;
     r.comments.push({
         author:'王 彬', time:new Date().toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''),
         text:`[Returned] ${reason}`, issue:true, avatarColor:'#7c3aed'
@@ -1941,10 +2377,7 @@ function showToast(msg) {
 // Init
 renderList();
 updateOaBar();
-// Update tab counts dynamically
-document.getElementById('tc-pending').textContent = REPORTS.filter(r=>r.status==='pending').length;
-document.getElementById('tc-approved').textContent = REPORTS.filter(r=>r.status==='approved').length;
-document.getElementById('tc-all').textContent = REPORTS.length;
+refreshTabCounts();
 </script>
 </body>
 </html>

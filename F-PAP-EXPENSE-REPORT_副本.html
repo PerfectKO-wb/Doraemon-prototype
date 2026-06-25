@@ -558,6 +558,39 @@ button { font-family:inherit; }
 .step-panel { display:none; padding:24px; }
 .step-panel.active { display:block; }
 
+/* ========= Test Case region switcher ========= */
+.tc-fab {
+    position:fixed; left:20px; bottom:20px; z-index:2000;
+    width:48px; height:48px; border-radius:50%; border:none;
+    background:var(--primary); color:#fff; cursor:pointer;
+    display:grid; place-items:center; box-shadow:0 6px 18px rgba(0,0,0,.18);
+    transition:transform .15s ease, box-shadow .15s ease;
+}
+.tc-fab:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.22); }
+.tc-fab svg { width:22px; height:22px; }
+.tc-panel {
+    position:fixed; left:20px; bottom:80px; z-index:2000;
+    width:280px; background:#fff; border:1px solid var(--border-divider);
+    border-radius:14px; box-shadow:0 16px 40px rgba(0,0,0,.18);
+    padding:14px; display:none;
+}
+.tc-panel.open { display:block; }
+.tc-panel-head { display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:700; color:var(--text-default); }
+.tc-close { border:none; background:transparent; cursor:pointer; color:var(--text-secondary); font-size:13px; }
+.tc-panel-sub { font-size:11px; color:var(--text-secondary); margin:4px 0 10px; }
+.tc-option {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:9px 10px; border:1.5px solid var(--border-divider); border-radius:10px;
+    cursor:pointer; margin-bottom:8px; transition:border .15s, background .15s;
+}
+.tc-option:hover { border-color:var(--primary); background:var(--bg-hover, #f7f7f8); }
+.tc-option.active { border-color:var(--primary); background:rgba(35,131,226,.06); }
+.tc-opt-main { display:flex; align-items:center; gap:10px; }
+.tc-flag { font-size:18px; }
+.tc-opt-title { font-size:12.5px; font-weight:600; color:var(--text-default); }
+.tc-opt-desc { font-size:10.5px; color:var(--text-secondary); margin-top:1px; }
+.tc-check { color:var(--primary); font-weight:700; font-size:13px; }
+
 /* Upload zone */
 .upload-grid { display:flex; flex-direction:column; gap:12px; margin-bottom:20px; }
 .upload-zone {
@@ -962,32 +995,6 @@ button { font-family:inherit; }
 }
 .ei-row-del:hover { background:#fff1f2; color:#ef4444; }
 
-/* US budget approval card */
-.budget-approval-card {
-    border:1px solid var(--border-divider); border-radius:var(--radius-md);
-    background:var(--bg-container); overflow:hidden; max-width:520px;
-}
-.ba-head {
-    display:flex; align-items:center; gap:6px;
-    padding:9px 14px; font-size:12px; font-weight:600; color:var(--success);
-    background:var(--success-bg); border-bottom:1px solid var(--success-border);
-}
-.ba-body { display:flex; align-items:center; gap:12px; padding:12px 14px; }
-.ba-thumb {
-    width:46px; height:46px; flex-shrink:0; border-radius:var(--radius-sm);
-    display:grid; place-items:center; color:var(--success);
-    background:var(--success-bg); border:1px solid var(--success-border);
-}
-.ba-meta { flex:1; min-width:0; }
-.ba-name { font-size:13px; font-weight:600; color:var(--text-default); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.ba-sub { font-size:11px; color:var(--text-disabled); margin-top:2px; }
-.ba-view {
-    flex-shrink:0; border:1px solid var(--border-default); background:var(--bg-container);
-    color:var(--text-secondary); border-radius:var(--radius-sm); padding:5px 14px;
-    font:inherit; font-size:12px; font-weight:500; cursor:pointer; transition:all .15s;
-}
-.ba-view:hover { background:var(--bg-hover); border-color:var(--border-strong); }
-
 /* Submitter info bar (Step 2, all regions) */
 .uploader-bar {
     display:flex; align-items:center; gap:14px;
@@ -1175,55 +1182,6 @@ button { font-family:inherit; }
     cursor:pointer; white-space:nowrap; flex-shrink:0; transition:opacity .15s; }
 .vc-picker-btn:hover { opacity:.85; }
 .vc-picker-empty { font-size:13px; color:var(--text-disabled); text-align:center; padding:20px 0; }
-
-/* ===== Test Case FAB ===== */
-.tc-fab {
-    position:fixed; bottom:24px; left:24px; z-index:1000;
-    display:flex; align-items:center; gap:8px;
-    background:linear-gradient(135deg,#6366f1,#4f46e5);
-    color:#fff; padding:10px 18px; border-radius:24px;
-    font-size:13px; font-weight:600; cursor:pointer;
-    box-shadow:0 4px 16px rgba(99,102,241,.4);
-    transition:all .18s; user-select:none;
-}
-.tc-fab:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(99,102,241,.5); }
-.tc-fab svg { width:16px; height:16px; }
-.tc-panel {
-    position:fixed; bottom:74px; left:24px; z-index:1001;
-    width:320px; background:var(--bg-container);
-    border:1px solid var(--border-divider); border-radius:16px;
-    box-shadow:0 8px 32px rgba(15,23,42,.16);
-    display:none; flex-direction:column; overflow:hidden;
-}
-.tc-panel.open { display:flex; }
-.tc-panel-header {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 16px 10px; border-bottom:1px solid var(--border-divider);
-}
-.tc-panel-title { font-size:13px; font-weight:700; color:var(--text-default); }
-.tc-close {
-    width:24px; height:24px; border:none; background:none; cursor:pointer;
-    display:grid; place-items:center; color:var(--text-secondary); border-radius:6px;
-}
-.tc-close:hover { background:var(--bg-hover); }
-.tc-close svg { width:14px; height:14px; }
-.tc-option {
-    display:flex; align-items:flex-start; gap:12px;
-    padding:14px 16px; cursor:pointer; transition:background .12s;
-    border-bottom:1px solid var(--border-divider);
-}
-.tc-option:last-child { border-bottom:none; }
-.tc-option:hover { background:var(--bg-hover); }
-.tc-option.active { background:var(--bg-active); }
-.tc-opt-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
-.tc-opt-body { flex:1; min-width:0; }
-.tc-opt-title { font-size:13px; font-weight:700; margin-bottom:3px; }
-.tc-opt-desc { font-size:11px; color:var(--text-secondary); line-height:1.6; }
-.tc-check {
-    width:20px; height:20px; border-radius:50%; background:#6366f1;
-    display:grid; place-items:center; flex-shrink:0; margin-top:2px;
-}
-.tc-check svg { width:11px; height:11px; stroke:#fff; }
 
 /* Info box */
 .info-box {
@@ -1447,7 +1405,7 @@ select.inline-select {
     </div>
     <div class="lp-count"><strong>103</strong> total</div>
     <div class="lp-body">
-        <div class="list-card" onclick="location.href='F-PAP-PAYMENT-REQUEST.html'">
+        <div class="list-card active" onclick="location.href='F-PAP-PAYMENT-REQUEST.html'">
             <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
             <div class="list-card-content">
                 <div class="list-card-title">Invoice Collection <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -1465,7 +1423,7 @@ select.inline-select {
             </div>
             <span class="list-card-dot"></span>
         </div>
-        <div class="list-card active" style="display:none;">
+        <div class="list-card" style="display:none;">
             <div class="list-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
             <div class="list-card-content">
                 <div class="list-card-title">Expense Report <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -1517,7 +1475,6 @@ select.inline-select {
                 <button class="s-tab" onclick="switchListTab(this,'oa-pending')">Pending <span class="tc" id="ct-oa-pending">0</span></button>
                 <button class="s-tab" onclick="switchListTab(this,'oa-approved')">Approved <span class="tc" id="ct-oa-approved">0</span></button>
                 <button class="s-tab" onclick="switchListTab(this,'oa-rejected')">Rejected <span class="tc" id="ct-oa-rejected">0</span></button>
-                <button class="s-tab" onclick="switchListTab(this,'needs-revision')">Needs Revision <span class="tc" id="ct-needs-revision">0</span></button>
             </div>
             <button class="btn-primary" onclick="startNewReport()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1557,99 +1514,9 @@ select.inline-select {
             <span class="wizard-title" id="wizardTitle">New Expense Report — May 2026</span>
         </div>
 
-        <!-- Step bar -->
-        <div class="step-bar" id="stepBar">
-            <div class="step-item active" id="step-ind-1">
-                <div class="step-num">1</div>
-                <div class="step-label">Upload Files</div>
-            </div>
-            <div class="step-connector" id="conn-1"></div>
-            <div class="step-item" id="step-ind-2">
-                <div class="step-num">2</div>
-                <div class="step-label">Review & Submit</div>
-            </div>
-        </div>
-
         <div class="wizard-body">
-            <!-- STEP 1: Upload Files (CN) / Upload Voucher (JP) -->
-            <div class="step-panel active" id="panel-1">
-                <!-- Region selector (region drives the upload content & fields) -->
-                <div class="wizard-edit-only" style="margin-bottom:20px;max-width:420px;">
-                    <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">Region</label>
-                    <select id="regionSelect" onchange="selectRegion(this.value)" style="width:100%;padding:9px 12px;border:1.5px solid var(--border-divider);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-default);background:#fff;cursor:pointer;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 10px center;outline:none;transition:border .15s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-divider)'">
-                        <option value="CN">CN — China</option>
-                        <option value="JP">JP — Japan</option>
-                        <option value="US">US — United States</option>
-                        <option value="TW">TW — Taiwan (Taipei)</option>
-                    </select>
-                </div>
-                <!-- CN: Single upload entry -->
-                <div class="panel-cn">
-                    <div class="info-box blue" style="margin-bottom:20px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                        <span>Upload your invoices. AI will auto-generate one expense item per invoice in the next step, where you can review and edit the details.</span>
-                    </div>
-                    <div class="upload-zone has-file" id="uzInv" style="max-width:420px;">
-                        <input type="file" accept="image/*,.pdf" multiple onchange="markUploaded('uzInv','uz-inv-badge')">
-                        <div class="uz-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        </div>
-                        <div class="uz-title">
-                            Invoices
-                            <span style="margin-left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#fef9c3;color:#a16207;vertical-align:middle;">Required</span>
-                        </div>
-                        <div class="uz-sub">PDF or image, batch upload (required)</div>
-                        <div class="uz-badge" id="uz-inv-badge">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            3 invoices uploaded
-                        </div>
-                    </div>
-                </div>
-                <!-- JP: Payment Voucher / Receipt required -->
-                <div class="panel-jp" style="display:none;">
-                    <div class="info-box blue" style="margin-bottom:20px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                        <span>Upload your payment vouchers or receipts for this expense period. Accepted formats: PDF or image, batch upload.</span>
-                    </div>
-                    <div class="upload-zone has-file" id="uzJpVoucher" style="max-width:420px;">
-                        <input type="file" accept="image/*,.pdf" multiple onchange="markUploaded('uzJpVoucher','uz-jp-badge')">
-                        <div class="uz-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                        </div>
-                        <div class="uz-title">
-                            Invoice / Payment Voucher / Receipt
-                            <span style="margin-left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#fef9c3;color:#a16207;vertical-align:middle;">Required</span>
-                        </div>
-                        <div class="uz-sub">Payment voucher / receipt — PDF or image, batch upload</div>
-                        <div class="uz-badge" id="uz-jp-badge">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            2 vouchers uploaded
-                        </div>
-                    </div>
-
-                    <!-- US only: optional budget approval screenshot -->
-                    <div class="panel-us" style="display:none;margin-top:16px;">
-                        <div class="upload-zone has-file" id="uzUsBudget" style="max-width:420px;">
-                            <input type="file" accept="image/*,.pdf" multiple onchange="markUploaded('uzUsBudget','uz-us-budget-badge')">
-                            <div class="uz-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                            </div>
-                            <div class="uz-title">
-                                Budget Approval Screenshot
-                                <span style="margin-left:6px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg-subtle);color:var(--text-disabled);border:1px solid var(--border-divider);vertical-align:middle;">Optional</span>
-                            </div>
-                            <div class="uz-sub">Budget approval screenshot — PDF or image, batch upload</div>
-                            <div class="uz-badge" id="uz-us-budget-badge">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                budget_approval_may2026.png
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STEP 2: Organize Items (CN) / Expense Details (JP) -->
-            <div class="step-panel" id="panel-2">
+            <!-- Single step: Review & Submit -->
+            <div class="step-panel active" id="panel-2">
                 <!-- Submitter info — shown for all regions -->
                 <div class="uploader-bar" id="uploaderBar"></div>
                 <div class="panel-cn">
@@ -1658,42 +1525,15 @@ select.inline-select {
                 <div class="panel-jp" style="display:none;">
                     <input type="file" id="uploadJpVoucherInput" accept=".pdf,image/*" multiple style="display:none">
                     <div class="step-main" id="jpItemsMain" style="overflow-y:auto;padding:24px;"></div>
-
-                    <!-- US only: budget approval screenshot preview -->
-                    <div class="panel-us" style="display:none;padding:0 24px 24px;">
-                        <div class="budget-approval-card">
-                            <div class="ba-head">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                                Budget Approval
-                            </div>
-                            <div class="ba-body">
-                                <div class="ba-thumb">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8" cy="9" r="2"/><path d="M2 17l5-5 4 4 3-3 6 6"/></svg>
-                                </div>
-                                <div class="ba-meta">
-                                    <div class="ba-name">budget_approval_may2026.png</div>
-                                    <div class="ba-sub">Uploaded · 1 file · Budget approval screenshot</div>
-                                </div>
-                                <button class="ba-view" onclick="showDocModal('budget')">View</button>
-                            </div>
-                        </div>
-                        <!-- US only: add budget approval screenshot -->
-                        <input type="file" id="uploadUsBudgetInput" accept=".pdf,image/*" multiple style="display:none">
-                        <button class="add-mount-btn wizard-edit-only" style="margin-top:12px;" onclick="triggerAddUsBudget()">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                            Add Budget Approval Screenshot
-                            <span style="font-size:11px;font-weight:400;color:var(--text-disabled);margin-left:4px;">Upload a screenshot of the approved budget</span>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
 
         <div class="wizard-footer">
-            <button class="btn-ghost" id="prevBtn" onclick="prevStep()">← Back</button>
+            <div></div>
             <div id="wizardFooterActions" style="display:flex;align-items:center;gap:8px;">
                 <button class="btn-ghost" onclick="closeWizard()">Save Draft</button>
-                <button class="btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
+                <button class="btn-primary" id="submitBtn" onclick="submitWizard()">✓ Submit OA</button>
             </div>
             <button id="wizardCloseBtn" class="btn-ghost" onclick="closeWizard()" style="display:none;">✕ Close</button>
         </div>
@@ -1718,60 +1558,6 @@ select.inline-select {
             </button>
         </div>
         <div class="doc-modal-body" id="docModalBody"></div>
-    </div>
-</div>
-
-<!-- Test Case FAB -->
-<div class="tc-fab" id="tcFab" onclick="toggleTcPanel()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
-    Test Case
-</div>
-<div class="tc-panel" id="tcPanel">
-    <div class="tc-panel-header">
-        <span class="tc-panel-title">Switch Scenario</span>
-        <button class="tc-close" onclick="toggleTcPanel()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-    </div>
-    <div class="tc-option active" id="tc-opt-surrogate" onclick="switchScenario('surrogate')">
-        <div class="tc-opt-icon">🔁</div>
-        <div class="tc-opt-body">
-            <div class="tc-opt-title">Surrogate invoice</div>
-            <div class="tc-opt-desc">One invoice covers multiple expense items<br>No payment voucher</div>
-        </div>
-        <div class="tc-check" id="tc-check-surrogate">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-    </div>
-    <div class="tc-option" id="tc-opt-onebyone" onclick="switchScenario('onebyone')">
-        <div class="tc-opt-icon">🧾</div>
-        <div class="tc-opt-body">
-            <div class="tc-opt-title">One invoice per item</div>
-            <div class="tc-opt-desc">Each invoice maps to one transaction, all linked to vouchers</div>
-        </div>
-        <div class="tc-check" id="tc-check-onebyone" style="display:none;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-    </div>
-    <div class="tc-option" id="tc-opt-withvc" onclick="switchScenario('withvc')" style="border:1.5px dashed #f59e0b;background:#fffbeb;">
-        <div class="tc-opt-icon">🔗</div>
-        <div class="tc-opt-body">
-            <div class="tc-opt-title" style="color:#92400e;">Invoice + Voucher (with unlinked)</div>
-            <div class="tc-opt-desc">Both invoices and vouchers uploaded<br>2 vouchers unmatched by AI → shows unlinked hint</div>
-        </div>
-        <div class="tc-check" id="tc-check-withvc" style="display:none;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-    </div>
-    <div class="tc-option" id="tc-opt-conflict" onclick="switchScenario('conflict')" style="border:1.5px dashed #f87171;background:#fff5f5;">
-        <div class="tc-opt-icon">⚠️</div>
-        <div class="tc-opt-body">
-            <div class="tc-opt-title" style="color:#dc2626;">Conflict demo</div>
-            <div class="tc-opt-desc">INV-001 referenced by two items at once<br>Verifies dual-row highlight + submit blocking</div>
-        </div>
-        <div class="tc-check" id="tc-check-conflict" style="display:none;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
     </div>
 </div>
 
@@ -1824,6 +1610,34 @@ select.inline-select {
         </div>
     </div>
 </div>
+
+<!-- ===== Test Case: switch region for the New Expense Report demo ===== -->
+<div class="tc-panel" id="tcPanel">
+    <div class="tc-panel-head">
+        <span>Test Case · Region</span>
+        <button class="tc-close" onclick="toggleTcPanel()">✕</button>
+    </div>
+    <div class="tc-panel-sub">Switch the region used for a new expense report</div>
+    <div class="tc-option active" id="tc-opt-CN" onclick="switchTestRegion('CN')">
+        <div class="tc-opt-main"><span class="tc-flag">🇨🇳</span><div><div class="tc-opt-title">CN — China</div><div class="tc-opt-desc">Invoice-driven · ¥ · 科目记账</div></div></div>
+        <span class="tc-check" id="tc-check-CN">✓</span>
+    </div>
+    <div class="tc-option" id="tc-opt-JP" onclick="switchTestRegion('JP')">
+        <div class="tc-opt-main"><span class="tc-flag">🇯🇵</span><div><div class="tc-opt-title">JP — Japan</div><div class="tc-opt-desc">Voucher-driven · ¥ · DingTalk OA</div></div></div>
+        <span class="tc-check" id="tc-check-JP" style="display:none;">✓</span>
+    </div>
+    <div class="tc-option" id="tc-opt-US" onclick="switchTestRegion('US')">
+        <div class="tc-opt-main"><span class="tc-flag">🇺🇸</span><div><div class="tc-opt-title">US — United States</div><div class="tc-opt-desc">Voucher-driven · $ · DingTalk OA</div></div></div>
+        <span class="tc-check" id="tc-check-US" style="display:none;">✓</span>
+    </div>
+    <div class="tc-option" id="tc-opt-TW" onclick="switchTestRegion('TW')">
+        <div class="tc-opt-main"><span class="tc-flag">🇹🇼</span><div><div class="tc-opt-title">TW — Taiwan (Taipei)</div><div class="tc-opt-desc">Invoice-driven · NT$ · 統一編號</div></div></div>
+        <span class="tc-check" id="tc-check-TW" style="display:none;">✓</span>
+    </div>
+</div>
+<button class="tc-fab" id="tcFab" onclick="toggleTcPanel()" title="Test Case · Switch Region">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+</button>
 
 <div class="toast" id="toast"></div>
 
@@ -1901,10 +1715,6 @@ const EXPENSE_REPORTS = [
       submitted:'2026-04-08', invoices:2, region:'CN' },
     { id:'ER-2026-02', name:'王 彬', email:'bin.wang@ctw.inc', month:'Feb 2026', amount:'¥2,980.00', status:'draft',
       submitted:'2026-03-05', invoices:2, region:'CN' },
-    { id:'ER-2026-01', name:'王 彬', email:'bin.wang@ctw.inc', month:'Jan 2026', amount:'¥1,560.00', status:'needs-revision',
-      submitted:'2026-02-03', invoices:2,
-      rejectedBy:'finance', region:'CN',
-      rejectReason:'第3行停车费发票金额（¥320）与报销金额（¥280）不符，请重新上传正确发票。' },
     { id:'ER-2026-07-JP', name:'岩田 聡一郎', email:'soichiro.iwata@ctw.inc', month:'Jul 2026', amount:'¥102,800', status:'oa-pending',
       submitted:'2026-07-18', invoices:2, region:'JP',
       jpRows:[
@@ -1939,7 +1749,7 @@ function switchListTab(btn, tab) {
 }
 
 function refreshERTabCounts() {
-    ['draft','oa-pending','oa-approved','oa-rejected','needs-revision'].forEach(s => {
+    ['draft','oa-pending','oa-approved','oa-rejected'].forEach(s => {
         const el = document.getElementById(`ct-${s}`);
         if (el) el.textContent = EXPENSE_REPORTS.filter(r=>r.status===s).length;
     });
@@ -1980,7 +1790,7 @@ function oaLinkCell(r) {
 
 function renderList() {
     // Update tab counts
-    ['all','draft','oa-pending','oa-approved','oa-rejected','needs-revision'].forEach(s => {
+    ['all','draft','oa-pending','oa-approved','oa-rejected'].forEach(s => {
         const el = document.getElementById(`ct-${s}`);
         if (!el) return;
         const count = s === 'all' ? EXPENSE_REPORTS.length : EXPENSE_REPORTS.filter(r => r.status === s).length;
@@ -2281,9 +2091,7 @@ function buildJpCard(item, i, docLabel) {
     </div>`;
 }
 
-// ========== Wizard ==========
-let currentStep = 1;
-
+// ========== Wizard (single step: Review & Submit) ==========
 function openWizard(mode, period, startStep) {
     document.getElementById('listSection').style.display = 'none';
     document.getElementById('detailSection').classList.add('open');
@@ -2294,21 +2102,19 @@ function openWizard(mode, period, startStep) {
         }
         wizardReadOnly = false;
         if (isJpLike()) initJpItems();
-        updateWizardStepLabels();
-        goToStep(startStep || 1);
+        goToStep();
     }
 }
 
-// Start a brand-new report — opens the wizard directly at Step 1 (no intermediate modal)
+// Start a brand-new report — opens the single-step wizard directly (no intermediate modal)
 function startNewReport() {
     wizardReportId = null;
     wizardReadOnly = false;
     document.getElementById('wizardTitle').textContent = 'New Expense Report';
-    // Default region to the logged-in employee's region; selectable in Step 1
+    // Default region comes from the logged-in employee / Test Case switcher
     currentRegion = CURRENT_USER.region || 'CN';
-    const sel = document.getElementById('regionSelect');
-    if (sel) sel.value = currentRegion;
-    openWizard('new', null, 1);
+    if (isJpLike()) initJpItems();
+    openWizard('new');
 }
 
 function closeWizard() {
@@ -2342,27 +2148,19 @@ function withdrawReportFromDetail(id) {
     renderList();
 }
 
+// Single-step wizard: render the Review & Submit panel (the `n` argument is ignored,
+// kept for backward compatibility with existing callers such as goToStep(2)).
 function goToStep(n) {
-    currentStep = n;
-    // Panels
+    // Panels — only panel-2 (Review & Submit) remains
     document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById(`panel-${n}`).classList.add('active');
+    document.getElementById('panel-2').classList.add('active');
     // Apply region-specific content visibility
     applyRegionPanels();
-    // Indicators
-    for (let i = 1; i <= 2; i++) {
-        const ind = document.getElementById(`step-ind-${i}`);
-        const conn = document.getElementById(`conn-${i}`);
-        ind.className = 'step-item' + (i === n ? ' active' : i < n ? ' done' : '');
-        if (conn) conn.className = 'step-connector' + (i < n ? ' done' : '');
-    }
-    // Step-specific renders — step 2 is the combined Review & Submit
-    if (n === 2) {
-        renderUploaderBar();
-        if (isJpLike()) renderJpStep2();
-        else renderItems();
-    }
-    // "Add invoice/voucher/receipt/budget" affordances belong to the editable flow only.
+    // Render the review content for the current region
+    renderUploaderBar();
+    if (isJpLike()) renderJpStep2();
+    else renderItems();
+    // "Add invoice/voucher/receipt" affordances belong to the editable flow only.
     // Hide them whenever the report is opened read-only (e.g. pending / approved / rejected views).
     document.querySelectorAll('.wizard-edit-only').forEach(el => {
         el.style.display = wizardReadOnly ? 'none' : '';
@@ -2370,10 +2168,8 @@ function goToStep(n) {
     // Read-only view mode: show contextual action buttons based on status
     const footerActions = document.getElementById('wizardFooterActions');
     const closeBtn      = document.getElementById('wizardCloseBtn');
-    const prevBtn       = document.getElementById('prevBtn');
     if (wizardReadOnly) {
         footerActions.style.display = 'none';
-        prevBtn.style.display = 'none';
         // Build context-sensitive action area
         const r = EXPENSE_REPORTS.find(x => x.id === wizardReportId);
         const status = r ? r.status : '';
@@ -2419,41 +2215,48 @@ function goToStep(n) {
     closeBtn.style.display = 'none';
     closeBtn.style.width = '';
     closeBtn.innerHTML = '✕ Close';
-    prevBtn.style.display = '';
-
-    // Buttons
-    prevBtn.style.visibility = n === 1 ? 'hidden' : 'visible';
-    const nextBtn = document.getElementById('nextBtn');
-    if (n === 2) {
-        nextBtn.textContent = '✓ Submit OA';
-        nextBtn.style.background = '';
-        nextBtn.style.cursor = '';
-        nextBtn.style.opacity = '';
-    } else {
-        nextBtn.textContent = 'Next →';
-        nextBtn.style.background = '';
-        nextBtn.style.cursor = '';
-        nextBtn.style.opacity = '';
-    }
 }
 
-function nextStep() {
-    if (currentStep === 2) {
-        // Submit OA → report status becomes the OA status (Pending) for demo continuity
-        const r = wizardReportId ? EXPENSE_REPORTS.find(x => x.id === wizardReportId) : null;
-        if (r) {
-            r.status = 'oa-pending';
-            r.rejectReason = '';
-        }
-        showToast('Report submitted to OA for approval');
-        wizardReadOnly = false;
-        closeWizard();
-        renderList();
-        return;
+// Submit the single-step report to the OA approval workflow
+function submitWizard() {
+    const r = wizardReportId ? EXPENSE_REPORTS.find(x => x.id === wizardReportId) : null;
+    if (r) {
+        r.status = 'oa-pending';
+        r.rejectReason = '';
     }
-    goToStep(currentStep + 1);
+    showToast('Report submitted to OA for approval');
+    wizardReadOnly = false;
+    closeWizard();
+    renderList();
 }
-function prevStep() { if (currentStep > 1) goToStep(currentStep - 1); }
+
+// ========== Test Case · region switcher ==========
+function toggleTcPanel() {
+    document.getElementById('tcPanel').classList.toggle('open');
+}
+
+function switchTestRegion(region) {
+    currentRegion = region;
+    CURRENT_USER.region = region;            // new reports default to this region
+    if (isJpLike()) initJpItems();
+    // Reflect selection in the panel
+    ['CN','JP','US','TW'].forEach(k => {
+        const opt = document.getElementById('tc-opt-' + k);
+        if (opt) opt.classList.toggle('active', k === region);
+        const chk = document.getElementById('tc-check-' + k);
+        if (chk) chk.style.display = k === region ? '' : 'none';
+    });
+    // If a new (editable) report wizard is open, re-render it as a fresh report for this region
+    const wizardOpen = document.getElementById('detailSection').classList.contains('open');
+    if (wizardOpen && !wizardReadOnly) {
+        wizardReportId = null;
+        document.getElementById('wizardTitle').textContent = 'New Expense Report';
+        goToStep();
+    }
+    toggleTcPanel();
+    const labels = { CN:'China', JP:'Japan', US:'United States', TW:'Taiwan (Taipei)' };
+    showToast('Test region: ' + (labels[region] || region));
+}
 
 // ========== Step 2: Organize Items ==========
 
@@ -2858,17 +2661,6 @@ document.getElementById('uploadJpVoucherInput').addEventListener('change', funct
     showToast(`Uploaded ${this.files.length} document(s) — one expense item generated each. Please fill in the details.`);
 });
 
-// US: add budget approval screenshot
-function triggerAddUsBudget() {
-    const input = document.getElementById('uploadUsBudgetInput');
-    input.value = '';
-    input.click();
-}
-document.getElementById('uploadUsBudgetInput').addEventListener('change', function() {
-    if (!this.files.length) return;
-    showToast(`Budget approval screenshot uploaded`);
-});
-
 // Attach a payment voucher to a specific expense item — opens picker modal
 let _pendingVcItemId = null;
 
@@ -3056,32 +2848,6 @@ function showDocModal(type, idx) {
                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
         </div>`;
-
-    } else if (type === 'budget') {
-        const u = getUploaderInfo();
-        tagEl.textContent  = 'Budget Approval';
-        tagEl.style.cssText = 'background:#f0fdf4;color:#15803d;';
-        titleEl.textContent = 'budget_approval_may2026.png';
-        const imgPath = 'assets/budget_approval_may2026.png';
-        bodyEl.innerHTML = `
-        <div class="doc-modal-meta">
-            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">File name</span><span class="doc-modal-meta-value">budget_approval_may2026.png</span></div>
-            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Type</span><span class="doc-modal-meta-value">Budget approval screenshot</span></div>
-            <div class="doc-modal-meta-item"><span class="doc-modal-meta-label">Uploaded by</span><span class="doc-modal-meta-value">${u.name}</span></div>
-        </div>
-        <div style="border-radius:10px;overflow:hidden;border:1px solid var(--border-divider);">
-            <div style="padding:6px 12px;background:#15803d;color:#fff;font-size:11px;font-weight:700;">Budget Approval · Screenshot</div>
-            <img src="${imgPath}" alt="Budget Approval"
-                style="width:100%;display:block;max-height:480px;object-fit:contain;background:#f8fafc;"
-                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-            <div style="display:none;align-items:center;justify-content:center;height:240px;background:#f8fafc;flex-direction:column;gap:8px;color:var(--text-disabled);font-size:12px;">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span style="font-weight:600;color:var(--text-secondary);">budget_approval_may2026.png</span>
-                <span>Budget approval screenshot (demo data)</span>
-            </div>
-        </div>`;
-        document.getElementById('docModal').classList.add('open');
-        return;
 
     } else if (type === 'vc') {
         const r = MOCK_VOUCHERS[idx];
@@ -3403,179 +3169,6 @@ function showToast(msg) {
     el.classList.add('visible');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove('visible'), 2200);
-}
-
-// ========== Test Case FAB ==========
-let currentScenario = 'surrogate';
-
-// ---- Scenario A: 替票（多笔付款，汇总一张发票）—— 无付款凭证 ----
-const SCENARIO_SURROGATE = {
-    records: [],
-    invoices: [
-        { id:'INV-001', date:'2026/6/12', amount:1645,    desc:'车辆费（停车/洗车）替票', file:'13.pdf', path:'员工报销单据/发票/2026_06_12_24/13.pdf' },
-        { id:'INV-002', date:'2026/6/12', amount:2000,    desc:'住房补贴发票',            file:'14.pdf', path:'员工报销单据/发票/2026_06_12_24/14.pdf' },
-        { id:'INV-003', date:'2026/6/12', amount:1083.88, desc:'充电服务费发票',           file:'24.pdf', path:'员工报销单据/发票/2026_06_12_24/24.pdf' },
-    ],
-    mountExtras: {
-        0: { invIndices:[0] },
-        1: { invIndices:[1] },
-        2: { invIndices:[2] },
-    },
-    items: [
-        { id:'EI-001', primaryInvIdx:0, invDate:'2026/6/12', expDate:'2026/5/01', desc:'5月停车费',   amount:900,    actualDesc:'停车场停车费', remarks:'5/1–5/15 多次停车', voucherIndices:[] },
-        { id:'EI-002', primaryInvIdx:0, invDate:'2026/6/12', expDate:'2026/5/16', desc:'5月洗车费',   amount:745,    actualDesc:'洗车服务费',   remarks:'5/16–5/31 含停车', voucherIndices:[] },
-        { id:'EI-003', primaryInvIdx:1, invDate:'2026/6/12', expDate:'2026/5/01', desc:'5月住房补贴', amount:2000,   actualDesc:'住房补贴服务费', remarks:'', voucherIndices:[] },
-        { id:'EI-004', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/04', desc:'5/4 充电',    amount:270.54, actualDesc:'充电服务费', remarks:'', voucherIndices:[] },
-        { id:'EI-005', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/07', desc:'5/7 充电',    amount:270.54, actualDesc:'充电服务费', remarks:'', voucherIndices:[] },
-        { id:'EI-006', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/09', desc:'5/9 充电',    amount:271.60, actualDesc:'充电服务费', remarks:'', voucherIndices:[] },
-        { id:'EI-007', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/12', desc:'5/12 充电',   amount:271.20, actualDesc:'充电服务费', remarks:'', voucherIndices:[] },
-    ],
-    eiNextId: 8,
-};
-
-// ---- Scenario B: 一单一票（每张发票对应一笔消费，含付款凭证）----
-const SCENARIO_ONEBYONE = {
-    records: [
-        { date:'2026/5/8',  merchant:'滴滴出行',     amount:89,   cat:'交通费', remarks:'', manual:false },
-        { date:'2026/5/12', merchant:'餐厅·新荣记',   amount:228,  cat:'餐饮费', remarks:'', manual:false },
-        { date:'2026/5/15', merchant:'中国国航',      amount:1380, cat:'差旅费', remarks:'', manual:false },
-        { date:'2026/5/15', merchant:'北京华贸酒店',  amount:528,  cat:'差旅费', remarks:'', manual:false },
-        { date:'2026/5/16', merchant:'北京地铁',      amount:45,   cat:'交通费', remarks:'', manual:false },
-        { date:'2026/5/16', merchant:'餐厅·京味轩',   amount:95,   cat:'餐饮费', remarks:'', manual:false },
-        { date:'2026/5/17', merchant:'中国国航',      amount:1150, cat:'差旅费', remarks:'', manual:false },
-    ],
-    invoices: [
-        { id:'INV-001', date:'2026/5/8',  amount:89,   desc:'滴滴打车发票',      file:'didi_20260508.pdf',  path:'员工报销单据/发票/2026_05/didi_20260508.pdf' },
-        { id:'INV-002', date:'2026/5/12', amount:228,  desc:'商务午餐发票',      file:'lunch_20260512.pdf', path:'员工报销单据/发票/2026_05/lunch_20260512.pdf' },
-        { id:'INV-003', date:'2026/5/15', amount:1380, desc:'上海→北京机票发票', file:'flight_sh_bj.pdf',   path:'员工报销单据/发票/2026_05/flight_sh_bj.pdf' },
-        { id:'INV-004', date:'2026/5/15', amount:528,  desc:'北京酒店住宿发票',  file:'hotel_bj.pdf',       path:'员工报销单据/发票/2026_05/hotel_bj.pdf' },
-        { id:'INV-005', date:'2026/5/16', amount:45,   desc:'北京地铁&公交发票', file:'transit_bj.pdf',     path:'员工报销单据/发票/2026_05/transit_bj.pdf' },
-        { id:'INV-006', date:'2026/5/16', amount:95,   desc:'客户拜访餐费发票',  file:'dinner_bj.pdf',      path:'员工报销单据/发票/2026_05/dinner_bj.pdf' },
-        { id:'INV-007', date:'2026/5/17', amount:1150, desc:'北京→上海机票发票', file:'flight_bj_sh.pdf',   path:'员工报销单据/发票/2026_05/flight_bj_sh.pdf' },
-    ],
-    mountExtras: {
-        0: { invIndices:[0] },
-        1: { invIndices:[1] },
-        2: { invIndices:[2] },
-        3: { invIndices:[3] },
-        4: { invIndices:[4] },
-        5: { invIndices:[5] },
-        6: { invIndices:[6] },
-    },
-    items: [
-        { id:'EI-001', primaryInvIdx:0, invDate:'2026/5/8',  expDate:'2026/5/8',  desc:'日常通勤打车',       amount:89,   actualDesc:'滴滴出行-北京',    remarks:'', voucherIndices:[0] },
-        { id:'EI-002', primaryInvIdx:1, invDate:'2026/5/12', expDate:'2026/5/12', desc:'商务午餐-供应商沟通', amount:228,  actualDesc:'餐厅消费-微信支付', remarks:'', voucherIndices:[1] },
-        { id:'EI-003', primaryInvIdx:2, invDate:'2026/5/15', expDate:'2026/5/15', desc:'上海→北京出差机票',   amount:1380, actualDesc:'中国国航-机票',    remarks:'', voucherIndices:[2] },
-        { id:'EI-004', primaryInvIdx:3, invDate:'2026/5/15', expDate:'2026/5/15', desc:'北京出差住宿',        amount:528,  actualDesc:'北京华贸酒店',     remarks:'', voucherIndices:[3] },
-        { id:'EI-005', primaryInvIdx:4, invDate:'2026/5/16', expDate:'2026/5/16', desc:'北京地铁&公交',       amount:45,   actualDesc:'北京地铁APP',      remarks:'', voucherIndices:[4] },
-        { id:'EI-006', primaryInvIdx:5, invDate:'2026/5/16', expDate:'2026/5/16', desc:'客户拜访餐费',        amount:95,   actualDesc:'餐厅消费-支付宝',  remarks:'', voucherIndices:[5] },
-        { id:'EI-007', primaryInvIdx:6, invDate:'2026/5/17', expDate:'2026/5/17', desc:'北京→上海返程机票',   amount:1150, actualDesc:'中国国航-机票',    remarks:'', voucherIndices:[6] },
-    ],
-    eiNextId: 8,
-};
-
-// ---- Scenario C: 冲突演示 — 挂载点1额外引用了 INV-001 ----
-const SCENARIO_CONFLICT = {
-    records: [],
-    invoices: [
-        { id:'INV-001', date:'2026/6/12', amount:1645,    desc:'车辆费（停车/洗车）替票', file:'13.pdf', path:'员工报销单据/发票/2026_06_12_24/13.pdf' },
-        { id:'INV-002', date:'2026/6/12', amount:2000,    desc:'住房补贴发票',            file:'14.pdf', path:'员工报销单据/发票/2026_06_12_24/14.pdf' },
-        { id:'INV-003', date:'2026/6/12', amount:1083.88, desc:'充电服务费发票',           file:'24.pdf', path:'员工报销单据/发票/2026_06_12_24/24.pdf' },
-    ],
-    mountExtras: {
-        0: { invIndices:[0]    },
-        1: { invIndices:[1, 0] },  // ← 挂载点1 额外引用 INV-001 → 冲突
-        2: { invIndices:[2]    },
-    },
-    items: [
-        { id:'EI-001', primaryInvIdx:0, invDate:'2026/6/12', expDate:'2026/5/15', desc:'5月停车洗车费', amount:1000,    actualDesc:'车辆费（停车/洗车）', remarks:'', voucherIndices:[] },
-        { id:'EI-002', primaryInvIdx:1, invDate:'2026/6/12', expDate:'2026/5/01', desc:'5月住房补贴',   amount:2000,    actualDesc:'住房补贴服务费',      remarks:'', voucherIndices:[] },
-        { id:'EI-003', primaryInvIdx:2, invDate:'2026/6/12', expDate:'2026/5/04', desc:'5月充电费',     amount:1083.88, actualDesc:'充电服务费',          remarks:'', voucherIndices:[] },
-    ],
-    eiNextId: 4,
-};
-
-// ---- Scenario D: Invoice + Voucher，含未关联凭证 ----
-// AI matched 2 vouchers to items, 2 vouchers uploaded but unlinked → warning shown
-const SCENARIO_WITHVC = {
-    records: [], // no separate bill transactions in this scenario
-    vouchers: [
-        { date:'2026/5/9',  merchant:'滴滴出行',  amount:89,   file:'didi_pay.jpg',    path:null },
-        { date:'2026/5/12', merchant:'新荣记·餐厅', amount:228,  file:'xinrongjii.jpg',  path:null },
-        { date:'2026/5/15', merchant:'携程旅行',   amount:1380, file:'flight_pay.jpg',  path:null },
-        { date:'2026/5/16', merchant:'北京地铁',   amount:45,   file:'metro_pay.jpg',   path:null },
-    ],
-    invoices: [
-        { id:'INV-001', date:'2026/5/9',  amount:89,   desc:'滴滴打车发票',  file:'didi.pdf',   path:'员工报销单据/发票/2026_05/didi.pdf' },
-        { id:'INV-002', date:'2026/5/12', amount:228,  desc:'商务午餐发票',  file:'lunch.pdf',  path:'员工报销单据/发票/2026_05/lunch.pdf' },
-        { id:'INV-003', date:'2026/5/15', amount:1380, desc:'差旅机票发票',  file:'flight.pdf', path:'员工报销单据/发票/2026_05/flight.pdf' },
-    ],
-    mountExtras: {
-        0: { invIndices:[0] },
-        1: { invIndices:[1] },
-        2: { invIndices:[2] },
-    },
-    // vouchers[0] & [1] are AI-auto-linked; vouchers[2] & [3] are unlinked → triggers warning
-    items: [
-        { id:'EI-001', primaryInvIdx:0, invDate:'2026/5/9',  expDate:'2026/5/9',  desc:'日常通勤打车',   amount:89,   actualDesc:'滴滴出行-北京',  remarks:'', voucherIndices:[0] },
-        { id:'EI-002', primaryInvIdx:1, invDate:'2026/5/12', expDate:'2026/5/12', desc:'商务午餐',       amount:228,  actualDesc:'新荣记-微信支付', remarks:'', voucherIndices:[1] },
-        { id:'EI-003', primaryInvIdx:2, invDate:'2026/5/15', expDate:'2026/5/15', desc:'出差机票（沪京）', amount:1380, actualDesc:'中国国航',       remarks:'', voucherIndices:[] },
-    ],
-    eiNextId: 4,
-};
-function toggleTcPanel() {
-    document.getElementById('tcPanel').classList.toggle('open');
-}
-
-function switchScenario(name) {
-    if (name === currentScenario) {
-        toggleTcPanel();
-        return;
-    }
-    currentScenario = name;
-
-    const scMap = { surrogate: SCENARIO_SURROGATE, onebyone: SCENARIO_ONEBYONE, conflict: SCENARIO_CONFLICT, withvc: SCENARIO_WITHVC };
-    const sc = scMap[name];
-    if (!sc) return;
-
-    // Deep-clone items to avoid mutations carrying over
-    EXPENSE_ITEMS.length = 0;
-    sc.items.forEach(it => EXPENSE_ITEMS.push(JSON.parse(JSON.stringify(it))));
-    eiNextId = sc.eiNextId;
-
-    MOCK_RECORDS.length = 0;
-    sc.records.forEach(r => MOCK_RECORDS.push({...r}));
-
-    MOCK_VOUCHERS.length = 0;
-    (sc.vouchers || []).forEach(v => MOCK_VOUCHERS.push({...v}));
-
-    // Snapshot first to avoid self-overwrite if sc.invoices === MOCK_INVOICES
-    const srcInvoices = sc.invoices.map(inv => ({...inv}));
-    MOCK_INVOICES.length = 0;
-    srcInvoices.forEach(inv => MOCK_INVOICES.push(inv));
-
-    // Reset and clone mount extras
-    Object.keys(MOUNT_EXTRAS).forEach(k => delete MOUNT_EXTRAS[k]);
-    Object.entries(sc.mountExtras).forEach(([k, v]) => {
-        MOUNT_EXTRAS[parseInt(k)] = JSON.parse(JSON.stringify(v));
-    });
-
-    // Update FAB active indicators
-    document.querySelectorAll('.tc-option').forEach(el => el.classList.remove('active'));
-    ['surrogate','onebyone','conflict','withvc'].forEach(k => {
-        const el = document.getElementById(`tc-check-${k}`);
-        if (el) el.style.display = k === name ? '' : 'none';
-    });
-    document.getElementById(`tc-opt-${name}`).classList.add('active');
-
-    // Reset wizard state and re-render list
-    document.getElementById('listSection').style.display = '';
-    document.getElementById('detailSection').classList.remove('open');
-    renderList();
-
-    toggleTcPanel();
-    const labels = { surrogate:'Switched: Surrogate invoice (no voucher)', onebyone:'Switched: One invoice per item (with vouchers)', conflict:'Switched: Conflict demo', withvc:'Switched: Invoice + Voucher (with unlinked hint)' };
-    showToast(labels[name] || 'Scenario switched');
 }
 
 // ========== Init ==========

@@ -391,6 +391,8 @@ button { font-family:inherit; }
 .er-table .col-invoices { width:80px; text-align:center; color:var(--text-secondary); }
 .er-table .col-amount { width:130px; text-align:right; font-weight:700; font-family:var(--font-mono); }
 .er-table .col-status { width:130px; }
+.er-table .col-region { width:65px; text-align:center; }
+.er-table .col-oa-status { width:110px; }
 .er-table .col-note { color:var(--text-secondary); font-size:12px; }
 .er-note-text { display:flex; align-items:flex-start; gap:5px; line-height:1.45; }
 .er-note-text svg { flex-shrink:0; margin-top:2px; }
@@ -409,6 +411,32 @@ button { font-family:inherit; }
 }
 .er-reject-hint.red { color:#b91c1c; }
 .er-reject-hint svg { flex-shrink:0; margin-top:1px; }
+.add-mount-btn {
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    width:100%; padding:14px; margin-top:12px;
+    border:2px dashed var(--border-divider); border-radius:10px;
+    background:var(--bg-page); color:var(--text-secondary);
+    font-size:13px; font-weight:600; cursor:pointer; transition:all .15s;
+}
+.add-mount-btn:hover {
+    border-color:#3b82f6; color:#1d4ed8; background:#eff6ff;
+}
+.add-mount-btn svg { width:14px; height:14px; flex-shrink:0; }
+.er-act-group { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.er-act-btn {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 9px; border-radius:5px; border:1px solid transparent;
+    font-size:11px; font-weight:600; cursor:pointer; transition:all .15s;
+}
+.er-act-edit {
+    background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8;
+}
+.er-act-edit:hover { background:#dbeafe; border-color:#93c5fd; }
+.er-act-del {
+    background:#fff1f2; border-color:#fecdd3; color:#be123c;
+}
+.er-act-del:hover { background:#ffe4e6; border-color:#fda4af; }
+.er-act-btn svg { width:11px; height:11px; flex-shrink:0; }
 .tag {
     display:inline-flex; align-items:center; gap:5px;
     height:22px; padding:0 9px 0 7px; border-radius:20px;
@@ -430,6 +458,33 @@ button { font-family:inherit; }
 .tag.rejected::before, .tag.oa-rejected::before { background:#f43f5e; }
 .tag.needs-revision { background:#f5f3ff; color:#5b21b6; }
 .tag.needs-revision::before { background:#8b5cf6; }
+.tag.oa-pending  { background:#fefce8; color:#854d0e; }
+.tag.oa-pending::before  { background:#eab308; animation:pulse-dot 2s ease-in-out infinite; }
+.tag.oa-approved { background:#f0fdf4; color:#166534; }
+.tag.oa-approved::before { background:#22c55e; }
+.tag.region-cn { background:#eff6ff; color:#1d4ed8; }
+.tag.region-cn::before { background:#3b82f6; }
+.tag.region-jp { background:#fff1f2; color:#b91c1c; }
+.tag.region-jp::before { background:#ef4444; }
+/* JP Step 2: expense table */
+.jp-exp-table { width:100%; border-collapse:collapse; font-size:13px; }
+.jp-exp-table th { font-size:11px; font-weight:600; color:var(--text-secondary); padding:8px 10px; border-bottom:1.5px solid var(--border-divider); background:var(--bg-subtle); text-align:left; white-space:nowrap; }
+.jp-exp-table td { padding:5px 6px; border-bottom:1px solid var(--border-divider); vertical-align:middle; }
+.jp-exp-table tbody tr:hover td { background:var(--bg-hover); }
+.jp-input { border:1px solid var(--border-divider); border-radius:5px; padding:5px 8px; font-size:12px; box-sizing:border-box; font-family:inherit; color:var(--text-default); background:#fff; transition:border .15s; }
+.jp-input:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 2px rgba(56,100,229,.12); }
+.jp-input-date    { width:108px; }
+.jp-input-cat     { width:130px; }
+.jp-input-purpose { width:160px; }
+.jp-input-amt     { width:110px; text-align:right; font-family:var(--font-mono); }
+.jp-input-doc     { width:140px; }
+.jp-input-remarks { width:100%; }
+.jp-del-btn { border:none; background:none; cursor:pointer; color:var(--text-disabled); padding:2px 6px; border-radius:4px; font-size:15px; line-height:1; }
+.jp-del-btn:hover { background:var(--bg-hover); color:var(--error); }
+.jp-step2-footer { display:flex; align-items:center; justify-content:space-between; padding:14px 0 0; border-top:1.5px solid var(--border-divider); margin-top:4px; }
+.jp-total-row { display:flex; align-items:baseline; gap:6px; }
+.jp-total-label { font-size:12px; font-weight:600; color:var(--text-secondary); }
+.jp-total-val { font-size:20px; font-weight:800; color:var(--primary-dark); font-family:var(--font-mono); }
 
 /* ========= Detail / Wizard ========= */
 .detail-view {
@@ -936,6 +991,38 @@ button { font-family:inherit; }
 .modal-title { font-size:16px; font-weight:700; margin-bottom:6px; }
 .modal-sub { font-size:13px; color:var(--text-secondary); margin-bottom:20px; line-height:1.5; }
 .modal-actions { display:flex; justify-content:flex-end; gap:8px; padding-top:4px; }
+/* Generic modal-box (non-wizard modals) */
+.modal-box {
+    background:var(--bg-container); border-radius:16px; overflow:hidden;
+    box-shadow:0 24px 64px rgba(15,23,42,.2); max-width:95vw;
+}
+.modal-header {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    padding:20px 20px 0; gap:12px;
+}
+.modal-header .modal-title { font-size:15px; font-weight:700; margin-bottom:2px; }
+.modal-header .modal-sub  { font-size:12px; color:var(--text-secondary); margin:0; }
+.modal-close {
+    width:28px; height:28px; border:none; background:none; cursor:pointer;
+    border-radius:6px; display:flex; align-items:center; justify-content:center;
+    color:var(--text-secondary); flex-shrink:0; transition:background .15s;
+}
+.modal-close:hover { background:var(--bg-hover); }
+.modal-footer {
+    display:flex; align-items:center; justify-content:flex-end; gap:8px;
+    padding:16px 20px; border-top:1px solid var(--border-divider);
+}
+.field-label-sm {
+    display:block; font-size:12px; font-weight:600;
+    color:var(--text-secondary); margin-bottom:5px;
+}
+.field-input-sm {
+    width:100%; height:36px; padding:0 10px;
+    border:1px solid var(--border-default); border-radius:7px;
+    background:var(--bg-container); font:inherit; font-size:13px;
+    color:var(--text-default); box-sizing:border-box; transition:border-color .15s;
+}
+.field-input-sm:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.08); }
 
 /* ===== Month Picker ===== */
 .month-picker-wrap { position:relative; }
@@ -1325,11 +1412,11 @@ select.inline-select {
         </div>
         <div class="main-toolbar" style="justify-content:space-between;">
             <div class="status-tabs-inline">
-                <button class="s-tab active" onclick="switchListTab(this,'all')">All <span class="tc" id="ct-all">6</span></button>
-                <button class="s-tab" onclick="switchListTab(this,'draft')">Draft <span class="tc" id="ct-draft">2</span></button>
-                <button class="s-tab" onclick="switchListTab(this,'pending')">Pending <span class="tc" id="ct-pending">1</span></button>
-                <button class="s-tab" onclick="switchListTab(this,'approved')">Approved <span class="tc" id="ct-approved">1</span></button>
-                <button class="s-tab" onclick="switchListTab(this,'needs-revision')">Needs Revision <span class="tc" id="ct-needs-revision">1</span></button>
+                <button class="s-tab active" onclick="switchListTab(this,'all')">All <span class="tc" id="ct-all">0</span></button>
+                <button class="s-tab" onclick="switchListTab(this,'draft')">Draft <span class="tc" id="ct-draft">0</span></button>
+                <button class="s-tab" onclick="switchListTab(this,'pending')">Pending <span class="tc" id="ct-pending">0</span></button>
+                <button class="s-tab" onclick="switchListTab(this,'needs-revision')">Needs Revision <span class="tc" id="ct-needs-revision">0</span></button>
+                <button class="s-tab" onclick="switchListTab(this,'approved')">Approved <span class="tc" id="ct-approved">0</span></button>
             </div>
             <button class="btn-primary" onclick="openNewReportModal()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1342,11 +1429,13 @@ select.inline-select {
                     <thead>
                         <tr>
                             <th class="col-emp">Employee</th>
+                            <th class="col-region">Region</th>
                             <th class="col-period">Period</th>
                             <th class="col-submitted">Submitted</th>
                             <th class="col-invoices">Invoices</th>
                             <th class="col-amount">Amount</th>
                             <th class="col-status">Status</th>
+                            <th class="col-oa-status">OA Status</th>
                             <th class="col-note">Comments</th>
                         </tr>
                     </thead>
@@ -1388,90 +1477,178 @@ select.inline-select {
         </div>
 
         <div class="wizard-body">
-            <!-- STEP 1: Upload -->
+            <!-- STEP 1: Upload Files (CN) / Upload Voucher (JP) -->
             <div class="step-panel active" id="panel-1">
-                <div class="info-box blue" style="margin-bottom:20px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    <span>Upload your invoices (required). Payment vouchers / monthly bill screenshots are optional — if uploaded, AI will help match them to your expense items in Step 2.</span>
+                <!-- CN: Invoice + optional voucher -->
+                <div class="panel-cn">
+                    <div class="info-box blue" style="margin-bottom:20px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span>Upload your invoices (required). Payment vouchers / monthly bill screenshots are optional — if uploaded, AI will help match them to your expense items in Step 2.</span>
+                    </div>
+                    <div class="upload-grid">
+                        <div class="upload-zone has-file" id="uzInv">
+                            <input type="file" accept="image/*,.pdf" multiple onchange="markUploaded('uzInv','uz-inv-badge')">
+                            <div class="uz-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>
+                            <div class="uz-title">
+                                Invoices
+                                <span style="margin-left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#fef9c3;color:#a16207;vertical-align:middle;">Required</span>
+                            </div>
+                            <div class="uz-sub">PDF or image, batch upload 发票（必传）</div>
+                            <div class="uz-badge" id="uz-inv-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                3 invoices uploaded
+                            </div>
+                        </div>
+                        <div class="upload-zone upload-zone-vc has-file" id="uzBill">
+                            <input type="file" accept="image/*" onchange="markUploaded('uzBill','uz-bill-badge')">
+                            <div class="uz-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                            <div class="uz-text">
+                                <div class="uz-title">
+                                    Payment Voucher
+                                    <span style="margin-left:6px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg-subtle);color:var(--text-disabled);border:1px solid var(--border-divider);vertical-align:middle;">Optional</span>
+                                </div>
+                                <div class="uz-sub">Alipay / WeChat bill screenshot — 付款凭证（选传）</div>
+                            </div>
+                            <div class="uz-badge" id="uz-bill-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                bill_may2026.png · parsed 36 records
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="upload-grid">
-                    <!-- Primary: Invoices (required) -->
-                    <div class="upload-zone has-file" id="uzInv">
-                        <input type="file" accept="image/*,.pdf" multiple onchange="markUploaded('uzInv','uz-inv-badge')">
+                <!-- JP: Payment Voucher / Receipt required -->
+                <div class="panel-jp" style="display:none;">
+                    <div class="info-box blue" style="margin-bottom:20px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span>Upload your payment vouchers or receipts (領収書) for this expense period. Accepted formats: PDF or image, batch upload.</span>
+                    </div>
+                    <div class="upload-zone has-file" id="uzJpVoucher" style="max-width:420px;">
+                        <input type="file" accept="image/*,.pdf" multiple onchange="markUploaded('uzJpVoucher','uz-jp-badge')">
                         <div class="uz-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                         </div>
                         <div class="uz-title">
-                            Invoices
+                            Payment Voucher / Receipt
                             <span style="margin-left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#fef9c3;color:#a16207;vertical-align:middle;">Required</span>
                         </div>
-                        <div class="uz-sub">PDF or image, batch upload 发票（必传）</div>
-                        <div class="uz-badge" id="uz-inv-badge">
+                        <div class="uz-sub">領収書・支払証明書 — PDF or image, batch upload</div>
+                        <div class="uz-badge" id="uz-jp-badge">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            3 invoices uploaded
-                        </div>
-                    </div>
-
-                    <!-- Secondary: Payment Voucher (optional) — compact row -->
-                    <div class="upload-zone upload-zone-vc has-file" id="uzBill">
-                        <input type="file" accept="image/*" onchange="markUploaded('uzBill','uz-bill-badge')">
-                        <div class="uz-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                        </div>
-                        <div class="uz-text">
-                            <div class="uz-title">
-                                Payment Voucher
-                                <span style="margin-left:6px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg-subtle);color:var(--text-disabled);border:1px solid var(--border-divider);vertical-align:middle;">Optional</span>
-                            </div>
-                            <div class="uz-sub">Alipay / WeChat bill screenshot — 付款凭证（选传）</div>
-                        </div>
-                        <div class="uz-badge" id="uz-bill-badge">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            bill_may2026.png · parsed 36 records
+                            2 vouchers uploaded
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- STEP 2: Organize Items -->
+            <!-- STEP 2: Organize Items (CN) / Expense Details (JP) -->
             <div class="step-panel" id="panel-2">
-                <div class="step-main" id="itemsMain" style="overflow-y:auto;padding:24px;"></div>
-            </div>
-
-            <!-- STEP 3: Preview -->
-            <div class="step-panel" id="panel-3">
-                <div class="info-box" style="margin-bottom:20px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    <span>Review your expense report draft below. You can edit any field inline before submitting to finance for review.</span>
+                <div class="panel-cn">
+                    <div class="step-main" id="itemsMain" style="overflow-y:auto;padding:24px;"></div>
                 </div>
-                <div class="report-preview">
-                    <div class="report-header-section">
-                        <div class="report-field"><span class="rf-label">Employee</span><span class="rf-value">王 彬</span></div>
-                        <div class="report-field"><span class="rf-label">Department</span><span class="rf-value">Finance</span></div>
-                        <div class="report-field"><span class="rf-label">Period</span><span class="rf-value">May 2026</span></div>
-                        <div class="report-field"><span class="rf-label">Submit Date</span><span class="rf-value">2026-06-04</span></div>
+                <div class="panel-jp" style="display:none;">
+                    <div class="info-box blue" style="margin-bottom:20px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span>Enter the date, purpose, and amount (tax included) for each expense item. Add a row for each expense.</span>
                     </div>
-                    <div class="report-table-wrap">
-                        <table class="report-table" id="reportTable">
+                    <div style="overflow:auto;">
+                        <table class="jp-exp-table">
                             <thead>
                                 <tr>
-                                    <th>Invoice Date<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">开票日期</span></th>
-                                    <th>Expense Date<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">消费日期</span></th>
-                                    <th>Description<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">费用内容支出说明</span></th>
-                                    <th>Amount (¥)<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">金额（人民币元）</span></th>
-                                    <th>Invoice Amount<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">发票金额</span></th>
-                                    <th>Actual Desc<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">实际内容支出说明</span></th>
-                                    <th>Remarks<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">备注</span></th>
-                                    <th>Invoice<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">关联发票</span></th>
-                                    <th>Payment Voucher<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">付款凭证</span></th>
+                                    <th style="width:36px;text-align:center;">#</th>
+                                    <th>Date<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">日付 ②</span></th>
+                                    <th>Business Purpose<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">業務目的 ④</span></th>
+                                    <th>Amount (¥, incl. tax)<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">金額（税込）①</span></th>
+                                    <th>Remarks<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">備考</span></th>
                                 </tr>
                             </thead>
-                            <tbody id="reportTbody"></tbody>
+                            <tbody id="jpItemsTbody"></tbody>
                         </table>
                     </div>
-                    <div class="report-total">
-                        <span class="total-label">Total</span>
-                        <span class="total-amount">¥ 5,094.72</span>
+                    <div class="jp-step2-footer">
+                        <div></div>
+                        <div class="jp-total-row">
+                            <span class="jp-total-label">Total</span>
+                            <span class="jp-total-val" id="jpStep2Total">¥0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Preview & Submit -->
+            <div class="step-panel" id="panel-3">
+                <!-- CN Preview -->
+                <div class="panel-cn">
+                    <div class="info-box" style="margin-bottom:20px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span>Review your expense report draft below. You can edit any field inline before submitting to finance for review.</span>
+                    </div>
+                    <div class="report-preview">
+                        <div class="report-header-section">
+                            <div class="report-field"><span class="rf-label">Employee</span><span class="rf-value">王 彬</span></div>
+                            <div class="report-field"><span class="rf-label">Department</span><span class="rf-value">Finance</span></div>
+                            <div class="report-field"><span class="rf-label">Period</span><span class="rf-value">May 2026</span></div>
+                            <div class="report-field"><span class="rf-label">Submit Date</span><span class="rf-value">2026-06-04</span></div>
+                        </div>
+                        <div class="report-table-wrap">
+                            <table class="report-table" id="reportTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:40px;text-align:center;">#</th>
+                                        <th>Invoice Date<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">开票日期</span></th>
+                                        <th>Expense Date<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">消费日期</span></th>
+                                        <th>Description<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">费用内容支出说明</span></th>
+                                        <th>Amount (¥)<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">金额（人民币元）</span></th>
+                                        <th>Invoice Amount<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">发票金额</span></th>
+                                        <th>Actual Desc<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">实际内容支出说明</span></th>
+                                        <th>Remarks<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">备注</span></th>
+                                        <th>Invoice<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">关联发票</span></th>
+                                        <th>Payment Voucher<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">付款凭证</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportTbody"></tbody>
+                            </table>
+                        </div>
+                        <div class="report-total">
+                            <span class="total-label">Total</span>
+                            <span class="total-amount">¥ 5,094.72</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- JP Preview -->
+                <div class="panel-jp" style="display:none;">
+                    <div class="info-box" style="margin-bottom:20px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span>Review your expense items before submitting to finance for review.</span>
+                    </div>
+                    <div class="report-preview">
+                        <div class="report-header-section">
+                            <div class="report-field"><span class="rf-label">Employee</span><span class="rf-value">岩田 聡一郎</span></div>
+                            <div class="report-field"><span class="rf-label">Department</span><span class="rf-value">Finance</span></div>
+                            <div class="report-field"><span class="rf-label">Period</span><span class="rf-value" id="jpPreviewPeriod">—</span></div>
+                            <div class="report-field"><span class="rf-label">Region</span><span class="rf-value"><span class="tag region-jp">JP</span></span></div>
+                        </div>
+                        <div class="report-table-wrap">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:40px;text-align:center;">#</th>
+                                        <th>Date<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">日付</span></th>
+                                        <th>Business Purpose<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">業務目的</span></th>
+                                        <th>Amount (¥, incl. tax)<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">金額（税込）</span></th>
+                                        <th>Remarks<br><span style="font-size:10px;font-weight:400;color:var(--text-disabled);">備考</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="jpPreviewTbody"></tbody>
+                            </table>
+                        </div>
+                        <div class="report-total">
+                            <span class="total-label">Total</span>
+                            <span class="total-amount" id="jpPreviewTotal">¥0</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1479,10 +1656,11 @@ select.inline-select {
 
         <div class="wizard-footer">
             <button class="btn-ghost" id="prevBtn" onclick="prevStep()">← Back</button>
-            <div style="display:flex;align-items:center;gap:8px;">
+            <div id="wizardFooterActions" style="display:flex;align-items:center;gap:8px;">
                 <button class="btn-ghost" onclick="closeWizard()">Save Draft</button>
                 <button class="btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
             </div>
+            <button id="wizardCloseBtn" class="btn-ghost" onclick="closeWizard()" style="display:none;">✕ Close</button>
         </div>
     </div>
 </div>
@@ -1491,6 +1669,52 @@ select.inline-select {
 <!-- Hidden file inputs for invoice / voucher upload -->
 <input type="file" id="uploadInvInput"  accept=".pdf,image/*" multiple style="display:none">
 <input type="file" id="uploadVcInput"   accept="image/*,.pdf" multiple style="display:none">
+
+<!-- Add Mount Point Modal -->
+<div id="addMountModal" class="modal-overlay" onclick="closeAddMountModal()" style="display:none;">
+    <div class="modal-box" style="width:420px;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title">Add Mount Point</div>
+                <div class="modal-sub">新增挂载点 — 手动录入发票信息</div>
+            </div>
+            <button class="modal-close" onclick="closeAddMountModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+            <div>
+                <label class="field-label-sm">Invoice No. <span class="field-cn">发票号码</span></label>
+                <input id="ampInvId" type="text" class="field-input-sm" placeholder="e.g. INV-2026-004" autocomplete="off">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                    <label class="field-label-sm">Invoice Date <span class="field-cn">开票日期</span></label>
+                    <input id="ampDate" type="text" class="field-input-sm" placeholder="YYYY/M/D" autocomplete="off">
+                </div>
+                <div>
+                    <label class="field-label-sm">Amount (¥) <span class="field-cn">含税金额</span></label>
+                    <input id="ampAmount" type="number" class="field-input-sm" placeholder="0.00" min="0" step="0.01" autocomplete="off">
+                </div>
+            </div>
+            <div>
+                <label class="field-label-sm">Description <span class="field-cn">发票摘要</span></label>
+                <input id="ampDesc" type="text" class="field-input-sm" placeholder="e.g. 出行服务费发票" autocomplete="off">
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text-secondary);display:flex;align-items:flex-start;gap:8px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>A blank expense item will be created under this mount point. You can upload the invoice file via "+ Add Invoice" after creation.</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeAddMountModal()">Cancel</button>
+            <button class="btn-primary" onclick="confirmAddMount()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:12px;height:12px;margin-right:4px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Create Mount Point
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Document Preview Modal -->
 <div id="docModal" class="doc-modal-overlay" onclick="closeDocModal()">
@@ -1636,6 +1860,15 @@ select.inline-select {
                 </div>
             </div>
         </div>
+        <div style="margin-bottom:20px;">
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">
+                Region <span style="font-weight:400;color:var(--text-disabled);">地区</span>
+            </label>
+            <select id="regionSelect" onchange="selectRegion(this.value)" style="width:100%;padding:9px 12px;border:1.5px solid var(--border-divider);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-default);background:#fff;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 10px center;outline:none;transition:border .15s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-divider)'">
+                <option value="CN">CN — China</option>
+                <option value="JP">JP — Japan</option>
+            </select>
+        </div>
         <div class="modal-actions">
             <button class="btn-ghost" onclick="closeNewReportModal()">Cancel</button>
             <button class="btn-primary" onclick="confirmNewReport()">
@@ -1708,18 +1941,31 @@ const MOCK_MATCH = [
 
 const EXPENSE_REPORTS = [
     { id:'ER-2026-05', name:'王 彬', email:'bin.wang@ctw.inc', month:'May 2026', amount:'¥5,094.72', status:'draft',
-      submitted:'2026-06-04', invoices:3 },
+      submitted:'2026-06-04', invoices:3, oaStatus:null, region:'CN' },
     { id:'ER-2026-04', name:'王 彬', email:'bin.wang@ctw.inc', month:'Apr 2026', amount:'¥3,812.00', status:'pending',
-      submitted:'2026-05-03', invoices:5 },
+      submitted:'2026-05-03', invoices:5, oaStatus:null, region:'CN' },
     { id:'ER-2026-03', name:'王 彬', email:'bin.wang@ctw.inc', month:'Mar 2026', amount:'¥4,210.50', status:'approved',
-      submitted:'2026-04-02', invoices:4 },
+      submitted:'2026-04-02', invoices:4, oaStatus:'oa-approved', region:'CN' },
+    { id:'ER-2026-03B', name:'王 彬', email:'bin.wang@ctw.inc', month:'Mar 2026 (B)', amount:'¥1,200.00', status:'approved',
+      submitted:'2026-04-05', invoices:1, oaStatus:'oa-pending', region:'CN' },
+    { id:'ER-2026-03C', name:'王 彬', email:'bin.wang@ctw.inc', month:'Mar 2026 (C)', amount:'¥980.00', status:'approved',
+      submitted:'2026-04-06', invoices:1, oaStatus:'oa-rejected', region:'CN',
+      oaApprover:'张总', rejectReason:'业务目的描述不清晰，请补充说明。' },
+    { id:'ER-2026-03D', name:'王 彬', email:'bin.wang@ctw.inc', month:'Mar 2026 (D)', amount:'¥3,500.00', status:'approved',
+      submitted:'2026-04-08', invoices:2, oaStatus:null, region:'CN' },
     { id:'ER-2026-02', name:'王 彬', email:'bin.wang@ctw.inc', month:'Feb 2026', amount:'¥2,980.00', status:'draft',
-      submitted:'2026-03-05', invoices:2 },
+      submitted:'2026-03-05', invoices:2, oaStatus:null, region:'CN' },
     { id:'ER-2026-01', name:'王 彬', email:'bin.wang@ctw.inc', month:'Jan 2026', amount:'¥1,560.00', status:'needs-revision',
       submitted:'2026-02-03', invoices:2,
-      rejectedBy:'finance',
+      rejectedBy:'finance', oaStatus:null, region:'CN',
       rejectReason:'第3行停车费发票金额（¥320）与报销金额（¥280）不符，请重新上传正确发票。' },
-
+    { id:'ER-2026-07-JP', name:'岩田 聡一郎', email:'soichiro.iwata@ctw.inc', month:'Jul 2026', amount:'¥102,800', status:'pending',
+      submitted:'2026-07-18', invoices:2, oaStatus:null, region:'JP',
+      jpRows:[
+          { date:'2026/7/1',  purpose:'台湾出張', amount:45000, remarks:'' },
+          { date:'2026/7/15', purpose:'上海出張', amount:45000, remarks:'往復航空券' },
+          { date:'2026/7/18', purpose:'上海出張', amount:12800, remarks:'交通費含む' },
+      ]},
 ];
 
 // ========== List rendering ==========
@@ -1732,12 +1978,27 @@ function switchListTab(btn, tab) {
     renderList();
 }
 
+function refreshERTabCounts() {
+    ['draft','pending','approved','needs-revision'].forEach(s => {
+        const el = document.getElementById(`ct-${s}`);
+        if (el) el.textContent = EXPENSE_REPORTS.filter(r=>r.status===s).length;
+    });
+    document.getElementById('ct-all').textContent = EXPENSE_REPORTS.length;
+}
+
 const STATUS_LABELS = {
-    draft: 'Draft',
-    pending: 'Pending',
-    approved: 'Approved',
-    rejected: 'Rejected',
+    draft:            'Draft',
+    pending:          'Pending',
+    approved:         'Approved',
     'needs-revision': 'Needs Revision',
+};
+// Which statuses the employee can edit/revise
+const EDITABLE_STATUSES   = new Set(['draft', 'needs-revision']);
+// Which statuses allow delete
+const DELETABLE_STATUSES  = new Set(['draft', 'needs-revision']);
+const OA_STATUS_LABELS = {
+    'oa-pending':  'Pending',
+    'oa-approved': 'Approved',
     'oa-rejected': 'Rejected',
 };
 
@@ -1753,7 +2014,7 @@ function renderList() {
     const filtered = currentListTab === 'all' ? EXPENSE_REPORTS : EXPENSE_REPORTS.filter(r => r.status === currentListTab);
     const tbody = document.getElementById('expenseCards');
     if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 0;color:var(--text-disabled);font-size:13px;">No expense reports found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:48px 0;color:var(--text-disabled);font-size:13px;">No expense reports found</td></tr>`;
         return;
     }
     tbody.innerHTML = filtered.map(r => {
@@ -1773,7 +2034,7 @@ function renderList() {
         }
 
 
-        return `<tr onclick="openReport('${r.id}')">
+        return `<tr onclick="openReport('${r.id}')" style="cursor:pointer;">
             <td class="col-emp">
                 <div class="er-emp-cell">
                     <div>
@@ -1782,42 +2043,159 @@ function renderList() {
                     </div>
                 </div>
             </td>
+            <td class="col-region"><span class="tag region-${(r.region||'CN').toLowerCase()}">${r.region||'CN'}</span></td>
             <td class="col-period">${r.month}</td>
             <td class="col-submitted">${r.submitted}</td>
             <td class="col-invoices">${r.invoices}</td>
             <td class="col-amount">${r.amount}</td>
             <td class="col-status"><span class="tag ${r.status}">${STATUS_LABELS[r.status]||r.status}</span></td>
+            <td class="col-oa-status">${r.oaStatus ? `<span class="tag ${r.oaStatus}">${OA_STATUS_LABELS[r.oaStatus]||r.oaStatus}</span>` : '<span style="color:var(--text-disabled);">—</span>'}</td>
             <td class="col-note">${rejectHint}</td>
         </tr>`;
     }).join('');
+    refreshERTabCounts();
+}
+
+let wizardReadOnly = false;
+let wizardReportId = null;
+
+function openDraftForEdit(id) {
+    const r = EXPENSE_REPORTS.find(x => x.id === id);
+    if (!r) return;
+    wizardReadOnly = false;
+    wizardReportId = id;
+    currentRegion = r.region || 'CN';
+    if (currentRegion === 'JP' && r.jpRows) jpItems = r.jpRows.map(x => ({...x}));
+    document.getElementById('wizardTitle').textContent = `${r.name} · ${r.month} — Editing Draft`;
+    updateWizardStepLabels();
+    openWizard('new', null, 2);
 }
 
 function openWizardForRevision(id) {
     const r = EXPENSE_REPORTS.find(x => x.id === id);
     if (!r) return;
+    wizardReadOnly = false;
+    wizardReportId = id;
+    currentRegion = r.region || 'CN';
+    if (currentRegion === 'JP' && r.jpRows) jpItems = r.jpRows.map(x => ({...x}));
     document.getElementById('wizardTitle').textContent = `${r.name} · ${r.month} — Revising`;
-    openWizard('new');
+    updateWizardStepLabels();
+    openWizard('new', null, 2);
 }
 
 function openReport(id) {
     const r = EXPENSE_REPORTS.find(x => x.id === id);
     if (!r) return;
+    // Draft and needs-revision are editable via row buttons; all others are view-only
+    wizardReadOnly = true;
+    wizardReportId = id;
+    currentRegion = r.region || 'CN';
+    if (currentRegion === 'JP' && r.jpRows) jpItems = r.jpRows.map(x => ({...x}));
     document.getElementById('wizardTitle').textContent = `${r.name} · ${r.month}`;
-    // Show at step 3 (preview) for existing report
+    updateWizardStepLabels();
     openWizard('existing');
     goToStep(3);
+}
+
+function deleteReport(id) {
+    const r = EXPENSE_REPORTS.find(x => x.id === id);
+    if (!r) return;
+    if (!DELETABLE_STATUSES.has(r.status)) return;
+    const idx = EXPENSE_REPORTS.indexOf(r);
+    EXPENSE_REPORTS.splice(idx, 1);
+    showToast(`Report ${id} deleted`);
+    renderList();
+}
+
+// ========== Region ==========
+let currentRegion = 'CN';
+
+function selectRegion(r) {
+    currentRegion = r;
+    const sel = document.getElementById('regionSelect');
+    if (sel) sel.value = r;
+}
+
+function applyRegionPanels() {
+    document.querySelectorAll('.panel-cn').forEach(el => el.style.display = currentRegion === 'CN' ? '' : 'none');
+    document.querySelectorAll('.panel-jp').forEach(el => el.style.display = currentRegion === 'JP' ? '' : 'none');
+}
+
+function updateWizardStepLabels() {
+    const labels = currentRegion === 'JP'
+        ? ['Upload Voucher', 'Expense Details', 'Preview & Submit']
+        : ['Upload Files', 'Organize Items', 'Preview & Submit'];
+    document.querySelectorAll('#stepBar .step-label').forEach((el, i) => { el.textContent = labels[i]; });
+}
+
+// ========== JP Expense Items ==========
+let jpItems = [];
+
+function initJpItems() {
+    jpItems = [
+        { date:'2026/7/1',  purpose:'台湾出張', amount:45000, remarks:'' },
+        { date:'2026/7/15', purpose:'上海出張', amount:45000, remarks:'往復航空券' },
+        { date:'2026/7/18', purpose:'上海出張', amount:12800, remarks:'交通費含む' },
+    ];
+}
+
+function renderJpStep2() {
+    const tbody = document.getElementById('jpItemsTbody');
+    if (!tbody) return;
+    tbody.innerHTML = jpItems.map((item, i) => `
+        <tr>
+            <td style="width:36px;text-align:center;color:var(--text-disabled);font-size:11px;font-weight:600;font-family:var(--font-mono);">${i + 1}</td>
+            <td><input class="jp-input jp-input-date" type="text" placeholder="yyyy/mm/dd" value="${item.date}" oninput="jpItems[${i}].date=this.value"></td>
+            <td><input class="jp-input jp-input-purpose" type="text" placeholder="e.g. 台湾出張、顧客訪問" value="${item.purpose}" oninput="jpItems[${i}].purpose=this.value"></td>
+            <td><input class="jp-input jp-input-amt" type="number" min="0" step="1" placeholder="0" value="${item.amount||''}" oninput="jpItems[${i}].amount=+this.value;updateJpTotal()"></td>
+            <td><input class="jp-input jp-input-remarks" type="text" placeholder="備考" value="${item.remarks}" oninput="jpItems[${i}].remarks=this.value"></td>
+        </tr>
+    `).join('');
+    updateJpTotal();
+}
+
+
+function updateJpTotal() {
+    const total = jpItems.reduce((s, r) => s + (+r.amount || 0), 0);
+    const el = document.getElementById('jpStep2Total');
+    if (el) el.textContent = '¥' + total.toLocaleString('ja-JP');
+}
+
+function renderJpPreview() {
+    const tbody = document.getElementById('jpPreviewTbody');
+    if (!tbody) return;
+    tbody.innerHTML = jpItems.map((row, i) => `
+        <tr>
+            <td style="text-align:center;color:var(--text-disabled);font-size:11px;font-family:var(--font-mono);">${i + 1}</td>
+            <td style="color:var(--text-secondary);white-space:nowrap;">${row.date}</td>
+            <td style="font-weight:500;">${row.purpose}</td>
+            <td style="text-align:right;font-weight:700;font-family:var(--font-mono);">¥${(+row.amount || 0).toLocaleString('ja-JP')}</td>
+            <td style="color:var(--text-secondary);font-size:12px;">${row.remarks||'—'}</td>
+        </tr>
+    `).join('');
+    const total = jpItems.reduce((s, r) => s + (+r.amount || 0), 0);
+    const periodEl = document.getElementById('jpPreviewPeriod');
+    const totalEl  = document.getElementById('jpPreviewTotal');
+    if (periodEl) periodEl.textContent = document.getElementById('wizardTitle').textContent.split('— ')[1] || '—';
+    if (totalEl)  totalEl.textContent  = '¥' + total.toLocaleString('ja-JP');
 }
 
 // ========== Wizard ==========
 let currentStep = 1;
 
-function openWizard(mode, period) {
+function openWizard(mode, period, startStep) {
     document.getElementById('listSection').style.display = 'none';
     document.getElementById('detailSection').classList.add('open');
     if (mode === 'new') {
         const label = period || 'New Report';
-        document.getElementById('wizardTitle').textContent = `New Expense Report — ${label}`;
-        goToStep(1);
+        if (!document.getElementById('wizardTitle').textContent.includes('Editing') &&
+            !document.getElementById('wizardTitle').textContent.includes('Revising')) {
+            document.getElementById('wizardTitle').textContent = `New Expense Report — ${label}`;
+        }
+        wizardReadOnly = false;
+        if (currentRegion === 'JP') initJpItems();
+        updateWizardStepLabels();
+        goToStep(startStep || 1);
     }
 }
 
@@ -1868,6 +2246,11 @@ function openNewReportModal() {
     updateMpLabel();
     document.getElementById('mpdDropdown').classList.remove('open');
     document.getElementById('monthPickerTrigger').classList.remove('open');
+    // Default region to employee's region (CN)
+    const defaultRegion = 'CN';
+    currentRegion = defaultRegion;
+    const sel = document.getElementById('regionSelect');
+    if (sel) sel.value = defaultRegion;
     document.getElementById('newReportModal').classList.add('open');
 }
 function closeNewReportModal() {
@@ -1884,7 +2267,12 @@ function confirmNewReport() {
 function closeWizard() {
     document.getElementById('detailSection').classList.remove('open');
     document.getElementById('listSection').style.display = '';
-    showToast('Draft saved');
+    if (!wizardReadOnly) showToast('Draft saved');
+}
+
+function closeDetailView() {
+    document.getElementById('detailSection').classList.remove('open');
+    document.getElementById('listSection').style.display = '';
 }
 
 function goToStep(n) {
@@ -1892,6 +2280,8 @@ function goToStep(n) {
     // Panels
     document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
     document.getElementById(`panel-${n}`).classList.add('active');
+    // Apply region-specific content visibility
+    applyRegionPanels();
     // Indicators
     for (let i = 1; i <= 3; i++) {
         const ind = document.getElementById(`step-ind-${i}`);
@@ -1900,23 +2290,81 @@ function goToStep(n) {
         if (i < 3) conn.className = 'step-connector' + (i < n ? ' done' : '');
     }
     // Step-specific renders
-    if (n === 2) renderItems();
-    if (n === 3) renderReport();
+    if (n === 2) {
+        if (currentRegion === 'JP') renderJpStep2();
+        else renderItems();
+    }
+    if (n === 3) {
+        if (currentRegion === 'JP') renderJpPreview();
+        else renderReport();
+    }
+    // Read-only view mode: show contextual action buttons based on status
+    const footerActions = document.getElementById('wizardFooterActions');
+    const closeBtn      = document.getElementById('wizardCloseBtn');
+    const prevBtn       = document.getElementById('prevBtn');
+    if (wizardReadOnly) {
+        footerActions.style.display = 'none';
+        prevBtn.style.display = 'none';
+        // Build context-sensitive action area
+        const r = EXPENSE_REPORTS.find(x => x.id === wizardReportId);
+        const status = r ? r.status : '';
+        let actHtml = `<button class="btn-ghost" onclick="closeDetailView()" style="margin-right:auto;">← Back to List</button>`;
+        if (status === 'draft') {
+            actHtml += `
+                <button class="btn-ghost" style="color:#be123c;border-color:#fecdd3;" onclick="deleteReport('${wizardReportId}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;margin-right:4px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    Delete Draft
+                </button>
+                <button class="btn-primary" onclick="openDraftForEdit('${wizardReportId}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;margin-right:4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Edit Draft
+                </button>`;
+        } else if (status === 'needs-revision') {
+            actHtml += `
+                <button class="btn-ghost" style="color:#be123c;border-color:#fecdd3;" onclick="deleteReport('${wizardReportId}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;margin-right:4px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    Delete
+                </button>
+                <button class="btn-primary" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);" onclick="openWizardForRevision('${wizardReportId}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:12px;height:12px;margin-right:4px;"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg>
+                    Revise & Resubmit
+                </button>`;
+        }
+        closeBtn.style.display = 'flex';
+        closeBtn.style.alignItems = 'center';
+        closeBtn.style.gap = '8px';
+        closeBtn.style.width = '100%';
+        closeBtn.innerHTML = actHtml;
+        return;
+    }
+    footerActions.style.display = 'flex';
+    closeBtn.style.display = 'none';
+    closeBtn.style.width = '';
+    closeBtn.innerHTML = '✕ Close';
+    prevBtn.style.display = '';
+
     // Buttons
-    document.getElementById('prevBtn').style.visibility = n === 1 ? 'hidden' : 'visible';
+    prevBtn.style.visibility = n === 1 ? 'hidden' : 'visible';
     const nextBtn = document.getElementById('nextBtn');
     if (n === 3) {
-        const conflicts = getConflictedInvIndices();
-        if (conflicts.size > 0) {
-            nextBtn.textContent = '⚠ 存在冲突，无法提交';
-            nextBtn.style.background = '#ef4444';
-            nextBtn.style.cursor = 'not-allowed';
-            nextBtn.style.opacity = '0.85';
-        } else {
+        if (currentRegion === 'JP') {
             nextBtn.textContent = '✓ Submit to Finance';
             nextBtn.style.background = '';
             nextBtn.style.cursor = '';
             nextBtn.style.opacity = '';
+        } else {
+            const conflicts = getConflictedInvIndices();
+            if (conflicts.size > 0) {
+                nextBtn.textContent = '⚠ 存在冲突，无法提交';
+                nextBtn.style.background = '#ef4444';
+                nextBtn.style.cursor = 'not-allowed';
+                nextBtn.style.opacity = '0.85';
+            } else {
+                nextBtn.textContent = '✓ Submit to Finance';
+                nextBtn.style.background = '';
+                nextBtn.style.cursor = '';
+                nextBtn.style.opacity = '';
+            }
         }
     } else {
         nextBtn.textContent = 'Next →';
@@ -1928,6 +2376,11 @@ function goToStep(n) {
 
 function nextStep() {
     if (currentStep === 3) {
+        if (currentRegion === 'JP') {
+            showToast('Report submitted to finance for review');
+            closeWizard();
+            return;
+        }
         // Hard block if invoice conflicts exist
         const conflicted = getConflictedInvIndices();
         if (conflicted.size > 0) {
@@ -2077,6 +2530,13 @@ function renderItems() {
         html += `</div>`;
     }
 
+    // Add Mount Point button
+    html += `<button class="add-mount-btn" onclick="openAddMountModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Mount Point
+        <span style="font-size:11px;font-weight:400;color:var(--text-disabled);margin-left:4px;">新增挂载点</span>
+    </button>`;
+
     container.innerHTML = html;
 }
 
@@ -2131,6 +2591,10 @@ function buildMountPoint(inv, invIdx, items, isMountConflict, conflicted) {
             </div>
             <span class="ei-status-badge" style="${sbStyle};margin-left:auto;">${mStatus.text}</span>
             <div class="mp-inv-amount">¥${inv.amount.toLocaleString('zh',{minimumFractionDigits:2})}</div>
+            <button onclick="removeMountPoint(${invIdx})" title="删除挂载点" style="margin-left:10px;border:none;background:none;cursor:pointer;color:var(--text-disabled);padding:4px 6px;border-radius:6px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;transition:all .15s;" onmouseover="this.style.background='#fff1f2';this.style.color='#ef4444';" onmouseout="this.style.background='none';this.style.color='var(--text-disabled)';">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                Remove
+            </button>
         </div>
         ${conflictHeader}
 
@@ -2159,6 +2623,92 @@ function buildMountPoint(inv, invIdx, items, isMountConflict, conflicted) {
             New Item under Expense ${invIdx + 1}
         </button>
     </div>`;
+}
+
+// ===== Add Mount Point Modal =====
+let _ampNextSeq = 4; // next sequence number for auto-generated invoice IDs
+
+function openAddMountModal() {
+    const today = new Date();
+    const d = `${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`;
+    document.getElementById('ampInvId').value = `INV-${today.getFullYear()}-${String(_ampNextSeq).padStart(3,'0')}`;
+    document.getElementById('ampDate').value = d;
+    document.getElementById('ampAmount').value = '';
+    document.getElementById('ampDesc').value = '';
+    const modal = document.getElementById('addMountModal');
+    modal.style.display = 'flex';
+    modal.style.opacity = '0';
+    requestAnimationFrame(() => { modal.style.transition = 'opacity .2s'; modal.style.opacity = '1'; });
+    setTimeout(() => document.getElementById('ampAmount').focus(), 80);
+}
+
+function closeAddMountModal() {
+    const modal = document.getElementById('addMountModal');
+    modal.style.opacity = '0';
+    setTimeout(() => { modal.style.display = 'none'; }, 200);
+}
+
+function confirmAddMount() {
+    const invId   = document.getElementById('ampInvId').value.trim() || `INV-NEW-${_ampNextSeq}`;
+    const invDate = document.getElementById('ampDate').value.trim();
+    const amount  = parseFloat(document.getElementById('ampAmount').value) || 0;
+    const desc    = document.getElementById('ampDesc').value.trim() || 'New invoice';
+
+    // Add invoice
+    const newInvIdx = MOCK_INVOICES.length;
+    MOCK_INVOICES.push({ id: invId, date: invDate, amount, desc, file: null, path: null });
+
+    // Add mount extras
+    MOUNT_EXTRAS[newInvIdx] = { invIndices: [newInvIdx] };
+
+    // Add a blank expense item under the new mount point
+    EXPENSE_ITEMS.push({
+        id: `EI-${String(eiNextId).padStart(3,'0')}`,
+        primaryInvIdx: newInvIdx,
+        invDate: invDate,
+        expDate: invDate,
+        desc: desc,
+        amount: amount,
+        actualDesc: '',
+        remarks: '',
+        voucherIndices: []
+    });
+    eiNextId++;
+    _ampNextSeq++;
+
+    closeAddMountModal();
+    showToast(`Mount point "${invId}" added`);
+    renderItems();
+}
+
+function removeMountPoint(invIdx) {
+    const inv = MOCK_INVOICES[invIdx];
+    const itemCount = EXPENSE_ITEMS.filter(ei => ei.primaryInvIdx === invIdx).length;
+    // Remove all expense items under this mount point
+    for (let i = EXPENSE_ITEMS.length - 1; i >= 0; i--) {
+        if (EXPENSE_ITEMS[i].primaryInvIdx === invIdx) EXPENSE_ITEMS.splice(i, 1);
+    }
+    // Shift primaryInvIdx for items that referenced later invoices
+    EXPENSE_ITEMS.forEach(ei => {
+        if (ei.primaryInvIdx > invIdx) ei.primaryInvIdx--;
+    });
+    // Remove the invoice
+    MOCK_INVOICES.splice(invIdx, 1);
+    // Rebuild MOUNT_EXTRAS with corrected indices
+    const newExtras = {};
+    Object.entries(MOUNT_EXTRAS).forEach(([k, v]) => {
+        const oldIdx = parseInt(k);
+        if (oldIdx === invIdx) return;
+        const newIdx = oldIdx > invIdx ? oldIdx - 1 : oldIdx;
+        newExtras[newIdx] = {
+            invIndices: v.invIndices
+                .filter(i => i !== invIdx)
+                .map(i => i > invIdx ? i - 1 : i)
+        };
+    });
+    MOUNT_EXTRAS = newExtras;
+    showToast(`Removed Expense ${invIdx + 1}${itemCount ? ` and ${itemCount} item(s)` : ''}`);
+    renderItems();
 }
 
 function buildItemCard(ei, idx, conflicted) {
@@ -2841,6 +3391,7 @@ function renderReport() {
             : '<span style="color:var(--text-disabled);font-size:11px;">—</span>';
 
         html += `<tr class="group-start">
+            <td style="text-align:center;color:var(--text-disabled);font-size:11px;font-weight:600;font-family:var(--font-mono);white-space:nowrap;">${idx + 1}</td>
             <td style="color:var(--text-secondary);font-size:11px;">${invDateStr}</td>
             <td style="color:var(--text-secondary);">${ei.expDate || '—'}</td>
             <td><input class="editable" value="${ei.desc}" onchange="EXPENSE_ITEMS[${idx}].desc=this.value" style="min-width:120px;" placeholder="Description"></td>
